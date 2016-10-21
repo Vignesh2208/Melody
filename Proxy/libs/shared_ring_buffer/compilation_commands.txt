@@ -1,0 +1,4 @@
+Producer : gcc -pthread ring_buffer.c producer.c -o producer -lpcap
+
+Consumer : gcc -pthread ring_buffer.c producer.c consumer.c -o consumer -lpcap
+
