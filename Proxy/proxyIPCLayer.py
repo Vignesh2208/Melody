@@ -8,9 +8,9 @@ from logger import Logger
 from defines import *
 
 
-class hostIPCLayer(threading.Thread) :
+class proxyIPCLayer(threading.Thread) :
 
-	def __init__(self,hostID,logFile) :
+	def __init__(self,logFile,hostIDList) :
 		self.attkLayerTxLock = threading.Lock()
 		self.attkLayerRxLock = threading.Lock()
 		self.threadCmdLock = threading.Lock()
@@ -18,16 +18,15 @@ class hostIPCLayer(threading.Thread) :
 		self.attkLayerTxBuffer = []
 		self.attkLayerRxBuffer = []
 		self.threadCmdQueue = []
-		self.hostID = hostID
-		self.log = logger.Logger(logFile,"Host " + str(hostID) + " IPC Thread")
-		self.sharedBufName = str(hostID) + "buffer"
-		self.sharedBuffer = shared_buffer(bufName=self.sharedBufName,isProxy=False)
-
-
-		result = self.sharedBuffer.open()
-
-		if result == BUF_NOT_INITIALIZED or result == FAILURE :
-			self.log.error("Shared Buffer open failed! Buffer not initialized")
+		self.sharedBufName = []
+		self.sharedBuffer = []
+		self.log = logger.Logger(logFile,"Proxy " + str(hostID) + " IPC Thread")
+		for hostID in hostIDList :
+			self.sharedBufName.append(str(hostID) + "buffer")
+			self.sharedBuffer.append(shared_buffer(bufName=str(hostID) + "buffer",isProxy=True))
+			result = self.sharedBuffer[len(sharedBuffer) - 1].open()
+			if result == BUF_NOT_INITIALIZED or result == FAILURE :
+				self.log.error("Shared Buffer open failed for host: " + str(hostID) + ". Buffer not initialized")
 
 
 	def appendToTxBuffer(self,pkt) :
@@ -49,10 +48,11 @@ class hostIPCLayer(threading.Thread) :
 
 	def getPktToSend(self) :
 		pkt = None
+		dstID = None
 		self.attkLayerTxLock.acquire()
-		pkt = attkLayerTxBuffer.pop()
+		dstID,pkt = attkLayerTxBuffer.pop()
 		self.attkLayerTxLock.release()
-		return pkt
+		return dstID,pkt
 
 	def cancelThread(self):
 		self.threadCmdLock.acquire()
@@ -64,6 +64,7 @@ class hostIPCLayer(threading.Thread) :
 	def run(self) :
 
 		pktToSend = None
+		dstID = None
 		while True :
 
 			currCmd = None
@@ -76,17 +77,22 @@ class hostIPCLayer(threading.Thread) :
 
 			# send any available pkt to Proxy
 			if pktToSend == None :
-				pktToSend = self.getPktToSend()
+				dstID,pktToSend = self.getPktToSend()
 
 			if pktToSend != None :
-				ret = self.sharedBuffer.write(pktToSend,PROXY_NODE_ID)
+				dstHostBufName = str(dstID) + "buffer"
+				dstHostBufIdx = self.sharedBufName.index(dstHostBufName)
+				assert(dstHostBufIdx >= 0 and dstHostBufIdx < len(self.sharedBufName))
+
+				ret = self.sharedBuffer[dstHostBufIdx].write(pktToSend,dstID)
 				if ret > 0 :
 					pktToSend = None
+					dstID = None
 
 			dstID,recvPkt = self.sharedBuffer.read()
 
 			if recvPkt != None :
-				self.appendToRxBuffer((dstID,recvPkt))
+				self.appendToRxBuffer(recvPkt)
 
 
 
