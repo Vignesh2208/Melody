@@ -12,6 +12,7 @@ import socket
 class proxyNetworkServiceLayer(threading.Thread) :
 
 	def __init__(self,logFile,powerSimIP) :
+		threading.Thread.__init__(self)
 
 		self.threadCmdLock = threading.Lock()
 		self.NetLayerRxLock = threading.Lock()
@@ -21,11 +22,11 @@ class proxyNetworkServiceLayer(threading.Thread) :
 		self.log = logger.Logger(logFile,"Proxy Network Layer Thread")
 
 		
-	def sendUDPMsg(self,pkt,IPAddr,port) :
+	def sendUDPMsg(self,pkt,IPAddr,Port) :
 		UDP_IP = IPAddr
-		UDP_PORT = port
+		UDP_PORT = Port
 		MESSAGE = str(pkt)
-		self.log.info("<SEND> TO: " + str(UDP_IP) + " FROM: " + str(self.hostID) + " PKT: " + str(MESSAGE))
+		self.log.info("<SEND> TO: " + str(UDP_IP) + ":" + str(UDP_PORT) + " FROM: " + str(self.powerSimIP) + " PKT: " + str(MESSAGE))
 		sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # UDP
 		sock.sendto(MESSAGE, (UDP_IP, UDP_PORT))
 
@@ -35,14 +36,20 @@ class proxyNetworkServiceLayer(threading.Thread) :
 	def rxPktPowerSim(self) :
 		pkt = None
 		self.NetLayerRxLock.acquire()
-		pkt = NetLayerRxBuffer.pop()
+		try:
+			pkt = self.NetLayerRxBuffer.pop()
+		except:
+			pkt = None
 		self.NetLayerRxLock.release()
 		return pkt
 
 
 	def getcurrCmd(self) :
 		self.threadCmdLock.acquire()
-		currCmd = self.threadCmdQueue.pop()
+		try:
+			currCmd = self.threadCmdQueue.pop()
+		except:
+			currCmd = None
 		self.threadCmdLock.release()
 		return currCmd
 
@@ -54,19 +61,24 @@ class proxyNetworkServiceLayer(threading.Thread) :
 
 	def run(self) :
 
+		self.log.info("Started listening on Port: " + str(PROXY_UDP_PORT))
 		while True :
-			currCmd = getcurrCmd()
+			currCmd = self.getcurrCmd()
 			if currCmd != None and currCmd == CMD_QUIT :
+				self.log.info("Stopping ...")
 				break
 			sock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM) # UDP
 			sock.settimeout(SOCKET_TIMEOUT)
 			sock.bind(('0.0.0.0', PROXY_UDP_PORT))
-			data, addr = sock.recvfrom(MAXPKTSIZE)
+			try:
+				data, addr = sock.recvfrom(MAXPKTSIZE)
+			except socket.timeout:
+				data = None
 
 			if data != None :
-				self.log.info("<RECV> TO: " + str(self.hostID) + " FROM: " + str(addr) + " PKT: " + str(data))
+				self.log.info("<RECV> TO: A HOST" + " FROM: " + str(addr) + " PKT: " + str(data))
 				self.NetLayerRxLock.acquire()
-				NetLayerRxBuffer.append(str(data))
+				self.NetLayerRxBuffer.append(str(data))
 				self.NetLayerRxLock.release()
 
 

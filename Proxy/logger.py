@@ -16,15 +16,12 @@ class Logger(object) :
 		self.logFile = logFile
 		self.tag = tag
 
-
-		assert(self.logLevel == "INFO" or self.logLevel == "DEBUG" or self.logLevel == "ERROR")
-
 	def logMsg(self,loglevel,tag,msg) :
 		if self.printable == True :
-			print(str(tag) + " >> " + strl(loglevel) + " << " + str(msg))
+			print str(tag) + " >> " + str(loglevel) + " >> " + str(msg) + "\n"
 		else :
 			with open(self.logFile,"a") as f :
-				f.write(str(tag) + " >> " + strl(loglevel) + " << " + str(msg) + "\n")
+				f.write(str(tag) + " >> " + str(loglevel) + " >> " + str(msg) + "\n")
 
 	def info(self,msg) :
 		self.logMsg("INFO",self.tag,msg) 

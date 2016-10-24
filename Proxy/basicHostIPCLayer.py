@@ -11,6 +11,8 @@ from defines import *
 class hostIPCLayer(threading.Thread) :
 
 	def __init__(self,hostID,logFile) :
+		threading.Thread.__init__(self)
+		
 		self.attkLayerTxLock = threading.Lock()
 		self.attkLayerRxLock = threading.Lock()
 		self.threadCmdLock = threading.Lock()
@@ -38,7 +40,11 @@ class hostIPCLayer(threading.Thread) :
 	def getReceivedMsg(self) :
 		pkt = None
 		self.attkLayerRxLock.acquire()
-		dstID,pkt = self.attkLayerRxBuffer.pop()
+		try:
+			dstID,pkt = self.attkLayerRxBuffer.pop()
+		except:
+			dstID = -1
+			pkt = None
 		self.attkLayerRxLock.release()
 		return dstID,pkt
 
@@ -50,7 +56,10 @@ class hostIPCLayer(threading.Thread) :
 	def getPktToSend(self) :
 		pkt = None
 		self.attkLayerTxLock.acquire()
-		pkt = attkLayerTxBuffer.pop()
+		try:
+			pkt = self.attkLayerTxBuffer.pop()
+		except:
+			pkt = None
 		self.attkLayerTxLock.release()
 		return pkt
 
@@ -63,15 +72,21 @@ class hostIPCLayer(threading.Thread) :
 
 	def run(self) :
 
+		self.log.info("Started ...")
 		pktToSend = None
 		while True :
 
 			currCmd = None
 			recvPkt = None
 			self.threadCmdLock.acquire()
-			currCmd = self.threadCmdQueue.pop()
+			try:
+				currCmd = self.threadCmdQueue.pop()
+			except:
+				currCmd = None
+
 			self.threadCmdLock.release()
 			if currCmd != None and currCmd == CMD_QUIT :
+				self.log.info("Stopping ...")
 				break
 
 			# send any available pkt to Proxy
@@ -80,12 +95,14 @@ class hostIPCLayer(threading.Thread) :
 
 			if pktToSend != None :
 				ret = self.sharedBuffer.write(pktToSend,PROXY_NODE_ID)
+				self.log.info("Relaying pkt: " + str(pktToSend) + " to Proxy")
 				if ret > 0 :
 					pktToSend = None
 
 			dstID,recvPkt = self.sharedBuffer.read()
 
-			if recvPkt != None :
+			if len(recvPkt) != 0 :
+				self.log.info("Received pkt: " + str(recvPkt) + " from Proxy for Dst: " + str(dstID))
 				self.appendToRxBuffer((dstID,recvPkt))
 
 

@@ -12,6 +12,7 @@ from defines import *
 class proxyTransportLayer(threading.Thread) :
 
 	def __init__(self,logFile,IPCLayer,NetworkServiceLayer) :
+		threading.Thread.__init__(self)
 
 		self.threadCmdLock = threading.Lock()
 		self.threadCmdQueue = []
@@ -33,26 +34,34 @@ class proxyTransportLayer(threading.Thread) :
 
 	def getcurrCmd(self) :
 		self.threadCmdLock.acquire()
-		currCmd = self.threadCmdQueue.pop()
+		try:
+			currCmd = self.threadCmdQueue.pop()
+		except:
+			currCmd = None
 		self.threadCmdLock.release()
 		return currCmd
 
-	def extractSrcNodeID(self,rxPktPowerSim) :
-		return 1 # For Now
 
 	def cancelThread(self):
 		self.threadCmdLock.acquire()
 		self.threadCmdQueue.append(CMD_QUIT)
 		self.threadCmdLock.release()
 
+	# Needs to be modified as Appropriate. It is used by the Proxy to determine the
+	# necessary shhared IPC Buffer to put the packet into
+	def extractSrcNodeID(self,rxPktPowerSim) :
+		return 1 # For Now
 
 	def run(self) :
 
 		pktToSend = None
+		self.log.info("Started ...")
 		while True :
 
 			currCmd = self.getcurrCmd()
+			txPkt = None
 			if currCmd != None and currCmd == CMD_QUIT :
+				self.log.info("Stopping ...")
 				break
 
 			recvPkt = self.rxPowerSim()
@@ -60,7 +69,7 @@ class proxyTransportLayer(threading.Thread) :
 				srcHostID = self.extractSrcNodeID(recvPkt)
 				self.txIPCLayer((srcHostID,recvPkt))
 
-			txPkt = self.rxIPCLayer()
+			srcId,txPkt = self.rxIPCLayer()
 			if txPkt != None :
 				self.txPowerSim(txPkt)
 

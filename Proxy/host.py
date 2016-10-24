@@ -1,5 +1,10 @@
 import sys
 import os
+
+scriptDir = os.path.dirname(os.path.realpath(__file__))
+if scriptDir not in sys.path:
+	sys.path.append(scriptDir)
+
 import logger
 from logger import *
 from basicNetworkServiceLayer import basicNetworkServiceLayer
@@ -7,8 +12,7 @@ import time
 import getopt
 import traceback
 import signal
-import datetime
-from datetime import *
+
 
 
 
@@ -21,12 +25,13 @@ def extractIPMapping(netCfgFile) :
 	for line in lines:
 		line = ' '.join(line.split())
 		line = line.replace(" ","")
-		splitLs = line.split(':')
-		assert(len(splitLs) == 2)
+		splitLs = line.split(',')
+		assert(len(splitLs) == 3)
 		hostID = int(splitLs[0])
 		IPAddr = splitLs[1]
+		Port = int(splitLs[2])
 
-		IPMapping[hostID] = IPAddr
+		IPMapping[hostID] = (IPAddr,Port)
 
 	return IPMapping
 
@@ -37,9 +42,10 @@ def usage() :
 	print "-h or --help"
 	print "-c or --netcfg-file=  Absolute path to network Cfg File <required>"
 	print "-l or --log-file=     Absolute path to log File <optional>"
-	print "-r or --runt-time=    Run time of host in seconds before it is shut-down <optional - default forever>"
+	print "-r or --run-time=    Run time of host in seconds before it is shut-down <optional - default forever>"
 	print "-n or --project-name= Name of project folder <optional - default is test project>"
 	print "-i or --is-controller If specified, this node is invoked as the control station"
+	print "-d or --id= Id of the node. Required and must be > 0"
 	sys.exit(0)
 
 def parseOpts() :
@@ -47,6 +53,8 @@ def parseOpts() :
 
 	lenRequiredOpts = 2
 	isController = False
+	netCfgFilePath = None
+	hostID = None
 	logFile = "stdout"
 	runTime = 0
 	projectName = "test"
@@ -88,12 +96,15 @@ def main(hostID,netCfgFile,logFile,runTime,projectName,isControlHost) :
 	log = logger.Logger(logFile,"Host" + str(hostID) + ": ")
 	
 	if isControlHost == True :
-		hostIPCLayer = __import__("Proxy.Projects." + str(projectName) + ".controlLayer", globals(), locals(), ['hostControlLayer'], -1)
-		hostAttackLayer = __import__("Proxy.basicHostAttackLayer", globals(), locals(), ['basicHostAttackLayer'], -1)
+		hostIPCLayer = __import__("Projects." + str(projectName) + ".controlLayer", globals(), locals(), ['hostControlLayer'], -1)
+		hostIPCLayer = hostIPCLayer.hostControlLayer
+		hostAttackLayer = __import__("basicHostAttackLayer", globals(), locals(), ['basicHostAttackLayer'], -1)
+		hostAttackLayer = hostAttackLayer.basicHostAttackLayer
 	else:
-		hostIPCLayer = __import__("Proxy.basicHostIPCLayer", globals(), locals(), ['basicHostIPCLayer'], -1)
-		hostAttackLayer = __import__("Proxy.Projects." + str(projectName) + ".hostAttackLayer", globals(), locals(), ['hostAttackLayer'], -1)
-
+		hostIPCLayer = __import__("basicHostIPCLayer", globals(), locals(), ['basicHostIPCLayer'], -1)
+		hostIPCLayer = hostIPCLayer.hostIPCLayer
+		hostAttackLayer = __import__("Projects." + str(projectName) + ".hostAttackLayer", globals(), locals(), ['hostAttackLayer'], -1)
+		hostAttackLayer = hostAttackLayer.hostAttackLayer
 
 	
 	IPCLayer = hostIPCLayer(hostID,logFile)
@@ -111,14 +122,17 @@ def main(hostID,netCfgFile,logFile,runTime,projectName,isControlHost) :
 		time.sleep(runTime)
 		IPCLayer.cancelThread()
 		AttackLayer.cancelThread()
-		IPCLayer.cancelThread()
+		NetLayer.cancelThread()
 	else :			  # run forever
 		while True :
 			time.sleep(1)
 
+
 	IPCLayer.join()
 	AttackLayer.join()
 	NetLayer.join()
+
+	print "Shutting Down Host ", hostID
 
 if __name__ == "__main__":
 

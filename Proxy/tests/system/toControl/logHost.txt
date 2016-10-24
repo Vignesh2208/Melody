@@ -1,0 +1,18 @@
+
+Host 1 Network Layer Thread >> INFO >> Started listening on IP: 127.0.0.1 PORT: 5005
+
+Host 1 Attack Layer Thread >> INFO >> Started ...
+
+Host 1 IPC Thread >> INFO >> Started ...
+
+Host 1 IPC Thread >> INFO >> Received pkt: Hello World! from Proxy for Dst: 2
+
+Host 1 Network Layer Thread >> INFO >> <SEND> TO: 127.0.0.1:5006 FROM: 1 PKT: Hello World!
+
+Host 1 IPC Thread >> INFO >> Stopping ...
+
+Host 1 Attack Layer Thread >> INFO >> Stopping ...
+
+Host 1 Network Layer Thread >> INFO >> Stopping ...
+
+Shutting Down Host  1

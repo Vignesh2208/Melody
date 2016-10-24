@@ -1,0 +1,3 @@
+
+Waiting for data from Proxy ...
+POWER SIM TEST SUCCEEDED

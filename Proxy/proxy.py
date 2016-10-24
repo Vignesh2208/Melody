@@ -1,5 +1,10 @@
 import sys
 import os
+
+scriptDir = os.path.dirname(os.path.realpath(__file__))
+if scriptDir not in sys.path:
+	sys.path.append(scriptDir)
+	
 import logger
 from logger import *
 from proxyNetworkLayer import proxyNetworkServiceLayer
@@ -9,10 +14,6 @@ import time
 import getopt
 import traceback
 import signal
-import datetime
-from datetime import *
-
-
 
 
 def extractIPMapping(netCfgFile) :
@@ -23,12 +24,13 @@ def extractIPMapping(netCfgFile) :
 	for line in lines:
 		line = ' '.join(line.split())
 		line = line.replace(" ","")
-		splitLs = line.split(':')
-		assert(len(splitLs) == 2)
+		splitLs = line.split(',')
+		assert(len(splitLs) == 3)
 		hostID = int(splitLs[0])
 		IPAddr = splitLs[1]
+		Port = int(splitLs[2])
 
-		IPMapping[hostID] = IPAddr
+		IPMapping[hostID] = (IPAddr,Port)
 
 	return IPMapping
 
@@ -49,6 +51,7 @@ def parseOpts() :
 	logFile = "stdout"
 	runTime = 0
 	powerSimIP="127.0.0.1"
+	netCfgFilePath = None
 
 	try:
 		(opts, args) = getopt.getopt(sys.argv[1:],
@@ -82,9 +85,13 @@ def main(netCfgFile,logFile,runTime,powerSimIP) :
 
 	hostIPMap = extractIPMapping(netCfgFile)
 	hostIDList = hostIPMap.keys()
-	log = logger.Logger(logFile,"Host" + str(hostID) + ": ")
+
+	print "HostID List = ", hostIDList
+
+	controlCenterID = max(hostIDList)
 	
 	IPCLayer = proxyIPCLayer(logFile,hostIDList)
+	IPCLayer.setControlCenterID(controlCenterID)
 	NetLayer = proxyNetworkServiceLayer(logFile,powerSimIP)
 	TransportLayer = proxyTransportLayer(logFile,IPCLayer,NetLayer)
 
@@ -99,7 +106,7 @@ def main(netCfgFile,logFile,runTime,powerSimIP) :
 		time.sleep(runTime)
 		IPCLayer.cancelThread()
 		TransportLayer.cancelThread()
-		IPCLayer.cancelThread()
+		NetLayer.cancelThread()
 	else :			  # run forever
 		while True :
 			time.sleep(1)
@@ -107,6 +114,8 @@ def main(netCfgFile,logFile,runTime,powerSimIP) :
 	IPCLayer.join()
 	TransportLayer.join()
 	NetLayer.join()
+
+	print "Proxy Shut Down Successfully"
 
 if __name__ == "__main__":
 

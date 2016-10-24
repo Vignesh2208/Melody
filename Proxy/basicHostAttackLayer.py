@@ -14,6 +14,7 @@ class basicHostAttackLayer(threading.Thread) :
 
 	def __init__(self,hostID,logFile,IPCLayer,NetworkServiceLayer) :
 
+		threading.Thread.__init__(self)
 		self.threadCmdLock = threading.Lock()
 		self.threadCmdQueue = []
 		self.hostID = hostID
@@ -35,7 +36,10 @@ class basicHostAttackLayer(threading.Thread) :
 
 	def getcurrCmd(self) :
 		self.threadCmdLock.acquire()
-		currCmd = self.threadCmdQueue.pop()
+		try:
+			currCmd = self.threadCmdQueue.pop()
+		except:
+			currCmd = None
 		self.threadCmdLock.release()
 		return currCmd
 
@@ -48,10 +52,12 @@ class basicHostAttackLayer(threading.Thread) :
 	def run(self) :
 
 		pktToSend = None
+		self.log.info("Started ...")
 		while True :
 
 			currCmd = self.getcurrCmd()
 			if currCmd != None and currCmd == CMD_QUIT :
+				self.log.info("Stopping ...")
 				break
 
 			recvPkt = self.rxNetServiceLayer()

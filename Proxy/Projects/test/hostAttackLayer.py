@@ -3,40 +3,40 @@ import os
 import threading
 import shared_buffer
 from shared_buffer import *
-import Proxy.logger
-from Proxy.logger import Logger
-from Proxy.defines import *
-from Proxy.basicHostAttackLayer import basicHostAttackLayer
+import logger
+from logger import Logger
+from defines import *
+from basicHostAttackLayer import basicHostAttackLayer
 
 
 
 class hostAttackLayer(basicHostAttackLayer) :
 
 	def __init__(self,hostID,logFile,IPCLayer,NetworkServiceLayer) :
-		basicHostAttackLayer.__init__(hostID,logFile,IPCLayer,NetworkServiceLayer)
+		basicHostAttackLayer.__init__(self,hostID,logFile,IPCLayer,NetworkServiceLayer)
 		
 
 	def txNetServiceLayer(self,pkt,dstNodeID) :
-		basicHostAttackLayer.txNetServiceLayer(pkt,dstNodeID)
+		basicHostAttackLayer.txNetServiceLayer(self,pkt,dstNodeID)
 
 	def rxNetServiceLayer(self) :
-		return basicHostAttackLayer.rxNetServiceLayer()
+		return basicHostAttackLayer.rxNetServiceLayer(self)
 
 	def txIPCLayer(self,pkt) :
-		basicHostAttackLayer.txIPCLayer(pkt)
+		basicHostAttackLayer.txIPCLayer(self,pkt)
 
 	def rxIPCLayer(self) :
-		return basicHostAttackLayer.rxIPCLayer()
+		return basicHostAttackLayer.rxIPCLayer(self)
 
 	def getcurrCmd(self) :
-		return basicHostAttackLayer.getcurrCmd()
+		return basicHostAttackLayer.getcurrCmd(self)
 
 	def cancelThread(self):
-		basicHostAttackLayer.cancelThread()
+		basicHostAttackLayer.cancelThread(self)
 
 
 	def run(self) :
-		basicHostAttackLayer.run()
+		basicHostAttackLayer.run(self)
 
 
 

@@ -3,35 +3,35 @@ import os
 import threading
 import shared_buffer
 from shared_buffer import *
-import Proxy.logger
-from Proxy.logger import Logger
-from Proxy.defines import *
-from Proxy.basicHostIPCLayer import basicHostIPCLayer
+import logger
+from logger import Logger
+from defines import *
+from basicHostIPCLayer import basicHostIPCLayer
 
 
 class hostControlLayer(basicHostIPCLayer) :
 
 	def __init__(self,hostID,logFile) :
-		basicHostIPCLayer.__init__(hostID,logFile)
+		basicHostIPCLayer.__init__(self,hostID,logFile)
 
 
 	def appendToTxBuffer(self,pkt) :
-		basicHostIPCLayer.appendToTxBuffer(pkt)
+		basicHostIPCLayer.appendToTxBuffer(self,pkt)
 
 	def getReceivedMsg(self) :
-		return basicHostIPCLayer.getReceivedMsg()
+		return basicHostIPCLayer.getReceivedMsg(self)
 
 	def appendToRxBuffer(self,pkt) :
-		basicHostIPCLayer.appendToRxBuffer(pkt)
+		basicHostIPCLayer.appendToRxBuffer(self,pkt)
 
 	def getPktToSend(self) :
-		return basicHostIPCLayer.getPktToSend()
+		return basicHostIPCLayer.getPktToSend(self)
 
 	def cancelThread(self):
-		basicHostIPCLayer.cancelThread()
+		basicHostIPCLayer.cancelThread(self)
 
 	def run(self) :
-		basicHostIPCLayer.run()
+		basicHostIPCLayer.run(self)
 
 
 

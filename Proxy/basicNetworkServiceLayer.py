@@ -13,38 +13,48 @@ class basicNetworkServiceLayer(threading.Thread) :
 
 	def __init__(self,hostID,logFile,hostID_To_IP) :
 
+		threading.Thread.__init__(self)
+
 		self.threadCmdLock = threading.Lock()
 		self.NetLayerRxLock = threading.Lock()
 		self.NetLayerRxBuffer = []
 		self.threadCmdQueue = []
 		self.hostID = hostID
 		self.IPMap = hostID_To_IP
+		self.hostIP,self.listenPort = self.IPMap[self.hostID]
 		self.log = logger.Logger(logFile,"Host " + str(hostID) + " Network Layer Thread")
 
 		
-	def sendUDPMsg(self,pkt,IPAddr) :
+	def sendUDPMsg(self,pkt,IPAddr,Port) :
 		UDP_IP = IPAddr
+		UDP_PORT = Port
 		MESSAGE = str(pkt)
-		self.log.info("<SEND> TO: " + str(UDP_IP) + " FROM: " + str(self.hostID) + " PKT: " + str(MESSAGE))
+		self.log.info("<SEND> TO: " + str(UDP_IP)  + ":" + str(UDP_PORT) + " FROM: " + str(self.hostID) + " PKT: " + str(MESSAGE))
 		sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # UDP
-		sock.sendto(MESSAGE, (UDP_IP, HOST_UDP_PORT))
+		sock.sendto(MESSAGE, (UDP_IP, UDP_PORT))
 
 	def txPkt(self,pkt,dstNodeID) :
-		if dsNodeID in self.IPMap.keys() :
-			IPAddr = self.IPMap[dsNodeID]
-			self.sendUDPMsg(pkt,IPAddr)
+		if dstNodeID in self.IPMap.keys() :
+			IPAddr,Port = self.IPMap[dstNodeID]
+			self.sendUDPMsg(pkt,IPAddr,Port)
 
 	def rxPkt(self) :
 		pkt = None
 		self.NetLayerRxLock.acquire()
-		pkt = NetLayerRxBuffer.pop()
+		try:
+			pkt = self.NetLayerRxBuffer.pop()
+		except:
+			pkt = None
 		self.NetLayerRxLock.release()
 		return pkt
 
 
 	def getcurrCmd(self) :
 		self.threadCmdLock.acquire()
-		currCmd = self.threadCmdQueue.pop()
+		try :
+			currCmd = self.threadCmdQueue.pop()
+		except:
+			currCmd = None
 		self.threadCmdLock.release()
 		return currCmd
 
@@ -56,14 +66,24 @@ class basicNetworkServiceLayer(threading.Thread) :
 
 	def run(self) :
 
+
+		self.log.info("Started listening on IP: " + self.hostIP + " PORT: " + str(self.listenPort))
 		while True :
 			currCmd = self.getcurrCmd()
 			if currCmd != None and currCmd == CMD_QUIT :
+				self.log.info("Stopping ...")
 				break
 			sock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM) # UDP
 			sock.settimeout(SOCKET_TIMEOUT)
-			sock.bind(('0.0.0.0', HOST_UDP_PORT))
-			data, addr = sock.recvfrom(MAXPKTSIZE)
+			sock.bind((self.hostIP, self.listenPort))
+
+			try:
+				data, addr = sock.recvfrom(MAXPKTSIZE)
+			except socket.timeout:
+				data = None
+				sock.close()
+				#self.log.info("Recv Timeout. Quiting")
+				#break 
 
 			if data != None :
 				self.log.info("<RECV> TO: " + str(self.hostID) + " FROM: " + str(addr) + " PKT: " + str(data))
