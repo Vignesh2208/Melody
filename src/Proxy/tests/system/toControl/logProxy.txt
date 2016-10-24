@@ -1,0 +1,23 @@
+
+HostID List =  [1, 2]
+Proxy IPC Thread >> INFO >> Initialized shared buffer for : 1
+
+Proxy IPC Thread >> INFO >> Initialized shared buffer for : 2
+
+Proxy Network Layer Thread >> INFO >> Started listening on Port: 5000
+
+Proxy Attack Layer Thread >> INFO >> Started ...
+
+Proxy IPC Thread >> INFO >> Started ...
+
+Proxy Network Layer Thread >> INFO >> <RECV> TO: A HOST FROM: ('127.0.0.1', 64755) PKT: Hello World!
+
+Proxy IPC Thread >> INFO >> Relaying pkt: Hello World! To: 2 via Host: 1
+
+Proxy Attack Layer Thread >> INFO >> Stopping ...
+
+Proxy IPC Thread >> INFO >> Stopping ...
+
+Proxy Network Layer Thread >> INFO >> Stopping ...
+
+Proxy Shut Down Successfully
