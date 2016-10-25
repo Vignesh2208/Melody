@@ -14,6 +14,21 @@ class Main:
 
 def main():
 
+    # network_configuration = NetworkConfiguration("ryu",
+    #                                              "127.0.0.1",
+    #                                              6633,
+    #                                              "http://localhost:8080/",
+    #                                              "admin",
+    #                                              "admin",
+    #                                              "clique",
+    #                                              {"num_switches": 5,
+    #                                               "per_switch_links": 3,
+    #                                               "num_hosts_per_switch": 1},
+    #                                              conf_root="configurations/",
+    #                                              synthesis_name="AboresceneSynthesis",
+    #                                              synthesis_params={"apply_group_intents_immediately": True})
+    #
+
     network_configuration = NetworkConfiguration("ryu",
                                                  "127.0.0.1",
                                                  6633,
@@ -25,8 +40,8 @@ def main():
                                                   "per_switch_links": 3,
                                                   "num_hosts_per_switch": 1},
                                                  conf_root="configurations/",
-                                                 synthesis_name="AboresceneSynthesis",
-                                                 synthesis_params={"apply_group_intents_immediately": True})
+                                                 synthesis_name="SimpleMACSynthesis",
+                                                 synthesis_params={})
 
     exp = Main(network_configuration)
     exp.start_project()

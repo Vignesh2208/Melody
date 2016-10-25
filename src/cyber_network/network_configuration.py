@@ -8,6 +8,7 @@ import fcntl
 import struct
 from socket import *
 
+from itertools import permutations
 from collections import defaultdict
 from functools import partial
 from mininet.net import Mininet
@@ -24,7 +25,9 @@ from cyber_network.topologies.clique_topo import CliqueTopo
 
 from cyber_network.synthesis.dijkstra_synthesis import DijkstraSynthesis
 from cyber_network.synthesis.aborescene_synthesis import AboresceneSynthesis
+from cyber_network.synthesis.simple_mac_synthesis import SimpleMACSynthesis
 from cyber_network.synthesis.synthesis_lib import SynthesisLib
+from cyber_network.synthesis.flow_specification import FlowSpecification
 
 
 class NetworkConfiguration(object):
@@ -107,9 +110,32 @@ class NetworkConfiguration(object):
 
         elif self.synthesis_name == "AboresceneSynthesis":
             self.synthesis = AboresceneSynthesis(self.synthesis_params)
-
+        elif self.synthesis_name == "SimpleMACSynthesis":
+            self.synthesis = SimpleMACSynthesis(self.synthesis_params)
         else:
             self.synthesis = None
+
+    def prepare_all_flow_specifications(self):
+
+        flow_specs = []
+
+        flow_match = Match(is_wildcard=True)
+        flow_match["ethernet_type"] = 0x0800
+
+        for src_host_id, dst_host_id in permutations(self.ng.host_ids, 2):
+
+            if src_host_id == dst_host_id:
+                continue
+
+            fs = FlowSpecification(src_host_id, dst_host_id, flow_match)
+            fs.ng_src_host = self.ng.get_node_object(src_host_id)
+            fs.ng_dst_host = self.ng.get_node_object(dst_host_id)
+            fs.mn_src_host = self.mininet_obj.get(src_host_id)
+            fs.mn_dst_host = self.mininet_obj.get(dst_host_id)
+
+            flow_specs.append(fs)
+
+        return flow_specs
 
     def trigger_synthesis(self, synthesis_setup_gap):
 
@@ -124,6 +150,12 @@ class NetworkConfiguration(object):
             flow_match = Match(is_wildcard=True)
             flow_match["ethernet_type"] = 0x0800
             self.synthesis.synthesize_all_switches(flow_match, 2)
+
+        elif self.synthesis_name == "SimpleMACSynthesis":
+            self.synthesis.network_graph = self.ng
+            self.synthesis.synthesis_lib = SynthesisLib("localhost", "8181", self.ng)
+            flow_specs = self.prepare_all_flow_specifications()
+            self.synthesis.synthesize_flow_specifications(flow_specs)
 
         if synthesis_setup_gap:
             time.sleep(synthesis_setup_gap)
@@ -397,22 +429,6 @@ class NetworkConfiguration(object):
                 dst_node = dst_list[0]
                 if dst_node.startswith("h"):
                     yield self.mininet_obj.get(dst_node)
-
-    def _get_experiment_host_pair(self):
-
-        for src_switch in self.topo.get_switches_with_hosts():
-            for dst_switch in self.topo.get_switches_with_hosts():
-                if src_switch == dst_switch:
-                    continue
-
-                # Assume one host per switch
-                src_host = "h" + src_switch[1:] + "1"
-                dst_host = "h" + dst_switch[1:] + "1"
-
-                src_host_node = self.mininet_obj.get(src_host)
-                dst_host_node = self.mininet_obj.get(dst_host)
-
-                yield (src_host_node, dst_host_node)
 
     def is_host_pair_pingable(self, src_host, dst_host):
         hosts = [src_host, dst_host]
