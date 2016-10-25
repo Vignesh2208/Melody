@@ -43,7 +43,8 @@ class NetworkConfiguration(object):
                  topo_params,
                  conf_root,
                  synthesis_name,
-                 synthesis_params):
+                 synthesis_params,
+                 roles):
 
         self.controller = controller
         self.topo_name = topo_name
@@ -52,6 +53,7 @@ class NetworkConfiguration(object):
         self.conf_root = conf_root
         self.synthesis_name = synthesis_name
         self.synthesis_params = synthesis_params
+        self.roles = roles
 
         self.controller_ip = controller_ip
         self.controller_port = controller_port

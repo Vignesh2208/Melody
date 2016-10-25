@@ -21,6 +21,8 @@ class CliqueTopo(Topo):
         self.num_hosts_per_switch = params["num_hosts_per_switch"]
         self.per_switch_links = params["per_switch_links"]
         self.switch_names = []
+        self.host_names = []
+        self.host_cntr = 1
 
         #  Add switches and hosts under them
         for i in xrange(self.num_switches):
@@ -28,8 +30,10 @@ class CliqueTopo(Topo):
             self.switch_names.append(curr_switch)
 
             for j in xrange(self.num_hosts_per_switch):
-                curr_switch_host = self.addHost("h" + str(i+1) + str(j+1))
-                self.addLink(curr_switch, curr_switch_host)
+                curr_host = self.addHost("h" + str(self.host_cntr))
+                self.addLink(curr_switch, curr_host)
+                self.host_names.append(curr_host)
+                self.host_cntr += 1
 
         #  Add links between switches
         for i in xrange(self.num_switches - 1):
