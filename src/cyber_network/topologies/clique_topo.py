@@ -5,21 +5,21 @@ from mininet.topo import Topo
 
 class CliqueTopo(Topo):
     
-    def __init__(self, num_switches, num_hosts_per_switch, per_switch_links):
+    def __init__(self, params):
         
         Topo.__init__(self)
 
-        if num_switches < 2:
+        if params["num_switches"] < 2:
             print "Need to have at least three switches for a ring."
             raise
 
-        if per_switch_links < 2 and per_switch_links > num_switches - 1:
-            print "Cannot have less than 2 and more than " + str(num_switches -1) + " links."
+        if params["per_switch_links"] < 2 and params["per_switch_links"] > params["num_switches"] - 1:
+            print "Cannot have less than 2 and more than " + str(params["num_switches"] -1) + " links."
 
-        self.num_switches = num_switches
-        self.total_switches = self.num_switches
-        self.num_hosts_per_switch = num_hosts_per_switch
-        self.per_switch_links = per_switch_links
+        self.num_switches = params["num_switches"]
+        self.total_switches = params["num_switches"]
+        self.num_hosts_per_switch = params["num_hosts_per_switch"]
+        self.per_switch_links = params["per_switch_links"]
         self.switch_names = []
 
         #  Add switches and hosts under them

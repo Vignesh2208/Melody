@@ -94,6 +94,9 @@ class NetworkConfiguration(object):
         elif self.topo_name == "linear":
             self.topo = LinearTopo(self.topo_params)
             self.nc_topo_str = "Linear topology with " + str(self.topo_params["num_switches"]) + " switches"
+        elif self.topo_name == "clique":
+            self.topo = CliqueTopo(self.topo_params)
+            self.nc_topo_str = "Linear topology with " + str(self.topo_params["num_switches"]) + " switches"
         else:
             raise NotImplementedError("Topology: %s" % self.topo_name)
 
