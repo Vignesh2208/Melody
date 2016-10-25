@@ -14,8 +14,8 @@ from mininet.net import Mininet
 from mininet.node import RemoteController
 from mininet.node import OVSSwitch
 from controller_man import ControllerMan
-from model.network_graph import NetworkGraph
-from model.match import Match
+from cyber_network.synthesis.network_graph import NetworkGraph
+from cyber_network.synthesis.match import Match
 
 from cyber_network.topologies.ring_topo import RingTopo
 from cyber_network.topologies.clos_topo import ClosTopo

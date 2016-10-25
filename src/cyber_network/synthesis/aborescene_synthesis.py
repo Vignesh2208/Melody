@@ -6,7 +6,7 @@ import sys
 from collections import defaultdict
 from copy import deepcopy
 from synthesis.synthesis_lib import SynthesisLib
-from model.intent import Intent
+from cyber_network.synthesis.intent import Intent
 
 
 class AboresceneSynthesis(object):

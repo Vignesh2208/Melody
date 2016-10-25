@@ -1,4 +1,3 @@
-import sys
 
 from cyber_network.network_configuration import NetworkConfiguration
 
