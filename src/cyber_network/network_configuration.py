@@ -17,14 +17,14 @@ from controller_man import ControllerMan
 from model.network_graph import NetworkGraph
 from model.match import Match
 
-from experiments.topologies.ring_topo import RingTopo
-from experiments.topologies.clos_topo import ClosTopo
-from experiments.topologies.linear_topo import LinearTopo
-from experiments.topologies.clique_topo import CliqueTopo
+from cyber_network.topologies.ring_topo import RingTopo
+from cyber_network.topologies.clos_topo import ClosTopo
+from cyber_network.topologies.linear_topo import LinearTopo
+from cyber_network.topologies.clique_topo import CliqueTopo
 
-from synthesis.dijkstra_synthesis import DijkstraSynthesis
-from synthesis.aborescene_synthesis import AboresceneSynthesis
-from synthesis.synthesis_lib import SynthesisLib
+from cyber_network.synthesis.dijkstra_synthesis import DijkstraSynthesis
+from cyber_network.synthesis.aborescene_synthesis import AboresceneSynthesis
+from cyber_network.synthesis.synthesis_lib import SynthesisLib
 
 
 class NetworkConfiguration(object):

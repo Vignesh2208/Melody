@@ -34,14 +34,14 @@ class CliqueTopo(Topo):
         #  Add links between switches
         for i in xrange(self.num_switches - 1):
 
-            dst_switch_offsets = xrange(1, per_switch_links)
+            dst_switch_offsets = xrange(1, self.per_switch_links)
             for j in dst_switch_offsets:
 
                 try:
-                    l = self.g[self.switch_names[i]][self.switch_names[(i + j) % num_switches]]
+                    l = self.g[self.switch_names[i]][self.switch_names[(i + j) % self.num_switches]]
                     print l
                 except KeyError:
-                    self.addLink(self.switch_names[i], self.switch_names[(i + j) % num_switches])
+                    self.addLink(self.switch_names[i], self.switch_names[(i + j) % self.num_switches])
 
         #  Form a ring only when there are more than two switches
         self.addLink(self.switch_names[0], self.switch_names[-1])
