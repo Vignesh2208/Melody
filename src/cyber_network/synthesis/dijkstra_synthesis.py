@@ -4,7 +4,7 @@ import networkx as nx
 
 from collections import defaultdict
 from copy import deepcopy
-from synthesis.synthesis_lib import SynthesisLib
+from synthesis_lib import SynthesisLib
 from cyber_network.synthesis.intent import Intent
 from cyber_network.synthesis.match import Match
 

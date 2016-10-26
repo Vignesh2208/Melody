@@ -27,6 +27,7 @@ void __initNewSharedBuffer(sharedPacketBuf * newBuf) {
 
 	
 	sem_init(&newBuf->lock,IS_SHARED,UNLOCKED);
+	sem_wait(&newBuf->lock);
 	newBuf->flow = PROXY_TO_HOST;
 	newBuf->ack = TRUE;
 	newBuf->dirty = FALSE;
@@ -34,6 +35,8 @@ void __initNewSharedBuffer(sharedPacketBuf * newBuf) {
 	newBuf->dstID = 0;
 	newBuf->pktLen = 0;
 	__flushBuffer(newBuf->pkt,MAXPKTSIZE);
+	newBuf->isInit = INIT_MAGIC;
+	sem_post(&newBuf->lock);
 
 }
 
@@ -75,9 +78,9 @@ bool __addNewSharedBuffer(char * bufName, bool isProxy) {
 	llist_append(&sharedBufNames,newBufName);
 	hmap_put(&sharedBufMap,newBufName,newBufPtr);
 
-	if(isProxy)
+	if(isProxy) {
 		__initNewSharedBuffer(newBufPtr);
-
+    }
 	return SUCCESS;
 
 
@@ -138,9 +141,14 @@ int __bufRead(char * bufName, char * storeBuf, bool isProxy) {
 	if(bufPtr == NULL || storeBuf == NULL)
 		return BUF_NOT_INITIALIZED;
 
+	if(bufPtr->isInit != INIT_MAGIC)
+	    return 0;
+
 	__flushBuffer(storeBuf,MAXPKTSIZE);
 
+
 	if (isProxy == TRUE) {
+
 		sem_wait(&bufPtr->lock);
 		
 		if(__PollProxyRead(bufPtr)) {
@@ -157,6 +165,7 @@ int __bufRead(char * bufName, char * storeBuf, bool isProxy) {
 
 	}
 	else{
+
 		sem_wait(&bufPtr->lock);
 		
 		if(__PollHostRead(bufPtr)) {
@@ -196,9 +205,13 @@ int __bufWrite(char * bufName, char * data, int len, bool isProxy, uint32_t rout
 		return BUF_NOT_INITIALIZED;
 	}
 
+    if(bufPtr->isInit != INIT_MAGIC)
+	    return 0;
+
 	assert(len > 0 && len < MAXPKTSIZE);
 
 	if(isProxy) {
+
 		sem_wait(&bufPtr->lock);
 		
 		if(__PollProxyRead(bufPtr) || __PollHostRead(bufPtr)) {
@@ -214,11 +227,13 @@ int __bufWrite(char * bufName, char * data, int len, bool isProxy, uint32_t rout
 			bufPtr->pktLen = len;
 			nWrite = len;
 		}
+
 		sem_post(&bufPtr->lock);
 		
 
 	}
 	else{
+
 		sem_wait(&bufPtr->lock);
 		
 		if(__PollProxyRead(bufPtr) || __PollHostRead(bufPtr)) {
@@ -234,6 +249,7 @@ int __bufWrite(char * bufName, char * data, int len, bool isProxy, uint32_t rout
 			bufPtr->pktLen = len;
 			nWrite = len;
 		}
+
 		sem_post(&bufPtr->lock);
 	}
 

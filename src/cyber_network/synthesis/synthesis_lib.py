@@ -7,7 +7,7 @@ import os
 import sys
 import urllib
 
-from model.match import Match
+from match import Match
 
 from collections import defaultdict
 

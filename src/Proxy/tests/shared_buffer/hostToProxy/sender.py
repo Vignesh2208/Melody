@@ -1,5 +1,6 @@
 import sys
 import os
+import time
 
 scriptDir = os.path.dirname(os.path.realpath(__file__))
 idx = scriptDir.index('NetPower_TestBed')
@@ -19,7 +20,13 @@ res = sender.open()
 
 assert res > 0
 msg = "Hello World!"
-print "sending msg: ", msg
-res = sender.write(msg,dstID=0)
+print("sending msg: ", msg)
+res = 0
+while res <= 0 :
+	res = sender.write(msg,dstID=0)
+	time.sleep(1)
+
+
+
 assert (res == len(msg))
-print "SENDER SUCCEEDED"
+print("SENDER SUCCEEDED")

@@ -5,7 +5,7 @@ Host 1 Attack Layer Thread >> INFO >> Started ...
 
 Host 1 IPC Thread >> INFO >> Started ...
 
-Host 1 Network Layer Thread >> INFO >> <RECV> TO: 1 FROM: ('127.0.0.1', 60466) PKT: Hello World!
+Host 1 Network Layer Thread >> INFO >> <RECV> TO: 1 FROM: ('127.0.0.1', 41134) PKT: Hello World!
 
 Host 1 IPC Thread >> INFO >> Relaying pkt: Hello World! to Proxy
 

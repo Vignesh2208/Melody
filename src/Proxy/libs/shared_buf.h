@@ -1,7 +1,7 @@
 
 #include "includes.h"
 
-
+#define INIT_MAGIC 12345
 
 typedef struct __attribute__((packed)) sharedBufferStruct {
 
@@ -10,6 +10,7 @@ typedef struct __attribute__((packed)) sharedBufferStruct {
 	uint32_t ack   : 1;  // 1 - information flow acked; 0 - information flow unacked
 	uint32_t dirty : 1;  // set if new data is available to read. cleared on ack.
 	uint32_t pad   : 5;  // all 0s
+	uint32_t isInit  ;   // set if buffer has been initialized
 	uint32_t dstID ;	 // ID of dst which can finally consume information
 	uint32_t pktLen;
 	char pkt[MAXPKTSIZE];
