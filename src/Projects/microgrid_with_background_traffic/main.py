@@ -39,7 +39,10 @@ def main():
                                                  "clique",
                                                  {"num_switches": 5,
                                                   "per_switch_links": 3,
-                                                  "num_hosts_per_switch": 1},
+                                                  "num_hosts_per_switch": 1,
+                                                  "switch_switch_link_latency_range": (40, 100),
+                                                  "host_switch_link_latency_range": (10, 20)
+                                                  },
                                                  conf_root="configurations/",
                                                  synthesis_name="SimpleMACSynthesis",
                                                  synthesis_params={},
