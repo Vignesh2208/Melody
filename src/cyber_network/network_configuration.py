@@ -14,6 +14,7 @@ from functools import partial
 from mininet.net import Mininet
 from mininet.node import RemoteController
 from mininet.node import OVSSwitch
+from mininet.link import TCLink
 from controller_man import ControllerMan
 from cyber_network.synthesis.network_graph import NetworkGraph
 from cyber_network.synthesis.match import Match
@@ -164,14 +165,9 @@ class NetworkConfiguration(object):
 
         if self.mininet_obj:
             self.mininet_obj.pingAll()
-
-            # is_bi_connected = self.is_bi_connected_manual_ping_test_all_hosts()
-
-            # is_bi_connected = self.is_bi_connected_manual_ping_test([(self.mininet_obj.get('h11'), self.mininet_obj.get('h31'))])
-
-            # is_bi_connected = self.is_bi_connected_manual_ping_test([(self.mininet_obj.get('h31'), self.mininet_obj.get('h41'))],
-            #                                                            [('s1', 's2')])
-            # print "is_bi_connected:", is_bi_connected
+            # full_data = self.mininet_obj.pingFull(hosts=[self.mininet_obj.get('h1'),
+            #                                              self.mininet_obj.get('h2')])
+            # print full_data
 
     def get_ryu_switches(self):
         ryu_switches = {}
@@ -401,6 +397,7 @@ class NetworkConfiguration(object):
             self.mininet_obj = Mininet(topo=self.topo,
                                        cleanup=True,
                                        autoStaticArp=True,
+                                       link=TCLink,
                                        controller=lambda name: RemoteController(name,
                                                                                 ip=self.controller_ip,
                                                                                 port=self.controller_port),
