@@ -27,6 +27,6 @@ while len(msg) == 0 :
 
 assert(Id==0)
 assert(msg == "Hello World!")
-print "msg received: msg = ",msg
+print("msg received: msg = ",msg)
 receiver.close()
-print "RECEIVER TEST SUCCEEDED"
+print("RECEIVER TEST SUCCEEDED")

@@ -39,8 +39,8 @@ typedef int bool;
 #define TRUE 1
 #define FALSE 0
 #define IS_SHARED 1
-#define LOCKED 1
-#define UNLOCKED 0
+#define LOCKED 0
+#define UNLOCKED 1
 #define PROXY_TO_HOST 1
 #define HOST_TO_PROXY 0
 #define BUF_NOT_INITIALIZED -1

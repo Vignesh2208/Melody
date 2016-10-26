@@ -16,7 +16,7 @@ if proxyDir not in sys.path:
 from defines import *
 
 HOST_IP = "127.0.0.1"
-HOST_PORT = 5006
+HOST_PORT = 5011
 
 
 sock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM) # UDP
