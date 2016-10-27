@@ -5,6 +5,8 @@ Host 1 Attack Layer Thread >> INFO >> Started ...
 
 Host 1 IPC Thread >> INFO >> Started ...
 
+Host 1 IPC Thread >> INFO >> power sim id to host id map = {'powerwolrd1': 1, 'powerworld2': 2}
+
 Host 1 IPC Thread >> INFO >> Received pkt: Hello World! from Proxy for Dst: 2
 
 Host 1 Network Layer Thread >> INFO >> <SEND> TO: 127.0.0.1:5011 FROM: 1 PKT: Hello World!

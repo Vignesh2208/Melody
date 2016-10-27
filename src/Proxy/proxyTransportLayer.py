@@ -48,6 +48,7 @@ class proxyTransportLayer(threading.Thread) :
 		self.threadCmdLock.release()
 
 	def extractPowerSimIdFromPkt(self,pkt):
+
 		return "test"
 
 	# Needs to be modified as Appropriate. It is used by the Proxy to determine the
