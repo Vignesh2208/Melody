@@ -21,7 +21,15 @@ class proxyNetworkServiceLayer(threading.Thread) :
 		self.powerSimIP = powerSimIP 
 		self.log = logger.Logger(logFile,"Proxy Network Layer Thread")
 
-		
+
+	def setPowerSimIdMap(self, powerSimIdMap):
+		self.hostIDtoPowerSimID = powerSimIdMap
+		self.powerSimIDtohostID = {}
+		for hostID in self.hostIDtoPowerSimID.keys():
+			powerSimIdSet = self.hostIDtoPowerSimID[hostID]
+			for powerSimId in powerSimIdSet:
+				self.powerSimIDtohostID[powerSimId] = hostID
+
 	def sendUDPMsg(self,pkt,IPAddr,Port) :
 		UDP_IP = IPAddr
 		UDP_PORT = Port

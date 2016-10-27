@@ -8,7 +8,7 @@ from logger import Logger
 from defines import *
 
 
-class hostIPCLayer(threading.Thread) :
+class basicHostIPCLayer(threading.Thread) :
 
 	def __init__(self,hostID,logFile) :
 		threading.Thread.__init__(self)
@@ -30,6 +30,9 @@ class hostIPCLayer(threading.Thread) :
 
 		if result == BUF_NOT_INITIALIZED or result == FAILURE :
 			self.log.error("Shared Buffer open failed! Buffer not initialized")
+
+		self.hostIDtoPowerSimID = None
+		self.powerSimIDtohostID = None
 
 
 	def appendToTxBuffer(self,pkt) :
@@ -78,11 +81,22 @@ class hostIPCLayer(threading.Thread) :
 		self.threadCmdQueue.append(CMD_QUIT)
 		self.threadCmdLock.release()
 
+	def setPowerSimIdMap(self, powerSimIdMap):
+		self.hostIDtoPowerSimID = powerSimIdMap
+		self.powerSimIDtohostID = {}
+		for hostID in self.hostIDtoPowerSimID.keys():
+			powerSimIdSet = self.hostIDtoPowerSimID[hostID]
+			for powerSimId in powerSimIdSet:
+				self.powerSimIDtohostID[powerSimId] = hostID
+
+
+
 
 
 	def run(self) :
 
 		self.log.info("Started ...")
+		self.log.info("power sim id to host id map = " + str(self.powerSimIDtohostID))
 		pktToSend = None
 		while True :
 

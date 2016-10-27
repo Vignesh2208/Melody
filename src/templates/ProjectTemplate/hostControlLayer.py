@@ -6,7 +6,7 @@ from shared_buffer import *
 import logger
 from logger import Logger
 from defines import *
-from basicHostIPCLayer import basicHostIPCLayer
+from Proxy.basicHostIPCLayer import basicHostIPCLayer
 
 
 class hostControlLayer(basicHostIPCLayer) :

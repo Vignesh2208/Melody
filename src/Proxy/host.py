@@ -23,6 +23,7 @@ import signal
 
 def extractIPMapping(netCfgFile) :
 	IPMapping = {}
+	PowerSimIdMapping = {}
 	assert(os.path.isfile(netCfgFile) == True)
 	lines = [line.rstrip('\n') for line in open(netCfgFile)]
 
@@ -30,14 +31,19 @@ def extractIPMapping(netCfgFile) :
 		line = ' '.join(line.split())
 		line = line.replace(" ","")
 		splitLs = line.split(',')
-		assert(len(splitLs) == 3)
-		hostID = int(splitLs[0])
+		assert(len(splitLs) >= 3)
+		hostID = int(splitLs[0][1:])
 		IPAddr = splitLs[1]
 		Port = int(splitLs[2])
+		IPMapping[hostID] = (IPAddr, Port)
 
-		IPMapping[hostID] = (IPAddr,Port)
+		for i in xrange(3,len(splitLs)) :
+			PowerSimId = str(splitLs[i])
+			if hostID not in PowerSimIdMapping.keys() :
+				PowerSimIdMapping[hostID] = []
+			PowerSimIdMapping[hostID].append(PowerSimId)
 
-	return IPMapping
+	return IPMapping,PowerSimIdMapping
 
 
 def usage() :
@@ -69,7 +75,7 @@ def parseOpts() :
 			[ "help", "netcfg-file=", "log-file=", "run-time=", "project-name=",
 			  "is-control","id="])
 	except getopt.GetoptError as e:
-		printError(str(e))
+		print (str(e))
 		usage()
 		return 1
 	for (o, v) in opts:
@@ -96,22 +102,23 @@ def parseOpts() :
 
 def main(hostID,netCfgFile,logFile,runTime,projectName,isControlHost) :
 
-	hostIPMap = extractIPMapping(netCfgFile)
+	hostIPMap,powerSimIdMap = extractIPMapping(netCfgFile)
 	log = logger.Logger(logFile,"Host" + str(hostID) + ": ")
 	
 	if isControlHost == True :
-		hostIPCLayer = __import__("Projects." + str(projectName) + ".controlLayer", globals(), locals(), ['hostControlLayer'], -1)
+		hostIPCLayer = __import__("Projects." + str(projectName) + ".hostControlLayer", globals(), locals(), ['hostControlLayer'], -1)
 		hostIPCLayer = hostIPCLayer.hostControlLayer
 		hostAttackLayer = __import__("basicHostAttackLayer", globals(), locals(), ['basicHostAttackLayer'], -1)
 		hostAttackLayer = hostAttackLayer.basicHostAttackLayer
 	else:
 		hostIPCLayer = __import__("basicHostIPCLayer", globals(), locals(), ['basicHostIPCLayer'], -1)
-		hostIPCLayer = hostIPCLayer.hostIPCLayer
+		hostIPCLayer = hostIPCLayer.basicHostIPCLayer
 		hostAttackLayer = __import__("Projects." + str(projectName) + ".hostAttackLayer", globals(), locals(), ['hostAttackLayer'], -1)
 		hostAttackLayer = hostAttackLayer.hostAttackLayer
 
 	
 	IPCLayer = hostIPCLayer(hostID,logFile)
+	IPCLayer.setPowerSimIdMap(powerSimIdMap)
 	NetLayer = basicNetworkServiceLayer(hostID,logFile,hostIPMap)
 	AttackLayer = hostAttackLayer(hostID,logFile,IPCLayer,NetLayer)
 

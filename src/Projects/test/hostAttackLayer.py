@@ -6,7 +6,7 @@ from shared_buffer import *
 import logger
 from logger import Logger
 from defines import *
-from basicHostAttackLayer import basicHostAttackLayer
+from Proxy.basicHostAttackLayer import basicHostAttackLayer
 
 
 

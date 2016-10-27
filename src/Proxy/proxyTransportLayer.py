@@ -47,10 +47,18 @@ class proxyTransportLayer(threading.Thread) :
 		self.threadCmdQueue.append(CMD_QUIT)
 		self.threadCmdLock.release()
 
+	def extractPowerSimIdFromPkt(self,pkt):
+		return "test"
+
 	# Needs to be modified as Appropriate. It is used by the Proxy to determine the
 	# necessary shhared IPC Buffer to put the packet into
 	def extractSrcNodeID(self,rxPktPowerSim) :
-		return 1 # For Now
+		powerSimId = self.extractPowerSimIdFromPkt(rxPktPowerSim)
+		try:
+			srcNodeID = self.IPCLayer.powerSimIDtohostID[powerSimId]
+		except:
+			srcNodeID = 1
+		return srcNodeID # For Now
 
 	def run(self) :
 
