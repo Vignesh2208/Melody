@@ -1,5 +1,6 @@
 import json
 from cyber_network.network_configuration import NetworkConfiguration
+from cyber_network.background_traffic import BackgroundTraffic
 
 
 class Main:
@@ -24,6 +25,10 @@ class Main:
         ng = self.network_configuration.setup_network_graph(mininet_setup_gap=1, synthesis_setup_gap=1)
 
         self.generate_node_mappings(self.network_configuration.roles)
+
+        bt = BackgroundTraffic(self.network_configuration.mininet_obj)
+
+        bt.generate_ssh_flows(1, "h1", "h2")
 
         print "Stopping project..."
 
