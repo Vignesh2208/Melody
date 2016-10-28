@@ -75,19 +75,21 @@ class proxyNetworkServiceLayer(threading.Thread) :
 			if currCmd != None and currCmd == CMD_QUIT :
 				self.log.info("Stopping ...")
 				break
-			sock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM) # UDP
-			sock.settimeout(SOCKET_TIMEOUT)
-			sock.bind(('0.0.0.0', PROXY_UDP_PORT))
-			try:
-				data, addr = sock.recvfrom(MAXPKTSIZE)
-			except socket.timeout:
-				data = None
 
-			if data != None :
-				self.log.info("<RECV> TO: A HOST" + " FROM: " + str(addr) + " PKT: " + str(data))
-				self.NetLayerRxLock.acquire()
-				self.NetLayerRxBuffer.append(str(data))
-				self.NetLayerRxLock.release()
+			if POWERSIM_TYPE == "POWER_WORLD" :
+				sock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM) # UDP
+				sock.settimeout(SOCKET_TIMEOUT)
+				sock.bind(('0.0.0.0', PROXY_UDP_PORT))
+				try:
+					data, addr = sock.recvfrom(MAXPKTSIZE)
+				except socket.timeout:
+					data = None
+
+				if data != None :
+					self.log.info("<RECV> TO: A HOST" + " FROM: " + str(addr) + " PKT: " + str(data))
+					self.NetLayerRxLock.acquire()
+					self.NetLayerRxBuffer.append(str(data))
+					self.NetLayerRxLock.release()
 
 
 

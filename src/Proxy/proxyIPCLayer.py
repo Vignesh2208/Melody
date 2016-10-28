@@ -98,6 +98,7 @@ class proxyIPCLayer(threading.Thread) :
 		nHosts = len(self.hostList)
 		assert(self.controlCenterID > 0)
 		self.log.info("Started ...")
+		self.log.info("power sim id to host id map = " + str(self.powerSimIDtohostID))
 		while True :
 
 			currCmd = None

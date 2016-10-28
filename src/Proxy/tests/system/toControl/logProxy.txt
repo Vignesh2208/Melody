@@ -9,9 +9,15 @@ Proxy Attack Layer Thread >> INFO >> Started ...
 
 Proxy IPC Thread >> INFO >> Started ...
 
-Proxy Network Layer Thread >> INFO >> <RECV> TO: A HOST FROM: ('127.0.0.1', 57962) PKT: Hello World!
+Proxy IPC Thread >> INFO >> power sim id to host id map = {'powerworld1': 1, 'powerworld2': 2}
 
-Proxy IPC Thread >> INFO >> Relaying pkt: Hello World! To: 2 via Host: 1
+Proxy Network Layer Thread >> INFO >> <RECV> TO: A HOST FROM: ('127.0.0.1', 48857) PKT: 0000000011powerworld1Hello World!
+
+Proxy Attack Layer Thread >> INFO >> Extracting src node id ...
+
+Proxy Attack Layer Thread >> INFO >> Extracted src node id = 1
+
+Proxy IPC Thread >> INFO >> Relaying pkt: 0000000011powerworld1Hello World! To: 2 via Host: 1
 
 Proxy IPC Thread >> INFO >> Stopping ...
 

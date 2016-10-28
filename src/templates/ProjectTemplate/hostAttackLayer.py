@@ -1,11 +1,11 @@
 import sys
 import os
 import threading
-import shared_buffer
-from shared_buffer import *
-import logger
-from logger import Logger
-from defines import *
+import Proxy.shared_buffer
+from Proxy.shared_buffer import *
+import Proxy.logger
+from Proxy.logger import Logger
+from Proxy.defines import *
 from Proxy.basicHostAttackLayer import basicHostAttackLayer
 
 

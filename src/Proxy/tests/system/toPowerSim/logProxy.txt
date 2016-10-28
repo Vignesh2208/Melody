@@ -1,5 +1,4 @@
 
-HostID List =  [1, 2]
 Proxy IPC Thread >> INFO >> Initialized shared buffer for : 1
 
 Proxy IPC Thread >> INFO >> Initialized shared buffer for : 2
@@ -10,14 +9,15 @@ Proxy Attack Layer Thread >> INFO >> Started ...
 
 Proxy IPC Thread >> INFO >> Started ...
 
-Proxy IPC Thread >> INFO >> Received pkt: Hello World! from a Host Node
+Proxy IPC Thread >> INFO >> power sim id to host id map = {'powerworld1': 1, 'powerworld2': 2}
 
-Proxy Network Layer Thread >> INFO >> <SEND> TO: 127.0.0.1:5500 FROM: 127.0.0.1 PKT: Hello World!
+Proxy IPC Thread >> INFO >> Received pkt: 0000000011powerworld1Hello World! from a Host Node
 
-Proxy IPC Thread >> INFO >> Stopping ...
+Proxy Network Layer Thread >> INFO >> <SEND> TO: 127.0.0.1:5500 FROM: 127.0.0.1 PKT: 0000000011powerworld1Hello World!
 
 Proxy Attack Layer Thread >> INFO >> Stopping ...
 
+Proxy IPC Thread >> INFO >> Stopping ...
+
 Proxy Network Layer Thread >> INFO >> Stopping ...
 
-Proxy Shut Down Successfully

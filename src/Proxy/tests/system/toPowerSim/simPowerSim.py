@@ -28,7 +28,7 @@ except socket.timeout:
 	data = ''
 
 if len(data) > 0 :
-	assert(data == "Hello World!")
+	assert(data == "0000000011powerworld1Hello World!")
 	print "POWERSIM TEST SUCCEEDED"
 else :
 	print "TIMED OUT"

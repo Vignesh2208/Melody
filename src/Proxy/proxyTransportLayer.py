@@ -49,7 +49,14 @@ class proxyTransportLayer(threading.Thread) :
 
 	def extractPowerSimIdFromPkt(self,pkt):
 
-		return "test"
+		powerSimID = "test"
+		if POWERSIM_TYPE == "POWER_WORLD" :
+			#splitLs = pkt.split(',')
+			#assert(len(splitLs) > 1)
+			powerSimIDLen = int(pkt[0:POWERSIM_ID_HDR_LEN])
+			powerSimID = str(pkt[POWERSIM_ID_HDR_LEN:POWERSIM_ID_HDR_LEN+powerSimIDLen])
+		return powerSimID
+
 
 	# Needs to be modified as Appropriate. It is used by the Proxy to determine the
 	# necessary shhared IPC Buffer to put the packet into
@@ -57,7 +64,8 @@ class proxyTransportLayer(threading.Thread) :
 		powerSimId = self.extractPowerSimIdFromPkt(rxPktPowerSim)
 		try:
 			srcNodeID = self.IPCLayer.powerSimIDtohostID[powerSimId]
-		except:
+		except Exception,e:
+			print str(e)
 			srcNodeID = 1
 		return srcNodeID # For Now
 
