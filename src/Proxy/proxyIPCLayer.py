@@ -31,6 +31,8 @@ class proxyIPCLayer(threading.Thread) :
 				self.log.info("Initialized shared buffer for : " + str(hostID))
 
 		self.controlCenterID = -1
+		self.hostIDtoPowerSimID = None
+		self.powerSimIDtohostID = None
 
 	def setControlCenterID(self,controlCenterID):
 		self.controlCenterID = controlCenterID
@@ -73,6 +75,13 @@ class proxyIPCLayer(threading.Thread) :
 		self.threadCmdQueue.append(CMD_QUIT)
 		self.threadCmdLock.release()
 
+	def setPowerSimIdMap(self, powerSimIdMap):
+		self.hostIDtoPowerSimID = powerSimIdMap
+		self.powerSimIDtohostID = {}
+		for hostID in self.hostIDtoPowerSimID.keys():
+			powerSimIdSet = self.hostIDtoPowerSimID[hostID]
+			for powerSimId in powerSimIdSet:
+				self.powerSimIDtohostID[powerSimId] = hostID
 
 	# Needs to be modified ass appropriate
 	# It is used by the proxy to determine
@@ -89,6 +98,7 @@ class proxyIPCLayer(threading.Thread) :
 		nHosts = len(self.hostList)
 		assert(self.controlCenterID > 0)
 		self.log.info("Started ...")
+		self.log.info("power sim id to host id map = " + str(self.powerSimIDtohostID))
 		while True :
 
 			currCmd = None

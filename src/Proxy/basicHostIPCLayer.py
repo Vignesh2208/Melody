@@ -8,7 +8,7 @@ from logger import Logger
 from defines import *
 
 
-class hostIPCLayer(threading.Thread) :
+class basicHostIPCLayer(threading.Thread) :
 
 	def __init__(self,hostID,logFile) :
 		threading.Thread.__init__(self)
@@ -30,6 +30,9 @@ class hostIPCLayer(threading.Thread) :
 
 		if result == BUF_NOT_INITIALIZED or result == FAILURE :
 			self.log.error("Shared Buffer open failed! Buffer not initialized")
+
+		self.hostIDtoPowerSimID = None
+		self.powerSimIDtohostID = None
 
 
 	def appendToTxBuffer(self,pkt) :
@@ -78,11 +81,46 @@ class hostIPCLayer(threading.Thread) :
 		self.threadCmdQueue.append(CMD_QUIT)
 		self.threadCmdLock.release()
 
+	def setPowerSimIdMap(self, powerSimIdMap):
+		self.hostIDtoPowerSimID = powerSimIdMap
+		self.powerSimIDtohostID = {}
+		for hostID in self.hostIDtoPowerSimID.keys():
+			powerSimIdSet = self.hostIDtoPowerSimID[hostID]
+			for powerSimId in powerSimIdSet:
+				self.powerSimIDtohostID[powerSimId] = hostID
+
+	def getPowerSimIDsforNode(self, cyberNodeID):
+		if cyberNodeID in self.hostIDtoPowerSimID.keys() :
+			return self.hostIDtoPowerSimID[cyberNodeID]
+		else:
+			return None
+
+	def getCyberNodeIDforNode(self, powerSimNodeID):
+		if powerSimNodeID in self.powerSimIDtohostID.keys():
+			return self.powerSimIDtohostID[powerSimNodeID]
+		else:
+			return None
+
+	def extractPowerSimIdFromPkt(self, pkt):
+
+		powerSimID = "test"
+		if POWERSIM_TYPE == "POWER_WORLD":
+			#splitLs = pkt.split(',')
+			#assert (len(splitLs) > 1)
+			powerSimIDLen = int(pkt[0:POWERSIM_ID_HDR_LEN])
+			powerSimID = str(pkt[POWERSIM_ID_HDR_LEN:POWERSIM_ID_HDR_LEN + powerSimIDLen])
+
+		return powerSimID
+
+	
+
+
 
 
 	def run(self) :
 
 		self.log.info("Started ...")
+		self.log.info("power sim id to host id map = " + str(self.powerSimIDtohostID))
 		pktToSend = None
 		while True :
 
@@ -103,11 +141,11 @@ class hostIPCLayer(threading.Thread) :
 				if ret > 0 :
 					pktToSend = None
 
-			dstID,recvPkt = self.sharedBuffer.read()
+			dstCyberNodeID,recvPkt = self.sharedBuffer.read()
 
 			if len(recvPkt) != 0 :
-				self.log.info("Received pkt: " + str(recvPkt) + " from Proxy for Dst: " + str(dstID))
-				self.appendToRxBuffer((dstID,recvPkt))
+				self.log.info("Received pkt: " + str(recvPkt) + " from Proxy for Dst: " + str(dstCyberNodeID))
+				self.appendToRxBuffer((dstCyberNodeID,recvPkt))
 
 
 

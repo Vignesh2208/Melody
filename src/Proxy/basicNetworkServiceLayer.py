@@ -23,8 +23,10 @@ class basicNetworkServiceLayer(threading.Thread) :
 		self.IPMap = hostID_To_IP
 		self.hostIP,self.listenPort = self.IPMap[self.hostID]
 		self.log = logger.Logger(logFile,"Host " + str(hostID) + " Network Layer Thread")
+		self.hostIDtoPowerSimID = None
+		self.powerSimIDtohostID = None
 
-		
+
 	def sendUDPMsg(self,pkt,IPAddr,Port) :
 		UDP_IP = IPAddr
 		UDP_PORT = Port

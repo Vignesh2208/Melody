@@ -1,7 +1,11 @@
 
+class TrafficSpec(object):
+    def __init__(self, type, rate, src_node_id, dst_node_id):
+        pass
+
 
 class BackgroundTraffic(object):
-    def __init__(self, mininet_obj):
+    def __init__(self, mininet_obj, traffic_specs):
         self.mininet_obj = mininet_obj
 
     def generate_ssh_flows(self, rate, src_node_id, dst_node_id):

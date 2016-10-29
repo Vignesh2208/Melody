@@ -22,6 +22,7 @@ import signal
 
 def extractIPMapping(netCfgFile) :
 	IPMapping = {}
+	PowerSimIdMapping = {}
 	assert(os.path.isfile(netCfgFile) == True)
 	lines = [line.rstrip('\n') for line in open(netCfgFile)]
 
@@ -29,14 +30,19 @@ def extractIPMapping(netCfgFile) :
 		line = ' '.join(line.split())
 		line = line.replace(" ","")
 		splitLs = line.split(',')
-		assert(len(splitLs) == 3)
-		hostID = int(splitLs[0])
+		assert(len(splitLs) >= 3)
+		hostID = int(splitLs[0][1:])
 		IPAddr = splitLs[1]
 		Port = int(splitLs[2])
 
 		IPMapping[hostID] = (IPAddr,Port)
+		for i in xrange(3, len(splitLs)):
+			PowerSimId = str(splitLs[i])
+			if hostID not in PowerSimIdMapping.keys():
+				PowerSimIdMapping[hostID] = []
+			PowerSimIdMapping[hostID].append(PowerSimId)
 
-	return IPMapping
+	return IPMapping,PowerSimIdMapping
 
 
 def usage() :
@@ -47,6 +53,7 @@ def usage() :
 	print "-l or --log-file=     Absolute path to log File <optional>"
 	print "-r or --runt-time=    Run time of host in seconds before it is shut-down <optional - default forever>"
 	print "-p or --power-sim-ip= IP Address of power simulator <optional - default 127.0.0.1>"
+	print "-d or --id= 			 ID of control center node. <optional - default taken as max of all host IDs>"
 	sys.exit(0)
 
 def parseOpts() :
@@ -56,13 +63,14 @@ def parseOpts() :
 	runTime = 0
 	powerSimIP="127.0.0.1"
 	netCfgFilePath = None
+	controlCenterID = None
 
 	try:
 		(opts, args) = getopt.getopt(sys.argv[1:],
-			"hc:l:r:p:",
-			[ "help", "netcfg-file=", "log-file=", "run-time=","power-sim-ip="])
+			"hc:l:r:p:d:",
+			[ "help", "netcfg-file=", "log-file=", "run-time=","power-sim-ip=","id="])
 	except getopt.GetoptError as e:
-		printError(str(e))
+		print (str(e))
 		usage()
 		return 1
 	for (o, v) in opts:
@@ -78,24 +86,28 @@ def parseOpts() :
 
 		if o in ("-p", "--power-sim-ip=") :
 			powerSimIP = str(v)
-		
+
+		if o in ("-d", "--id="):
+			controlCenterID = int(v)
 
 	assert(netCfgFilePath != None)
-	return (netCfgFilePath,logFile,runTime,powerSimIP)
+	return (netCfgFilePath,logFile,runTime,powerSimIP,controlCenterID)
 		
 
 
-def main(netCfgFile,logFile,runTime,powerSimIP) :
+def main(netCfgFile,logFile,runTime,powerSimIP,controlCenterID) :
 
-	hostIPMap = extractIPMapping(netCfgFile)
+	hostIPMap,powerSimIdMap = extractIPMapping(netCfgFile)
 	hostIDList = hostIPMap.keys()
 
-	print "HostID List = ", hostIDList
+	#print "HostID List = ", hostIDList
 
-	controlCenterID = max(hostIDList)
+	if controlCenterID == None :
+		controlCenterID = max(hostIDList)
 	
 	IPCLayer = proxyIPCLayer(logFile,hostIDList)
 	IPCLayer.setControlCenterID(controlCenterID)
+	IPCLayer.setPowerSimIdMap(powerSimIdMap)
 	NetLayer = proxyNetworkServiceLayer(logFile,powerSimIP)
 	TransportLayer = proxyTransportLayer(logFile,IPCLayer,NetLayer)
 
@@ -119,12 +131,12 @@ def main(netCfgFile,logFile,runTime,powerSimIP) :
 	TransportLayer.join()
 	NetLayer.join()
 
-	print "Proxy Shut Down Successfully"
+	#print "Proxy Shut Down Successfully"
 
 if __name__ == "__main__":
 
-	netCfgFilePath,logFile,runTime,powerSimIP = parseOpts()
-	sys.exit(main(netCfgFilePath,logFile,runTime,powerSimIP))
+	netCfgFilePath,logFile,runTime,powerSimIP,controlCenterID = parseOpts()
+	sys.exit(main(netCfgFilePath,logFile,runTime,powerSimIP,controlCenterID))
 	
 
 
