@@ -1,7 +1,7 @@
 import json
 import os
 from cyber_network.network_configuration import NetworkConfiguration
-from cyber_network.background_traffic import BackgroundTraffic
+from cyber_network.background_traffic import TrafficFlow, BackgroundTraffic
 from Proxy.defines import *
 import time
 import subprocess
@@ -47,10 +47,18 @@ class Main:
         #with open('node_mappings.json', 'w') as outfile:
         #    json.dump(self.node_mappings, outfile)
 
+    def start_background_traffic(self):
+        traffic_flows = [TrafficFlow("poisson", 5, 1, "ssh", "h1", "h2")]
+        bt = BackgroundTraffic(self.network_configuration.mininet_obj, traffic_flows)
+
+        bt.start()
+
     def start_project(self):
         print "Starting project ..."
         ng = self.network_configuration.setup_network_graph(mininet_setup_gap=1, synthesis_setup_gap=1)
         self.generate_node_mappings(self.network_configuration.roles)
+
+        #self.start_background_traffic()
 
         print "Starting all Host Commands ..."
         for i in range(len(self.network_configuration.mininet_obj.hosts)):
