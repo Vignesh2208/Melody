@@ -13,6 +13,9 @@ Dependencies:
 ```
 Pre-Run Steps:
 
+- Install expect
+    - sudo apt-get install expect
+    
 - Install shared buffer python IPC (for python 2.7)
     - cd NetPower_Testbed/src/Proxy/libs
     - sudo python setup.py build_ext --inplace
