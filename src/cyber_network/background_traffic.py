@@ -32,7 +32,7 @@ class TrafficFlow(object):
         self.src_mn_node = None
         self.dst_mn_node = None
 
-    def start(self, mininet_obj):
+    def start(self, mininet_obj, root_user_name, root_password, base_dir):
 
         self.src_mn_node = mininet_obj.get(self.src_node_id)
         self.dst_mn_node = mininet_obj.get(self.dst_node_id)
@@ -44,10 +44,14 @@ class TrafficFlow(object):
         result = self.dst_mn_node.cmd('/usr/sbin/sshd -D&')
         print result
 
-        CLI(mininet_obj)
+        # Wait a second before starting the client
+        time.sleep(1)
 
-        # Start the client
-        result = self.src_mn_node.cmd()
+        result = self.src_mn_node.cmd(base_dir + '/src/cyber_network/ssh_session_connect_disconnect.expect ' +
+                                      root_user_name + ' ' +
+                                      root_password + ' ' +
+                                      self.dst_mn_node.IP())
+
         print result
 
     def stop(self):
@@ -55,13 +59,16 @@ class TrafficFlow(object):
 
 
 class BackgroundTraffic(object):
-    def __init__(self, mininet_obj, traffic_flows):
+    def __init__(self, mininet_obj, traffic_flows, root_user_name, root_password, base_dir):
         self.mininet_obj = mininet_obj
         self.traffic_flows = traffic_flows
+        self.root_user_name = root_user_name
+        self.root_password = root_password
+        self.base_dir = base_dir
 
     def start(self):
         for tf in self.traffic_flows:
-            tf.start(self.mininet_obj)
+            tf.start(self.mininet_obj, self.root_user_name, self.root_password, self.base_dir)
 
     def stop(self):
         for tf in self.traffic_flows:

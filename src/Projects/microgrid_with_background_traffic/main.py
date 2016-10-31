@@ -19,6 +19,7 @@ class Main:
         self.run_time = self.network_configuration.run_time
         self.power_simulator_ip = self.network_configuration.power_simulator_ip
         self.node_mappings = {}
+        self.control_node_id = None
 
         self.script_dir = os.path.dirname(os.path.realpath(__file__))
         idx = self.script_dir.index('NetPower_TestBed')
@@ -49,17 +50,11 @@ class Main:
 
     def start_background_traffic(self):
         traffic_flows = [TrafficFlow("poisson", 5, 1, "ssh", "h1", "h2")]
-        bt = BackgroundTraffic(self.network_configuration.mininet_obj, traffic_flows)
+        bt = BackgroundTraffic(self.network_configuration.mininet_obj, traffic_flows, "ubuntu", "ubuntu", self.base_dir)
 
         bt.start()
 
-    def start_project(self):
-        print "Starting project ..."
-        ng = self.network_configuration.setup_network_graph(mininet_setup_gap=1, synthesis_setup_gap=1)
-        self.generate_node_mappings(self.network_configuration.roles)
-
-        #self.start_background_traffic()
-
+    def start_host_processes(self):
         print "Starting all Host Commands ..."
         for i in range(len(self.network_configuration.mininet_obj.hosts)):
             mininet_host = self.network_configuration.mininet_obj.hosts[i]
@@ -76,19 +71,22 @@ class Main:
 
             if "controller" in host_role :
                 cmd_to_run = cmd_to_run + " -i"
-                control_node_id = host_id
+                self.control_node_id = host_id
             print "Starting cmd for host: " + str(mininet_host.name) + " at " + str(datetime.datetime.now())
             mininet_host.cmd(cmd_to_run)
+
+    def start_proxy_process(self):
 
         print "Starting Proxy Process at " + str(datetime.datetime.now())
         proxy_py_script = self.proxy_dir + "/proxy.py"
         proxy_log_file = self.log_dir + "/proxy_log.txt"
         subprocess.Popen(['python',str(proxy_py_script),'-c',self.node_mappings_file_path,'-l',proxy_log_file,
-                        '-r',str(self.run_time),'-p',self.power_simulator_ip,'-d',str(control_node_id)])
+                        '-r',str(self.run_time),'-p',self.power_simulator_ip,'-d', str(self.control_node_id)])
         #os.system("python " + str(proxy_py_script) + " -c " + self.node_mappings_file_path + " -l " + proxy_log_file \
         #         + " -r " + str(self.run_time) + " -p " + self.power_simulator_ip + " -d " + str(self.control_node_id))
 
-        if self.run_time > 0 :
+    def run(self):
+        if self.run_time > 0:
             print "Running Project for roughly (runtime + 5) =  " + str(self.run_time + 5) + " secs ..."
             time.sleep(self.run_time + 5)
         else:
@@ -98,6 +96,17 @@ class Main:
                     time.sleep(1)
             except KeyboardInterrupt:
                 print "Interrupted ..."
+
+    def start_project(self):
+        print "Starting project ..."
+        ng = self.network_configuration.setup_network_graph(mininet_setup_gap=1, synthesis_setup_gap=1)
+        self.generate_node_mappings(self.network_configuration.roles)
+
+        self.start_background_traffic()
+
+        self.start_host_processes()
+        self.start_proxy_process()
+        self.run()
 
         print "Stopping project..."
         self.stop_project()
