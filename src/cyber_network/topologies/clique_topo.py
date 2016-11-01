@@ -9,6 +9,7 @@ class CliqueTopo(Topo):
     def __init__(self, params):
         
         Topo.__init__(self)
+        self.params = params
 
         if params["num_switches"] < 2:
             print "Need to have at least three switches for a ring."
@@ -66,5 +67,12 @@ class CliqueTopo(Topo):
 
         #  Form a ring only when there are more than two switches
         self.addLink(self.switch_names[0], self.switch_names[-1], **switch_switch_link_opts)
+
+    def __str__(self):
+        params_str = ''
+        for k, v in self.params.items():
+            params_str += "_" + str(k) + "_" + str(v)
+        return self.__class__.__name__ + params_str
+
 
 topos = {"cliquetopo": (lambda: CliqueTopo())}

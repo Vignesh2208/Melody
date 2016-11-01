@@ -1,7 +1,7 @@
 import json
 import os
 from cyber_network.network_configuration import NetworkConfiguration
-from cyber_network.background_traffic import TrafficFlow, BackgroundTraffic
+from cyber_network.background_traffic import TrafficFlow
 from Proxy.defines import *
 import time
 import subprocess
@@ -49,10 +49,11 @@ class Main:
         #    json.dump(self.node_mappings, outfile)
 
     def start_background_traffic(self):
-        traffic_flows = [TrafficFlow("poisson", 5, 1, "ssh", "h1", "h2")]
-        bt = BackgroundTraffic(self.network_configuration.mininet_obj, traffic_flows, "ubuntu", "ubuntu", self.base_dir)
+        traffic_flows = [TrafficFlow("poisson", 5, 1, self.run_time, "ssh", "h1", "h2",
+                                     "ubuntu", "ubuntu", self.base_dir, self.network_configuration.mininet_obj)]
 
-        bt.start()
+        for tf in traffic_flows:
+            tf.start()
 
     def start_host_processes(self):
         print "Starting all Host Commands ..."
