@@ -1,7 +1,8 @@
 import json
 import os
 from cyber_network.network_configuration import NetworkConfiguration
-from cyber_network.background_traffic import TrafficFlow
+from cyber_network.traffic_flow import TrafficFlow
+from cyber_network.traffic_flow import TRAFFIC_FLOW_PERIODIC, TRAFFIC_FLOW_EXPONENTIAL ,TRAFFIC_FLOW_ONE_SHOT
 from Proxy.defines import *
 import time
 import subprocess
@@ -45,12 +46,21 @@ class Main:
 
                 outfile.write(lineTowrite)
 
-        #with open('node_mappings.json', 'w') as outfile:
-        #    json.dump(self.node_mappings, outfile)
+                #with open('node_mappings.json', 'w') as outfile:
+                #    json.dump(self.node_mappings, outfile)
 
     def start_background_traffic(self):
-        traffic_flows = [TrafficFlow("poisson", 5, 1, self.run_time, "ssh", "h1", "h2",
-                                     "ubuntu", "ubuntu", self.base_dir, self.network_configuration.mininet_obj)]
+        traffic_flows = [TrafficFlow(type=TRAFFIC_FLOW_PERIODIC,
+                                     offset=5,
+                                     inter_flow_period=1,
+                                     run_time=self.run_time,
+                                     src_node_id="h1",
+                                     dst_node_id="h2",
+                                     root_user_name="ubuntu",
+                                     root_password="ubuntu",
+                                     mininet_obj=self.network_configuration.mininet_obj,
+                                     server_process_cmd='/usr/sbin/sshd -D&',
+                                     client_expect_file=self.base_dir + '/src/cyber_network/ssh_session.expect')]
 
         for tf in traffic_flows:
             tf.start()
@@ -82,7 +92,7 @@ class Main:
         proxy_py_script = self.proxy_dir + "/proxy.py"
         proxy_log_file = self.log_dir + "/proxy_log.txt"
         subprocess.Popen(['python',str(proxy_py_script),'-c',self.node_mappings_file_path,'-l',proxy_log_file,
-                        '-r',str(self.run_time),'-p',self.power_simulator_ip,'-d', str(self.control_node_id)])
+                          '-r',str(self.run_time),'-p',self.power_simulator_ip,'-d', str(self.control_node_id)])
         #os.system("python " + str(proxy_py_script) + " -c " + self.node_mappings_file_path + " -l " + proxy_log_file \
         #         + " -r " + str(self.run_time) + " -p " + self.power_simulator_ip + " -d " + str(self.control_node_id))
 
@@ -137,14 +147,14 @@ def main():
                                                  synthesis_params={},
                                                  # Can map multiple power simulator objects to same cyber node.
                                                  roles=[
-                                                         ("controller_node",["control;1"]),
-                                                         ("operations_nodes",["operations;1","operations;2"]),
-                                                         ("distribution_ieds",["distribution;1"]),
-                                                         ("renewable_generator_ieds",["generator;1"]),
-                                                         ("thermal_generator_ieds",["generator;2"])
-                                                        ],
+                                                     ("controller_node",["control;1"]),
+                                                     ("operations_nodes",["operations;1","operations;2"]),
+                                                     ("distribution_ieds",["distribution;1"]),
+                                                     ("renewable_generator_ieds",["generator;1"]),
+                                                     ("thermal_generator_ieds",["generator;2"])
+                                                 ],
                                                  project_name="microgrid_with_background_traffic",
-                                                 run_time=10,
+                                                 run_time=20,
                                                  power_simulator_ip="127.0.0.1"
                                                  )
 
