@@ -59,10 +59,23 @@ class Main:
                                      root_user_name="ubuntu",
                                      root_password="ubuntu",
                                      server_process_cmd='/usr/sbin/sshd -D&',
+                                     client_expect_file=self.base_dir + '/src/cyber_network/ssh_session.expect'),
+
+                         TrafficFlow(type=TRAFFIC_FLOW_EXPONENTIAL,
+                                     offset=5,
+                                     inter_flow_period=2,
+                                     run_time=self.run_time,
+                                     src_mn_node=self.network_configuration.mininet_obj.get("h3"),
+                                     dst_mn_node=self.network_configuration.mininet_obj.get("h4"),
+                                     root_user_name="ubuntu",
+                                     root_password="ubuntu",
+                                     server_process_cmd='/usr/sbin/sshd -D&',
                                      client_expect_file=self.base_dir + '/src/cyber_network/ssh_session.expect')]
 
         for tf in traffic_flows:
             tf.start()
+
+        print "Background traffic threads started..."
 
     def start_host_processes(self):
         print "Starting all Host Commands ..."
