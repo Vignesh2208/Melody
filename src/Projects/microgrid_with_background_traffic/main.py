@@ -50,15 +50,14 @@ class Main:
                 #    json.dump(self.node_mappings, outfile)
 
     def start_background_traffic(self):
-        traffic_flows = [TrafficFlow(type=TRAFFIC_FLOW_PERIODIC,
+        traffic_flows = [TrafficFlow(type=TRAFFIC_FLOW_EXPONENTIAL,
                                      offset=5,
-                                     inter_flow_period=1,
+                                     inter_flow_period=5,
                                      run_time=self.run_time,
-                                     src_node_id="h1",
-                                     dst_node_id="h2",
+                                     src_mn_node=self.network_configuration.mininet_obj.get("h1"),
+                                     dst_mn_node=self.network_configuration.mininet_obj.get("h2"),
                                      root_user_name="ubuntu",
                                      root_password="ubuntu",
-                                     mininet_obj=self.network_configuration.mininet_obj,
                                      server_process_cmd='/usr/sbin/sshd -D&',
                                      client_expect_file=self.base_dir + '/src/cyber_network/ssh_session.expect')]
 

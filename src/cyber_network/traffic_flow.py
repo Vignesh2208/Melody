@@ -1,5 +1,6 @@
 import time
 import threading
+import random
 
 from timeit import default_timer as timer
 
@@ -10,8 +11,8 @@ TRAFFIC_FLOW_ONE_SHOT = 'One Shot'
 
 class TrafficFlow(threading.Thread):
 
-    def __init__(self, type, offset, inter_flow_period, run_time, src_node_id, dst_node_id,
-                 root_user_name, root_password, mininet_obj,
+    def __init__(self, type, offset, inter_flow_period, run_time, src_mn_node, dst_mn_node,
+                 root_user_name, root_password,
                  server_process_cmd, client_expect_file):
         '''
         'type', 'offset' and rate' do the following:
@@ -33,12 +34,9 @@ class TrafficFlow(threading.Thread):
         self.offset = offset
         self.inter_flow_period = inter_flow_period
         self.run_time = run_time
-        self.src_node_id = src_node_id
-        self.dst_node_id = dst_node_id
-        self.mininet_obj = mininet_obj
 
-        self.src_mn_node = self.mininet_obj.get(self.src_node_id)
-        self.dst_mn_node = self.mininet_obj.get(self.dst_node_id)
+        self.src_mn_node = src_mn_node
+        self.dst_mn_node = dst_mn_node
 
         self.root_user_name = root_user_name
         self.root_password = root_password
@@ -66,10 +64,17 @@ class TrafficFlow(threading.Thread):
                                           self.root_password + ' ' +
                                           self.dst_mn_node.IP())
 
+            print "Time since started:", self.elasped_time - self.start_time
+            #print result
+
             if self.type == TRAFFIC_FLOW_PERIODIC:
-                time.sleep(self.inter_flow_period)
+                sleep_for = self.inter_flow_period
+                print "sleep_for:", sleep_for
+                time.sleep(sleep_for)
             elif self.type == TRAFFIC_FLOW_EXPONENTIAL:
-                time.sleep(1)
+                sleep_for = random.expovariate(1.0/self.inter_flow_period)
+                print "sleep_for:", sleep_for
+                time.sleep(sleep_for)
             elif self.type == TRAFFIC_FLOW_ONE_SHOT:
                 break
             else:
