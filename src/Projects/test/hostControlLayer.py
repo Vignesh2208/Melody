@@ -15,20 +15,6 @@ class hostControlLayer(basicHostIPCLayer) :
 		basicHostIPCLayer.__init__(self,hostID,logFile)
 
 
-	# Appends data that needs to be set to power simulator to a Rx Buffer
-	# from which it is later picked up by the Attack Layer
-	# and subsequently transmitted over the network to power sim via dstCyberNode-Proxy
-	# Arguments:
-	#	tuple - (dstCyberNodeID (int), pkt (string) )
-	def appendToRxBuffer(self,dataTuple) :
-		basicHostIPCLayer.appendToRxBuffer(self,dataTuple)
-
-
-	# Returns a pkt (string) received from Attack Layer (if any)
-	# Otherwise it returns None
-	def getPktFromAttackLayer(self):
-		return basicHostIPCLayer.getPktToSend(self)
-
 	# Returns the set of power sim node Ids [list of strings] that
 	# are mapped to the given cyber node (int). It returns None if the
 	# mapping does not exist.
@@ -44,14 +30,45 @@ class hostControlLayer(basicHostIPCLayer) :
 	# Returns the power sim id present in the pkt (string)
 	def extractPowerSimIdFromPkt(self, pkt):
 		return basicHostIPCLayer.extractPowerSimIdFromPkt(pkt)
+
+	# Returns the payload present in the pkt (string)
+	def extractPayloadFromPkt(self, pkt):
+		return basicHostIPCLayer.extractPayloadFromPkt(pkt)
+
+
+	# transmits to power simulator 
+	# Arguments:
+	# 	powerSimNodeID (string)
+	#   payload (string)
+	def txPktToPowerSim(self,powerSimNodeID,payload) :
+		cyberNodeID = self.getCyberNodeIDforNode(powerSimNodeID)
+		txpkt = '%10d%s%s'% (len(powerSimNodeID),powerSimNodeID,payload)
+		self.attackLayer.onRxPktFromIPCLayer(txpkt,cyberNodeID)
+
+	# Callback on each received pkt from Attack layer.
+	# Arguments:
+	#   pkt - full pkt including powerSimID(string)
+	def onRxPktFromAttackLayer(self,pkt):
+		# process the pkt here
+		return None
+
 		
 	
 	# Could be modified to implement specific control algorithms
 	def run(self) :
 
 		# Default Control Algorithm which does nothing specific
-		basicHostIPCLayer.run(self)
+		self.log.info("Started ...")
+		self.log.info("power sim id to host id map = " + str(self.powerSimIDtohostID))
+		assert(self.attackLayer != None)
+		while True :
 
+			currCmd = self.getcurrCmd()
+			if currCmd != None and currCmd == CMD_QUIT :
+				self.log.info("Stopping ...")
+				break
+
+			# Put control logic here
 
 
 

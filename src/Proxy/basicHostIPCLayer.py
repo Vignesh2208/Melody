@@ -13,12 +13,7 @@ class basicHostIPCLayer(threading.Thread) :
 	def __init__(self,hostID,logFile) :
 		threading.Thread.__init__(self)
 		
-		self.attkLayerTxLock = threading.Lock()
-		self.attkLayerRxLock = threading.Lock()
 		self.threadCmdLock = threading.Lock()
-
-		self.attkLayerTxBuffer = []
-		self.attkLayerRxBuffer = []
 		self.threadCmdQueue = []
 		self.hostID = hostID
 		self.log = logger.Logger(logFile,"Host " + str(hostID) + " IPC Thread")
@@ -33,39 +28,15 @@ class basicHostIPCLayer(threading.Thread) :
 
 		self.hostIDtoPowerSimID = None
 		self.powerSimIDtohostID = None
+		self.attackLayer = None
 
+	def setAttackLayer(self,attackLayer):
+		self.attackLayer = attackLayer
 
-	def appendToTxBuffer(self,pkt) :
-		self.attkLayerTxLock.acquire()
-		self.attkLayerTxBuffer.append(pkt)
-		self.attkLayerTxLock.release()
+	def getAttackLayer(self):
+		return self.attackLayer
 
-	def getReceivedMsg(self) :
-		pkt = None
-		self.attkLayerRxLock.acquire()
-		try:
-			dstID,pkt = self.attkLayerRxBuffer.pop()
-		except:
-			dstID = -1
-			pkt = None
-		self.attkLayerRxLock.release()
-		return dstID,pkt
-
-	def appendToRxBuffer(self,pkt) :
-		self.attkLayerRxLock.acquire()
-		self.attkLayerRxBuffer.append(pkt)
-		self.attkLayerRxLock.release()
-
-	def getPktToSend(self) :
-		pkt = None
-		self.attkLayerTxLock.acquire()
-		try:
-			pkt = self.attkLayerTxBuffer.pop()
-		except:
-			pkt = None
-		self.attkLayerTxLock.release()
-		return pkt
-
+	
 	def getcurrCmd(self):
 		currCmd = None
 		self.threadCmdLock.acquire()
@@ -101,19 +72,30 @@ class basicHostIPCLayer(threading.Thread) :
 		else:
 			return None
 
+	def onRxPktFromProxy(self,pkt,dstCyberNodeID) :
+		self.attackLayer.onRxPktFromIPCLayer(pkt,dstCyberNodeID)
+
+
+	def onRxPktFromAttackLayer(self,pkt):
+		ret = 0
+		while ret <= 0 :
+			ret = self.sharedBuffer.write(pkt,PROXY_NODE_ID)
+			self.log.info("Relaying pkt: " + str(pkt) + " to Proxy")
+
+
+
 	def extractPowerSimIdFromPkt(self, pkt):
 
 		powerSimID = "test"
 		if POWERSIM_TYPE == "POWER_WORLD":
-			#splitLs = pkt.split(',')
-			#assert (len(splitLs) > 1)
 			powerSimIDLen = int(pkt[0:POWERSIM_ID_HDR_LEN])
 			powerSimID = str(pkt[POWERSIM_ID_HDR_LEN:POWERSIM_ID_HDR_LEN + powerSimIDLen])
 
 		return powerSimID
 
-	
-
+	def extractPayloadFromPkt(self,pkt) :
+		powerSimID = self.extractPowerSimIdFromPkt(pkt) 
+		return pkt[POWERSIM_ID_HDR_LEN + len(powerSimID):]
 
 
 
@@ -121,6 +103,7 @@ class basicHostIPCLayer(threading.Thread) :
 
 		self.log.info("Started ...")
 		self.log.info("power sim id to host id map = " + str(self.powerSimIDtohostID))
+		assert(self.attackLayer != None)
 		pktToSend = None
 		while True :
 
@@ -131,22 +114,14 @@ class basicHostIPCLayer(threading.Thread) :
 				self.log.info("Stopping ...")
 				break
 
-			# send any available pkt to Proxy
-			if pktToSend == None :
-				pktToSend = self.getPktToSend()
-
-			if pktToSend != None :
-				ret = self.sharedBuffer.write(pktToSend,PROXY_NODE_ID)
-				self.log.info("Relaying pkt: " + str(pktToSend) + " to Proxy")
-				if ret > 0 :
-					pktToSend = None
 
 			dstCyberNodeID,recvPkt = self.sharedBuffer.read()
 
 			if len(recvPkt) != 0 :
 				self.log.info("Received pkt: " + str(recvPkt) + " from Proxy for Dst: " + str(dstCyberNodeID))
-				self.appendToRxBuffer((dstCyberNodeID,recvPkt))
+				self.onRxPktFromProxy(recvPkt,dstCyberNodeID)
 
+				
 
 
 

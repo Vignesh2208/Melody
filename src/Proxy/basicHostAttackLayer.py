@@ -6,8 +6,7 @@ import threading
 import logger
 from logger import Logger
 from defines import *
-#from hostIPCLayer import *
-#from networkServiceLayer import *
+
 
 
 class basicHostAttackLayer(threading.Thread) :
@@ -22,18 +21,7 @@ class basicHostAttackLayer(threading.Thread) :
 		self.IPCLayer = IPCLayer
 		self.NetServiceLayer = NetworkServiceLayer
 
-	def txNetServiceLayer(self,pkt,dstNodeID) :
-		self.NetServiceLayer.txPkt(pkt,dstNodeID)
-
-	def rxNetServiceLayer(self) :
-		return self.NetServiceLayer.rxPkt()	
-
-	def txIPCLayer(self,pkt) :
-		self.IPCLayer.appendToTxBuffer(pkt)
-
-	def rxIPCLayer(self) :
-		return self.IPCLayer.getReceivedMsg()
-
+	
 	def getcurrCmd(self) :
 		self.threadCmdLock.acquire()
 		try:
@@ -48,11 +36,29 @@ class basicHostAttackLayer(threading.Thread) :
 		self.threadCmdQueue.append(CMD_QUIT)
 		self.threadCmdLock.release()
 
+	# default - benign Attack Layer
+	def onRxPktFromNetworkLayer(self,pkt):
+		self.IPCLayer.onRxPktFromAttackLayer(pkt)
+
+	# default - benign Attack Layer
+	def onRxPktFromIPCLayer(self,pkt,dstNodeID):
+		self.NetServiceLayer.onRxPktFromAttackLayer(pkt,dstNodeID)
+
+
+	def txAsyncNetServiceLayer(self,pkt,dstNodeID):
+		self.NetServiceLayer.onRxPktFromAttackLayer(pkt,dstNodeID)
+
+	def txAsyncIPCLayer(self,pkt) :
+		self.IPCLayer.onRxPktFromAttackLayer(pkt)
+
+
 
 	def run(self) :
 
 		pktToSend = None
 		self.log.info("Started ...")
+		assert(self.NetServiceLayer != None)
+		assert(self.IPCLayer != None)
 		while True :
 
 			currCmd = self.getcurrCmd()
@@ -60,13 +66,9 @@ class basicHostAttackLayer(threading.Thread) :
 				self.log.info("Stopping ...")
 				break
 
-			recvPkt = self.rxNetServiceLayer()
-			if recvPkt != None :
-				self.txIPCLayer(recvPkt)
+			# can use this to send async pkts to Net layer and IPC layer
 
-			dstNodeID,txPkt = self.rxIPCLayer()
-			if txPkt != None :
-				self.txNetServiceLayer(txPkt,dstNodeID)
+
 
 
 

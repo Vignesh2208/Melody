@@ -16,8 +16,6 @@ class basicNetworkServiceLayer(threading.Thread) :
 		threading.Thread.__init__(self)
 
 		self.threadCmdLock = threading.Lock()
-		self.NetLayerRxLock = threading.Lock()
-		self.NetLayerRxBuffer = []
 		self.threadCmdQueue = []
 		self.hostID = hostID
 		self.IPMap = hostID_To_IP
@@ -25,6 +23,15 @@ class basicNetworkServiceLayer(threading.Thread) :
 		self.log = logger.Logger(logFile,"Host " + str(hostID) + " Network Layer Thread")
 		self.hostIDtoPowerSimID = None
 		self.powerSimIDtohostID = None
+		self.attackLayer = None
+
+
+
+	def setAttackLayer(self,attackLayer):
+		self.attackLayer = attackLayer
+
+	def getAttackLayer(self):
+		return self.attackLayer
 
 
 	def sendUDPMsg(self,pkt,IPAddr,Port) :
@@ -39,17 +46,6 @@ class basicNetworkServiceLayer(threading.Thread) :
 		if dstNodeID in self.IPMap.keys() :
 			IPAddr,Port = self.IPMap[dstNodeID]
 			self.sendUDPMsg(pkt,IPAddr,Port)
-
-	def rxPkt(self) :
-		pkt = None
-		self.NetLayerRxLock.acquire()
-		try:
-			pkt = self.NetLayerRxBuffer.pop()
-		except:
-			pkt = None
-		self.NetLayerRxLock.release()
-		return pkt
-
 
 	def getcurrCmd(self) :
 		self.threadCmdLock.acquire()
@@ -66,10 +62,19 @@ class basicNetworkServiceLayer(threading.Thread) :
 		self.threadCmdLock.release()
 
 
+	def onRxPktFromAttackLayer(self,pkt,dstNodeID):
+		self.txPkt(pkt,dstNodeID)
+
+	def onRxPktFromNetwork(self,pkt):
+		self.attackLayer.onRxPktFromNetworkLayer(pkt)
+
+
 	def run(self) :
 
 
 		self.log.info("Started listening on IP: " + self.hostIP + " PORT: " + str(self.listenPort))
+		assert(self.attackLayer != None)
+
 		while True :
 			currCmd = self.getcurrCmd()
 			if currCmd != None and currCmd == CMD_QUIT :
@@ -84,15 +89,11 @@ class basicNetworkServiceLayer(threading.Thread) :
 			except socket.timeout:
 				data = None
 				sock.close()
-				#self.log.info("Recv Timeout. Quiting")
-				#break 
+				 
 
 			if data != None :
 				self.log.info("<RECV> TO: " + str(self.hostID) + " FROM: " + str(addr) + " PKT: " + str(data))
-				self.NetLayerRxLock.acquire()
-				self.NetLayerRxBuffer.append(str(data))
-				self.NetLayerRxLock.release()
-
+				self.onRxPktFromNetwork(str(data))
 
 
 

@@ -1,12 +1,12 @@
 import sys
 import os
 import threading
-import Proxy.shared_buffer
-from Proxy.shared_buffer import *
-import Proxy.logger
-from Proxy.logger import Logger
-from Proxy.defines import *
-from Proxy.basicHostAttackLayer import basicHostAttackLayer
+import shared_buffer
+from shared_buffer import *
+import logger
+from logger import Logger
+from defines import *
+from basicHostAttackLayer import basicHostAttackLayer
 
 
 
@@ -16,42 +16,56 @@ class hostAttackLayer(basicHostAttackLayer) :
 		basicHostAttackLayer.__init__(self,hostID,logFile,IPCLayer,NetworkServiceLayer)
 		
 
-	# Transmit to another node through the Network Simulator using UDP.
-	# Network Service Layer will automatically resolve dstNodeID to an IP Address
-	# Arguments:
-	#	pkt 	  - <string>
-	# 	dstNodeID - <int> Node ID of intended recipient
-	def txNetServiceLayer(self,pkt,dstNodeID) :
-		basicHostAttackLayer.txNetServiceLayer(self,pkt,dstNodeID)
+	# Callback on each received pkt from Net layer
+	# By default it is injected to IPC layer
+	# Arguments 
+	#		pkt 	(full packet - string)
+	def onRxPktFromNetworkLayer(self,pkt):
 
-	# Gets a pkt (string) received by the Network Layer if one is present.
-	# Otherwise it returns None
-	# Returns:
-	#	pkt		 - <string>
-	def rxNetServiceLayer(self) :
-		return basicHostAttackLayer.rxNetServiceLayer(self)
+		# possibly modify pkt here
+		return basicHostAttackLayer.onRxPktFromNetworkLayer(pkt)		# injects pkt into IPC layer
+		
 
-	# Takes a pkt (string) as argument and relays it to IPC Layer of host
-	# which can then optionally relay it to Proxy (If it is not a Control Host)
-	# Arguments:
-	#	pkt		- <string>
-	def txIPCLayer(self,pkt) :
-		basicHostAttackLayer.txIPCLayer(self,pkt)
+	# Callback on each received pkt from IPC layer
+	# By default it is injected to Network Layer
+	# Arguments 
+	#		pkt 	(full packet - string)
+	#		dstCyberNodeID	(int)
+	def onRxPktFromIPCLayer(self,pkt,dstCyberNodeID):
 
-	#  Returns a dstNodeID,pkt tuple if available from the IPC Layer of the Host
-	#  The Attack Layer can subsequently choose to relay it to Network Layer.
-	#  Returns:
-	#	(dstNodeID,pkt)		-(<int>,<string>)
-	def rxIPCLayer(self) :
-		return basicHostAttackLayer.rxIPCLayer(self)
+		# possibly modify pkt here
+		return basicHostAttackLayer.onRxPktFromIPCLayer(pkt,dstCyberNodeID)	# injects pkt into Network layer
 
+
+	# Send pkt asynchronously to the Network layer
+	def txAsyncNetServiceLayer(self,pkt,dstCyberNodeID):
+		return basicHostAttackLayer.txAsyncNetServiceLayer(pkt,dstCyberNodeID)
+
+	# Send pkt asynchronously to the IPC layer
+	def txAsyncIPCLayer(self,pkt) :
+		return basicHostAttackLayer.txAsyncIPCLayer(pkt)
+
+	# Returns the unique hostID (int)
+	def getHostID(self) :
+		return self.hostID
 
 	#  Could be arbitrarily modified to perform specific attacks
 	#  using the API described.
 	def run(self) :
 
 		# Default Benign Attack Layer
-		basicHostAttackLayer.run(self)
+		pktToSend = None
+		self.log.info("Started ...")
+		assert(self.NetServiceLayer != None)
+		assert(self.IPCLayer != None)
+		while True :
+
+			currCmd = self.getcurrCmd()
+			if currCmd != None and currCmd == CMD_QUIT :
+				self.log.info("Stopping ...")
+				break
+
+			# Put logic for specific attacks here.  Can be used to do Async sends to IPC and Network layers
 
 
 

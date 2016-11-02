@@ -122,6 +122,9 @@ def main(hostID,netCfgFile,logFile,runTime,projectName,isControlHost) :
 	NetLayer = basicNetworkServiceLayer(hostID,logFile,hostIPMap)
 	AttackLayer = hostAttackLayer(hostID,logFile,IPCLayer,NetLayer)
 
+	IPCLayer.setAttackLayer(AttackLayer)
+	NetLayer.setAttackLayer(AttackLayer)
+
 	assert(IPCLayer != None and NetLayer != None and AttackLayer != None)
 
 	
