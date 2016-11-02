@@ -14,8 +14,8 @@ SOCKET_TIMEOUT = 5
 
 
 
-PROXY_UDP_PORT = 6000         #Proxy listens on this port for udp pkts from PowerSim
-POWERSIM_UDP_PORT = 5500      #Power Simulator listens on this port for udp pkts from Proxy
+PROXY_UDP_PORT = 9999         #Proxy listens on this port for udp pkts from PowerSim
+POWERSIM_UDP_PORT = 9998      #Power Simulator listens on this port for udp pkts from Proxy
 DEFAULT_HOST_UDP_PORT = 5100  #Every network simulated node listens on this port by default for udp pkts from other nodes
 DEFAULT_POWERSIM_IP = "127.0.0.1"
 POWERSIM_TYPE = "POWER_WORLD" # POWER_WORLD/RTDS

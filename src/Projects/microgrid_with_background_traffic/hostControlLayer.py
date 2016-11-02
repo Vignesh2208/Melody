@@ -7,7 +7,7 @@ import Proxy.logger
 from Proxy.logger import Logger
 from Proxy.defines import *
 from Proxy.basicHostIPCLayer import basicHostIPCLayer
-
+from datetime import datetime
 
 class hostControlLayer(basicHostIPCLayer) :
 
@@ -50,6 +50,7 @@ class hostControlLayer(basicHostIPCLayer) :
 	#   pkt - full pkt including powerSimID(string)
 	def onRxPktFromAttackLayer(self,pkt):
 		# process the pkt here
+		self.log.info("%s  %s"%datetime.now(), pkt)
 		return None
 
 		

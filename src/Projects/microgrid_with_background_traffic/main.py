@@ -1,12 +1,14 @@
 import json
 import os
+import time
+import subprocess
+import datetime
+import sys
+sys.path.append("./")
 from cyber_network.network_configuration import NetworkConfiguration
 from cyber_network.traffic_flow import TrafficFlow
 from cyber_network.traffic_flow import TRAFFIC_FLOW_PERIODIC, TRAFFIC_FLOW_EXPONENTIAL ,TRAFFIC_FLOW_ONE_SHOT
 from Proxy.defines import *
-import time
-import subprocess
-import datetime
 
 
 class Main:
@@ -141,7 +143,7 @@ class Main:
         ng = self.network_configuration.setup_network_graph(mininet_setup_gap=1, synthesis_setup_gap=1)
         self.generate_node_mappings(self.network_configuration.roles)
 
-        self.start_background_traffic()
+        # self.start_background_traffic()
         self.start_host_processes()
         self.start_proxy_process()
         self.run()
@@ -181,8 +183,8 @@ def main():
                                                          ("generator",["30;1","31;1","32;1","33;1","34;1","35;1","36;1","37;1","38;1","39;1"])
                                                         ],                       
                                                  project_name="microgrid_with_background_traffic",
-                                                 run_time=20,
-                                                 power_simulator_ip="127.0.0.1"
+                                                 run_time=10,
+                                                 power_simulator_ip="10.0.60.16"
                                                  )
 
     exp = Main(network_configuration)
