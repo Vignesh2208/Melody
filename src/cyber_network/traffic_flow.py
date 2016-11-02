@@ -61,18 +61,14 @@ class TrafficFlow(threading.Thread):
             if self.elasped_time - self.start_time > self.run_time:
                 break
 
-            print (self.client_expect_file + ' ' +
-                                          self.root_user_name + ' ' +
-                                          self.root_password + ' ' +
-                                          self.dst_mn_node.IP() + '&')
-
             result = self.src_mn_node.cmd(self.client_expect_file + ' ' +
                                           self.root_user_name + ' ' +
                                           self.root_password + ' ' +
                                           self.dst_mn_node.IP() + '&')
 
-            print "Flow thread for src:", self.src_mn_node, "dst:", self.dst_mn_node, \
-                "Time since started:", self.elasped_time - self.start_time
+            # print "Traffic Flow thread for src:", self.src_mn_node, \
+            #     "dst:", self.dst_mn_node, \
+            #     "Time since started:", self.elasped_time - self.start_time
 
             #print result
 
@@ -94,7 +90,7 @@ class TrafficFlow(threading.Thread):
 
             # Start the server
             result = self.dst_mn_node.cmd(self.server_process_start_cmd)
-            print result
+            #print result
 
     def stop_server(self):
 
@@ -102,7 +98,7 @@ class TrafficFlow(threading.Thread):
 
             # Stop the server
             result = self.dst_mn_node.cmd(self.server_process_stop_cmd)
-            print result
+            #print result
         
     def run(self):
 
