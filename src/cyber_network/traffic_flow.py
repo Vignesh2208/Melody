@@ -52,6 +52,8 @@ class TrafficFlow(threading.Thread):
 
     def client_loop(self):
 
+        print "Starting client loop..."
+
         while True:
 
             self.elasped_time = timer()
@@ -62,14 +64,15 @@ class TrafficFlow(threading.Thread):
             result = self.src_mn_node.cmd(self.client_expect_file + ' ' +
                                           self.root_user_name + ' ' +
                                           self.root_password + ' ' +
-                                          self.dst_mn_node.IP())
+                                          self.dst_mn_node.IP() + '&')
 
-            print "Time since started:", self.elasped_time - self.start_time
+            print "Flow thread for src:", self.src_mn_node, "dst:", self.dst_mn_node, \
+                "Time since started:", self.elasped_time - self.start_time
+
             #print result
 
             if self.type == TRAFFIC_FLOW_PERIODIC:
                 sleep_for = self.inter_flow_period
-                print "sleep_for:", sleep_for
                 time.sleep(sleep_for)
             elif self.type == TRAFFIC_FLOW_EXPONENTIAL:
                 sleep_for = random.expovariate(1.0/self.inter_flow_period)
@@ -89,6 +92,8 @@ class TrafficFlow(threading.Thread):
 
     def run(self):
 
+        print "Starting thread..."
+
         self.start_time = timer()
 
         # First wait for offset seconds
@@ -97,7 +102,7 @@ class TrafficFlow(threading.Thread):
         # Start the server process
         self.setup_server()
 
-        # Wait a second before starting the client
+        # Wait a second before starting the client loop
         time.sleep(1)
 
         self.client_loop()
