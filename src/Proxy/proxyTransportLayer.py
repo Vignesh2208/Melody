@@ -51,8 +51,6 @@ class proxyTransportLayer(threading.Thread) :
 
 		powerSimID = "test"
 		if POWERSIM_TYPE == "POWER_WORLD" :
-			#splitLs = pkt.split(',')
-			#assert(len(splitLs) > 1)
 			powerSimIDLen = int(pkt[0:POWERSIM_ID_HDR_LEN])
 			powerSimID = str(pkt[POWERSIM_ID_HDR_LEN:POWERSIM_ID_HDR_LEN+powerSimIDLen])
 		return powerSimID

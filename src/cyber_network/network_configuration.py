@@ -81,8 +81,8 @@ class NetworkConfiguration(object):
             self.load_config = False
             self.save_config = True
         else:
-            self.load_config = True
-            self.save_config = False
+            self.load_config = False
+            self.save_config = True
 
         self.h = httplib2.Http()
         self.controller_api_base_url = controller_api_base_url
