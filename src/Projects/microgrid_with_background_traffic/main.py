@@ -59,20 +59,20 @@ class Main:
                         dst_mn_node=self.network_configuration.mininet_obj.get("h2"),
                         root_user_name="ubuntu",
                         root_password="ubuntu",
-                        server_process_start_cmd='/usr/sbin/sshd -D&',
-                        server_process_stop_cmd='sudo killall sshd',
-                        client_expect_file=self.base_dir + '/src/cyber_network/ssh_session.expect'),
+                        server_process_start_cmd="python -m SimpleHTTPServer&",
+                        server_process_stop_cmd="ps aux | grep SimpleHTTPServer | awk {'print $2'} | xargs kill",
+                        client_expect_file=self.base_dir + '/src/cyber_network/http_session.expect'),
 
             TrafficFlow(type=TRAFFIC_FLOW_EXPONENTIAL,
                         offset=5,
                         inter_flow_period=1,
                         run_time=self.run_time,
-                        src_mn_node=self.network_configuration.mininet_obj.get("h3"),
+                        src_mn_node=self.network_configuration.mininet_obj.get("h1"),
                         dst_mn_node=self.network_configuration.mininet_obj.get("h4"),
                         root_user_name="ubuntu",
                         root_password="ubuntu",
-                        server_process_start_cmd='/usr/sbin/sshd -D&',
-                        server_process_stop_cmd='sudo killall sshd',
+                        server_process_start_cmd="/usr/sbin/sshd -D&",
+                        server_process_stop_cmd="sudo killall sshd",
                         client_expect_file=self.base_dir + '/src/cyber_network/ssh_session.expect')
         ]
 

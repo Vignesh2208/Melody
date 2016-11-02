@@ -61,6 +61,11 @@ class TrafficFlow(threading.Thread):
             if self.elasped_time - self.start_time > self.run_time:
                 break
 
+            print (self.client_expect_file + ' ' +
+                                          self.root_user_name + ' ' +
+                                          self.root_password + ' ' +
+                                          self.dst_mn_node.IP() + '&')
+
             result = self.src_mn_node.cmd(self.client_expect_file + ' ' +
                                           self.root_user_name + ' ' +
                                           self.root_password + ' ' +
