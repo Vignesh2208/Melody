@@ -63,6 +63,18 @@ class Main:
                         server_process_stop_cmd="ps aux | grep SimpleHTTPServer | awk {'print $2'} | xargs kill",
                         client_expect_file=self.base_dir + '/src/cyber_network/http_session.expect'),
 
+            TrafficFlow(type=TRAFFIC_FLOW_ONE_SHOT,
+                        offset=5,
+                        inter_flow_period=1,
+                        run_time=self.run_time,
+                        src_mn_node=self.network_configuration.mininet_obj.get("h1"),
+                        dst_mn_node=self.network_configuration.mininet_obj.get("h3"),
+                        root_user_name="ubuntu",
+                        root_password="ubuntu",
+                        server_process_start_cmd="",
+                        server_process_stop_cmd="",
+                        client_expect_file=self.base_dir + '/src/cyber_network/ping_session.expect'),
+
             TrafficFlow(type=TRAFFIC_FLOW_EXPONENTIAL,
                         offset=5,
                         inter_flow_period=1,

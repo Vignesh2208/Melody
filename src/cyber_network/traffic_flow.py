@@ -90,15 +90,19 @@ class TrafficFlow(threading.Thread):
 
     def start_server(self):
 
-        # Start the server
-        result = self.dst_mn_node.cmd(self.server_process_start_cmd)
-        print result
+        if self.server_process_start_cmd:
+
+            # Start the server
+            result = self.dst_mn_node.cmd(self.server_process_start_cmd)
+            print result
 
     def stop_server(self):
 
-        # Stop the server
-        result = self.dst_mn_node.cmd(self.server_process_stop_cmd)
-        print result
+        if self.server_process_stop_cmd:
+
+            # Stop the server
+            result = self.dst_mn_node.cmd(self.server_process_stop_cmd)
+            print result
         
     def run(self):
 
