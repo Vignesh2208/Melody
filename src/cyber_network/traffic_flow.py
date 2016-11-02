@@ -13,7 +13,9 @@ class TrafficFlow(threading.Thread):
 
     def __init__(self, type, offset, inter_flow_period, run_time, src_mn_node, dst_mn_node,
                  root_user_name, root_password,
-                 server_process_cmd, client_expect_file):
+                 server_process_start_cmd,
+                 server_process_stop_cmd,
+                 client_expect_file):
         '''
         'type', 'offset' and rate' do the following:
             - Periodic: That repeats itself after af fixed period determined by inter_flow_period seconds,
@@ -41,11 +43,9 @@ class TrafficFlow(threading.Thread):
         self.root_user_name = root_user_name
         self.root_password = root_password
 
-        self.server_process_cmd = server_process_cmd
+        self.server_process_start_cmd = server_process_start_cmd
+        self.server_process_stop_cmd = server_process_stop_cmd
         self.client_expect_file = client_expect_file
-
-        self.src_process_pid = None
-        self.dst_process_pid = None
 
         self.start_time = None
         self.elasped_time = None
@@ -76,7 +76,6 @@ class TrafficFlow(threading.Thread):
                 time.sleep(sleep_for)
             elif self.type == TRAFFIC_FLOW_EXPONENTIAL:
                 sleep_for = random.expovariate(1.0/self.inter_flow_period)
-                print "sleep_for:", sleep_for
                 time.sleep(sleep_for)
             elif self.type == TRAFFIC_FLOW_ONE_SHOT:
                 break
@@ -84,12 +83,18 @@ class TrafficFlow(threading.Thread):
                 print "Invalid traffic flow type"
                 raise Exception
 
-    def setup_server(self):
+    def start_server(self):
 
         # Start the server
-        result = self.dst_mn_node.cmd(self.server_process_cmd)
+        result = self.dst_mn_node.cmd(self.server_process_start_cmd)
         print result
 
+    def stop_server(self):
+
+        # Stop the server
+        result = self.dst_mn_node.cmd(self.server_process_stop_cmd)
+        print result
+        
     def run(self):
 
         print "Starting thread..."
@@ -100,9 +105,12 @@ class TrafficFlow(threading.Thread):
         time.sleep(self.offset)
 
         # Start the server process
-        self.setup_server()
+        self.start_server()
 
         # Wait a second before starting the client loop
         time.sleep(1)
 
         self.client_loop()
+        
+        # Kill the server process
+        self.stop_server()

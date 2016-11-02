@@ -51,7 +51,7 @@ class Main:
 
     def start_background_traffic(self):
         traffic_flows = [
-            TrafficFlow(type=TRAFFIC_FLOW_EXPONENTIAL,
+            TrafficFlow(type=TRAFFIC_FLOW_PERIODIC,
                         offset=5,
                         inter_flow_period=1,
                         run_time=self.run_time,
@@ -59,7 +59,8 @@ class Main:
                         dst_mn_node=self.network_configuration.mininet_obj.get("h2"),
                         root_user_name="ubuntu",
                         root_password="ubuntu",
-                        server_process_cmd='/usr/sbin/sshd -D&',
+                        server_process_start_cmd='/usr/sbin/sshd -D&',
+                        server_process_stop_cmd='sudo killall sshd',
                         client_expect_file=self.base_dir + '/src/cyber_network/ssh_session.expect'),
 
             TrafficFlow(type=TRAFFIC_FLOW_EXPONENTIAL,
@@ -70,7 +71,8 @@ class Main:
                         dst_mn_node=self.network_configuration.mininet_obj.get("h4"),
                         root_user_name="ubuntu",
                         root_password="ubuntu",
-                        server_process_cmd='/usr/sbin/sshd -D&',
+                        server_process_start_cmd='/usr/sbin/sshd -D&',
+                        server_process_stop_cmd='sudo killall sshd',
                         client_expect_file=self.base_dir + '/src/cyber_network/ssh_session.expect')
         ]
 
