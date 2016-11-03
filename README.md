@@ -6,7 +6,8 @@ Anomaly Detection Purposes.
 Dependencies:
 
 #python-httplib2
-#ryu
+#python-ryu-4.0 or above
+#ryu-bin and ryu-manager
 #python 2.7
 ```
 
@@ -15,6 +16,9 @@ Pre-Run Steps:
 
 - Install expect
     - sudo apt-get install expect
+
+- Disable firewall (if any)
+    sudo ufw disable
     
 - Install shared buffer python IPC (for python 2.7)
     - cd NetPower_Testbed/src/Proxy/libs

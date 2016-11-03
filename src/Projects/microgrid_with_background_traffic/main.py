@@ -108,11 +108,13 @@ class Main:
 
             host_py_script = self.proxy_dir + "/host.py"
             cmd_to_run = "python " + str(host_py_script) + " -c " + self.node_mappings_file_path + " -l " + host_log_file + " -r " + str(self.run_time) \
-                         + " -n " + str(self.project_name) + " -d " + str(host_id) + " &"
+                         + " -n " + str(self.project_name) + " -d " + str(host_id)
 
             if "controller" in host_role :
                 cmd_to_run = cmd_to_run + " -i"
                 self.control_node_id = host_id
+
+            cmd_to_run = cmd_to_run + " >> " + host_log_file + " 2>&1" + " &"
             print "Starting cmd for host: " + str(mininet_host.name) + " at " + str(datetime.datetime.now())
             mininet_host.cmd(cmd_to_run)
 
@@ -184,7 +186,7 @@ def main():
                                                         ],                       
                                                  project_name="microgrid_with_background_traffic",
                                                  run_time=10,
-                                                 power_simulator_ip="10.0.60.16"
+                                                 power_simulator_ip="127.0.0.1"
                                                  )
 
     exp = Main(network_configuration)

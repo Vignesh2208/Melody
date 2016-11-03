@@ -7,6 +7,7 @@ import logger
 from logger import Logger
 from defines import *
 import socket
+import Queue
 
 
 class basicNetworkServiceLayer(threading.Thread) :
@@ -34,19 +35,6 @@ class basicNetworkServiceLayer(threading.Thread) :
 		return self.attackLayer
 
 
-	def sendUDPMsg(self,pkt,IPAddr,Port) :
-		UDP_IP = IPAddr
-		UDP_PORT = Port
-		MESSAGE = str(pkt)
-		self.log.info("<SEND> TO: " + str(UDP_IP)  + ":" + str(UDP_PORT) + " FROM: " + str(self.hostID) + " PKT: " + str(MESSAGE))
-		sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # UDP
-		sock.sendto(MESSAGE, (UDP_IP, UDP_PORT))
-
-	def txPkt(self,pkt,dstNodeID) :
-		if dstNodeID in self.IPMap.keys() :
-			IPAddr,Port = self.IPMap[dstNodeID]
-			self.sendUDPMsg(pkt,IPAddr,Port)
-
 	def getcurrCmd(self) :
 		self.threadCmdLock.acquire()
 		try :
@@ -62,11 +50,8 @@ class basicNetworkServiceLayer(threading.Thread) :
 		self.threadCmdLock.release()
 
 
-	def onRxPktFromAttackLayer(self,pkt,dstNodeID):
-		self.txPkt(pkt,dstNodeID)
-
 	def onRxPktFromNetwork(self,pkt):
-		self.attackLayer.onRxPktFromNetworkLayer(pkt)
+		self.attackLayer.runOnThread(self.attackLayer.onRxPktFromNetworkLayer,pkt)
 
 
 	def run(self) :

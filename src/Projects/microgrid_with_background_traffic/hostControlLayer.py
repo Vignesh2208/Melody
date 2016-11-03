@@ -8,6 +8,7 @@ from Proxy.logger import Logger
 from Proxy.defines import *
 from Proxy.basicHostIPCLayer import basicHostIPCLayer
 from datetime import datetime
+import time
 
 class hostControlLayer(basicHostIPCLayer) :
 
@@ -19,21 +20,21 @@ class hostControlLayer(basicHostIPCLayer) :
 	# are mapped to the given cyber node (int). It returns None if the
 	# mapping does not exist.
 	def getPowerSimIDsforNode(self, cyberNodeID):
-		return basicHostIPCLayer.getPowerSimIDsforNode(cyberNodeID)
+		return basicHostIPCLayer.getPowerSimIDsforNode(self,cyberNodeID)
 
 	# Returns the cyber node id (int) when given a power sim node id (string)
 	# If the mapping does not exist, it returns None
 	def getCyberNodeIDforNode(self, powerSimNodeID):
-		return basicHostIPCLayer.getCyberNodeIDforNode(powerSimNodeID)
+		return basicHostIPCLayer.getCyberNodeIDforNode(self,powerSimNodeID)
 
 
 	# Returns the power sim id present in the pkt (string)
 	def extractPowerSimIdFromPkt(self, pkt):
-		return basicHostIPCLayer.extractPowerSimIdFromPkt(pkt)
+		return basicHostIPCLayer.extractPowerSimIdFromPkt(self,pkt)
 
 	# Returns the payload present in the pkt (string)
 	def extractPayloadFromPkt(self, pkt):
-		return basicHostIPCLayer.extractPayloadFromPkt(pkt)
+		return basicHostIPCLayer.extractPayloadFromPkt(self,pkt)
 
 
 	# transmits to power simulator 
@@ -41,35 +42,32 @@ class hostControlLayer(basicHostIPCLayer) :
 	# 	powerSimNodeID (string)
 	#   payload (string)
 	def txPktToPowerSim(self,powerSimNodeID,payload) :
-		cyberNodeID = self.getCyberNodeIDforNode(powerSimNodeID)
-		txpkt = '%10d%s%s'% (len(powerSimNodeID),powerSimNodeID,payload)
-		self.attackLayer.onRxPktFromIPCLayer(txpkt,cyberNodeID)
+		return basicHostIPCLayer.txPktToPowerSim(self,powerSimNodeID,payload)
+
 
 	# Callback on each received pkt from Attack layer.
 	# Arguments:
 	#   pkt - full pkt including powerSimID(string)
 	def onRxPktFromAttackLayer(self,pkt):
 		# process the pkt here
-		self.log.info("%s  %s"%datetime.now(), pkt)
+		self.log.info("Recv: at " + str(datetime.now())  + "Pkt = " + str(pkt))
 		return None
+
+	def run(self):
+		self.log.info("Started control layer run")
+		self.lastSendTime = int(round(time.time()*1000))
+		return basicHostIPCLayer.run(self)
 
 		
 	
 	# Could be modified to implement specific control algorithms
-	def run(self) :
-
-		# Default Control Algorithm which does nothing specific
-		self.log.info("Started ...")
-		self.log.info("power sim id to host id map = " + str(self.powerSimIDtohostID))
-		assert(self.attackLayer != None)
-		while True :
-
-			currCmd = self.getcurrCmd()
-			if currCmd != None and currCmd == CMD_QUIT :
-				self.log.info("Stopping ...")
-				break
-
-			# Put control logic here
+	# Function called repeatedly
+	def idle(self) :
+		# Put control logic here
+		currTime = int(round(time.time()*1000))
+		if currTime - self.lastSendTime >= 1000 :
+			self.txPktToPowerSim("2","HelloWorld!")
+			self.lastSendTime = currTime
 
 
 

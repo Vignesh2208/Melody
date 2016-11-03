@@ -30,26 +30,6 @@ class proxyNetworkServiceLayer(threading.Thread) :
 			for powerSimId in powerSimIdSet:
 				self.powerSimIDtohostID[powerSimId] = hostID
 
-	def sendUDPMsg(self,pkt,IPAddr,Port) :
-		UDP_IP = IPAddr
-		UDP_PORT = Port
-		MESSAGE = str(pkt)
-		self.log.info("<SEND> TO: " + str(UDP_IP) + ":" + str(UDP_PORT) + " FROM: " + str(self.powerSimIP) + " PKT: " + str(MESSAGE))
-		sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # UDP
-		sock.sendto(MESSAGE, (UDP_IP, UDP_PORT))
-
-	def txPktPowerSim(self,pkt) :
-		self.sendUDPMsg(pkt,self.powerSimIP,POWERSIM_UDP_PORT)
-
-	def rxPktPowerSim(self) :
-		pkt = None
-		self.NetLayerRxLock.acquire()
-		try:
-			pkt = self.NetLayerRxBuffer.pop()
-		except:
-			pkt = None
-		self.NetLayerRxLock.release()
-		return pkt
 
 
 	def getcurrCmd(self) :
@@ -86,7 +66,7 @@ class proxyNetworkServiceLayer(threading.Thread) :
 					data = None
 
 				if data != None :
-					self.log.info("<RECV> TO: A HOST" + " FROM: " + str(addr) + " PKT: " + str(data))
+					self.log.info("<RECV PKT> FROM: " + str(addr) + " PKT: " + str(data))
 					self.NetLayerRxLock.acquire()
 					self.NetLayerRxBuffer.append(str(data))
 					self.NetLayerRxLock.release()

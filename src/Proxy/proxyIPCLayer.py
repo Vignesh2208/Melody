@@ -37,21 +37,6 @@ class proxyIPCLayer(threading.Thread) :
 	def setControlCenterID(self,controlCenterID):
 		self.controlCenterID = controlCenterID
 
-	def appendToTxBuffer(self,pkt) :
-		self.attkLayerTxLock.acquire()
-		self.attkLayerTxBuffer.append(pkt)
-		self.attkLayerTxLock.release()
-
-	def getReceivedMsg(self) :
-		pkt = None
-		self.attkLayerRxLock.acquire()
-		try :
-			dstID,pkt = self.attkLayerRxBuffer.pop()
-		except:
-			dstID = -1
-			pkt = None
-		self.attkLayerRxLock.release()
-		return dstID,pkt
 
 	def appendToRxBuffer(self,pkt) :
 		self.attkLayerRxLock.acquire()
@@ -124,7 +109,7 @@ class proxyIPCLayer(threading.Thread) :
 				finalDstID = self.extractFinalDstID(pktToSend)
 				ret = self.sharedBufferArray.write(dstHostBufName,pktToSend,finalDstID)
 				if ret > 0 :
-					self.log.info("Relaying pkt: " + str(pktToSend) + " To: " + str(finalDstID) + " via Host: " + str(dstID))
+					self.log.info("Relaying pkt: " + str(pktToSend) + " To Control Host: " + str(finalDstID) + " via Host: " + str(dstID))
 					pktToSend = None
 					dstID = None
 				

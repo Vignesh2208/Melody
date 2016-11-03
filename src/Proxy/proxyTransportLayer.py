@@ -6,6 +6,7 @@ import threading
 import logger
 from logger import Logger
 from defines import *
+import socket
 
 
 
@@ -16,21 +17,51 @@ class proxyTransportLayer(threading.Thread) :
 
 		self.threadCmdLock = threading.Lock()
 		self.threadCmdQueue = []
-		self.log = logger.Logger(logFile,"Proxy Attack Layer Thread")
+		self.log = logger.Logger(logFile,"Proxy Transport Layer Thread")
 		self.IPCLayer = IPCLayer
 		self.NetServiceLayer = NetworkServiceLayer
 
+	def sendUDPMsg(self, pkt, IPAddr, Port):
+		UDP_IP = IPAddr
+		UDP_PORT = Port
+		MESSAGE = str(pkt)
+		self.log.info(
+			"<SEND PKT> TO POWERSIM: " + str(UDP_IP) + ":" + str(UDP_PORT)  + " PKT= " + str(
+				MESSAGE))
+		sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP
+		sock.sendto(MESSAGE, (UDP_IP, UDP_PORT))
+
+
 	def txPowerSim(self,pkt) :
-		self.NetServiceLayer.txPktPowerSim(pkt)
+		self.sendUDPMsg(pkt, self.NetServiceLayer.powerSimIP, POWERSIM_UDP_PORT)
 
 	def rxPowerSim(self) :
-		return self.NetServiceLayer.rxPktPowerSim()	
+		pkt = None
+		self.NetServiceLayer.NetLayerRxLock.acquire()
+		try:
+			pkt = self.NetServiceLayer.NetLayerRxBuffer.pop()
+		except:
+			pkt = None
+		self.NetServiceLayer.NetLayerRxLock.release()
+		return pkt
 
 	def txIPCLayer(self,data) :
-		self.IPCLayer.appendToTxBuffer(data)
+		self.IPCLayer.attkLayerTxLock.acquire()
+		self.IPCLayer.attkLayerTxBuffer.append(data)
+		self.IPCLayer.attkLayerTxLock.release()
+
 
 	def rxIPCLayer(self) :
-		return self.IPCLayer.getReceivedMsg()
+		pkt = None
+		self.IPCLayer.attkLayerRxLock.acquire()
+		try:
+			dstID, pkt = self.IPCLayer.attkLayerRxBuffer.pop()
+		except:
+			dstID = -1
+			pkt = None
+		self.IPCLayer.attkLayerRxLock.release()
+		return dstID, pkt
+
 
 	def getcurrCmd(self) :
 		self.threadCmdLock.acquire()

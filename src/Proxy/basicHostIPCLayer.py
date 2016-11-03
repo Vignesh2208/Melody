@@ -6,6 +6,7 @@ import threading
 import logger
 from logger import Logger
 from defines import *
+import Queue
 
 
 class basicHostIPCLayer(threading.Thread) :
@@ -14,6 +15,9 @@ class basicHostIPCLayer(threading.Thread) :
 		threading.Thread.__init__(self)
 		
 		self.threadCmdLock = threading.Lock()
+		self.threadCallbackQueue = []
+		self.threadCallbackLock = threading.Lock()
+
 		self.threadCmdQueue = []
 		self.hostID = hostID
 		self.log = logger.Logger(logFile,"Host " + str(hostID) + " IPC Thread")
@@ -73,16 +77,20 @@ class basicHostIPCLayer(threading.Thread) :
 			return None
 
 	def onRxPktFromProxy(self,pkt,dstCyberNodeID) :
-		self.attackLayer.onRxPktFromIPCLayer(pkt,dstCyberNodeID)
+		self.attackLayer.runOnThread(self.attackLayer.onRxPktFromIPCLayer,pkt,dstCyberNodeID)
 
 
 	def onRxPktFromAttackLayer(self,pkt):
 		ret = 0
 		while ret <= 0 :
 			ret = self.sharedBuffer.write(pkt,PROXY_NODE_ID)
-			self.log.info("Relaying pkt: " + str(pkt) + " to Proxy")
+		self.log.info("Relaying pkt: " + str(pkt) + " to Proxy")
 
-
+	def txPktToPowerSim(self, powerSimNodeID, payload):
+		cyberNodeID = self.getCyberNodeIDforNode(powerSimNodeID)
+		powerSimNodeIDLen = str(len(powerSimNodeID))
+		txpkt = powerSimNodeIDLen.zfill(POWERSIM_ID_HDR_LEN) + powerSimNodeID + payload
+		self.attackLayer.runOnThread(self.attackLayer.onRxPktFromIPCLayer, txpkt, cyberNodeID)
 
 	def extractPowerSimIdFromPkt(self, pkt):
 
@@ -98,32 +106,46 @@ class basicHostIPCLayer(threading.Thread) :
 		return pkt[POWERSIM_ID_HDR_LEN + len(powerSimID):]
 
 
+	def runOnThread(self, function, *args):
+		self.threadCallbackLock.acquire()
+		if len(self.threadCallbackQueue) == 0 :
+			self.threadCallbackQueue.append((function, args))
+		else :
+			self.threadCallbackQueue[0] = (function, args)
+		self.threadCallbackLock.release()
+
 
 	def run(self) :
 
 		self.log.info("Started ...")
 		self.log.info("power sim id to host id map = " + str(self.powerSimIDtohostID))
+		self.log.info("host id to powersim id map = " + str(self.hostIDtoPowerSimID))
 		assert(self.attackLayer != None)
-		pktToSend = None
 		while True :
 
-			
-			recvPkt = None
 			currCmd = self.getcurrCmd()
 			if currCmd != None and currCmd == CMD_QUIT :
 				self.log.info("Stopping ...")
 				break
 
+			self.threadCallbackLock.acquire()
+			if len(self.threadCallbackQueue) == 0:
+				self.threadCallbackLock.release()
+			else:
+				function,args = self.threadCallbackQueue.pop()
+				self.threadCallbackLock.release()
 
-			dstCyberNodeID,recvPkt = self.sharedBuffer.read()
+				function(*args)
 
-			if len(recvPkt) != 0 :
-				self.log.info("Received pkt: " + str(recvPkt) + " from Proxy for Dst: " + str(dstCyberNodeID))
-				self.onRxPktFromProxy(recvPkt,dstCyberNodeID)
+			self.idle()
 
-				
+	def idle(self):
+		recvPkt = ""
+		dstCyberNodeID, recvPkt = self.sharedBuffer.read()
 
-
+		if len(recvPkt) != 0:
+			self.log.info("Received pkt: " + str(recvPkt) + " from Proxy for Dst Node Id =  " + str(dstCyberNodeID))
+			self.onRxPktFromProxy(recvPkt, dstCyberNodeID)
 
 
 
