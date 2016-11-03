@@ -51,7 +51,7 @@ class basicNetworkServiceLayer(threading.Thread) :
 
 
 	def onRxPktFromNetwork(self,pkt):
-		self.attackLayer.runOnThread(self.attackLayer.onRxPktFromNetworkLayer,pkt)
+		self.attackLayer.runOnThread(self.attackLayer.onRxPktFromNetworkLayer,extractPowerSimIdFromPkt(pkt),pkt)
 
 
 	def run(self) :
@@ -59,21 +59,23 @@ class basicNetworkServiceLayer(threading.Thread) :
 
 		self.log.info("Started listening on IP: " + self.hostIP + " PORT: " + str(self.listenPort))
 		assert(self.attackLayer != None)
+		sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP
+		#sock.settimeout(SOCKET_TIMEOUT)
+		sock.bind((self.hostIP, self.listenPort))
 
 		while True :
 			currCmd = self.getcurrCmd()
 			if currCmd != None and currCmd == CMD_QUIT :
 				self.log.info("Stopping ...")
-				break
-			sock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM) # UDP
-			sock.settimeout(SOCKET_TIMEOUT)
-			sock.bind((self.hostIP, self.listenPort))
-
-			try:
-				data, addr = sock.recvfrom(MAXPKTSIZE)
-			except socket.timeout:
-				data = None
 				sock.close()
+				break
+
+
+			#try:
+			data, addr = sock.recvfrom(MAXPKTSIZE)
+			#except socket.timeout:
+			#	data = None
+
 				 
 
 			if data != None :

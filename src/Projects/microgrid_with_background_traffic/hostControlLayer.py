@@ -66,7 +66,7 @@ class hostControlLayer(basicHostIPCLayer) :
 		# Put control logic here
 		currTime = int(round(time.time()*1000))
 		if currTime - self.lastSendTime >= 1000 :
-			self.txPktToPowerSim("2","HelloWorld!")
+			#self.txPktToPowerSim("2","HelloWorld!")
 			self.lastSendTime = currTime
 
 

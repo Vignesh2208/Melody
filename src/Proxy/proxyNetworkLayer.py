@@ -50,20 +50,22 @@ class proxyNetworkServiceLayer(threading.Thread) :
 	def run(self) :
 
 		self.log.info("Started listening on Port: " + str(PROXY_UDP_PORT))
+		sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP
+		#sock.settimeout(SOCKET_TIMEOUT)
+		sock.bind(('0.0.0.0', PROXY_UDP_PORT))
 		while True :
 			currCmd = self.getcurrCmd()
 			if currCmd != None and currCmd == CMD_QUIT :
 				self.log.info("Stopping ...")
+				sock.close()
 				break
 
 			if POWERSIM_TYPE == "POWER_WORLD" :
-				sock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM) # UDP
-				sock.settimeout(SOCKET_TIMEOUT)
-				sock.bind(('0.0.0.0', PROXY_UDP_PORT))
-				try:
-					data, addr = sock.recvfrom(MAXPKTSIZE)
-				except socket.timeout:
-					data = None
+
+				#try:
+				data, addr = sock.recvfrom(MAXPKTSIZE)
+				#except socket.timeout:
+				#	data = None
 
 				if data != None :
 					self.log.info("<RECV PKT> FROM: " + str(addr) + " PKT: " + str(data))

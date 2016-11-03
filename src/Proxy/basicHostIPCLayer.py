@@ -15,8 +15,9 @@ class basicHostIPCLayer(threading.Thread) :
 		threading.Thread.__init__(self)
 		
 		self.threadCmdLock = threading.Lock()
-		self.threadCallbackQueue = []
+		self.threadCallbackQueue = {}
 		self.threadCallbackLock = threading.Lock()
+		self.nPendingCallbacks = 0
 
 		self.threadCmdQueue = []
 		self.hostID = hostID
@@ -77,7 +78,7 @@ class basicHostIPCLayer(threading.Thread) :
 			return None
 
 	def onRxPktFromProxy(self,pkt,dstCyberNodeID) :
-		self.attackLayer.runOnThread(self.attackLayer.onRxPktFromIPCLayer,pkt,dstCyberNodeID)
+		self.attackLayer.runOnThread(self.attackLayer.onRxPktFromIPCLayer,extractPowerSimIdFromPkt(pkt),pkt,dstCyberNodeID)
 
 
 	def onRxPktFromAttackLayer(self,pkt):
@@ -90,28 +91,25 @@ class basicHostIPCLayer(threading.Thread) :
 		cyberNodeID = self.getCyberNodeIDforNode(powerSimNodeID)
 		powerSimNodeIDLen = str(len(powerSimNodeID))
 		txpkt = powerSimNodeIDLen.zfill(POWERSIM_ID_HDR_LEN) + powerSimNodeID + payload
-		self.attackLayer.runOnThread(self.attackLayer.onRxPktFromIPCLayer, txpkt, cyberNodeID)
+		self.attackLayer.runOnThread(self.attackLayer.onRxPktFromIPCLayer, powerSimNodeID, txpkt, cyberNodeID)
 
-	def extractPowerSimIdFromPkt(self, pkt):
-
-		powerSimID = "test"
-		if POWERSIM_TYPE == "POWER_WORLD":
-			powerSimIDLen = int(pkt[0:POWERSIM_ID_HDR_LEN])
-			powerSimID = str(pkt[POWERSIM_ID_HDR_LEN:POWERSIM_ID_HDR_LEN + powerSimIDLen])
-
-		return powerSimID
 
 	def extractPayloadFromPkt(self,pkt) :
 		powerSimID = self.extractPowerSimIdFromPkt(pkt) 
 		return pkt[POWERSIM_ID_HDR_LEN + len(powerSimID):]
 
 
-	def runOnThread(self, function, *args):
+	def runOnThread(self, function, powerSimNodeID, *args):
 		self.threadCallbackLock.acquire()
-		if len(self.threadCallbackQueue) == 0 :
-			self.threadCallbackQueue.append((function, args))
+		if powerSimNodeID not in self.threadCallbackQueue.keys() :
+			self.threadCallbackQueue[powerSimNodeID] = []
+			self.threadCallbackQueue[powerSimNodeID].append((function, args))
 		else :
-			self.threadCallbackQueue[0] = (function, args)
+			if len(self.threadCallbackQueue[powerSimNodeID]) == 0 :
+				self.threadCallbackQueue[powerSimNodeID].append((function, args))
+			else:
+				self.threadCallbackQueue[powerSimNodeID][0] = (function, args)
+		self.nPendingCallbacks = self.nPendingCallbacks + 1
 		self.threadCallbackLock.release()
 
 
@@ -128,14 +126,22 @@ class basicHostIPCLayer(threading.Thread) :
 				self.log.info("Stopping ...")
 				break
 
+			callbackFns = []
 			self.threadCallbackLock.acquire()
-			if len(self.threadCallbackQueue) == 0:
+			if self.nPendingCallbacks == 0:
 				self.threadCallbackLock.release()
 			else:
-				function,args = self.threadCallbackQueue.pop()
+
+				values = list(self.threadCallbackQueue.values())
+				for i in xrange(0, len(values)):
+					if len(values[i]) > 0:
+						callbackFns.append(values[i].pop())
+				self.nPendingCallbacks = 0
 				self.threadCallbackLock.release()
 
-				function(*args)
+				for i in xrange(0, len(callbackFns)):
+					function, args = callbackFns[i]
+					function(*args)
 
 			self.idle()
 

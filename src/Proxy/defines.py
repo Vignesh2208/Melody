@@ -20,3 +20,13 @@ DEFAULT_HOST_UDP_PORT = 5100  #Every network simulated node listens on this port
 DEFAULT_POWERSIM_IP = "127.0.0.1"
 POWERSIM_TYPE = "POWER_WORLD" # POWER_WORLD/RTDS
 POWERSIM_ID_HDR_LEN = 10      # 10 characters for holding the length of power sim id. currently only used for power world
+
+
+def extractPowerSimIdFromPkt(pkt):
+
+	powerSimID = "test"
+	if POWERSIM_TYPE == "POWER_WORLD":
+		powerSimIDLen = int(pkt[0:POWERSIM_ID_HDR_LEN])
+		powerSimID = str(pkt[POWERSIM_ID_HDR_LEN:POWERSIM_ID_HDR_LEN + powerSimIDLen])
+
+	return powerSimID

@@ -5,6 +5,7 @@ import os
 import threading
 import logger
 from logger import Logger
+
 from defines import *
 import Queue
 import socket
@@ -20,8 +21,9 @@ class basicHostAttackLayer(threading.Thread) :
 		self.threadCmdLock = threading.Lock()
 
 		self.threadCmdQueue = []
-		self.threadCallbackQueue = []
+		self.threadCallbackQueue = {}
 		self.threadCallbackLock = threading.Lock()
+		self.nPendingCallbacks = 0
 
 		self.hostID = hostID
 		self.log = logger.Logger(logFile,"Host " + str(hostID) + " Attack Layer Thread")
@@ -61,23 +63,27 @@ class basicHostAttackLayer(threading.Thread) :
 		self.txPkt(pkt,dstNodeID)
 
 	def txAsyncIPCLayer(self,pkt) :
-		self.IPCLayer.runOnThread(self.IPCLayer.onRxPktFromAttackLayer,pkt)
+		self.IPCLayer.runOnThread(self.IPCLayer.onRxPktFromAttackLayer,extractPowerSimIdFromPkt(pkt),pkt)
 
 	# default - benign Attack Layer
 	def onRxPktFromNetworkLayer(self, pkt):
-		self.IPCLayer.runOnThread(self.IPCLayer.onRxPktFromAttackLayer,pkt)
+		self.IPCLayer.runOnThread(self.IPCLayer.onRxPktFromAttackLayer,extractPowerSimIdFromPkt(pkt),pkt)
 
 	# default - benign Attack Layer
 	def onRxPktFromIPCLayer(self, pkt, dstNodeID):
 		self.txAsyncNetServiceLayer(pkt, dstNodeID)
 
-
-	def runOnThread(self, function, *args):
+	def runOnThread(self, function, powerSimNodeID, *args):
 		self.threadCallbackLock.acquire()
-		if len(self.threadCallbackQueue) == 0:
-			self.threadCallbackQueue.append((function, args))
+		if powerSimNodeID not in self.threadCallbackQueue.keys():
+			self.threadCallbackQueue[powerSimNodeID] = []
+			self.threadCallbackQueue[powerSimNodeID].append((function, args))
 		else:
-			self.threadCallbackQueue[0] = (function, args)
+			if len(self.threadCallbackQueue[powerSimNodeID]) == 0:
+				self.threadCallbackQueue[powerSimNodeID].append((function, args))
+			else :
+				self.threadCallbackQueue[powerSimNodeID][0] = (function, args)
+		self.nPendingCallbacks = self.nPendingCallbacks + 1
 		self.threadCallbackLock.release()
 
 
@@ -96,13 +102,22 @@ class basicHostAttackLayer(threading.Thread) :
 				self.log.info("Stopping ...")
 				break
 
+			callbackFns = []
 			self.threadCallbackLock.acquire()
-			if len(self.threadCallbackQueue) == 0:
+			if self.nPendingCallbacks == 0:
 				self.threadCallbackLock.release()
 			else:
-				function, args = self.threadCallbackQueue.pop()
+
+				values = list(self.threadCallbackQueue.values())
+				for i in xrange(0,len(values)) :
+					if len(values[i]) > 0 :
+						callbackFns.append(values[i].pop())
+				self.nPendingCallbacks = 0
 				self.threadCallbackLock.release()
-				function(*args)
+
+				for i in xrange(0,len(callbackFns)) :
+					function,args = callbackFns[i]
+					function(*args)
 
 			self.idle()
 

@@ -181,8 +181,8 @@ def main():
                                                          ("controller_node",["control;1"]),
                                                          ("pilot_buses_set_1",["2","25","29"]),
                                                          ("pilot_buses_set_2",["22","23","19"]),
-                                                         ("pilot_buses_set_3",["20","10","6","9"]),
-                                                         ("generator",["30;1","31;1","32;1","33;1","34;1","35;1","36;1","37;1","38;1","39;1"])
+                                                         ("pilot_buses_set_3",["20","10","6"]),
+                                                         ("generator",["9","30;1","31;1","32;1","33;1","34;1","35;1","36;1","37;1","38;1","39;1"])
                                                         ],                       
                                                  project_name="microgrid_with_background_traffic",
                                                  run_time=10,
