@@ -60,7 +60,7 @@ class basicNetworkServiceLayer(threading.Thread) :
 		self.log.info("Started listening on IP: " + self.hostIP + " PORT: " + str(self.listenPort))
 		assert(self.attackLayer != None)
 		sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP
-		#sock.settimeout(SOCKET_TIMEOUT)
+		sock.settimeout(SOCKET_TIMEOUT)
 		sock.bind((self.hostIP, self.listenPort))
 
 		while True :
@@ -71,10 +71,10 @@ class basicNetworkServiceLayer(threading.Thread) :
 				break
 
 
-			#try:
-			data, addr = sock.recvfrom(MAXPKTSIZE)
-			#except socket.timeout:
-			#	data = None
+			try:
+				data, addr = sock.recvfrom(MAXPKTSIZE)
+			except socket.timeout:
+				data = None
 
 				 
 

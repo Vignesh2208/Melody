@@ -118,6 +118,28 @@ class Main:
             print "Starting cmd for host: " + str(mininet_host.name) + " at " + str(datetime.datetime.now())
             mininet_host.cmd(cmd_to_run)
 
+    def start_switch_link_pkt_captures(self):
+        print "Starting wireshark capture on switches ..."
+
+        for i in range(len(self.network_configuration.mininet_obj.links)):
+            mininet_link = self.network_configuration.mininet_obj.links[i]
+            switchIntfs = mininet_link.intf1
+            capture_cmd = "sudo tshark"
+
+            if mininet_link.intf1.name.startswith("s") and mininet_link.intf2.name.startswith("s") :
+
+                capture_log_file = self.log_dir  + "/" + mininet_link.intf1.name + "-" + mininet_link.intf2.name + ".pcap"
+                with open(capture_log_file,"w") as f :
+                    pass
+
+
+                capture_cmd = capture_cmd + " -i "  + str(switchIntfs.name)
+                capture_cmd = capture_cmd + " -w " + capture_log_file + " &"
+                os.system(capture_cmd)
+
+
+
+
     def start_proxy_process(self):
 
         print "Starting Proxy Process at " + str(datetime.datetime.now())
@@ -147,6 +169,7 @@ class Main:
 
         # self.start_background_traffic()
         self.start_host_processes()
+        self.start_switch_link_pkt_captures()
         self.start_proxy_process()
         self.run()
 
@@ -185,7 +208,7 @@ def main():
                                                          ("generator",["9","30;1","31;1","32;1","33;1","34;1","35;1","36;1","37;1","38;1","39;1"])
                                                         ],                       
                                                  project_name="microgrid_with_background_traffic",
-                                                 run_time=10,
+                                                 run_time=60,
                                                  power_simulator_ip="127.0.0.1"
                                                  )
 
