@@ -185,8 +185,8 @@ def main():
                                                          ("generator",["9","30;1","31;1","32;1","33;1","34;1","35;1","36;1","37;1","38;1","39;1"])
                                                         ],                       
                                                  project_name="microgrid_with_background_traffic",
-                                                 run_time=10,
-                                                 power_simulator_ip="127.0.0.1"
+                                                 run_time=60,
+                                                 power_simulator_ip="10.0.60.16"
                                                  )
 
     exp = Main(network_configuration)

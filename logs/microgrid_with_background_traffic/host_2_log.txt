@@ -1,47 +1,171 @@
 Host 2 Network Layer Thread >> INFO >> Started listening on IP: 10.0.0.2 PORT: 5100
 Host 2 Attack Layer Thread >> INFO >> Started ...
 Host 2 IPC Thread >> INFO >> Started ...
-Host 2 IPC Thread >> INFO >> power sim id to host id map = {'34;1': 5, '25': 2, '20': 4, '37;1': 5, '22': 3, '23': 3, '19': 3, '36;1': 5, '29': 2, '35;1': 5, 'control;1': 1, '2': 2, '30;1': 5, '6': 4, '9': 4, '39;1': 5, '33;1': 5, '32;1': 5, '31;1': 5, '38;1': 5, '10': 4}
-Host 2 IPC Thread >> INFO >> host id to powersim id map = {1: ['control;1'], 2: ['2', '25', '29'], 3: ['22', '23', '19'], 4: ['20', '10', '6', '9'], 5: ['30;1', '31;1', '32;1', '33;1', '34;1', '35;1', '36;1', '37;1', '38;1', '39;1']}
+Host 2 IPC Thread >> INFO >> power sim id to host id map = {'34;1': 5, '25': 2, '20': 4, '37;1': 5, '22': 3, '23': 3, '19': 3, '36;1': 5, '29': 2, '35;1': 5, 'control;1': 1, '2': 2, '30;1': 5, '6': 4, '9': 5, '39;1': 5, '33;1': 5, '32;1': 5, '31;1': 5, '38;1': 5, '10': 4}
+Host 2 IPC Thread >> INFO >> host id to powersim id map = {1: ['control;1'], 2: ['2', '25', '29'], 3: ['22', '23', '19'], 4: ['20', '10', '6'], 5: ['9', '30;1', '31;1', '32;1', '33;1', '34;1', '35;1', '36;1', '37;1', '38;1', '39;1']}
 Host 2 IPC Thread >> INFO >> Received pkt: 000000000121.05150549 from Proxy for Dst Node Id =  1
 Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 000000000121.05150549
-Host 2 Network Layer Thread >> INFO >> <RECV> TO: 2 FROM: ('10.0.0.1', 35028) PKT: 00000000012HelloWorld!
-Host 2 IPC Thread >> INFO >> Relaying pkt: 00000000012HelloWorld! to Proxy
-Host 2 IPC Thread >> INFO >> Received pkt: 000000000121.05150549 from Proxy for Dst Node Id =  1
-Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 000000000121.05150549
-Host 2 Network Layer Thread >> INFO >> <RECV> TO: 2 FROM: ('10.0.0.1', 45509) PKT: 00000000012HelloWorld!
-Host 2 IPC Thread >> INFO >> Relaying pkt: 00000000012HelloWorld! to Proxy
-Host 2 IPC Thread >> INFO >> Received pkt: 000000000121.05150549 from Proxy for Dst Node Id =  1
-Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 000000000121.05150549
-Host 2 Network Layer Thread >> INFO >> <RECV> TO: 2 FROM: ('10.0.0.1', 59750) PKT: 00000000012HelloWorld!
-Host 2 IPC Thread >> INFO >> Relaying pkt: 00000000012HelloWorld! to Proxy
-Host 2 IPC Thread >> INFO >> Received pkt: 000000000121.05150549 from Proxy for Dst Node Id =  1
-Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 000000000121.05150549
-Host 2 Network Layer Thread >> INFO >> <RECV> TO: 2 FROM: ('10.0.0.1', 36547) PKT: 00000000012HelloWorld!
-Host 2 IPC Thread >> INFO >> Relaying pkt: 00000000012HelloWorld! to Proxy
-Host 2 IPC Thread >> INFO >> Received pkt: 000000000121.05150549 from Proxy for Dst Node Id =  1
-Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 000000000121.05150549
-Host 2 Network Layer Thread >> INFO >> <RECV> TO: 2 FROM: ('10.0.0.1', 35492) PKT: 00000000012HelloWorld!
-Host 2 IPC Thread >> INFO >> Relaying pkt: 00000000012HelloWorld! to Proxy
-Host 2 IPC Thread >> INFO >> Received pkt: 000000000121.05150549 from Proxy for Dst Node Id =  1
-Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 000000000121.05150549
-Host 2 Network Layer Thread >> INFO >> <RECV> TO: 2 FROM: ('10.0.0.1', 47881) PKT: 00000000012HelloWorld!
-Host 2 IPC Thread >> INFO >> Relaying pkt: 00000000012HelloWorld! to Proxy
-Host 2 IPC Thread >> INFO >> Received pkt: 000000000121.05150549 from Proxy for Dst Node Id =  1
-Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 000000000121.05150549
-Host 2 Network Layer Thread >> INFO >> <RECV> TO: 2 FROM: ('10.0.0.1', 59025) PKT: 00000000012HelloWorld!
-Host 2 IPC Thread >> INFO >> Relaying pkt: 00000000012HelloWorld! to Proxy
-Host 2 IPC Thread >> INFO >> Received pkt: 000000000121.05150549 from Proxy for Dst Node Id =  1
-Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 000000000121.05150549
-Host 2 Network Layer Thread >> INFO >> <RECV> TO: 2 FROM: ('10.0.0.1', 42497) PKT: 00000000012HelloWorld!
-Host 2 IPC Thread >> INFO >> Relaying pkt: 00000000012HelloWorld! to Proxy
-Host 2 IPC Thread >> INFO >> Received pkt: 000000000121.05150549 from Proxy for Dst Node Id =  1
-Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 000000000121.05150549
-Host 2 Network Layer Thread >> INFO >> <RECV> TO: 2 FROM: ('10.0.0.1', 57181) PKT: 00000000012HelloWorld!
-Host 2 IPC Thread >> INFO >> Relaying pkt: 00000000012HelloWorld! to Proxy
-Host 2 IPC Thread >> INFO >> Received pkt: 000000000121.05150549 from Proxy for Dst Node Id =  1
-Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 000000000121.05150549
+Host 2 IPC Thread >> INFO >> Received pkt: 0000000002251.05284111 from Proxy for Dst Node Id =  1
+Host 2 IPC Thread >> INFO >> Received pkt: 0000000002291.04719347 from Proxy for Dst Node Id =  1
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 0000000002251.05284111
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 0000000002291.04719347
+Host 2 IPC Thread >> INFO >> Received pkt: 000000000121.04868719 from Proxy for Dst Node Id =  1
+Host 2 IPC Thread >> INFO >> Received pkt: 0000000002250.99919652 from Proxy for Dst Node Id =  1
+Host 2 IPC Thread >> INFO >> Received pkt: 0000000002291.03682165 from Proxy for Dst Node Id =  1
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 0000000002250.99919652
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 000000000121.04868719
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 0000000002291.03682165
+Host 2 IPC Thread >> INFO >> Received pkt: 000000000121.1295655 from Proxy for Dst Node Id =  1
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 000000000121.1295655
+Host 2 IPC Thread >> INFO >> Received pkt: 0000000002251.09642812 from Proxy for Dst Node Id =  1
+Host 2 IPC Thread >> INFO >> Received pkt: 0000000002291.06319686 from Proxy for Dst Node Id =  1
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 0000000002251.09642812
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 0000000002291.06319686
+Host 2 IPC Thread >> INFO >> Received pkt: 000000000121.11542559 from Proxy for Dst Node Id =  1
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 000000000121.11542559
+Host 2 IPC Thread >> INFO >> Received pkt: 0000000002251.10302814 from Proxy for Dst Node Id =  1
+Host 2 IPC Thread >> INFO >> Received pkt: 0000000002291.06117273 from Proxy for Dst Node Id =  1
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 0000000002251.10302814
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 0000000002291.06117273
+Host 2 IPC Thread >> INFO >> Received pkt: 000000000121.05992012 from Proxy for Dst Node Id =  1
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 000000000121.05992012
+Host 2 IPC Thread >> INFO >> Received pkt: 0000000002251.06562217 from Proxy for Dst Node Id =  1
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 0000000002251.06562217
+Host 2 IPC Thread >> INFO >> Received pkt: 0000000002291.05352734 from Proxy for Dst Node Id =  1
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 0000000002291.05352734
+Host 2 IPC Thread >> INFO >> Received pkt: 000000000121.05993232 from Proxy for Dst Node Id =  1
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 000000000121.05993232
+Host 2 IPC Thread >> INFO >> Received pkt: 0000000002251.04701462 from Proxy for Dst Node Id =  1
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 0000000002251.04701462
+Host 2 IPC Thread >> INFO >> Received pkt: 0000000002291.04971911 from Proxy for Dst Node Id =  1
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 0000000002291.04971911
+Host 2 IPC Thread >> INFO >> Received pkt: 000000000121.05983725 from Proxy for Dst Node Id =  1
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 000000000121.05983725
+Host 2 IPC Thread >> INFO >> Received pkt: 0000000002251.05664426 from Proxy for Dst Node Id =  1
+Host 2 IPC Thread >> INFO >> Received pkt: 0000000002291.05169717 from Proxy for Dst Node Id =  1
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 0000000002251.05664426
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 0000000002291.05169717
+Host 2 IPC Thread >> INFO >> Received pkt: 000000000121.05983861 from Proxy for Dst Node Id =  1
+Host 2 IPC Thread >> INFO >> Received pkt: 0000000002251.06579166 from Proxy for Dst Node Id =  1
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 000000000121.05983861
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 0000000002251.06579166
+Host 2 IPC Thread >> INFO >> Received pkt: 0000000002291.05356478 from Proxy for Dst Node Id =  1
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 0000000002291.05356478
+Host 2 IPC Thread >> INFO >> Received pkt: 000000000121.05987017 from Proxy for Dst Node Id =  1
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 000000000121.05987017
+Host 2 IPC Thread >> INFO >> Received pkt: 0000000002251.06582029 from Proxy for Dst Node Id =  1
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 0000000002251.06582029
+Host 2 IPC Thread >> INFO >> Received pkt: 0000000002291.05357008 from Proxy for Dst Node Id =  1
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 0000000002291.05357008
+Host 2 IPC Thread >> INFO >> Received pkt: 000000000121.05988569 from Proxy for Dst Node Id =  1
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 000000000121.05988569
+Host 2 IPC Thread >> INFO >> Received pkt: 0000000002251.06583434 from Proxy for Dst Node Id =  1
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 0000000002251.06583434
+Host 2 IPC Thread >> INFO >> Received pkt: 0000000002291.0535727 from Proxy for Dst Node Id =  1
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 0000000002291.0535727
+Host 2 IPC Thread >> INFO >> Received pkt: 000000000121.05987782 from Proxy for Dst Node Id =  1
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 000000000121.05987782
+Host 2 IPC Thread >> INFO >> Received pkt: 0000000002251.06582703 from Proxy for Dst Node Id =  1
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 0000000002251.06582703
+Host 2 IPC Thread >> INFO >> Received pkt: 0000000002291.05357131 from Proxy for Dst Node Id =  1
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 0000000002291.05357131
+Host 2 IPC Thread >> INFO >> Received pkt: 000000000121.05987782 from Proxy for Dst Node Id =  1
+Host 2 IPC Thread >> INFO >> Received pkt: 0000000002251.06582703 from Proxy for Dst Node Id =  1
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 000000000121.05987782
+Host 2 IPC Thread >> INFO >> Received pkt: 0000000002291.05357131 from Proxy for Dst Node Id =  1
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 0000000002251.06582703
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 0000000002291.05357131
+Host 2 IPC Thread >> INFO >> Received pkt: 000000000121.0598622 from Proxy for Dst Node Id =  1
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 000000000121.0598622
+Host 2 IPC Thread >> INFO >> Received pkt: 0000000002251.06580925 from Proxy for Dst Node Id =  1
+Host 2 IPC Thread >> INFO >> Received pkt: 0000000002291.05356797 from Proxy for Dst Node Id =  1
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 0000000002251.06580925
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 0000000002291.05356797
+Host 2 IPC Thread >> INFO >> Received pkt: 000000000121.0598622 from Proxy for Dst Node Id =  1
+Host 2 IPC Thread >> INFO >> Received pkt: 0000000002251.06580925 from Proxy for Dst Node Id =  1
+Host 2 IPC Thread >> INFO >> Received pkt: 0000000002291.05356797 from Proxy for Dst Node Id =  1
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 0000000002251.06580925
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 000000000121.0598622
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 0000000002291.05356797
+Host 2 IPC Thread >> INFO >> Received pkt: 000000000121.0598622 from Proxy for Dst Node Id =  1
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 000000000121.0598622
+Host 2 IPC Thread >> INFO >> Received pkt: 0000000002251.06580925 from Proxy for Dst Node Id =  1
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 0000000002251.06580925
+Host 2 IPC Thread >> INFO >> Received pkt: 0000000002291.05356797 from Proxy for Dst Node Id =  1
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 0000000002291.05356797
+Host 2 IPC Thread >> INFO >> Received pkt: 000000000121.05987771 from Proxy for Dst Node Id =  1
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 000000000121.05987771
+Host 2 IPC Thread >> INFO >> Received pkt: 0000000002251.0658326 from Proxy for Dst Node Id =  1
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 0000000002251.0658326
+Host 2 IPC Thread >> INFO >> Received pkt: 0000000002291.05357235 from Proxy for Dst Node Id =  1
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 0000000002291.05357235
+Host 2 IPC Thread >> INFO >> Received pkt: 000000000121.05987771 from Proxy for Dst Node Id =  1
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 000000000121.05987771
+Host 2 IPC Thread >> INFO >> Received pkt: 0000000002251.0658326 from Proxy for Dst Node Id =  1
+Host 2 IPC Thread >> INFO >> Received pkt: 0000000002291.05357235 from Proxy for Dst Node Id =  1
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 0000000002251.0658326
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 0000000002291.05357235
+Host 2 IPC Thread >> INFO >> Received pkt: 000000000121.05986234 from Proxy for Dst Node Id =  1
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 000000000121.05986234
+Host 2 IPC Thread >> INFO >> Received pkt: 0000000002251.06581906 from Proxy for Dst Node Id =  1
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 0000000002251.06581906
+Host 2 IPC Thread >> INFO >> Received pkt: 0000000002291.05356986 from Proxy for Dst Node Id =  1
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 0000000002291.05356986
+Host 2 IPC Thread >> INFO >> Received pkt: 0000000002251.06581906 from Proxy for Dst Node Id =  1
+Host 2 IPC Thread >> INFO >> Received pkt: 0000000002291.05356986 from Proxy for Dst Node Id =  1
+Host 2 IPC Thread >> INFO >> Received pkt: 000000000121.05986234 from Proxy for Dst Node Id =  1
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 0000000002251.06581906
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 000000000121.05986234
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 0000000002291.05356986
+Host 2 IPC Thread >> INFO >> Received pkt: 000000000121.05986998 from Proxy for Dst Node Id =  1
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 000000000121.05986998
+Host 2 IPC Thread >> INFO >> Received pkt: 0000000002251.06581422 from Proxy for Dst Node Id =  1
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 0000000002251.06581422
+Host 2 IPC Thread >> INFO >> Received pkt: 0000000002291.05356886 from Proxy for Dst Node Id =  1
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 0000000002291.05356886
+Host 2 IPC Thread >> INFO >> Received pkt: 000000000121.05986998 from Proxy for Dst Node Id =  1
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 000000000121.05986998
+Host 2 IPC Thread >> INFO >> Received pkt: 0000000002251.06581422 from Proxy for Dst Node Id =  1
+Host 2 IPC Thread >> INFO >> Received pkt: 0000000002291.05356886 from Proxy for Dst Node Id =  1
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 0000000002251.06581422
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 0000000002291.05356886
+Host 2 IPC Thread >> INFO >> Received pkt: 000000000121.05986998 from Proxy for Dst Node Id =  1
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 000000000121.05986998
+Host 2 IPC Thread >> INFO >> Received pkt: 0000000002251.06581422 from Proxy for Dst Node Id =  1
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 0000000002251.06581422
+Host 2 IPC Thread >> INFO >> Received pkt: 0000000002291.05356886 from Proxy for Dst Node Id =  1
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 0000000002291.05356886
+Host 2 IPC Thread >> INFO >> Received pkt: 000000000121.05987386 from Proxy for Dst Node Id =  1
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 000000000121.05987386
+Host 2 IPC Thread >> INFO >> Received pkt: 0000000002251.06582913 from Proxy for Dst Node Id =  1
+Host 2 IPC Thread >> INFO >> Received pkt: 0000000002291.05357176 from Proxy for Dst Node Id =  1
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 0000000002251.06582913
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 0000000002291.05357176
+Host 2 IPC Thread >> INFO >> Received pkt: 000000000121.05987386 from Proxy for Dst Node Id =  1
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 000000000121.05987386
+Host 2 IPC Thread >> INFO >> Received pkt: 0000000002251.06582913 from Proxy for Dst Node Id =  1
+Host 2 IPC Thread >> INFO >> Received pkt: 0000000002291.05357176 from Proxy for Dst Node Id =  1
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 0000000002251.06582913
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 0000000002291.05357176
+Host 2 IPC Thread >> INFO >> Received pkt: 000000000121.05987386 from Proxy for Dst Node Id =  1
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 000000000121.05987386
+Host 2 IPC Thread >> INFO >> Received pkt: 0000000002251.06582913 from Proxy for Dst Node Id =  1
+Host 2 IPC Thread >> INFO >> Received pkt: 0000000002291.05357176 from Proxy for Dst Node Id =  1
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 0000000002251.06582913
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 0000000002291.05357176
+Host 2 IPC Thread >> INFO >> Received pkt: 000000000121.05986425 from Proxy for Dst Node Id =  1
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 000000000121.05986425
+Host 2 IPC Thread >> INFO >> Received pkt: 0000000002291.05356795 from Proxy for Dst Node Id =  1
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 0000000002291.05356795
+Host 2 IPC Thread >> INFO >> Received pkt: 0000000002251.0658092 from Proxy for Dst Node Id =  1
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 0000000002251.0658092
+Host 2 IPC Thread >> INFO >> Received pkt: 000000000121.05986425 from Proxy for Dst Node Id =  1
+Host 2 IPC Thread >> INFO >> Received pkt: 0000000002251.0658092 from Proxy for Dst Node Id =  1
+Host 2 IPC Thread >> INFO >> Received pkt: 0000000002291.05356795 from Proxy for Dst Node Id =  1
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 0000000002251.0658092
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 000000000121.05986425
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 0000000002291.05356795
+Host 2 IPC Thread >> INFO >> Received pkt: 000000000121.05986425 from Proxy for Dst Node Id =  1
+Host 2 Attack Layer Thread >> INFO >> <SEND PKT> TO: 10.0.0.1:5100 FROM: 2 PKT= 000000000121.05986425
 Host 2 IPC Thread >> INFO >> Stopping ...
 Host 2 Attack Layer Thread >> INFO >> Stopping ...
-Host 2 Network Layer Thread >> INFO >> Stopping ...
-Shutting Down Host  2
