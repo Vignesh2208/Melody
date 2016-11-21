@@ -9,6 +9,8 @@ Dependencies:
 #python-ryu-4.0 or above
 #ryu-bin and ryu-manager
 #python 2.7
+#numpy
+#pypcapfile
 ```
 
 ```
@@ -16,6 +18,12 @@ Pre-Run Steps:
 
 - Install expect
     - sudo apt-get install expect
+
+- Install numpy
+    - sudo pip install numpy
+
+- Install pypcapfile
+   - sudo pip install pypcapfile
 
 - Disable firewall (if any)
     sudo ufw disable

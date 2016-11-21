@@ -52,6 +52,7 @@ class hostAttackLayer(basicHostAttackLayer) :
 	#  Function called repeatedly.
 	def idle(self) :
 		# Put logic for specific attacks here.  Can be used to do Async sends to IPC and Network layers
+
 		pass
 
 

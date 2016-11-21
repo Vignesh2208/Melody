@@ -63,7 +63,7 @@ class controlLoopThread(threading.Thread) :
 			self.vg = np.array(self.vg + u)
 			for i in range(GEN_NO):
 				busnum, gid, voltsp = GEN_ID[i][0], GEN_ID[i][1], self.vg[i]
-				self.controlLayer.txPktToPowerSim("%d;%d"%(busnum,gid), str(voltsp))
+				#self.controlLayer.txPktToPowerSim("%d;%d"%(busnum,gid), str(voltsp))
 			# self.controlLayer.txPktToPowerSim("2","HelloWorld!")
 			time.sleep(0.5)
 
@@ -165,6 +165,13 @@ class hostControlLayer(basicHostIPCLayer) :
 			self.control_loop_thread_running = True
 
 
+		else:
+			recvPkt = ""
+			dstCyberNodeID, recvPkt = self.sharedBuffer.read()
+
+			if len(recvPkt) != 0:
+				self.log.info("Received pkt: " + str(recvPkt) + " from Proxy for Dst Node Id =  " + str(dstCyberNodeID))
+				self.onRxPktFromProxy(recvPkt, dstCyberNodeID)
 
 
 

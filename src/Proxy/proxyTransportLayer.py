@@ -20,6 +20,7 @@ class proxyTransportLayer(threading.Thread) :
 		self.log = logger.Logger(logFile,"Proxy Transport Layer Thread")
 		self.IPCLayer = IPCLayer
 		self.NetServiceLayer = NetworkServiceLayer
+		self.sendSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 	def sendUDPMsg(self, pkt, IPAddr, Port):
 		UDP_IP = IPAddr
@@ -28,8 +29,8 @@ class proxyTransportLayer(threading.Thread) :
 		self.log.info(
 			"<SEND PKT> TO POWERSIM: " + str(UDP_IP) + ":" + str(UDP_PORT)  + " PKT= " + str(
 				MESSAGE))
-		sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP
-		sock.sendto(MESSAGE, (UDP_IP, UDP_PORT))
+
+		self.sendSocket.sendto(MESSAGE, (UDP_IP, UDP_PORT))
 
 
 	def txPowerSim(self,pkt) :
@@ -78,19 +79,11 @@ class proxyTransportLayer(threading.Thread) :
 		self.threadCmdQueue.append(CMD_QUIT)
 		self.threadCmdLock.release()
 
-	def extractPowerSimIdFromPkt(self,pkt):
-
-		powerSimID = "test"
-		if POWERSIM_TYPE == "POWER_WORLD" :
-			powerSimIDLen = int(pkt[0:POWERSIM_ID_HDR_LEN])
-			powerSimID = str(pkt[POWERSIM_ID_HDR_LEN:POWERSIM_ID_HDR_LEN+powerSimIDLen])
-		return powerSimID
-
 
 	# Needs to be modified as Appropriate. It is used by the Proxy to determine the
 	# necessary shhared IPC Buffer to put the packet into
 	def extractSrcNodeID(self,rxPktPowerSim) :
-		powerSimId = self.extractPowerSimIdFromPkt(rxPktPowerSim)
+		powerSimId = extractPowerSimIdFromPkt(rxPktPowerSim)
 		try:
 			srcNodeID = self.IPCLayer.powerSimIDtohostID[powerSimId]
 		except Exception,e:

@@ -9,15 +9,15 @@ srcDir = scriptDir + "/.."
 if srcDir not in sys.path:
 	sys.path.append(srcDir)
 	
-import logger
+
 from logger import *
 from proxyNetworkLayer import proxyNetworkServiceLayer
 from proxyTransportLayer import proxyTransportLayer
 from proxyIPCLayer import proxyIPCLayer
 import time
 import getopt
-import traceback
-import signal
+import socket
+
 
 
 def extractIPMapping(netCfgFile) :

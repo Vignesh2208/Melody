@@ -2,6 +2,7 @@ import shared_buffer
 from shared_buffer import *
 import sys
 import os
+import socket
 import threading
 import logger
 from logger import Logger
@@ -34,6 +35,8 @@ class basicHostIPCLayer(threading.Thread) :
 		self.hostIDtoPowerSimID = None
 		self.powerSimIDtohostID = None
 		self.attackLayer = None
+		self.raw_sock = socket.socket(socket.AF_INET,socket.SOCK_RAW,socket.IPPROTO_RAW)
+		#self.raw_sock.setsockopt(socket.IPPROTO_IP, socket.IP_HDRINCL, 1)
 
 	def setAttackLayer(self,attackLayer):
 		self.attackLayer = attackLayer
@@ -78,7 +81,15 @@ class basicHostIPCLayer(threading.Thread) :
 			return None
 
 	def onRxPktFromProxy(self,pkt,dstCyberNodeID) :
-		self.attackLayer.runOnThread(self.attackLayer.onRxPktFromIPCLayer,extractPowerSimIdFromPkt(pkt),pkt,dstCyberNodeID)
+
+		if is_pkt_from_attack_dispatcher(pkt) == True :
+			payload = self.extractPayloadFromPkt(pkt)
+
+			src_ip,dst_ip = decode_raw_ip_payload_src_dst(str(payload))
+			self.log.info("Sending attack dispatcher packet : " + str(payload) + " to: " + dst_ip)
+			self.raw_sock.sendto(binascii.unhexlify(payload),(dst_ip,0))
+		else :
+			self.attackLayer.runOnThread(self.attackLayer.onRxPktFromIPCLayer,extractPowerSimIdFromPkt(pkt),pkt,dstCyberNodeID)
 
 
 	def onRxPktFromAttackLayer(self,pkt):
@@ -95,7 +106,7 @@ class basicHostIPCLayer(threading.Thread) :
 
 
 	def extractPayloadFromPkt(self,pkt) :
-		powerSimID = self.extractPowerSimIdFromPkt(pkt) 
+		powerSimID = extractPowerSimIdFromPkt(pkt)
 		return pkt[POWERSIM_ID_HDR_LEN + len(powerSimID):]
 
 

@@ -48,8 +48,7 @@ class Main:
 
                 outfile.write(lineTowrite)
 
-                #with open('node_mappings.json', 'w') as outfile:
-                #    json.dump(self.node_mappings, outfile)
+
 
     def start_background_traffic(self):
         traffic_flows = [
@@ -93,6 +92,8 @@ class Main:
         for tf in traffic_flows:
             tf.start()
 
+
+
         print "Background traffic threads started..."
 
     def start_host_processes(self):
@@ -124,12 +125,12 @@ class Main:
         for i in range(len(self.network_configuration.mininet_obj.links)):
             mininet_link = self.network_configuration.mininet_obj.links[i]
             switchIntfs = mininet_link.intf1
-            capture_cmd = "sudo tshark"
+            capture_cmd = "sudo tcpdump"
 
             if mininet_link.intf1.name.startswith("s") and mininet_link.intf2.name.startswith("s") :
 
                 capture_log_file = self.log_dir  + "/" + mininet_link.intf1.name + "-" + mininet_link.intf2.name + ".pcap"
-                with open(capture_log_file,"w") as f :
+                with open(capture_log_file , "w") as f :
                     pass
 
 
@@ -145,10 +146,18 @@ class Main:
         print "Starting Proxy Process at " + str(datetime.datetime.now())
         proxy_py_script = self.proxy_dir + "/proxy.py"
         proxy_log_file = self.log_dir + "/proxy_log.txt"
-        subprocess.Popen(['python',str(proxy_py_script),'-c',self.node_mappings_file_path,'-l',proxy_log_file,
-                          '-r',str(self.run_time),'-p',self.power_simulator_ip,'-d', str(self.control_node_id)])
-        #os.system("python " + str(proxy_py_script) + " -c " + self.node_mappings_file_path + " -l " + proxy_log_file \
-        #         + " -r " + str(self.run_time) + " -p " + self.power_simulator_ip + " -d " + str(self.control_node_id))
+        #subprocess.Popen(['python',str(proxy_py_script),'-c',self.node_mappings_file_path,'-l',proxy_log_file,
+        #                  '-r',str(self.run_time),'-p',self.power_simulator_ip,'-d', str(self.control_node_id)])
+        os.system("python " + str(proxy_py_script) + " -c " + self.node_mappings_file_path + " -l " + proxy_log_file \
+                 + " -r " + str(self.run_time) + " -p " + self.power_simulator_ip + " -d " + str(self.control_node_id) + " &")
+
+    def start_attack_dispatcher(self):
+        print "Starting Attack Dispatcher at " + str(datetime.datetime.now())
+        replay_pcap = self.script_dir + "/replay.pcap"
+
+        if os.path.isfile(replay_pcap) :
+            attack_dispatcher_script = self.proxy_dir + "/attack_dispatcher.py"
+            os.system("python " + str(attack_dispatcher_script) + " -c " + replay_pcap + " -l " + self.node_mappings_file_path + " -r " + str(self.run_time) + " &")
 
     def run(self):
         if self.run_time > 0:
@@ -167,10 +176,13 @@ class Main:
         ng = self.network_configuration.setup_network_graph(mininet_setup_gap=1, synthesis_setup_gap=1)
         self.generate_node_mappings(self.network_configuration.roles)
 
-        # self.start_background_traffic()
+        #self.start_background_traffic()
         self.start_host_processes()
         self.start_switch_link_pkt_captures()
         self.start_proxy_process()
+        print "Waiting for 5 secs for all processes to spawn up ..."
+        time.sleep(5)
+        self.start_attack_dispatcher()
         self.run()
 
         print "Stopping project..."
@@ -208,8 +220,7 @@ def main():
                                                          ("generator",["9","30;1","31;1","32;1","33;1","34;1","35;1","36;1","37;1","38;1","39;1"])
                                                         ],                       
                                                  project_name="microgrid_with_background_traffic",
-                                                 run_time=60,
-
+                                                 run_time=20,
                                                  power_simulator_ip="10.0.60.16"
                                                  )
 

@@ -30,6 +30,7 @@ class basicHostAttackLayer(threading.Thread) :
 		self.IPCLayer = IPCLayer
 		self.NetServiceLayer = NetworkServiceLayer
 
+		self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP
 	
 	def getcurrCmd(self) :
 		self.threadCmdLock.acquire()
@@ -51,8 +52,8 @@ class basicHostAttackLayer(threading.Thread) :
 		MESSAGE = str(pkt)
 		self.log.info(
 			"<SEND PKT> TO: " + str(UDP_IP) + ":" + str(UDP_PORT) + " FROM: " + str(self.hostID) + " PKT= " + str(MESSAGE))
-		sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP
-		sock.sendto(MESSAGE, (UDP_IP, UDP_PORT))
+
+		self.sock.sendto(MESSAGE, (UDP_IP, UDP_PORT))
 
 	def txPkt(self, pkt, dstNodeID):
 		if dstNodeID in self.NetServiceLayer.IPMap.keys():

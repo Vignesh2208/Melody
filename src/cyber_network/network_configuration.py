@@ -8,6 +8,8 @@ import fcntl
 import struct
 from socket import *
 
+from mininet.cli import CLI
+
 from itertools import permutations
 from collections import defaultdict
 from functools import partial
@@ -29,6 +31,7 @@ from cyber_network.synthesis.aborescene_synthesis import AboresceneSynthesis
 from cyber_network.synthesis.simple_mac_synthesis import SimpleMACSynthesis
 from cyber_network.synthesis.synthesis_lib import SynthesisLib
 from cyber_network.synthesis.flow_specification import FlowSpecification
+import subprocess
 
 
 class NetworkConfiguration(object):
@@ -170,10 +173,32 @@ class NetworkConfiguration(object):
             time.sleep(synthesis_setup_gap)
 
         if self.mininet_obj:
-            self.mininet_obj.pingAll()
+            #self.mininet_obj.pingAll()
             # full_data = self.mininet_obj.pingFull(hosts=[self.mininet_obj.get('h1'),
             #                                              self.mininet_obj.get('h2')])
             # print full_data
+
+            """
+            h1 = self.mininet_obj.get('h1')
+            h2 = self.mininet_obj.get('h2')
+
+            s1 = self.mininet_obj.get('s1')
+
+            cmd = "ping -c3 " + h2.IP()
+            output = h1.cmd(cmd)
+
+            macAddr = os.popen("ifconfig -a s1-eth1 | grep HWaddr | awk -F \' \' \'{print $5}\'").read().rstrip('\n')
+            #macAddr = str(proc.stdout.read())
+            os.system("sudo tcprewrite --enet-smac=" + str(macAddr) + " --infile=/home/ubuntu/Desktop/Workspace/NetPower_TestBed/test.pcap --outfile=/home/ubuntu/Desktop/Workspace/NetPower_TestBed/test2.pcap")
+
+            cmd = "sudo tcpreplay -i s1-eth1 /home/ubuntu/Desktop/Workspace/NetPower_TestBed/test2.pcap"
+            os.system(cmd)
+            #output = h1.cmd(cmd)
+
+            print "here"
+            """
+
+
 
     def get_ryu_switches(self):
         ryu_switches = {}
