@@ -106,3 +106,9 @@ target/
 
 #Ipython Notebook
 .ipynb_checkpoints
+
+#Editor
+.idea/
+
+#logs
+logs/microgrid_with_background_traffic/
