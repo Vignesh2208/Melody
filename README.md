@@ -11,6 +11,7 @@ Dependencies:
 #python 2.7
 #numpy
 #pypcapfile
+#openssh-server
 ```
 
 ```
@@ -24,6 +25,9 @@ Pre-Run Steps:
 
 - Install pypcapfile
    - sudo pip install pypcapfile
+
+- Install openssh-server
+   - sudo apt-get install openssh-server
 
 - Disable firewall (if any)
     sudo ufw disable
