@@ -7,6 +7,7 @@ import logger
 from logger import Logger
 from defines import *
 import socket
+from datetime import datetime
 
 
 class proxyNetworkServiceLayer(threading.Thread) :
@@ -68,7 +69,8 @@ class proxyNetworkServiceLayer(threading.Thread) :
 					data = None
 
 				if data != None :
-					self.log.info("<RECV PKT> FROM: " + str(addr) + " PKT: " + str(data))
+					self.log.info("%s  RECV_FROM=%s:%s  PKT=%s"%(datetime.now(), str(addr[0]), str(addr[1]), str(data)))
+					# self.log.info("<RECV PKT> FROM: " + str(addr) + " PKT: " + str(data))
 					self.NetLayerRxLock.acquire()
 					self.NetLayerRxBuffer.append(str(data))
 					self.NetLayerRxLock.release()

@@ -63,9 +63,9 @@ class controlLoopThread(threading.Thread) :
 			self.vg = np.array(self.vg + u)
 			for i in range(GEN_NO):
 				busnum, gid, voltsp = GEN_ID[i][0], GEN_ID[i][1], self.vg[i]
-				#self.controlLayer.txPktToPowerSim("%d;%d"%(busnum,gid), str(voltsp))
+				self.controlLayer.txPktToPowerSim("%d;%d"%(busnum,gid), str(voltsp))
 			# self.controlLayer.txPktToPowerSim("2","HelloWorld!")
-			time.sleep(0.5)
+			time.sleep(1.0)
 
 			
 class hostControlLayer(basicHostIPCLayer) :
@@ -113,7 +113,7 @@ class hostControlLayer(basicHostIPCLayer) :
 		busnum = int(pkt[10:10+idlen])
 		buspuvolt = float(pkt[10+idlen:])
 		self.vp[BUS_PILOT.index(busnum)] = buspuvolt
-		self.log.info("Recv: at " + str(datetime.now())  + "Pkt = " + str(pkt))
+		# self.log.info(str(datetime.now()) + "Recv:"  + "Pkt = " + str(pkt))
 		return None
 
 	def run(self):

@@ -7,7 +7,7 @@ import logger
 from logger import Logger
 from defines import *
 import socket
-
+from datetime import datetime
 
 
 class proxyTransportLayer(threading.Thread) :
@@ -26,9 +26,10 @@ class proxyTransportLayer(threading.Thread) :
 		UDP_IP = IPAddr
 		UDP_PORT = Port
 		MESSAGE = str(pkt)
-		self.log.info(
-			"<SEND PKT> TO POWERSIM: " + str(UDP_IP) + ":" + str(UDP_PORT)  + " PKT= " + str(
-				MESSAGE))
+		self.log.info("%s  SEND_TO=%s:%s  PKT=%s"%(datetime.now(), str(UDP_IP), str(UDP_PORT), str(MESSAGE)))
+		# self.log.info(
+		# 	"<SEND PKT> TO POWERSIM: " + str(UDP_IP) + ":" + str(UDP_PORT)  + " PKT= " + str(
+		# 		MESSAGE))
 
 		self.sendSocket.sendto(MESSAGE, (UDP_IP, UDP_PORT))
 

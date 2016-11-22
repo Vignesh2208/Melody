@@ -3,7 +3,27 @@ Host 4 Attack Layer Thread >> INFO >> Started ...
 Host 4 IPC Thread >> INFO >> Started ...
 Host 4 IPC Thread >> INFO >> power sim id to host id map = {'34;1': 5, '25': 2, '20': 4, '37;1': 5, '22': 3, '23': 3, '19': 3, '36;1': 5, '29': 2, '35;1': 5, 'control;1': 1, '2': 2, '30;1': 5, '6': 4, '9': 5, '39;1': 5, '33;1': 5, '32;1': 5, '31;1': 5, '38;1': 5, '10': 4}
 Host 4 IPC Thread >> INFO >> host id to powersim id map = {1: ['control;1'], 2: ['2', '25', '29'], 3: ['22', '23', '19'], 4: ['20', '10', '6'], 5: ['9', '30;1', '31;1', '32;1', '33;1', '34;1', '35;1', '36;1', '37;1', '38;1', '39;1']}
-Host 4 IPC Thread >> INFO >> Stopping ...
+Host 4 IPC Thread >> INFO >> Received pkt: 000000000161.07416531 from Proxy for Dst Node Id =  1
+Host 4 IPC Thread >> INFO >> Received pkt: 0000000002101.06098097 from Proxy for Dst Node Id =  1
+Host 4 Attack Layer Thread >> INFO >> 2016-11-21 17:35:36.780067  SEND_TO=10.0.0.1:5100  PKT=000000000161.07416531
+Host 4 IPC Thread >> INFO >> Received pkt: 0000000002200.99421519 from Proxy for Dst Node Id =  1
+Host 4 Attack Layer Thread >> INFO >> 2016-11-21 17:35:36.832063  SEND_TO=10.0.0.1:5100  PKT=0000000002101.06098097
+Host 4 Attack Layer Thread >> INFO >> 2016-11-21 17:35:36.832173  SEND_TO=10.0.0.1:5100  PKT=0000000002200.99421519
+Host 4 IPC Thread >> INFO >> Received pkt: 000000000161.02434463 from Proxy for Dst Node Id =  1
+Host 4 IPC Thread >> INFO >> Received pkt: 0000000002101.02421572 from Proxy for Dst Node Id =  1
+Host 4 IPC Thread >> INFO >> Received pkt: 0000000002200.98708007 from Proxy for Dst Node Id =  1
+Host 4 Attack Layer Thread >> INFO >> 2016-11-21 17:35:37.680054  SEND_TO=10.0.0.1:5100  PKT=0000000002101.02421572
+Host 4 Attack Layer Thread >> INFO >> 2016-11-21 17:35:37.680128  SEND_TO=10.0.0.1:5100  PKT=0000000002200.98708007
+Host 4 Attack Layer Thread >> INFO >> 2016-11-21 17:35:37.680166  SEND_TO=10.0.0.1:5100  PKT=000000000161.02434463
+Host 4 IPC Thread >> INFO >> Received pkt: 000000000161.02441408 from Proxy for Dst Node Id =  1
+Host 4 IPC Thread >> INFO >> Received pkt: 0000000002101.02426356 from Proxy for Dst Node Id =  1
+Host 4 IPC Thread >> INFO >> Received pkt: 0000000002200.98708315 from Proxy for Dst Node Id =  1
+Host 4 Attack Layer Thread >> INFO >> 2016-11-21 17:35:38.724053  SEND_TO=10.0.0.1:5100  PKT=0000000002101.02426356
+Host 4 Attack Layer Thread >> INFO >> 2016-11-21 17:35:38.725768  SEND_TO=10.0.0.1:5100  PKT=0000000002200.98708315
+Host 4 Attack Layer Thread >> INFO >> 2016-11-21 17:35:38.725843  SEND_TO=10.0.0.1:5100  PKT=000000000161.02441408
+Host 4 IPC Thread >> INFO >> Received pkt: 000000000161.025342 from Proxy for Dst Node Id =  1
+Host 4 Attack Layer Thread >> INFO >> 2016-11-21 17:35:39.736252  SEND_TO=10.0.0.1:5100  PKT=000000000161.025342
 Host 4 Attack Layer Thread >> INFO >> Stopping ...
+Host 4 IPC Thread >> INFO >> Stopping ...
 Host 4 Network Layer Thread >> INFO >> Stopping ...
 Shutting Down Host  4

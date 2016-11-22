@@ -1,3 +1,4 @@
+
 import json
 import os
 import time
@@ -176,7 +177,7 @@ class Main:
         ng = self.network_configuration.setup_network_graph(mininet_setup_gap=1, synthesis_setup_gap=1)
         self.generate_node_mappings(self.network_configuration.roles)
 
-        #self.start_background_traffic()
+        self.start_background_traffic()
         self.start_host_processes()
         self.start_switch_link_pkt_captures()
         self.start_proxy_process()
@@ -216,11 +217,11 @@ def main():
                                                          ("controller_node",["control;1"]),
                                                          ("pilot_buses_set_1",["2","25","29"]),
                                                          ("pilot_buses_set_2",["22","23","19"]),
-                                                         ("pilot_buses_set_3",["20","10","6"]),
-                                                         ("generator",["9","30;1","31;1","32;1","33;1","34;1","35;1","36;1","37;1","38;1","39;1"])
+                                                         ("pilot_buses_set_3",["20","10","6", "9"]),
+                                                         ("generator",["30;1","31;1","32;1","33;1","34;1","35;1","36;1","37;1","38;1","39;1"])
                                                         ],                       
                                                  project_name="microgrid_with_background_traffic",
-                                                 run_time=20,
+                                                 run_time=40,
                                                  power_simulator_ip="10.0.60.16"
                                                  )
 

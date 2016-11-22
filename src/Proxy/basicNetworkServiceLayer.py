@@ -8,6 +8,7 @@ from logger import Logger
 from defines import *
 import socket
 import Queue
+from datetime import datetime
 
 
 class basicNetworkServiceLayer(threading.Thread) :
@@ -79,7 +80,8 @@ class basicNetworkServiceLayer(threading.Thread) :
 				 
 
 			if data != None :
-				self.log.info("<RECV> TO: " + str(self.hostID) + " FROM: " + str(addr) + " PKT: " + str(data))
+				self.log.info("%s  RECV_FROM=%s:%s  PKT=%s"%(datetime.now(), str(addr[0]), str(addr[1]), str(data)))
+				# self.log.info("<RECV> TO: " + str(self.hostID) + " FROM: " + str(addr) + " PKT: " + str(data))
 				self.onRxPktFromNetwork(str(data))
 
 

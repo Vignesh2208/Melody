@@ -5,6 +5,7 @@ import os
 import threading
 import logger
 from logger import Logger
+from datetime import datetime
 
 from defines import *
 import Queue
@@ -50,8 +51,8 @@ class basicHostAttackLayer(threading.Thread) :
 		UDP_IP = IPAddr
 		UDP_PORT = Port
 		MESSAGE = str(pkt)
-		self.log.info(
-			"<SEND PKT> TO: " + str(UDP_IP) + ":" + str(UDP_PORT) + " FROM: " + str(self.hostID) + " PKT= " + str(MESSAGE))
+		self.log.info("%s  SEND_TO=%s:%s  PKT=%s"%(datetime.now(), str(UDP_IP), str(UDP_PORT),  str(MESSAGE)))
+		# str(datetime.now()) + " <SEND PKT> TO=" + str(UDP_IP) + ":" + str(UDP_PORT) + " FROM: " + str(self.hostID) + " PKT= " + str(MESSAGE))
 
 		self.sock.sendto(MESSAGE, (UDP_IP, UDP_PORT))
 
