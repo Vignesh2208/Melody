@@ -21,6 +21,13 @@ class proxyNetworkServiceLayer(threading.Thread) :
 		self.threadCmdQueue = []
 		self.powerSimIP = powerSimIP 
 		self.log = logger.Logger(logFile,"Proxy Network Layer Thread")
+		self.transportLayer = None
+
+	def setTransportLayer(self, transportLayer):
+		self.transportLayer = transportLayer
+
+	def getTransportLayer(self):
+		return self.transportLayer
 
 
 	def setPowerSimIdMap(self, powerSimIdMap):
@@ -47,6 +54,8 @@ class proxyNetworkServiceLayer(threading.Thread) :
 		self.threadCmdQueue.append(CMD_QUIT)
 		self.threadCmdLock.release()
 
+	def onRxPktFromNetwork(self, pkt):
+		self.transportLayer.runOnThread(self.transportLayer.onRxPktFromNetworkLayer, extractPowerSimIdFromPkt(pkt), pkt)
 
 	def run(self) :
 
@@ -70,10 +79,8 @@ class proxyNetworkServiceLayer(threading.Thread) :
 
 				if data != None :
 					self.log.info("%s  RECV_FROM=%s:%s  PKT=%s"%(datetime.now(), str(addr[0]), str(addr[1]), str(data)))
-					# self.log.info("<RECV PKT> FROM: " + str(addr) + " PKT: " + str(data))
-					self.NetLayerRxLock.acquire()
-					self.NetLayerRxBuffer.append(str(data))
-					self.NetLayerRxLock.release()
+					self.onRxPktFromNetwork(str(data))
+
 
 
 

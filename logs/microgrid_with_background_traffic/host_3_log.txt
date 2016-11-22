@@ -1,26 +1,248 @@
 Host 3 Network Layer Thread >> INFO >> Started listening on IP: 10.0.0.3 PORT: 5100
 Host 3 Attack Layer Thread >> INFO >> Started ...
 Host 3 IPC Thread >> INFO >> Started ...
-Host 3 IPC Thread >> INFO >> power sim id to host id map = {'34;1': 5, '25': 2, '20': 4, '37;1': 5, '22': 3, '23': 3, '19': 3, '36;1': 5, '29': 2, '35;1': 5, 'control;1': 1, '2': 2, '30;1': 5, '6': 4, '9': 5, '39;1': 5, '33;1': 5, '32;1': 5, '31;1': 5, '38;1': 5, '10': 4}
-Host 3 IPC Thread >> INFO >> host id to powersim id map = {1: ['control;1'], 2: ['2', '25', '29'], 3: ['22', '23', '19'], 4: ['20', '10', '6'], 5: ['9', '30;1', '31;1', '32;1', '33;1', '34;1', '35;1', '36;1', '37;1', '38;1', '39;1']}
-Host 3 IPC Thread >> INFO >> Received pkt: 0000000002191.05597926 from Proxy for Dst Node Id =  1
-Host 3 IPC Thread >> INFO >> Received pkt: 0000000002221.05609838 from Proxy for Dst Node Id =  1
-Host 3 IPC Thread >> INFO >> Received pkt: 0000000002231.05130797 from Proxy for Dst Node Id =  1
-Host 3 Attack Layer Thread >> INFO >> 2016-11-21 17:35:36.804070  SEND_TO=10.0.0.1:5100  PKT=0000000002191.05597926
-Host 3 Attack Layer Thread >> INFO >> 2016-11-21 17:35:36.804191  SEND_TO=10.0.0.1:5100  PKT=0000000002221.05609838
-Host 3 Attack Layer Thread >> INFO >> 2016-11-21 17:35:36.804236  SEND_TO=10.0.0.1:5100  PKT=0000000002231.05130797
-Host 3 IPC Thread >> INFO >> Received pkt: 0000000002191.04766815 from Proxy for Dst Node Id =  1
-Host 3 IPC Thread >> INFO >> Received pkt: 0000000002221.04757917 from Proxy for Dst Node Id =  1
-Host 3 IPC Thread >> INFO >> Received pkt: 0000000002231.04216104 from Proxy for Dst Node Id =  1
-Host 3 Attack Layer Thread >> INFO >> 2016-11-21 17:35:37.677320  SEND_TO=10.0.0.1:5100  PKT=0000000002191.04766815
-Host 3 Attack Layer Thread >> INFO >> 2016-11-21 17:35:37.677581  SEND_TO=10.0.0.1:5100  PKT=0000000002221.04757917
-Host 3 Attack Layer Thread >> INFO >> 2016-11-21 17:35:37.677632  SEND_TO=10.0.0.1:5100  PKT=0000000002231.04216104
-Host 3 IPC Thread >> INFO >> Received pkt: 0000000002191.04767473 from Proxy for Dst Node Id =  1
-Host 3 IPC Thread >> INFO >> Received pkt: 0000000002221.04758623 from Proxy for Dst Node Id =  1
-Host 3 IPC Thread >> INFO >> Received pkt: 0000000002231.04216833 from Proxy for Dst Node Id =  1
-Host 3 Attack Layer Thread >> INFO >> 2016-11-21 17:35:38.720868  SEND_TO=10.0.0.1:5100  PKT=0000000002191.04767473
-Host 3 Attack Layer Thread >> INFO >> 2016-11-21 17:35:38.722659  SEND_TO=10.0.0.1:5100  PKT=0000000002221.04758623
-Host 3 Attack Layer Thread >> INFO >> 2016-11-21 17:35:38.729640  SEND_TO=10.0.0.1:5100  PKT=0000000002231.04216833
+Host 3 IPC Thread >> INFO >> power sim id to host id map = {'34;1': 5, '25': 2, '20': 4, '37;1': 5, '22': 3, '23': 3, '19': 3, '36;1': 5, '29': 2, '35;1': 5, 'control;1': 1, '2': 2, '30;1': 5, '6': 4, '9': 4, '39;1': 5, '33;1': 5, '32;1': 5, '31;1': 5, '38;1': 5, '10': 4}
+Host 3 IPC Thread >> INFO >> host id to powersim id map = {1: ['control;1'], 2: ['2', '25', '29'], 3: ['22', '23', '19'], 4: ['20', '10', '6', '9'], 5: ['30;1', '31;1', '32;1', '33;1', '34;1', '35;1', '36;1', '37;1', '38;1', '39;1']}
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002221.05150549$1509 from Proxy for Dst Node Id =  1
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002231.05150549$1509 from Proxy for Dst Node Id =  1
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002191.05150549$1509 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:10.724245  SEND_TO=10.0.0.1:5100  PKT=0000000002191.05150549$1509
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:10.724524  SEND_TO=10.0.0.1:5100  PKT=0000000002221.05150549$1509
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:10.724652  SEND_TO=10.0.0.1:5100  PKT=0000000002231.05150549$1509
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002221.05150549$1510 from Proxy for Dst Node Id =  1
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002231.05150549$1510 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:11.760382  SEND_TO=10.0.0.1:5100  PKT=0000000002221.05150549$1510
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:11.761060  SEND_TO=10.0.0.1:5100  PKT=0000000002231.05150549$1510
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002191.05150549$1510 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:11.897157  SEND_TO=10.0.0.1:5100  PKT=0000000002191.05150549$1510
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002221.05150549$1511 from Proxy for Dst Node Id =  1
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002231.05150549$1511 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:12.670168  SEND_TO=10.0.0.1:5100  PKT=0000000002221.05150549$1511
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002191.05150549$1511 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:12.724269  SEND_TO=10.0.0.1:5100  PKT=0000000002191.05150549$1511
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:12.724446  SEND_TO=10.0.0.1:5100  PKT=0000000002231.05150549$1511
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002221.05150549$1512 from Proxy for Dst Node Id =  1
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002231.05150549$1512 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:13.745262  SEND_TO=10.0.0.1:5100  PKT=0000000002221.05150549$1512
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:13.745379  SEND_TO=10.0.0.1:5100  PKT=0000000002231.05150549$1512
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002191.05150549$1512 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:13.796174  SEND_TO=10.0.0.1:5100  PKT=0000000002191.05150549$1512
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002221.05150549$1513 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:14.716277  SEND_TO=10.0.0.1:5100  PKT=0000000002221.05150549$1513
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002231.05150549$1513 from Proxy for Dst Node Id =  1
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002191.05150549$1513 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:14.760841  SEND_TO=10.0.0.1:5100  PKT=0000000002191.05150549$1513
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:14.760962  SEND_TO=10.0.0.1:5100  PKT=0000000002231.05150549$1513
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002221.05150549$1514 from Proxy for Dst Node Id =  1
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002231.05150549$1514 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:15.732339  SEND_TO=10.0.0.1:5100  PKT=0000000002221.05150549$1514
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:15.732686  SEND_TO=10.0.0.1:5100  PKT=0000000002231.05150549$1514
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002191.05150549$1514 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:15.792486  SEND_TO=10.0.0.1:5100  PKT=0000000002191.05150549$1514
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002221.05150549$1515 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:16.724298  SEND_TO=10.0.0.1:5100  PKT=0000000002221.05150549$1515
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002231.05150549$1515 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:16.796197  SEND_TO=10.0.0.1:5100  PKT=0000000002231.05150549$1515
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002191.05150549$1515 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:16.852205  SEND_TO=10.0.0.1:5100  PKT=0000000002191.05150549$1515
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002221.05150549$1516 from Proxy for Dst Node Id =  1
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002231.05150549$1516 from Proxy for Dst Node Id =  1
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002191.05150549$1516 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:17.808353  SEND_TO=10.0.0.1:5100  PKT=0000000002191.05150549$1516
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:17.808603  SEND_TO=10.0.0.1:5100  PKT=0000000002221.05150549$1516
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:17.808721  SEND_TO=10.0.0.1:5100  PKT=0000000002231.05150549$1516
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002221.05150549$1517 from Proxy for Dst Node Id =  1
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002231.05150549$1517 from Proxy for Dst Node Id =  1
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002191.05150549$1517 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:18.712492  SEND_TO=10.0.0.1:5100  PKT=0000000002191.05150549$1517
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:18.713069  SEND_TO=10.0.0.1:5100  PKT=0000000002221.05150549$1517
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:18.713795  SEND_TO=10.0.0.1:5100  PKT=0000000002231.05150549$1517
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002221.05150549$1518 from Proxy for Dst Node Id =  1
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002231.05150549$1518 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:19.652313  SEND_TO=10.0.0.1:5100  PKT=0000000002221.05150549$1518
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002191.05150549$1518 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:19.703446  SEND_TO=10.0.0.1:5100  PKT=0000000002191.05150549$1518
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:19.703812  SEND_TO=10.0.0.1:5100  PKT=0000000002231.05150549$1518
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002221.05150549$1519 from Proxy for Dst Node Id =  1
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002231.05150549$1519 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:20.647620  SEND_TO=10.0.0.1:5100  PKT=0000000002221.05150549$1519
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002191.05150549$1519 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:20.704194  SEND_TO=10.0.0.1:5100  PKT=0000000002191.05150549$1519
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:20.704350  SEND_TO=10.0.0.1:5100  PKT=0000000002231.05150549$1519
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002221.05150549$1520 from Proxy for Dst Node Id =  1
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002231.05150549$1520 from Proxy for Dst Node Id =  1
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002191.05150549$1520 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:21.697557  SEND_TO=10.0.0.1:5100  PKT=0000000002191.05150549$1520
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:21.697747  SEND_TO=10.0.0.1:5100  PKT=0000000002221.05150549$1520
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:21.697839  SEND_TO=10.0.0.1:5100  PKT=0000000002231.05150549$1520
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002221.05150549$1521 from Proxy for Dst Node Id =  1
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002231.05150549$1521 from Proxy for Dst Node Id =  1
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002191.05150549$1521 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:22.652581  SEND_TO=10.0.0.1:5100  PKT=0000000002191.05150549$1521
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:22.652879  SEND_TO=10.0.0.1:5100  PKT=0000000002221.05150549$1521
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:22.652971  SEND_TO=10.0.0.1:5100  PKT=0000000002231.05150549$1521
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002221.05150549$1522 from Proxy for Dst Node Id =  1
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002231.05150549$1522 from Proxy for Dst Node Id =  1
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002191.05150549$1522 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:23.732187  SEND_TO=10.0.0.1:5100  PKT=0000000002191.05150549$1522
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:23.732350  SEND_TO=10.0.0.1:5100  PKT=0000000002221.05150549$1522
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:23.732437  SEND_TO=10.0.0.1:5100  PKT=0000000002231.05150549$1522
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002221.05150549$1523 from Proxy for Dst Node Id =  1
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002231.05150549$1523 from Proxy for Dst Node Id =  1
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002191.05150549$1523 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:24.724226  SEND_TO=10.0.0.1:5100  PKT=0000000002191.05150549$1523
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:24.724583  SEND_TO=10.0.0.1:5100  PKT=0000000002221.05150549$1523
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:24.724854  SEND_TO=10.0.0.1:5100  PKT=0000000002231.05150549$1523
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002221.05150549$1524 from Proxy for Dst Node Id =  1
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002231.05150549$1524 from Proxy for Dst Node Id =  1
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002191.05150549$1524 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:25.689725  SEND_TO=10.0.0.1:5100  PKT=0000000002191.05150549$1524
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:25.689985  SEND_TO=10.0.0.1:5100  PKT=0000000002221.05150549$1524
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:25.690109  SEND_TO=10.0.0.1:5100  PKT=0000000002231.05150549$1524
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002221.05150549$1525 from Proxy for Dst Node Id =  1
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002231.05150549$1525 from Proxy for Dst Node Id =  1
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002191.05150549$1525 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:26.724239  SEND_TO=10.0.0.1:5100  PKT=0000000002191.05150549$1525
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:26.724510  SEND_TO=10.0.0.1:5100  PKT=0000000002221.05150549$1525
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:26.724743  SEND_TO=10.0.0.1:5100  PKT=0000000002231.05150549$1525
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002221.05150549$1526 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:27.762845  SEND_TO=10.0.0.1:5100  PKT=0000000002221.05150549$1526
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002231.05150549$1526 from Proxy for Dst Node Id =  1
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002191.05150549$1526 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:27.796408  SEND_TO=10.0.0.1:5100  PKT=0000000002231.05150549$1526
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:27.836225  SEND_TO=10.0.0.1:5100  PKT=0000000002191.05150549$1526
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002221.05150549$1527 from Proxy for Dst Node Id =  1
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002231.05150549$1527 from Proxy for Dst Node Id =  1
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002191.05150549$1527 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:28.735593  SEND_TO=10.0.0.1:5100  PKT=0000000002191.05150549$1527
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:28.736332  SEND_TO=10.0.0.1:5100  PKT=0000000002221.05150549$1527
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:28.736478  SEND_TO=10.0.0.1:5100  PKT=0000000002231.05150549$1527
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002221.05150549$1528 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:29.768260  SEND_TO=10.0.0.1:5100  PKT=0000000002221.05150549$1528
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002231.05150549$1528 from Proxy for Dst Node Id =  1
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002191.05150549$1528 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:29.800212  SEND_TO=10.0.0.1:5100  PKT=0000000002191.05150549$1528
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:29.800382  SEND_TO=10.0.0.1:5100  PKT=0000000002231.05150549$1528
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002221.05150549$1529 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:30.720251  SEND_TO=10.0.0.1:5100  PKT=0000000002221.05150549$1529
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002231.05150549$1529 from Proxy for Dst Node Id =  1
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002191.05150549$1529 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:30.792243  SEND_TO=10.0.0.1:5100  PKT=0000000002191.05150549$1529
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:30.792395  SEND_TO=10.0.0.1:5100  PKT=0000000002231.05150549$1529
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002221.05150549$1530 from Proxy for Dst Node Id =  1
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002231.05150549$1530 from Proxy for Dst Node Id =  1
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002191.05150549$1530 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:31.700247  SEND_TO=10.0.0.1:5100  PKT=0000000002191.05150549$1530
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:31.700534  SEND_TO=10.0.0.1:5100  PKT=0000000002221.05150549$1530
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:31.700697  SEND_TO=10.0.0.1:5100  PKT=0000000002231.05150549$1530
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002221.05150549$1531 from Proxy for Dst Node Id =  1
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002231.05150549$1531 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:32.829976  SEND_TO=10.0.0.1:5100  PKT=0000000002221.05150549$1531
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002191.05150549$1531 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:32.830278  SEND_TO=10.0.0.1:5100  PKT=0000000002231.05150549$1531
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:32.868182  SEND_TO=10.0.0.1:5100  PKT=0000000002191.05150549$1531
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002221.05150549$1532 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:33.724259  SEND_TO=10.0.0.1:5100  PKT=0000000002221.05150549$1532
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002231.05150549$1532 from Proxy for Dst Node Id =  1
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002191.05150549$1532 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:33.795948  SEND_TO=10.0.0.1:5100  PKT=0000000002191.05150549$1532
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:33.796060  SEND_TO=10.0.0.1:5100  PKT=0000000002231.05150549$1532
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002221.05150549$1533 from Proxy for Dst Node Id =  1
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002231.05150549$1533 from Proxy for Dst Node Id =  1
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002191.05150549$1533 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:34.732315  SEND_TO=10.0.0.1:5100  PKT=0000000002191.05150549$1533
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:34.732737  SEND_TO=10.0.0.1:5100  PKT=0000000002221.05150549$1533
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:34.732991  SEND_TO=10.0.0.1:5100  PKT=0000000002231.05150549$1533
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002221.05150549$1534 from Proxy for Dst Node Id =  1
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002231.05150549$1534 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:35.780413  SEND_TO=10.0.0.1:5100  PKT=0000000002221.05150549$1534
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:35.780826  SEND_TO=10.0.0.1:5100  PKT=0000000002231.05150549$1534
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002191.05150549$1534 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:35.864840  SEND_TO=10.0.0.1:5100  PKT=0000000002191.05150549$1534
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002221.05150549$1535 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:36.791996  SEND_TO=10.0.0.1:5100  PKT=0000000002221.05150549$1535
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002231.05150549$1535 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:36.836462  SEND_TO=10.0.0.1:5100  PKT=0000000002231.05150549$1535
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002191.05150549$1535 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:36.860397  SEND_TO=10.0.0.1:5100  PKT=0000000002191.05150549$1535
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002221.05150549$1536 from Proxy for Dst Node Id =  1
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002231.05150549$1536 from Proxy for Dst Node Id =  1
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002191.05150549$1536 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:37.868217  SEND_TO=10.0.0.1:5100  PKT=0000000002191.05150549$1536
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:37.868355  SEND_TO=10.0.0.1:5100  PKT=0000000002221.05150549$1536
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:37.868439  SEND_TO=10.0.0.1:5100  PKT=0000000002231.05150549$1536
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002221.05150549$1537 from Proxy for Dst Node Id =  1
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002231.05150549$1537 from Proxy for Dst Node Id =  1
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002191.05150549$1537 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:38.798968  SEND_TO=10.0.0.1:5100  PKT=0000000002191.05150549$1537
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:38.799414  SEND_TO=10.0.0.1:5100  PKT=0000000002221.05150549$1537
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:38.799595  SEND_TO=10.0.0.1:5100  PKT=0000000002231.05150549$1537
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002221.05150549$1538 from Proxy for Dst Node Id =  1
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002231.05150549$1538 from Proxy for Dst Node Id =  1
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002191.05150549$1538 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:39.793002  SEND_TO=10.0.0.1:5100  PKT=0000000002191.05150549$1538
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:39.793541  SEND_TO=10.0.0.1:5100  PKT=0000000002221.05150549$1538
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:39.793697  SEND_TO=10.0.0.1:5100  PKT=0000000002231.05150549$1538
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002221.05150549$1539 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:40.860218  SEND_TO=10.0.0.1:5100  PKT=0000000002221.05150549$1539
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002231.05150549$1539 from Proxy for Dst Node Id =  1
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002191.05150549$1539 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:40.893715  SEND_TO=10.0.0.1:5100  PKT=0000000002191.05150549$1539
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:40.893853  SEND_TO=10.0.0.1:5100  PKT=0000000002231.05150549$1539
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002221.05150549$1540 from Proxy for Dst Node Id =  1
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002231.05150549$1540 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:41.735182  SEND_TO=10.0.0.1:5100  PKT=0000000002221.05150549$1540
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:41.735410  SEND_TO=10.0.0.1:5100  PKT=0000000002231.05150549$1540
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002191.05150549$1540 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:41.847752  SEND_TO=10.0.0.1:5100  PKT=0000000002191.05150549$1540
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002221.05150549$1541 from Proxy for Dst Node Id =  1
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002231.05150549$1541 from Proxy for Dst Node Id =  1
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002191.05150549$1541 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:42.789117  SEND_TO=10.0.0.1:5100  PKT=0000000002191.05150549$1541
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:42.789416  SEND_TO=10.0.0.1:5100  PKT=0000000002221.05150549$1541
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:42.789582  SEND_TO=10.0.0.1:5100  PKT=0000000002231.05150549$1541
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002221.05150549$1542 from Proxy for Dst Node Id =  1
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002231.05150549$1542 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:43.782369  SEND_TO=10.0.0.1:5100  PKT=0000000002221.05150549$1542
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002191.05150549$1542 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:43.819756  SEND_TO=10.0.0.1:5100  PKT=0000000002191.05150549$1542
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:43.820065  SEND_TO=10.0.0.1:5100  PKT=0000000002231.05150549$1542
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002221.05150549$1543 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:44.806092  SEND_TO=10.0.0.1:5100  PKT=0000000002221.05150549$1543
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002231.05150549$1543 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:44.861424  SEND_TO=10.0.0.1:5100  PKT=0000000002231.05150549$1543
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002191.05150549$1543 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:44.876996  SEND_TO=10.0.0.1:5100  PKT=0000000002191.05150549$1543
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002221.05150549$1544 from Proxy for Dst Node Id =  1
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002231.05150549$1544 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:45.779267  SEND_TO=10.0.0.1:5100  PKT=0000000002221.05150549$1544
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:45.779573  SEND_TO=10.0.0.1:5100  PKT=0000000002231.05150549$1544
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002191.05150549$1544 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:45.840244  SEND_TO=10.0.0.1:5100  PKT=0000000002191.05150549$1544
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002221.05150549$1545 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:46.793811  SEND_TO=10.0.0.1:5100  PKT=0000000002221.05150549$1545
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002231.05150549$1545 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:46.805748  SEND_TO=10.0.0.1:5100  PKT=0000000002231.05150549$1545
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002191.05150549$1545 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:46.853606  SEND_TO=10.0.0.1:5100  PKT=0000000002191.05150549$1545
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002221.05150549$1546 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:47.766765  SEND_TO=10.0.0.1:5100  PKT=0000000002221.05150549$1546
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002231.05150549$1546 from Proxy for Dst Node Id =  1
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002191.05150549$1546 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:47.871669  SEND_TO=10.0.0.1:5100  PKT=0000000002191.05150549$1546
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:47.871795  SEND_TO=10.0.0.1:5100  PKT=0000000002231.05150549$1546
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002221.05150549$1547 from Proxy for Dst Node Id =  1
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002231.05150549$1547 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:48.793031  SEND_TO=10.0.0.1:5100  PKT=0000000002221.05150549$1547
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002191.05150549$1547 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:48.828530  SEND_TO=10.0.0.1:5100  PKT=0000000002191.05150549$1547
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:48.828984  SEND_TO=10.0.0.1:5100  PKT=0000000002231.05150549$1547
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002221.05150549$1548 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:49.813520  SEND_TO=10.0.0.1:5100  PKT=0000000002221.05150549$1548
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002231.05150549$1548 from Proxy for Dst Node Id =  1
+Host 3 IPC Thread >> INFO >> Received pkt: 0000000002191.05150549$1548 from Proxy for Dst Node Id =  1
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:49.952206  SEND_TO=10.0.0.1:5100  PKT=0000000002191.05150549$1548
+Host 3 Attack Layer Thread >> INFO >> 2016-11-21 20:54:49.952387  SEND_TO=10.0.0.1:5100  PKT=0000000002231.05150549$1548
 Host 3 Attack Layer Thread >> INFO >> Stopping ...
 Host 3 IPC Thread >> INFO >> Stopping ...
 Host 3 Network Layer Thread >> INFO >> Stopping ...

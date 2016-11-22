@@ -30,7 +30,9 @@ def extractPowerSimIdFromPkt(pkt):
 
 	powerSimID = "test"
 	if POWERSIM_TYPE == "POWER_WORLD":
+		#print "Extract Power Sim ID, pkt = ", pkt
 		powerSimIDLen = int(pkt[1:POWERSIM_ID_HDR_LEN])
+
 		powerSimID = str(pkt[POWERSIM_ID_HDR_LEN:POWERSIM_ID_HDR_LEN + powerSimIDLen])
 
 	return powerSimID

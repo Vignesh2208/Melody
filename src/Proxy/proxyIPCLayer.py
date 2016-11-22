@@ -13,16 +13,17 @@ class proxyIPCLayer(threading.Thread) :
 	def __init__(self,logFile,hostIDList) :
 		threading.Thread.__init__(self)
 		
-		self.attkLayerTxLock = threading.Lock()
-		self.attkLayerRxLock = threading.Lock()
-		self.threadCmdLock = threading.Lock()
 
-		self.attkLayerTxBuffer = []
-		self.attkLayerRxBuffer = []
+		self.threadCmdLock = threading.Lock()
 		self.threadCmdQueue = []
+
+		self.threadCallbackQueue = {}
+		self.threadCallbackLock = threading.Lock()
+
 		self.sharedBufferArray = shared_buffer_array()
 		self.log = logger.Logger(logFile,"Proxy IPC Thread")
 		self.hostList = hostIDList
+		self.nPendingCallbacks = 0
 		for hostID in hostIDList :
 			result = self.sharedBufferArray.open(bufName=str(hostID) + "buffer",isProxy=True)
 			if result == BUF_NOT_INITIALIZED or result == FAILURE :
@@ -33,27 +34,18 @@ class proxyIPCLayer(threading.Thread) :
 		self.controlCenterID = -1
 		self.hostIDtoPowerSimID = None
 		self.powerSimIDtohostID = None
+		self.transportLayer = None
+		self.nHosts = len(self.hostList)
 
 	def setControlCenterID(self,controlCenterID):
 		self.controlCenterID = controlCenterID
 
+	def setTransportLayer(self, transportLayer):
+		self.transportLayer = transportLayer
 
-	def appendToRxBuffer(self,pkt) :
-		self.attkLayerRxLock.acquire()
-		self.attkLayerRxBuffer.append(pkt)
-		self.attkLayerRxLock.release()
+	def getTransportLayer(self):
+		return self.transportLayer
 
-	def getPktToSend(self) :
-		pkt = None
-		dstID = None
-		self.attkLayerTxLock.acquire()
-		try:
-			dstID,pkt = self.attkLayerTxBuffer.pop()
-		except:
-			dstID = -1
-			pkt = None
-		self.attkLayerTxLock.release()
-		return dstID,pkt
 
 	def cancelThread(self):
 		self.threadCmdLock.acquire()
@@ -75,53 +67,79 @@ class proxyIPCLayer(threading.Thread) :
 	def extractFinalDstID(self,pktFromPowerSim) :
 		return self.controlCenterID
 
+	def runOnThread(self, function, powerSimNodeID, *args):
+		self.threadCallbackLock.acquire()
+		if powerSimNodeID not in self.threadCallbackQueue.keys():
+			self.threadCallbackQueue[powerSimNodeID] = []
+			self.threadCallbackQueue[powerSimNodeID].append((function, args))
+		else:
+			if len(self.threadCallbackQueue[powerSimNodeID]) == 0:
+				self.threadCallbackQueue[powerSimNodeID].append((function, args))
+			else:
+				self.threadCallbackQueue[powerSimNodeID][0] = (function, args)
+		self.nPendingCallbacks = self.nPendingCallbacks + 1
+		self.threadCallbackLock.release()
+
+	def onRxPktFromTransportLayer(self,srcNodeID,pkt):
+		injectHostBufName = str(srcNodeID) + "buffer"
+		# replace dstID with NodeID of ControlNode Here
+		finalDstID = self.extractFinalDstID(pkt)
+		ret = 0
+		while ret <= 0 :
+			ret = self.sharedBufferArray.write(injectHostBufName, pkt, finalDstID)
+		return
+
+	def onRxPktFromHost(self,pkt):
+		self.transportLayer.runOnThread(self.transportLayer.onRxPktFromIPCLayer,extractPowerSimIdFromPkt(pkt),pkt)
+
+	def getcurrCmd(self):
+		self.threadCmdLock.acquire()
+		try:
+			currCmd = self.threadCmdQueue.pop()
+		except:
+			currCmd = None
+		self.threadCmdLock.release()
+		return currCmd
 
 	def run(self) :
 
-		pktToSend = None
-		dstID = None
-		nHosts = len(self.hostList)
 		assert(self.controlCenterID > 0)
 		self.log.info("Started ...")
 		self.log.info("power sim id to host id map = " + str(self.powerSimIDtohostID))
 		while True :
 
-			currCmd = None
-			recvPkt = ''
-			self.threadCmdLock.acquire()
-			try:
-				currCmd = self.threadCmdQueue.pop()
-			except:
-				currCmd = None
-			self.threadCmdLock.release()
-			if currCmd != None and currCmd == CMD_QUIT :
+			currCmd = self.getcurrCmd()
+			if currCmd != None and currCmd == CMD_QUIT:
 				self.log.info("Stopping ...")
 				break
 
-			# send any available pkt to Host
-			if pktToSend == None :
-				dstID,pktToSend = self.getPktToSend()
+			callbackFns = []
+			self.threadCallbackLock.acquire()
+			if self.nPendingCallbacks == 0:
+				self.threadCallbackLock.release()
+			else:
 
-			if pktToSend != None :
-				dstHostBufName = str(dstID) + "buffer"
-				
-				# replace dstID with NodeID of ControlNode Here
-				finalDstID = self.extractFinalDstID(pktToSend)
-				ret = self.sharedBufferArray.write(dstHostBufName,pktToSend,finalDstID)
-				if ret > 0 :
-					self.log.info("Relaying pkt: " + str(pktToSend) + " To Control Host: " + str(finalDstID) + " via Host: " + str(dstID))
-					pktToSend = None
-					dstID = None
-				
+				values = list(self.threadCallbackQueue.values())
+				for i in xrange(0, len(values)):
+					if len(values[i]) > 0:
+						callbackFns.append(values[i].pop())
+				self.nPendingCallbacks = 0
+				self.threadCallbackLock.release()
 
-			for i in xrange(0,nHosts) :
-				recvPkt = ''
-				tmpID,recvPkt = self.sharedBufferArray.read(str(self.hostList[i])+ "buffer")
+				for i in xrange(0, len(callbackFns)):
+					function, args = callbackFns[i]
+					function(*args)
 
-				if len(recvPkt) > 0 :
-					self.log.info("Received pkt: " + str(recvPkt) + " from a Host Node")
-					self.appendToRxBuffer((tmpID,recvPkt))
+			self.idle()
 
+	def idle(self):
+		for i in xrange(0, self.nHosts):
+			recvPkt = ''
+			tmpID, recvPkt = self.sharedBufferArray.read(str(self.hostList[i]) + "buffer")
+
+			if len(recvPkt) > 0:
+				self.log.info("Received pkt: " + str(recvPkt) + " from a Host Node")
+				self.onRxPktFromHost(recvPkt)
 
 
 

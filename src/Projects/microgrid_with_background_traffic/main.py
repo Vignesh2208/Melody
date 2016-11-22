@@ -181,7 +181,7 @@ class Main:
         self.start_host_processes()
         self.start_switch_link_pkt_captures()
         self.start_proxy_process()
-        print "Waiting for 5 secs for all processes to spawn up ..."
+        #print "Waiting for 5 secs for all processes to spawn up ..."
         time.sleep(5)
         self.start_attack_dispatcher()
         self.run()
@@ -222,7 +222,7 @@ def main():
                                                         ],                       
                                                  project_name="microgrid_with_background_traffic",
                                                  run_time=40,
-                                                 power_simulator_ip="10.0.60.16"
+                                                 power_simulator_ip="127.0.0.1"
                                                  )
 
     exp = Main(network_configuration)

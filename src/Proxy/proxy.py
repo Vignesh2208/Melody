@@ -113,6 +113,8 @@ def main(netCfgFile,logFile,runTime,powerSimIP,controlCenterID) :
 
 	assert(IPCLayer != None and NetLayer != None and TransportLayer != None)
 
+	IPCLayer.setTransportLayer(TransportLayer)
+	NetLayer.setTransportLayer(TransportLayer)
 	
 	NetLayer.start()
 	TransportLayer.start()

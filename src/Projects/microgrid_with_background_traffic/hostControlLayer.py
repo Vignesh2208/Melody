@@ -65,7 +65,7 @@ class controlLoopThread(threading.Thread) :
 				busnum, gid, voltsp = GEN_ID[i][0], GEN_ID[i][1], self.vg[i]
 				self.controlLayer.txPktToPowerSim("%d;%d"%(busnum,gid), str(voltsp))
 			# self.controlLayer.txPktToPowerSim("2","HelloWorld!")
-			time.sleep(1.0)
+			time.sleep(0.5)
 
 			
 class hostControlLayer(basicHostIPCLayer) :
@@ -109,11 +109,14 @@ class hostControlLayer(basicHostIPCLayer) :
 	#   pkt - full pkt including powerSimID(string)
 	def onRxPktFromAttackLayer(self,pkt):
 		# process the pkt here
-		idlen = int(pkt[:10])
-		busnum = int(pkt[10:10+idlen])
-		buspuvolt = float(pkt[10+idlen:])
-		self.vp[BUS_PILOT.index(busnum)] = buspuvolt
-		# self.log.info(str(datetime.now()) + "Recv:"  + "Pkt = " + str(pkt))
+		try:
+			idlen = int(pkt[:10])
+			busnum = int(pkt[10:10+idlen])
+			buspuvolt = float(pkt[10+idlen:])
+			self.vp[BUS_PILOT.index(busnum)] = buspuvolt
+		except Exception as e:
+			pass
+
 		return None
 
 	def run(self):
