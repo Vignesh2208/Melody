@@ -112,3 +112,6 @@ target/
 
 #logs
 logs/microgrid_with_background_traffic/
+
+#configuration
+src/Projects/microgrid_with_background_traffic/configurations/
