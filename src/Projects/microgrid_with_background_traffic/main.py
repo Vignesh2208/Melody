@@ -36,7 +36,7 @@ class Main:
 
     def generate_node_mappings(self, roles):
         with open(self.node_mappings_file_path,"w") as outfile:
-            for i in xrange(0,len(self.network_configuration.mininet_obj.hosts)):
+            for i in xrange(0,len(roles)):
                 mininet_host = self.network_configuration.mininet_obj.hosts[i]
                 self.node_mappings[mininet_host.name] = (mininet_host.IP(), roles[i],DEFAULT_HOST_UDP_PORT)
                 lineTowrite = str(mininet_host.name) + "," + str(mininet_host.IP()) + "," + str(DEFAULT_HOST_UDP_PORT) + ","
@@ -99,14 +99,17 @@ class Main:
 
     def start_host_processes(self):
         print "Starting all Host Commands ..."
-        for i in range(len(self.network_configuration.mininet_obj.hosts)):
+        for i in xrange(len(self.network_configuration.roles)):
             mininet_host = self.network_configuration.mininet_obj.hosts[i]
             host_id = int(mininet_host.name[1:])
             host_role = self.node_mappings[mininet_host.name][1][0]
+
             if "controller" not in host_role:
                 host_log_file = self.log_dir + "/host_" + str(host_id) + "_log.txt"
             else:
                 host_log_file = self.log_dir + "/controller_node_log.txt"
+
+
 
             host_py_script = self.proxy_dir + "/host.py"
             cmd_to_run = "python " + str(host_py_script) + " -c " + self.node_mappings_file_path + " -l " + host_log_file + " -r " + str(self.run_time) \
@@ -154,11 +157,13 @@ class Main:
 
     def start_attack_dispatcher(self):
         print "Starting Attack Dispatcher at " + str(datetime.datetime.now())
-        replay_pcap = self.script_dir + "/replay.pcap"
+        replay_pcaps_dir = self.script_dir + "/pcaps"
 
-        if os.path.isfile(replay_pcap) :
+        if os.path.isdir(replay_pcaps_dir) :
             attack_dispatcher_script = self.proxy_dir + "/attack_dispatcher.py"
-            os.system("python " + str(attack_dispatcher_script) + " -c " + replay_pcap + " -l " + self.node_mappings_file_path + " -r " + str(self.run_time) + " &")
+            os.system("python " + str(attack_dispatcher_script) + " -c " + replay_pcaps_dir + " -l " + self.node_mappings_file_path + " -r " + str(self.run_time) + " &")
+
+
 
     def run(self):
         if self.run_time > 0:
@@ -181,7 +186,7 @@ class Main:
         self.start_host_processes()
         self.start_switch_link_pkt_captures()
         self.start_proxy_process()
-        #print "Waiting for 5 secs for all processes to spawn up ..."
+        print "Waiting for 5 secs for all processes to spawn up ..."
         time.sleep(5)
         self.start_attack_dispatcher()
         self.run()
@@ -202,7 +207,7 @@ def main():
                                                  "http://localhost:8080/",
                                                  "admin",
                                                  "admin",
-                                                 "clique",
+                                                 "clique_enterprise",
                                                  {"num_switches": 5,
                                                   "per_switch_links": 3,
                                                   "num_hosts_per_switch": 1,
@@ -214,11 +219,17 @@ def main():
                                                  synthesis_params={},
                                                  # Can map multiple power simulator objects to same cyber node.
                                                  roles=[
+                                                         # internal field bus network. clique topology structure created only for this
                                                          ("controller_node",["control;1"]),
                                                          ("pilot_buses_set_1",["2","25","29"]),
                                                          ("pilot_buses_set_2",["22","23","19"]),
                                                          ("pilot_buses_set_3",["20","10","6", "9"]),
-                                                         ("generator",["30;1","31;1","32;1","33;1","34;1","35;1","36;1","37;1","38;1","39;1"])
+                                                         ("generator",["30;1","31;1","32;1","33;1","34;1","35;1","36;1","37;1","38;1","39;1"]),
+
+                                                         # part of enterprise network. Linear topology which is attached to the clique at one switch
+                                                         ("enterprise-1",["vpn-gateway;1"]),
+                                                         ("enterprise-2",["attacker;1"])
+
                                                         ],                       
                                                  project_name="microgrid_with_background_traffic",
                                                  run_time=40,

@@ -20,7 +20,7 @@
 #include "utils/linkedlist.h"
 
 
-#define MAXPKTSIZE 1000 // bytes
+#define MAXPKTSIZE 10000 // bytes
 #define MAX_BUF_NAME_LEN 100
 
 typedef int int32_t;

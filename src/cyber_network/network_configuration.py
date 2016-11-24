@@ -25,6 +25,7 @@ from cyber_network.topologies.ring_topo import RingTopo
 from cyber_network.topologies.clos_topo import ClosTopo
 from cyber_network.topologies.linear_topo import LinearTopo
 from cyber_network.topologies.clique_topo import CliqueTopo
+from cyber_network.topologies.clique_enterprise_topo import CliqueEnterpriseTopo
 
 from cyber_network.synthesis.dijkstra_synthesis import DijkstraSynthesis
 from cyber_network.synthesis.aborescene_synthesis import AboresceneSynthesis
@@ -112,7 +113,11 @@ class NetworkConfiguration(object):
         elif self.topo_name == "clique":
             self.topo = CliqueTopo(self.topo_params)
             self.nc_topo_str = "Linear topology with " + str(self.topo_params["num_switches"]) + " switches"
+        elif self.topo_name == "clique_enterprise" :
+            self.topo = CliqueEnterpriseTopo(self.topo_params)
+            self.nc_topo_str = "Clique Enterprise topology with " + str(self.topo_params["num_switches"]) + " switches"
         else:
+
             raise NotImplementedError("Topology: %s" % self.topo_name)
 
     def init_synthesis(self):
@@ -173,7 +178,8 @@ class NetworkConfiguration(object):
             time.sleep(synthesis_setup_gap)
 
         if self.mininet_obj:
-            #self.mininet_obj.pingAll()
+            self.mininet_obj.pingAll()
+
             # full_data = self.mininet_obj.pingFull(hosts=[self.mininet_obj.get('h1'),
             #                                              self.mininet_obj.get('h2')])
             # print full_data

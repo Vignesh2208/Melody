@@ -84,10 +84,12 @@ class basicHostIPCLayer(threading.Thread) :
 
 		if is_pkt_from_attack_dispatcher(pkt) == True :
 			payload = self.extractPayloadFromPkt(pkt)
-
-			src_ip,dst_ip = decode_raw_ip_payload_src_dst(str(payload))
-			self.log.info("Sending attack dispatcher packet : " + str(payload) + " to: " + dst_ip)
-			self.raw_sock.sendto(binascii.unhexlify(payload),(dst_ip,0))
+			try:
+				src_ip,dst_ip = decode_raw_ip_payload_src_dst(str(payload))
+				self.log.info("Sending attack dispatcher packet : " + str(payload) + " to: " + dst_ip)
+				self.raw_sock.sendto(binascii.unhexlify(payload),(dst_ip,0))
+			except Exception as e:
+				pass
 		else :
 			self.attackLayer.runOnThread(self.attackLayer.onRxPktFromIPCLayer,extractPowerSimIdFromPkt(pkt),pkt,dstCyberNodeID)
 
