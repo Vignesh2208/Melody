@@ -23,6 +23,8 @@ class attackPlaybackThread(threading.Thread) :
         self.raw_rx_sock.settimeout(5.0)
 
 
+    def post_playback(self):
+        pass
 
 
     def run(self):
@@ -64,6 +66,20 @@ class attackPlaybackThread(threading.Thread) :
                     src_ip, dst_ip = decode_raw_ip_payload_src_dst(payload)
                     #print "Tx (src,dst) = ", src_ip, dst_ip, " len = ", len(payload), " payload = ", recv_msg[3:]
                     self.attackLayer.raw_tx_sock.sendto(payload, (dst_ip, 0))
+                elif len(recv_msg) != 0 and recv_msg[0:3] == "END" :
+                    self.attackLayer.end_of_replay_phase = True
+                    print "Playback phase finished. stopping attack playback thread ..."
+                    self.attackLayer.accessLock.release()
+                    break
+                elif self.attackLayer.end_of_replay_phase == True:
+                    print "Playback phase finished. stopping attack playback thread ..."
+                    self.attackLayer.accessLock.release()
+                    break
+
+            if self.attackLayer.end_of_replay_phase == True:
+                print "Playback phase finished. stopping attack playback thread ..."
+                self.attackLayer.accessLock.release()
+                break
 
 
             if ip_payload == self.attackLayer.rx_pkt_check :
@@ -75,6 +91,7 @@ class attackPlaybackThread(threading.Thread) :
 
             self.attackLayer.accessLock.release()
 
+        self.post_playback()
 
 
 
@@ -116,6 +133,7 @@ class basicHostAttackLayer(threading.Thread):
         self.stoppingLock = threading.Lock()
         self.accessLock = threading.Lock()
         self.attack_playback_thread_started = False
+        self.end_of_replay_phase = False
 
         self.attack_playback_thread = attackPlaybackThread(self)
 
@@ -197,6 +215,10 @@ class basicHostAttackLayer(threading.Thread):
             elif recv_msg[0:2] == "RX":
                 self.rx_pkt_check = recv_msg[3:]
                 self.rx_pkt_check_updated = True
+                self.accessLock.release()
+            elif recv_msg[0:3] == "END" :
+                self.end_of_replay_phase = True
+                self.stopping = True
                 self.accessLock.release()
             else:
                 self.accessLock.release()

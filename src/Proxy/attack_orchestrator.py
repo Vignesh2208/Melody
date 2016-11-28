@@ -170,6 +170,18 @@ class attack_orchestrator():
             sys.exit(0)
 
 
+    def signal_end_of_replay_phase(self):
+
+
+        hostIDS = self.PowerSimIdMapping.keys()
+        for hostID in hostIDS :
+            ret = 0
+            while ret <= 0:
+                ret = self.sharedBufferArray.write(str(hostID) + "attk-channel-buffer", "END", 0)
+
+        print "Signalled end of replay phase ..."
+        time.sleep(5.0)
+
 
 
     def run(self):
@@ -195,6 +207,10 @@ class attack_orchestrator():
 
                 self.replay_pkt(l2_type=l2_type,curr_pkt=curr_pkt,pkt_no=idx)
                 idx = idx + 1
+
+
+        self.signal_end_of_replay_phase()
+
 
 
 if __name__ == "__main__":
