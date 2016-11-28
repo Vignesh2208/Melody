@@ -160,7 +160,7 @@ class Main:
         replay_pcaps_dir = self.script_dir + "/pcaps"
 
         if os.path.isdir(replay_pcaps_dir) :
-            attack_dispatcher_script = self.proxy_dir + "/attack_dispatcher.py"
+            attack_dispatcher_script = self.proxy_dir + "/attack_orchestrator.py"
             os.system("python " + str(attack_dispatcher_script) + " -c " + replay_pcaps_dir + " -l " + self.node_mappings_file_path + " -r " + str(self.run_time) + " &")
 
 
@@ -232,7 +232,7 @@ def main():
 
                                                         ],                       
                                                  project_name="microgrid_with_background_traffic",
-                                                 run_time=40,
+                                                 run_time=90,
                                                  power_simulator_ip="127.0.0.1"
                                                  )
 

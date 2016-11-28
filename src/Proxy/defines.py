@@ -1,6 +1,12 @@
 from pcapfile.protocols.linklayer import ethernet
 from pcapfile.protocols.network import ip
 import binascii
+import dpkt
+
+import socket
+from dpkt.loopback import Loopback
+from dpkt.ethernet import Ethernet
+from dpkt.ip import IP
 
 # Error Defines
 SUCCESS  = 1
@@ -25,6 +31,9 @@ DEFAULT_PROXY_IP = "127.0.0.1"
 POWERSIM_TYPE = "POWER_WORLD" # POWER_WORLD/RTDS
 POWERSIM_ID_HDR_LEN = 10      # 10 characters for holding the length of power sim id. currently only used for power world
 
+ETH_TYPE_FRAME=1 # Ethernet
+ETH_TYPE_LOOPBACK = 0
+
 
 def extractPowerSimIdFromPkt(pkt):
 
@@ -37,37 +46,98 @@ def extractPowerSimIdFromPkt(pkt):
 
 	return powerSimID
 
-def print_pkt_info(pkt) :
-	eth_frame = ethernet.Ethernet(pkt.raw())
-	ip_packet = ip.IP(binascii.unhexlify(eth_frame.payload))
 
-	print "Raw Pkt = ", pkt.raw()
-	print "TimeStamp = ", pkt.timestamp
-	print "Eth frame = ", eth_frame
-	print "Eth src = ", eth_frame.src
-	print "Eth dst = ", eth_frame.dst
-	print "IP packet = ", ip_packet
-	print "IP source = ", ip_packet.src
-	print "IP dst = ", ip_packet.dst
-	print "IP Payload = ", ip_packet.payload
 
-def get_pkt_src_dst_IP(pkt):
-	eth_frame = ethernet.Ethernet(pkt.raw())
-	ip_packet = ip.IP(binascii.unhexlify(eth_frame.payload))
 
-	return str(ip_packet.src),str(ip_packet.dst)
+def inet_to_str(inet):
+    """Convert inet object to a string
+        Args:
+            inet (inet struct): inet network address
+        Returns:
+            str: Printable/readable IP address
+    """
+    # First try ipv4 and then ipv6
+    try:
+        return socket.inet_ntop(socket.AF_INET, inet)
+    except ValueError:
+        return socket.inet_ntop(socket.AF_INET6, inet)
 
-def get_raw_ip_pkt(pkt) :
-	eth_frame = ethernet.Ethernet(pkt.raw())
-	ip_packet = ip.IP(binascii.unhexlify(eth_frame.payload))
-	return eth_frame.payload
 
-def decode_raw_ip_payload_src_dst(pkt_str) :
-	ip_packet = ip.IP(binascii.unhexlify(pkt_str))
-	return ip_packet.src, ip_packet.dst
+def str_to_inet(str):
+    """Convert string object to an inet
+        Args:
+            str: Printable/readable IP address
+        Returns:
+            inet (inet struct): inet network address
+    """
+    # First try ipv4 and then ipv6
+    try:
+        return socket.inet_pton(socket.AF_INET, str)
+    except ValueError:
+        return socket.inet_pton(socket.AF_INET6, str)
+
+
+def get_ip_loopback(buf):
+    # Unpack the data within the Ethernet frame (the IP packet)
+    # Pulling out src, dst, length, fragment info, TTL, and Protocol
+    lp = Loopback(buf)
+    lp.unpack(buf)
+    ip = lp.data
+    return ip
+
+def get_ip_ethernet(buf):
+    lp = Ethernet(buf)
+    lp.unpack(buf)
+    ip = lp.data
+    return ip
+
+
+def get_pkt_src_dst_IP(buf,DL_TYPE=ETH_TYPE_FRAME):
+    """
+    :param buf: A string buffer containing the entire packet
+    :return: A tuple with source and destination IP strings
+    """
+
+    if DL_TYPE == ETH_TYPE_LOOPBACK:
+        ip = get_ip_loopback(buf)
+
+    else :
+        ip = get_ip_ethernet(buf)
+
+
+    return inet_to_str(ip.src), inet_to_str(ip.dst)
+
+
+def get_raw_ip_pkt(buf,DL_TYPE=ETH_TYPE_FRAME):
+    """
+    :param buf: A string buffer containing the entire packet
+    :return: A string buffer with IP payload
+    """
+
+    if DL_TYPE == ETH_TYPE_LOOPBACK:
+        ip = get_ip_loopback(buf)
+    else:
+        ip = get_ip_ethernet(buf)
+
+
+
+    return ip
+
+
+def decode_raw_ip_payload_src_dst(buf):
+
+    ip = IP(buf)
+    return inet_to_str(ip.src), inet_to_str(ip.dst)
+
+
 
 def is_pkt_from_attack_dispatcher(pkt_str):
 	if pkt_str[0] == "1":
 		return True
 	else :
 		return False
+
+
+
+
+

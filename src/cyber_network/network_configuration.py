@@ -178,7 +178,7 @@ class NetworkConfiguration(object):
             time.sleep(synthesis_setup_gap)
 
         if self.mininet_obj:
-            self.mininet_obj.pingAll()
+            #self.mininet_obj.pingAll()
 
             # full_data = self.mininet_obj.pingFull(hosts=[self.mininet_obj.get('h1'),
             #                                              self.mininet_obj.get('h2')])
