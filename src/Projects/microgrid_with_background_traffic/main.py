@@ -54,8 +54,8 @@ class Main:
     def start_background_traffic(self):
         traffic_flows = [
             TrafficFlow(type=TRAFFIC_FLOW_PERIODIC,
-                        offset=5,
-                        inter_flow_period=1,
+                        offset=1,
+                        inter_flow_period=3,
                         run_time=self.run_time,
                         src_mn_node=self.network_configuration.mininet_obj.get("h1"),
                         dst_mn_node=self.network_configuration.mininet_obj.get("h2"),
@@ -78,7 +78,7 @@ class Main:
                         client_expect_file=self.base_dir + '/src/cyber_network/ping_session.expect'),
 
             TrafficFlow(type=TRAFFIC_FLOW_EXPONENTIAL,
-                        offset=5,
+                        offset=10,
                         inter_flow_period=1,
                         run_time=self.run_time,
                         src_mn_node=self.network_configuration.mininet_obj.get("h1"),
@@ -92,8 +92,6 @@ class Main:
 
         for tf in traffic_flows:
             tf.start()
-
-
 
         print "Background traffic threads started..."
 
@@ -181,7 +179,6 @@ class Main:
         print "Starting project ..."
         ng = self.network_configuration.setup_network_graph(mininet_setup_gap=1, synthesis_setup_gap=1)
         self.generate_node_mappings(self.network_configuration.roles)
-
         self.start_background_traffic()
         self.start_host_processes()
         self.start_switch_link_pkt_captures()

@@ -61,16 +61,10 @@ class TrafficFlow(threading.Thread):
             if self.elasped_time - self.start_time > self.run_time:
                 break
 
-            result = self.src_mn_node.cmd(self.client_expect_file + ' ' +
-                                          self.root_user_name + ' ' +
-                                          self.root_password + ' ' +
-                                          self.dst_mn_node.IP() + '&')
-
-            # print "Traffic Flow thread for src:", self.src_mn_node, \
-            #     "dst:", self.dst_mn_node, \
-            #     "Time since started:", self.elasped_time - self.start_time
-
-            #print result
+            result = self.src_mn_node.pexec(self.client_expect_file + ' ' +
+                                            self.root_user_name + ' ' +
+                                            self.root_password + ' ' +
+                                            self.dst_mn_node.IP())
 
             if self.type == TRAFFIC_FLOW_PERIODIC:
                 sleep_for = self.inter_flow_period
@@ -89,17 +83,15 @@ class TrafficFlow(threading.Thread):
         if self.server_process_start_cmd:
 
             # Start the server
-            result = self.dst_mn_node.cmd(self.server_process_start_cmd)
-            #print result
+            result = self.dst_mn_node.pexec(self.server_process_start_cmd)
 
     def stop_server(self):
 
         if self.server_process_stop_cmd:
 
             # Stop the server
-            result = self.dst_mn_node.cmd(self.server_process_stop_cmd)
-            #print result
-        
+            result = self.dst_mn_node.pexec(self.server_process_stop_cmd)
+
     def run(self):
 
         print "Starting thread..."
@@ -116,6 +108,6 @@ class TrafficFlow(threading.Thread):
         time.sleep(1)
 
         self.client_loop()
-        
+
         # Kill the server process
         self.stop_server()
