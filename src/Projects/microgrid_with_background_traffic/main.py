@@ -154,6 +154,8 @@ class Main:
                  + " -r " + str(self.run_time) + " -p " + self.power_simulator_ip + " -d " + str(self.control_node_id) + " &")
 
     def start_attack_dispatcher(self):
+        print "Waiting for 5 secs for all processes to spawn up ..."
+        time.sleep(5)
         print "Starting Attack Dispatcher at " + str(datetime.datetime.now())
         replay_pcaps_dir = self.script_dir + "/pcaps"
 
@@ -179,13 +181,11 @@ class Main:
         print "Starting project ..."
         ng = self.network_configuration.setup_network_graph(mininet_setup_gap=1, synthesis_setup_gap=1)
         self.generate_node_mappings(self.network_configuration.roles)
-        self.start_background_traffic()
         self.start_host_processes()
         self.start_switch_link_pkt_captures()
         self.start_proxy_process()
-        print "Waiting for 5 secs for all processes to spawn up ..."
-        time.sleep(5)
         self.start_attack_dispatcher()
+        self.start_background_traffic()
         self.run()
 
         print "Stopping project..."
@@ -208,7 +208,7 @@ def main():
                                                  {"num_switches": 5,
                                                   "per_switch_links": 3,
                                                   "num_hosts_per_switch": 1,
-                                                  "switch_switch_link_latency_range": (40, 100),
+                                                  "switch_switch_link_latency_range": (40, 50),
                                                   "host_switch_link_latency_range": (10, 20)
                                                   },
                                                  conf_root="configurations/",
@@ -229,7 +229,7 @@ def main():
 
                                                         ],                       
                                                  project_name="microgrid_with_background_traffic",
-                                                 run_time=90,
+                                                 run_time=60,
                                                  power_simulator_ip="127.0.0.1"
                                                  )
 

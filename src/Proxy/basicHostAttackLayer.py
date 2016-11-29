@@ -19,8 +19,7 @@ class attackPlaybackThread(threading.Thread) :
     def __init__(self, attackLayer):
         self.attackLayer = attackLayer
         threading.Thread.__init__(self)
-        self.raw_rx_sock = socket.socket(socket.PF_PACKET,socket.SOCK_RAW,socket.htons(0x0800))
-        self.raw_rx_sock.settimeout(5.0)
+
 
 
     def post_playback(self):
@@ -29,6 +28,8 @@ class attackPlaybackThread(threading.Thread) :
 
     def run(self):
         start_time = time.time()
+        self.raw_rx_sock = socket.socket(socket.PF_PACKET, socket.SOCK_RAW, socket.htons(0x0800))
+        self.raw_rx_sock.settimeout(5.0)
         print "Running Attack Playback Thread"
         while True :
             self.attackLayer.stoppingLock.acquire()
@@ -57,10 +58,11 @@ class attackPlaybackThread(threading.Thread) :
             self.attackLayer.accessLock.acquire()
             if self.attackLayer.rx_pkt_check_updated == False:
                 recv_msg = ''
-                dummy_id, recv_msg = self.attackLayer.attk_channel_buffer.read()
+                dummy_id, recv_msg = self.attackLayer.sharedBufferArray.read(self.attackLayer.attk_channel_bufName)
                 if len(recv_msg) != 0 and recv_msg[0:2] == "RX" :
                     self.attackLayer.rx_pkt_check = recv_msg[3:]
                     self.attackLayer.rx_pkt_check_updated = True
+                    #print "Rx check = ", recv_msg[3:]
                 elif len(recv_msg) != 0 and recv_msg[0:2] == "TX" :
                     payload = binascii.unhexlify(recv_msg[3:])
                     src_ip, dst_ip = decode_raw_ip_payload_src_dst(payload)
@@ -75,6 +77,8 @@ class attackPlaybackThread(threading.Thread) :
                     print "Playback phase finished. stopping attack playback thread ..."
                     self.attackLayer.accessLock.release()
                     break
+                elif len(recv_msg) != 0:
+                    print "Recv unknown msg type. Msg = ", recv_msg
 
             if self.attackLayer.end_of_replay_phase == True:
                 print "Playback phase finished. stopping attack playback thread ..."
@@ -87,7 +91,7 @@ class attackPlaybackThread(threading.Thread) :
                 self.attackLayer.rx_pkt_check = None
                 self.attackLayer.rx_pkt_check_updated = False
                 while ret <= 0 :
-                    ret = self.attackLayer.attk_channel_buffer.write("ACK",0)
+                    ret = self.attackLayer.sharedBufferArray.write(self.attackLayer.attk_channel_bufName,"ACK",0)
 
             self.attackLayer.accessLock.release()
 
@@ -103,7 +107,7 @@ class attackPlaybackThread(threading.Thread) :
 
 
 class basicHostAttackLayer(threading.Thread):
-    def __init__(self, hostID, logFile, IPCLayer, NetworkServiceLayer):
+    def __init__(self, hostID, logFile, IPCLayer, NetworkServiceLayer,sharedBufferArray):
 
         threading.Thread.__init__(self)
         self.threadCmdLock = threading.Lock()
@@ -112,17 +116,12 @@ class basicHostAttackLayer(threading.Thread):
         self.threadCallbackQueue = {}
         self.threadCallbackLock = threading.Lock()
         self.nPendingCallbacks = 0
-
+        self.sharedBufferArray = sharedBufferArray
         self.hostID = hostID
         self.log = logger.Logger(logFile, "Host " + str(hostID) + " Attack Layer Thread")
         self.IPCLayer = IPCLayer
         self.NetServiceLayer = NetworkServiceLayer
-        self.attk_channel_bufName = str(hostID) + "attk-channel-buffer"
-        self.attk_channel_buffer = shared_buffer(bufName=self.attk_channel_bufName,isProxy=False)
-        result = self.attk_channel_buffer.open()
-        if result == BUF_NOT_INITIALIZED or result == FAILURE:
-            print "Shared Buffer open failed! Buffer not initialized for host: " + str(hostID)
-            sys.exit(0)
+
 
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP
         self.raw_tx_sock = socket.socket(socket.AF_INET,socket.SOCK_RAW,socket.IPPROTO_RAW)
@@ -136,6 +135,8 @@ class basicHostAttackLayer(threading.Thread):
         self.end_of_replay_phase = False
 
         self.attack_playback_thread = attackPlaybackThread(self)
+
+        self.init_shared_attk_playback_buffer()
 
 
     def getcurrCmd(self):
@@ -199,12 +200,9 @@ class basicHostAttackLayer(threading.Thread):
             self.log.info("Starting Attack playback thread ...")
             self.attack_playback_thread.start()
 
-
-
-
         recv_msg = ''
         self.accessLock.acquire()
-        dummy_id, recv_msg = self.attk_channel_buffer.read()
+        dummy_id, recv_msg = self.sharedBufferArray.read(self.attk_channel_bufName)
         if len(recv_msg) != 0:
             if recv_msg[0:2] == "TX":
                 payload = binascii.unhexlify(recv_msg[3:])
@@ -215,23 +213,36 @@ class basicHostAttackLayer(threading.Thread):
             elif recv_msg[0:2] == "RX":
                 self.rx_pkt_check = recv_msg[3:]
                 self.rx_pkt_check_updated = True
+                #print "Rx check = ", recv_msg[3:]
                 self.accessLock.release()
             elif recv_msg[0:3] == "END" :
                 self.end_of_replay_phase = True
                 self.stopping = True
                 self.accessLock.release()
             else:
+                print "Recv unknown msg type. Msg = ", recv_msg
                 self.accessLock.release()
         else:
             self.accessLock.release()
 
 
+    def init_shared_attk_playback_buffer(self):
+        self.attk_channel_bufName = str(self.hostID) + "attk-channel-buffer"
+        #self.attk_channel_buffer = shared_buffer(bufName=self.attk_channel_bufName, isProxy=False)
+
+        result = self.sharedBufferArray.open(self.attk_channel_bufName,isProxy=False)
+        if result == BUF_NOT_INITIALIZED or result == FAILURE:
+            print "Shared Buffer open failed! Buffer not initialized for host: " + str(self.hostID)
+            sys.exit(0)
+        else:
+            self.log.info("Attk playback buffer open suceeded !")
 
 
     def run(self):
 
         pktToSend = None
         self.log.info("Started ...")
+
         assert (self.NetServiceLayer != None)
         assert (self.IPCLayer != None)
         while True:

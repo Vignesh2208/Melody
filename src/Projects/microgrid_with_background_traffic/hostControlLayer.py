@@ -70,8 +70,8 @@ class controlLoopThread(threading.Thread) :
 			
 class hostControlLayer(basicHostIPCLayer) :
 
-	def __init__(self,hostID,logFile) :
-		basicHostIPCLayer.__init__(self,hostID,logFile)
+	def __init__(self,hostID,logFile,sharedBufferArray) :
+		basicHostIPCLayer.__init__(self,hostID,logFile,sharedBufferArray)
 		self.stoppingLock = threading.Lock()
 		self.vp = np.array([BUS_PUVOLT[p] for p in BUS_PILOT])
 
@@ -110,6 +110,7 @@ class hostControlLayer(basicHostIPCLayer) :
 	def onRxPktFromAttackLayer(self,pkt):
 		# process the pkt here
 		try:
+
 			idlen = int(pkt[:10])
 			busnum = int(pkt[10:10+idlen])
 			buspuvolt = float(pkt[10+idlen:])
@@ -170,7 +171,7 @@ class hostControlLayer(basicHostIPCLayer) :
 
 		else:
 			recvPkt = ""
-			dstCyberNodeID, recvPkt = self.sharedBuffer.read()
+			dstCyberNodeID, recvPkt = self.sharedBufferArray.read(self.sharedBufName)
 
 			if len(recvPkt) != 0:
 				self.log.info("Received pkt: " + str(recvPkt) + " from Proxy for Dst Node Id =  " + str(dstCyberNodeID))

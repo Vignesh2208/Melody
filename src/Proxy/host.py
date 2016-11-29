@@ -1,5 +1,7 @@
 import sys
 import os
+import shared_buffer
+from shared_buffer import  *
 
 scriptDir = os.path.dirname(os.path.realpath(__file__))
 if scriptDir not in sys.path:
@@ -104,6 +106,8 @@ def main(hostID,netCfgFile,logFile,runTime,projectName,isControlHost) :
 
 	hostIPMap,powerSimIdMap = extractIPMapping(netCfgFile)
 	log = logger.Logger(logFile,"Host" + str(hostID) + ": ")
+
+	sharedBufferArray = shared_buffer_array()
 	
 	if isControlHost == True :
 		hostIPCLayer = __import__("Projects." + str(projectName) + ".hostControlLayer", globals(), locals(), ['hostControlLayer'], -1)
@@ -117,10 +121,10 @@ def main(hostID,netCfgFile,logFile,runTime,projectName,isControlHost) :
 		hostAttackLayer = hostAttackLayer.hostAttackLayer
 
 	
-	IPCLayer = hostIPCLayer(hostID,logFile)
+	IPCLayer = hostIPCLayer(hostID,logFile,sharedBufferArray)
 	IPCLayer.setPowerSimIdMap(powerSimIdMap)
 	NetLayer = basicNetworkServiceLayer(hostID,logFile,hostIPMap)
-	AttackLayer = hostAttackLayer(hostID,logFile,IPCLayer,NetLayer)
+	AttackLayer = hostAttackLayer(hostID,logFile,IPCLayer,NetLayer,sharedBufferArray)
 
 	IPCLayer.setAttackLayer(AttackLayer)
 	NetLayer.setAttackLayer(AttackLayer)

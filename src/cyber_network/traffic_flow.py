@@ -83,14 +83,14 @@ class TrafficFlow(threading.Thread):
         if self.server_process_start_cmd:
 
             # Start the server
-            result = self.dst_mn_node.pexec(self.server_process_start_cmd)
+            result = self.dst_mn_node.cmd(self.server_process_start_cmd)
 
     def stop_server(self):
 
         if self.server_process_stop_cmd:
 
             # Stop the server
-            result = self.dst_mn_node.pexec(self.server_process_stop_cmd)
+            result = self.dst_mn_node.cmd(self.server_process_stop_cmd)
 
     def run(self):
 

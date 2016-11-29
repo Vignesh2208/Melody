@@ -80,6 +80,7 @@ class attack_orchestrator():
         self.init_shared_buffers()
 
 
+
     def extractIPMapping(self):
         self.IPMapping = {}
         self.PowerSimIdMapping = {}
@@ -186,6 +187,7 @@ class attack_orchestrator():
 
     def run(self):
         assert os.path.exists(self.pcapsDirPath)
+
 
         replay_pcaps = fnmatch.filter(os.listdir(self.pcapsDirPath), 'replay*.pcap')
         replay_pcaps = sorted(replay_pcaps)
