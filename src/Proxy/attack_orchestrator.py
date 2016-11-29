@@ -123,6 +123,12 @@ class attack_orchestrator():
                 print "Shared Buffer open failed! Buffer not initialized for host: " + str(hostID)
                 sys.exit(0)
 
+        result = self.sharedBufferArray.open(bufName="cmd-channel-buffer",isProxy=True)
+
+        if result == BUF_NOT_INITIALIZED or result == FAILURE:
+            print "Cmd channel buffer open failed! "
+            sys.exit(0)
+
 
 
 
@@ -180,7 +186,19 @@ class attack_orchestrator():
             while ret <= 0:
                 ret = self.sharedBufferArray.write(str(hostID) + "attk-channel-buffer", "END", 0)
 
+        ret = 0
+        while ret <= 0 :
+            ret = self.sharedBufferArray.write("cmd-channel-buffer","END",0)
+
         print "Signalled end of replay phase ..."
+        time.sleep(5.0)
+
+    def signal_start_of_replay_phase(self):
+
+        ret = 0
+        while ret <= 0 :
+            ret = self.sharedBufferArray.write("cmd-channel-buffer","START",0)
+        print "Signalled start of replay phase ..."
         time.sleep(5.0)
 
 
@@ -191,6 +209,8 @@ class attack_orchestrator():
 
         replay_pcaps = fnmatch.filter(os.listdir(self.pcapsDirPath), 'replay*.pcap')
         replay_pcaps = sorted(replay_pcaps)
+        self.signal_start_of_replay_phase()
+
         self.start_time = time.time()
         for replay_pcap_f_name in replay_pcaps:
             pcapFilePath = self.pcapsDirPath + "/" + replay_pcap_f_name

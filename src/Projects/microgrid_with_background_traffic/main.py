@@ -5,10 +5,15 @@ import time
 import subprocess
 import datetime
 import sys
+
+
+
 sys.path.append("./")
 from cyber_network.network_configuration import NetworkConfiguration
 from cyber_network.traffic_flow import TrafficFlow
 from cyber_network.traffic_flow import TRAFFIC_FLOW_PERIODIC, TRAFFIC_FLOW_EXPONENTIAL ,TRAFFIC_FLOW_ONE_SHOT
+import Proxy.shared_buffer
+from Proxy.shared_buffer import *
 from Proxy.defines import *
 
 
@@ -31,6 +36,13 @@ class Main:
         self.node_mappings_file_path = self.script_dir + "/node_mappings.txt"
         self.log_dir = self.base_dir + "/logs/" + str(self.project_name)
         self.proxy_dir = self.base_dir + "/src/Proxy"
+        self.sharedBufferArray = shared_buffer_array()
+
+        result = self.sharedBufferArray.open(bufName="cmd-channel-buffer",isProxy=False)
+        if result == BUF_NOT_INITIALIZED or result == FAILURE:
+            print "Cmd channel buffer open failed! "
+            sys.exit(0)
+
         if not os.path.exists(self.log_dir):
             os.makedirs(self.log_dir)
 
@@ -154,8 +166,8 @@ class Main:
                  + " -r " + str(self.run_time) + " -p " + self.power_simulator_ip + " -d " + str(self.control_node_id) + " &")
 
     def start_attack_dispatcher(self):
-        print "Waiting for 5 secs for all processes to spawn up ..."
-        time.sleep(5)
+        #print "Waiting for 5 secs for all processes to spawn up ..."
+        #time.sleep(5)
         print "Starting Attack Dispatcher at " + str(datetime.datetime.now())
         replay_pcaps_dir = self.script_dir + "/pcaps"
 
@@ -164,15 +176,48 @@ class Main:
             os.system("python " + str(attack_dispatcher_script) + " -c " + replay_pcaps_dir + " -l " + self.node_mappings_file_path + " -r " + str(self.run_time) + " &")
 
 
+    def disable_TCP_RST(self):
+        print "DISABLING TCP RST"
+        for i in xrange(len(self.network_configuration.roles)):
+            mininet_host = self.network_configuration.mininet_obj.hosts[i]
+            mininet_host.cmd("sudo iptables -I OUTPUT -p tcp --tcp-flags RST RST -j DROP ")
+
+
+    def enable_TCP_RST(self):
+        print "RE-ENABLING TCP RST"
+        for i in xrange(len(self.network_configuration.roles)):
+            mininet_host = self.network_configuration.mininet_obj.hosts[i]
+            mininet_host.cmd("sudo iptables -I OUTPUT -p tcp --tcp-flags RST RST -j ACCEPT ")
+
+
 
     def run(self):
         if self.run_time > 0:
             print "Running Project for roughly (runtime + 5) =  " + str(self.run_time + 5) + " secs ..."
-            time.sleep(self.run_time + 5)
+            start_time = time.time()
+            while 1 :
+                if time.time() - start_time >= self.run_time + 5.0:
+                    break
+                else:
+                    recv_msg = ''
+                    dummy_id, recv_msg = self.sharedBufferArray.read("cmd-channel-buffer")
+                    if len(recv_msg) != 0:
+                        if recv_msg == "START":
+                            self.disable_TCP_RST()
+                        if recv_msg == "END":
+                            self.enable_TCP_RST()
+                    time.sleep(0.5)
         else:
             print "Running Project forever. Press Ctrl-C to quit ..."
             try:
                 while 1:
+                    recv_msg = ''
+                    dummy_id, recv_msg = self.sharedBufferArray.read("cmd-channel-buffer")
+                    if len(recv_msg) != 0:
+                        if recv_msg == "START" :
+                            self.disable_TCP_RST()
+                        if recv_msg == "END" :
+                            self.enable_TCP_RST()
                     time.sleep(1)
             except KeyboardInterrupt:
                 print "Interrupted ..."
