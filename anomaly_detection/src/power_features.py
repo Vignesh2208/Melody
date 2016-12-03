@@ -24,7 +24,7 @@ def power_features(filename):
 
 		ip=eth.data
 
-		if ip.data.dport == 5100:
+		if ip.p == dpkt.ip.IP_PROTO_UDP and ip.data.dport == 5100:
 			node_id_length = int(ip.data.data[:10])
 			node_id = ip.data.data[10:(10+node_id_length)]
 			measurement = float(ip.data.data[(10+node_id_length):])

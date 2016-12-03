@@ -7,8 +7,12 @@ def dst_list(filename):
     dst_list = []
     i = 0
     start_ts = 0
-    for ts, pkt in dpkt.pcap.Reader(open(filename,'r')):
 
+    print "Filename  =",filename
+    pcap_reader = open(filename,'r')
+    #print pcap_reader
+    for ts, pkt in dpkt.pcap.Reader(pcap_reader):
+        final_ts = ts
         if i == 0:
           start_ts = ts
 
@@ -23,9 +27,11 @@ def dst_list(filename):
         else:
             dst_list.append(ip.dst)
 
-        final_ts = ts
+
         i += 1
     return dst_list, start_ts, final_ts
+
+
 
 def network_features(filename, dst_list, start, end):
   #dst_list, start, end = dst_list(filename)
