@@ -1,0 +1,11 @@
+#!/usr/bin/expect -f
+
+set username [lindex $argv 0];
+set password [lindex $argv 1];
+set host [lindex $argv 2];
+
+exec telnet $host 23
+send "Will Echo\r"
+send "$username\r"
+send "$password\r"
+
