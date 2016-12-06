@@ -89,15 +89,15 @@ class Main:
             #             server_process_stop_cmd="sudo killall sshd",
             #             client_expect_file=self.base_dir + '/src/cyber_network/ssh_session.expect'),
 
-            TrafficFlow(type=TRAFFIC_FLOW_ONE_SHOT,
+            TrafficFlow(type=TRAFFIC_FLOW_PERIODIC,
                         offset=1,
-                        inter_flow_period=1,
+                        inter_flow_period=2,
                         run_time=self.run_time,
                         src_mn_node=self.network_configuration.mininet_obj.get("h1"),
                         dst_mn_node=self.network_configuration.mininet_obj.get("h2"),
                         root_user_name="ubuntu",
                         root_password="ubuntu",
-                        server_process_start_cmd="sudo netcat -l -p 23&",
+                        server_process_start_cmd="sudo netcat -k -l -p 23&",
                         server_process_stop_cmd="sudo killall netcat",
                         client_expect_file=self.base_dir + '/src/cyber_network/telnet_session.expect'),
             #
@@ -299,7 +299,7 @@ def main():
 
                                                         ],                       
                                                  project_name="microgrid_with_background_traffic",
-                                                 run_time=10,
+                                                 run_time=50,
                                                  power_simulator_ip="127.0.0.1"
                                                  )
 

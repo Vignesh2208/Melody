@@ -61,10 +61,11 @@ class TrafficFlow(threading.Thread):
             if self.elasped_time - self.start_time > self.run_time:
                 break
 
-            result = self.src_mn_node.pexec(self.client_expect_file + ' ' +
-                                            self.root_user_name + ' ' +
-                                            self.root_password + ' ' +
-                                            self.dst_mn_node.IP())
+            cmd = self.client_expect_file + ' ' +\
+                  self.root_user_name + ' ' +\
+                  self.root_password + ' ' + self.dst_mn_node.IP()
+
+            result = self.src_mn_node.pexec(cmd)
 
             if self.type == TRAFFIC_FLOW_PERIODIC:
                 sleep_for = self.inter_flow_period
