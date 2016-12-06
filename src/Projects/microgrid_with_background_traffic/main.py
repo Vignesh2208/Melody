@@ -77,20 +77,20 @@ class Main:
             #             server_process_stop_cmd="",
             #             client_expect_file=self.base_dir + '/src/cyber_network/ping_session.expect'),
             #
-            # TrafficFlow(type=TRAFFIC_FLOW_ONE_SHOT,
-            #             offset=5,
-            #             inter_flow_period=1,
-            #             run_time=self.run_time,
-            #             src_mn_node=self.network_configuration.mininet_obj.get("h7"),
-            #             dst_mn_node=self.network_configuration.mininet_obj.get("h1"),
-            #             root_user_name="ubuntu",
-            #             root_password="ubuntu",
-            #             server_process_start_cmd="/usr/sbin/sshd -D&",
-            #             server_process_stop_cmd="sudo killall sshd",
-            #             client_expect_file=self.base_dir + '/src/cyber_network/ssh_session.expect'),
+            TrafficFlow(type=TRAFFIC_FLOW_ONE_SHOT,
+                        offset=5,
+                        inter_flow_period=1,
+                        run_time=self.run_time,
+                        src_mn_node=self.network_configuration.mininet_obj.get("h7"),
+                        dst_mn_node=self.network_configuration.mininet_obj.get("h1"),
+                        root_user_name="ubuntu",
+                        root_password="ubuntu",
+                        server_process_start_cmd="/usr/sbin/sshd -D&",
+                        server_process_stop_cmd="sudo killall sshd",
+                        client_expect_file=self.base_dir + '/src/cyber_network/ssh_session.expect'),
 
-            TrafficFlow(type=TRAFFIC_FLOW_PERIODIC,
-                        offset=1,
+            TrafficFlow(type=TRAFFIC_FLOW_ONE_SHOT,
+                        offset=10,
                         inter_flow_period=2,
                         run_time=self.run_time,
                         src_mn_node=self.network_configuration.mininet_obj.get("h1"),
@@ -299,7 +299,7 @@ def main():
 
                                                         ],                       
                                                  project_name="microgrid_with_background_traffic",
-                                                 run_time=50,
+                                                 run_time=15,
                                                  power_simulator_ip="127.0.0.1"
                                                  )
 
