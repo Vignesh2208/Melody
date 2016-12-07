@@ -65,29 +65,29 @@ class Main:
 
     def start_background_traffic(self):
         traffic_flows = [
-            # TrafficFlow(type=TRAFFIC_FLOW_PERIODIC,
-            #             offset=1,
-            #             inter_flow_period=1,
-            #             run_time=self.run_time,
-            #             src_mn_node=self.network_configuration.mininet_obj.get("h1"),
-            #             dst_mn_node=self.network_configuration.mininet_obj.get("h2"),
-            #             root_user_name="ubuntu",
-            #             root_password="ubuntu",
-            #             server_process_start_cmd="",
-            #             server_process_stop_cmd="",
-            #             client_expect_file=self.base_dir + '/src/cyber_network/ping_session.expect'),
-            #
-            # TrafficFlow(type=TRAFFIC_FLOW_ONE_SHOT,
-            #             offset=5,
-            #             inter_flow_period=1,
-            #             run_time=self.run_time,
-            #             src_mn_node=self.network_configuration.mininet_obj.get("h7"),
-            #             dst_mn_node=self.network_configuration.mininet_obj.get("h1"),
-            #             root_user_name="ubuntu",
-            #             root_password="ubuntu",
-            #             server_process_start_cmd="/usr/sbin/sshd -D&",
-            #             server_process_stop_cmd="sudo killall sshd",
-            #             client_expect_file=self.base_dir + '/src/cyber_network/ssh_session.expect'),
+            TrafficFlow(type=TRAFFIC_FLOW_PERIODIC,
+                        offset=1,
+                        inter_flow_period=1,
+                        run_time=self.run_time,
+                        src_mn_node=self.network_configuration.mininet_obj.get("h7"),
+                        dst_mn_node=self.network_configuration.mininet_obj.get("h1"),
+                        root_user_name="ubuntu",
+                        root_password="ubuntu",
+                        server_process_start_cmd="",
+                        server_process_stop_cmd="",
+                        client_expect_file=self.base_dir + '/src/cyber_network/ping_session.expect'),
+
+            TrafficFlow(type=TRAFFIC_FLOW_ONE_SHOT,
+                        offset=5,
+                        inter_flow_period=1,
+                        run_time=self.run_time,
+                        src_mn_node=self.network_configuration.mininet_obj.get("h7"),
+                        dst_mn_node=self.network_configuration.mininet_obj.get("h1"),
+                        root_user_name="ubuntu",
+                        root_password="ubuntu",
+                        server_process_start_cmd="/usr/sbin/sshd -D&",
+                        server_process_stop_cmd="sudo killall sshd",
+                        client_expect_file=self.base_dir + '/src/cyber_network/ssh_session.expect'),
 
             TrafficFlow(type=TRAFFIC_FLOW_ONE_SHOT,
                         offset=10,
@@ -101,29 +101,29 @@ class Main:
                         server_process_stop_cmd="sudo killall socat",
                         client_expect_file=self.base_dir + '/src/cyber_network/socat_session.expect'),
 
-            # TrafficFlow(type=TRAFFIC_FLOW_EXPONENTIAL,
-            #             offset=1,
-            #             inter_flow_period=1,
-            #             run_time=self.run_time,
-            #             src_mn_node=self.network_configuration.mininet_obj.get("h7"),
-            #             dst_mn_node=self.network_configuration.mininet_obj.get("h1"),
-            #             root_user_name="ubuntu",
-            #             root_password="ubuntu",
-            #             server_process_start_cmd="python -m SimpleHTTPServer&",
-            #             server_process_stop_cmd="ps aux | grep SimpleHTTPServer | awk {'print $2'} | xargs kill",
-            #             client_expect_file=self.base_dir + '/src/cyber_network/http_session.expect'),
-            #
-            # TrafficFlow(type=TRAFFIC_FLOW_EXPONENTIAL,
-            #             offset=1,
-            #             inter_flow_period=1,
-            #             run_time=self.run_time,
-            #             src_mn_node=self.network_configuration.mininet_obj.get("h7"),
-            #             dst_mn_node=self.network_configuration.mininet_obj.get("h1"),
-            #             root_user_name="ubuntu",
-            #             root_password="ubuntu",
-            #             server_process_start_cmd="/usr/sbin/sshd -D&",
-            #             server_process_stop_cmd="sudo killall sshd",
-            #             client_expect_file=self.base_dir + '/src/cyber_network/ssh_session.expect')
+            TrafficFlow(type=TRAFFIC_FLOW_EXPONENTIAL,
+                        offset=1,
+                        inter_flow_period=self.run_time/2,
+                        run_time=self.run_time,
+                        src_mn_node=self.network_configuration.mininet_obj.get("h7"),
+                        dst_mn_node=self.network_configuration.mininet_obj.get("h1"),
+                        root_user_name="ubuntu",
+                        root_password="ubuntu",
+                        server_process_start_cmd="python -m SimpleHTTPServer&",
+                        server_process_stop_cmd="ps aux | grep SimpleHTTPServer | awk {'print $2'} | xargs kill",
+                        client_expect_file=self.base_dir + '/src/cyber_network/http_session.expect'),
+
+            TrafficFlow(type=TRAFFIC_FLOW_EXPONENTIAL,
+                        offset=1,
+                        inter_flow_period=self.run_time/2,
+                        run_time=self.run_time,
+                        src_mn_node=self.network_configuration.mininet_obj.get("h7"),
+                        dst_mn_node=self.network_configuration.mininet_obj.get("h1"),
+                        root_user_name="ubuntu",
+                        root_password="ubuntu",
+                        server_process_start_cmd="/usr/sbin/sshd -D&",
+                        server_process_stop_cmd="sudo killall sshd",
+                        client_expect_file=self.base_dir + '/src/cyber_network/ssh_session.expect')
         ]
 
         for tf in traffic_flows:
@@ -250,10 +250,10 @@ class Main:
         print "Starting project ..."
         ng = self.network_configuration.setup_network_graph(mininet_setup_gap=1, synthesis_setup_gap=1)
         self.generate_node_mappings(self.network_configuration.roles)
-        # self.start_host_processes()
+        self.start_host_processes()
         self.start_switch_link_pkt_captures()
-        # self.start_proxy_process()
-        # self.start_attack_dispatcher()
+        self.start_proxy_process()
+        self.start_attack_dispatcher()
         self.start_background_traffic()
         self.run()
 
@@ -298,7 +298,7 @@ def main():
 
                                                         ],                       
                                                  project_name="microgrid_with_background_traffic",
-                                                 run_time=30,
+                                                 run_time=60,
                                                  power_simulator_ip="127.0.0.1"
                                                  )
 
