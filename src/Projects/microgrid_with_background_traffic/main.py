@@ -77,17 +77,17 @@ class Main:
             #             server_process_stop_cmd="",
             #             client_expect_file=self.base_dir + '/src/cyber_network/ping_session.expect'),
             #
-            TrafficFlow(type=TRAFFIC_FLOW_ONE_SHOT,
-                        offset=5,
-                        inter_flow_period=1,
-                        run_time=self.run_time,
-                        src_mn_node=self.network_configuration.mininet_obj.get("h7"),
-                        dst_mn_node=self.network_configuration.mininet_obj.get("h1"),
-                        root_user_name="ubuntu",
-                        root_password="ubuntu",
-                        server_process_start_cmd="/usr/sbin/sshd -D&",
-                        server_process_stop_cmd="sudo killall sshd",
-                        client_expect_file=self.base_dir + '/src/cyber_network/ssh_session.expect'),
+            # TrafficFlow(type=TRAFFIC_FLOW_ONE_SHOT,
+            #             offset=5,
+            #             inter_flow_period=1,
+            #             run_time=self.run_time,
+            #             src_mn_node=self.network_configuration.mininet_obj.get("h7"),
+            #             dst_mn_node=self.network_configuration.mininet_obj.get("h1"),
+            #             root_user_name="ubuntu",
+            #             root_password="ubuntu",
+            #             server_process_start_cmd="/usr/sbin/sshd -D&",
+            #             server_process_stop_cmd="sudo killall sshd",
+            #             client_expect_file=self.base_dir + '/src/cyber_network/ssh_session.expect'),
 
             TrafficFlow(type=TRAFFIC_FLOW_ONE_SHOT,
                         offset=10,
@@ -97,11 +97,10 @@ class Main:
                         dst_mn_node=self.network_configuration.mininet_obj.get("h2"),
                         root_user_name="ubuntu",
                         root_password="ubuntu",
-                        server_process_start_cmd="sudo netcat -k -l -p 23&",
-                        server_process_stop_cmd="sudo killall netcat",
-                        client_expect_file=self.base_dir + '/src/cyber_network/telnet_session.expect'),
-            #
-            #
+                        server_process_start_cmd="sudo socat tcp-l:23,reuseaddr,fork exec:/bin/login,pty,setsid,setpgid,stderr,ctty&",
+                        server_process_stop_cmd="sudo killall socat",
+                        client_expect_file=self.base_dir + '/src/cyber_network/socat_session.expect'),
+
             # TrafficFlow(type=TRAFFIC_FLOW_EXPONENTIAL,
             #             offset=1,
             #             inter_flow_period=1,
@@ -299,7 +298,7 @@ def main():
 
                                                         ],                       
                                                  project_name="microgrid_with_background_traffic",
-                                                 run_time=15,
+                                                 run_time=30,
                                                  power_simulator_ip="127.0.0.1"
                                                  )
 

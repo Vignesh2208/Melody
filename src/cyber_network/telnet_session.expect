@@ -7,3 +7,13 @@ set host [lindex $argv 2];
 spawn telnet $host 23
 expect "'^]'."
 send "Hello Telnet...\r"
+sleep 1
+send "Hello Telnet...\r"
+sleep 1
+send "Hello Telnet...\r"
+sleep 1
+send "Hello Telnet...\r"
+sleep 1
+send "Hello Telnet...\r"
+sleep 1
+close
