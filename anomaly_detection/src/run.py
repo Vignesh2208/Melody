@@ -21,8 +21,8 @@ scriptDir = os.path.dirname(os.path.realpath(__file__))
 covType = 'full'
 if __name__ == "__main__" :
 
-	data,nMaxAttackSamples = read_microgrid_datasets.extract_features()
-	#data,nMaxAttackSamples = read_MSU_DataSet_Samples(scriptDir)
+	#data,nMaxAttackSamples = read_microgrid_datasets.extract_features()
+	data,nMaxAttackSamples = read_MSU_DataSet_Samples(scriptDir)
 	trainData = data['Train']
 	attackData = []
 	fundamentalPeriods = []
@@ -30,23 +30,33 @@ if __name__ == "__main__" :
 	
 
 	boxPlotData = {}
+	detectionTimeData = {}
+	nCrossValidationAttempts = 0
 	boxPlotLabels = ['Train']
+	detectionTimeLabels = []
 	powerSpectralDensity = {}
-	
+	nFP = 0.0
+	nFN = 0.0
+	nTP = 0.0
+	nTN = 1.0
 
 	for attackType in data['Attack'].keys() :
 		attackData.append((attackType,data['Attack'][attackType]))
+
+		if "Normal" in attackType :
+			nCrossValidationAttempts = nCrossValidationAttempts + 1
 		boxPlotLabels.append(attackType)
-	
+		detectionTimeLabels.append(attackType)
+
+
 	if usePCA == True :
-		covType =  'diag'
+		covType = 'diag'
 		optDimensionality = extractOptPCADimensionality(data['Train'])
 		print "PCA 99 percentile optDimensionality = ", optDimensionality
 		pca = PCA(n_components=optDimensionality)
 		pca.fit(data['Train'])
 		trainData = pca.transform(data['Train'])
 		attackData = []
-		
 
 		for attackType in data['Attack'].keys() :
 			attackData.append((attackType,pca.transform(data['Attack'][attackType])))	
@@ -112,7 +122,8 @@ if __name__ == "__main__" :
 		nSignals = len(trainData[0])
 		nLags = 100
 		modelOrder = [0]*nSignals
-		print "nSignals = ",nSignals
+		print "Number of PCA Signals = ",nSignals
+		print "Fitting ARMA Models ..."
 		
 		for i in xrange(0,nSignals) :			
 			currSignal = np.array(map(itemgetter(i),trainData))
@@ -191,7 +202,8 @@ if __name__ == "__main__" :
 
 
 			boxPlotData[i] = []	
-			trainDataRMS= getRMSErrs(diffSignal,res,windowSize)
+			trainDataRMS,detection_time = getRMSErrs(diffSignal,res,windowSize)
+			max_train_rms_err = max(trainDataRMS)
 			boxPlotData[i].append(trainDataRMS)
 			
 			for k in xrange(0,len(attackData)) :
@@ -206,10 +218,32 @@ if __name__ == "__main__" :
 					else:
 						diffAttackSignal[j] = (attackSignal[j] - attackSignal[j-fundamentalPeriods[i]])
 
-				if difference_order == 0 :
-					boxPlotData[i].append(getRMSErrs(diffAttackSignal,res,windowSize))
+
+				attackDataRMS,detection_time = getRMSErrs(diffAttackSignal,res,windowSize,threshold=max_train_rms_err)
+
+				if attackType not in detectionTimeData.keys():
+					detectionTimeData[attackType] = detection_time
+				elif detection_time != None:
+					if detectionTimeData[attackType] == None :
+						detectionTimeData[attackType] = detection_time
+					elif detection_time < detectionTimeData[attackType] :
+						detectionTimeData[attackType] = detection_time
+
+
+				boxPlotData[i].append(attackDataRMS)
+
+
+		for attackType in detectionTimeData.keys() :
+			if "Normal" in attackType :
+				if detectionTimeData[attackType] == None :
+					nTN = nTN + 1.0
 				else:
-					boxPlotData[i].append(getRMSErrs(diffAttackSignal,res,windowSize))
+					nFP = nFP + 1.0
+			else:
+				if detectionTimeData[attackType] == None :
+					nFN = nFN + 1.0
+				else:
+					nTP = nTP + 1.0
 
 		if nSignals % 2 == 0 :
 			nrows = nSignals/2
@@ -244,7 +278,34 @@ if __name__ == "__main__" :
 		plt.tight_layout()
 		plt.show()
 
-	
+
+		print "################################################"
+		print "Output Statistics"
+		print "################################################"
+		tp_rate =nTP/(nTP + nFN)
+		fp_rate =nFP/(nFP + nTN)
+		tn_rate = nTN/(nTN + nFP)
+		fn_rate = 1.0 - tp_rate
+		precision = tp_rate/(tp_rate + fp_rate)
+		recall = tp_rate/(tp_rate + fn_rate)
+
+		print "True Positive Rate:      ",tp_rate
+		print "False Positive Rate:     ",fp_rate
+		print "True Negative Rate:      ",tn_rate
+		print "False Negative Rate:     ",fn_rate
+		print "Precision:               ",precision
+		print "Recall:                  ",recall
+
+		print ""
+		print ""
+		print "#################################################"
+		print "Detection Time (multiply by sampling rate ts) ..."
+		print "#################################################"
+		for attackType in detectionTimeLabels :
+			if attackType in detectionTimeData.keys():
+				print attackType, ":		", detectionTimeData[attackType]
+			else:
+				print attackType, ":		NOT DETECTED"
 	
 
 	if testHMMForecasting == True :
