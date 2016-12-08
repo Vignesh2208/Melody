@@ -29,6 +29,7 @@ class Main:
         self.power_simulator_ip = self.network_configuration.power_simulator_ip
         self.node_mappings = {}
         self.control_node_id = None
+        self.emulated_traffic_flows = []
 
         self.script_dir = os.path.dirname(os.path.realpath(__file__))
         idx = self.script_dir.index('NetPower_TestBed')
@@ -64,7 +65,7 @@ class Main:
 
 
     def start_background_traffic(self):
-        traffic_flows = [
+        self.emulated_traffic_flows.extend([
             TrafficFlow(type=TRAFFIC_FLOW_PERIODIC,
                         offset=1,
                         inter_flow_period=1,
@@ -74,7 +75,6 @@ class Main:
                         root_user_name="ubuntu",
                         root_password="ubuntu",
                         server_process_start_cmd="",
-                        server_process_stop_cmd="",
                         client_expect_file=self.base_dir + '/src/cyber_network/ping_session.expect'),
 
             TrafficFlow(type=TRAFFIC_FLOW_ONE_SHOT,
@@ -86,7 +86,6 @@ class Main:
                         root_user_name="ubuntu",
                         root_password="ubuntu",
                         server_process_start_cmd="/usr/sbin/sshd -D&",
-                        server_process_stop_cmd="sudo killall sshd",
                         client_expect_file=self.base_dir + '/src/cyber_network/ssh_session.expect'),
 
             TrafficFlow(type=TRAFFIC_FLOW_ONE_SHOT,
@@ -98,7 +97,6 @@ class Main:
                         root_user_name="ubuntu",
                         root_password="ubuntu",
                         server_process_start_cmd="sudo socat tcp-l:23,reuseaddr,fork exec:/bin/login,pty,setsid,setpgid,stderr,ctty&",
-                        server_process_stop_cmd="sudo killall socat",
                         client_expect_file=self.base_dir + '/src/cyber_network/socat_session.expect'),
 
             TrafficFlow(type=TRAFFIC_FLOW_EXPONENTIAL,
@@ -110,7 +108,6 @@ class Main:
                         root_user_name="ubuntu",
                         root_password="ubuntu",
                         server_process_start_cmd="python -m SimpleHTTPServer&",
-                        server_process_stop_cmd="ps aux | grep SimpleHTTPServer | awk {'print $2'} | xargs kill",
                         client_expect_file=self.base_dir + '/src/cyber_network/http_session.expect'),
 
             TrafficFlow(type=TRAFFIC_FLOW_EXPONENTIAL,
@@ -122,11 +119,10 @@ class Main:
                         root_user_name="ubuntu",
                         root_password="ubuntu",
                         server_process_start_cmd="/usr/sbin/sshd -D&",
-                        server_process_stop_cmd="sudo killall sshd",
                         client_expect_file=self.base_dir + '/src/cyber_network/ssh_session.expect')
-        ]
+        ])
 
-        for tf in traffic_flows:
+        for tf in self.emulated_traffic_flows:
             tf.start()
 
         print "Background traffic threads started..."
@@ -214,7 +210,6 @@ class Main:
             mininet_host.cmd("sudo iptables -I OUTPUT -p tcp --tcp-flags RST RST -j ACCEPT ")
 
 
-
     def run(self):
         if self.run_time > 0:
             print "Running Project for roughly (runtime + 5) =  " + str(self.run_time + 5) + " secs ..."
@@ -262,6 +257,11 @@ class Main:
 
     def stop_project(self):
         print "Cleaning up ..."
+
+        # Join the threads for background processes to wait on them
+        for tf in self.emulated_traffic_flows:
+            tf.join()
+
         self.network_configuration.cleanup_mininet()
 
 

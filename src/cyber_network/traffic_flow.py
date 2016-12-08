@@ -14,7 +14,7 @@ class TrafficFlow(threading.Thread):
     def __init__(self, type, offset, inter_flow_period, run_time, src_mn_node, dst_mn_node,
                  root_user_name, root_password,
                  server_process_start_cmd,
-                 server_process_stop_cmd,
+                 #server_process_stop_cmd,
                  client_expect_file):
         '''
         'type', 'offset' and rate' do the following:
@@ -44,7 +44,7 @@ class TrafficFlow(threading.Thread):
         self.root_password = root_password
 
         self.server_process_start_cmd = server_process_start_cmd
-        self.server_process_stop_cmd = server_process_stop_cmd
+        self.server_pid = None
         self.client_expect_file = client_expect_file
 
         self.start_time = None
@@ -85,13 +85,18 @@ class TrafficFlow(threading.Thread):
 
             # Start the server
             result = self.dst_mn_node.cmd(self.server_process_start_cmd)
+            print result
+
+            for line in result.split("\r"):
+                print line
+                if line[0] == "[" and line[2] == "]":
+                    self.server_pid = int(line.split()[1])
+                    print self.server_pid
 
     def stop_server(self):
 
-        if self.server_process_stop_cmd:
-
-            # Stop the server
-            result = self.dst_mn_node.cmd(self.server_process_stop_cmd)
+        # Stop the server
+        result = self.dst_mn_node.cmd("sudo kill " + str(self.server_pid))
 
     def run(self):
 
