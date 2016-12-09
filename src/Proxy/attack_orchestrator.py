@@ -149,7 +149,7 @@ class attack_orchestrator():
         try:
             srchostID = self.IPToHostMapping[src_ip]
             dstHostID = self.IPToHostMapping[dst_ip]
-            print "Dispatching Next Attack pkt no = ", idx, " Len = ", len(raw_ip_pkt), "Src Host = ", srchostID, " Dst Host = ", dstHostID
+            #print "Dispatching Next Attack pkt no = ", idx, " Len = ", len(raw_ip_pkt), "Src Host = ", srchostID, " Dst Host = ", dstHostID
             ret = 0
 
             pkt_hex_str = binascii.hexlify(raw_ip_pkt.__str__())
@@ -164,7 +164,7 @@ class attack_orchestrator():
                 # ret = self.shared_bufs[srchostID].write("TX:" + str(raw_ip_pkt),DUMMY_ID)
                 ret = self.sharedBufferArray.write(str(srchostID) + "attk-channel-buffer", "TX:" + str(pkt_hex_str), 0)
 
-            print "Waiting for attk pkt simulation completion"
+            #print "Waiting for attk pkt simulation completion"
 
             recv_msg = ''
             while recv_msg != "ACK":
