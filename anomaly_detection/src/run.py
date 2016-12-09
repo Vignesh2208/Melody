@@ -4,6 +4,7 @@ import read_microgrid_datasets
 from read_microgrid_datasets import *
 import itertools
 from hmm_model import *
+import math
 
 
 
@@ -16,13 +17,34 @@ testFourierExtrapolation = True
 testArimaForecasting = True
 testHMMForecasting = False
 
+model_orders = {
+	"MSU" :
+			[
+			(5,0,0),
+			(5,0,0),
+			(5,0,0),
+			(5,0,0),
+		   	],
+	"all_taps" :
+			[
+			(1,0,0),
+			(1,0,0),
+			(2,1,0),	# The train error seems to be high for this. (was (2,0,1))
+			(1,0,2),
+			(1,1,0),	# Need to check this. ARMA fit does not converge. (was (1,0,8))
+			(3,0,0),
+			(2,0,0)
+			]
+}
+
 
 scriptDir = os.path.dirname(os.path.realpath(__file__))
 covType = 'full'
+scenario_name = "all_taps"
 if __name__ == "__main__" :
 
-	#data,nMaxAttackSamples = read_microgrid_datasets.extract_features()
-	data,nMaxAttackSamples = read_MSU_DataSet_Samples(scriptDir)
+	data,nMaxAttackSamples = read_microgrid_datasets.extract_features(scenario_name=scenario_name)
+	#data,nMaxAttackSamples = read_MSU_DataSet_Samples(scriptDir)
 	trainData = data['Train']
 	attackData = []
 	fundamentalPeriods = []
@@ -71,12 +93,13 @@ if __name__ == "__main__" :
 		
 		# Step-0 Extract fundamental Periods of each signal
 		for i in xrange(0,nSignals) :
+
 			currSignal = np.array(map(itemgetter(i),trainData))
 			print "Extracting Fundamental periods for signal ", i, " ..."
 			f,PWSD,candidatePeriods,pThreshold,f0 = getPeriodHints(X=currSignal,fs=1.0)
 
 			if f0 != 0 :
-				fundamentalPeriods[i] = int(1.0/float(f0))
+				fundamentalPeriods[i] = int(round(1.0/float(f0)))
 			else:
 				fundamentalPeriods[i] = 0
 			powerSpectralDensity[i] = (f,PWSD,pThreshold)
@@ -120,12 +143,15 @@ if __name__ == "__main__" :
 	if testArimaForecasting == True :
 
 		nSignals = len(trainData[0])
-		nLags = 100
+		nLags = 25
 		modelOrder = [0]*nSignals
 		print "Number of PCA Signals = ",nSignals
 		print "Fitting ARMA Models ..."
 		
-		for i in xrange(0,nSignals) :			
+		for i in xrange(0,nSignals) :
+
+
+			#i = 4
 			currSignal = np.array(map(itemgetter(i),trainData))
 			diffSignal = np.array([0.0]*len(currSignal))
 
@@ -139,65 +165,45 @@ if __name__ == "__main__" :
 
 
 			# Step 2 estimate model order by looking at acf/pacf of signal
-			"""
-			print "Plot Acf/Pacf for signal ", i , " ..."
+
 			
-			acf = stattools.acf(x=np.array(map(itemgetter(i),trainData)),nlags=nLags,fft=True)
-			pacf = stattools.pacf(x=np.array(map(itemgetter(i),trainData)),nlags=nLags)
-			plt.plot(diffSignal[0:nLags],marker='+',label="ACF")
-			plt.plot(pacf,marker='^',label="PACF",linestyle='--')
-			plt.title("ACF/PACF for Signal " + str(i))
-			plt.xlabel("Lags")
-			plt.ylabel("Auto Correlation/Partial Auto Correlation")
-			plt.xticks(np.arange(0, nLags + 5 , int(nLags/20)))
-			plt.legend(loc='upper right',shadow=True)
-			plt.show()
-			sys.exit(0)
-			"""
-			
-			"""
-			print "Estimating Acf for differenced signal ", i, " ..."
+
+			print "Fitting Model for PCA signal ", i + 1, " ..."
 
 
-			#spacf_orig = stattools.pacf(x=currSignal,nlags=nLags)
-			pacf_orig = stattools.acf(x=diffSignal,nlags=nLags,fft=True)
-			pacf = stattools.pacf(x=diffSignal,nlags=nLags)
-			plt.plot(pacf_orig,marker='+',label="PACF Orig",linestyle='-.',color="red")
-			plt.plot(pacf,marker='^',label="PACF Diff",linestyle='--',color="green")
-			plt.title("PACF for Original and Differenced Signal No: " + str(i))
-			plt.xlabel("Lags")
-			plt.ylabel("Partial Auto Correlation")
-			plt.xticks(np.arange(0, nLags + 5 , int(nLags/20)))
-			plt.legend(loc='upper right',shadow=True)
-			plt.show()
-			#sys.exit(0)
-			"""
+
+			# acf = stattools.acf(x=diffSignal,nlags=nLags,fft=True)
+			# pacf = stattools.pacf(x=diffSignal,nlags=nLags)
+            #
+			# fig, axarr = plt.subplots(nrows=2, ncols=1)
+            #
+			# axarr[0].plot(acf,marker='+',label="ACF",linestyle='-.',color="red")
+			# axarr[0].set_title("Auto-Correlation Function for PCA Signal : " + str(i+1))
+			# axarr[0].set_xlabel("Lags")
+			# axarr[0].set_ylabel("ACF")
+			# axarr[0].set_xlim([0,nLags + 5])
+			# axarr[0].grid(True)
+            #
+			# axarr[1].plot(pacf, marker='+', label="PACF", linestyle='-.', color="green")
+			# axarr[1].set_title("Partial Auto-Correlation Function for PCA Signal : " + str(i+1))
+			# axarr[1].set_xlabel("Lags")
+			# axarr[1].set_ylabel("PACF")
+			# axarr[1].set_xlim([0, nLags + 5])
+			# axarr[1].grid(True)
+            #
+			# plt.tight_layout()
+			# plt.show()
+			# sys.exit(0)
+
 
 			
 			# Step 3: use model order to do ARMA forcecasting	
 			# (AR order, difference order, MA Order)
-			
-			difference_order = 0	
-			""" Old one
-			modelOrder[0] = (1,difference_order,10)
-			modelOrder[1] = (1,difference_order,9)
-			modelOrder[2] = (1,difference_order,10)
-			modelOrder[3] = (1,difference_order,10)
-			"""
+			modelOrder = model_orders[scenario_name][i]
 
 
-
-			modelOrder[i] = (5,difference_order,0)
-
-			"""
-			modelOrder[0] = (5,difference_order,0)
-			modelOrder[1] = (5,difference_order,0)
-			modelOrder[2] = (5,difference_order,0)
-			modelOrder[3] = (5,difference_order,0)
-			"""
-			
 			#arima_model = statsmodels.tsa.arima_model.ARIMA(currSignal,(modelOrder[i][0],modelOrder[i][1],modelOrder[i][2]))
-			arima_model = statsmodels.tsa.arima_model.ARIMA(diffSignal,(modelOrder[i][0],modelOrder[i][1],modelOrder[i][2]))
+			arima_model = statsmodels.tsa.arima_model.ARIMA(diffSignal,(modelOrder[0],modelOrder[1],modelOrder[2]))
 			res = arima_model.fit()
 
 
@@ -253,7 +259,6 @@ if __name__ == "__main__" :
 			
 		ncols = 2
 
-		print boxPlotData
 		fig, axarr = plt.subplots(nrows=nrows, ncols=ncols)
 		for i in xrange(0,nrows) :
 			for j in xrange(0,ncols) :
@@ -282,12 +287,36 @@ if __name__ == "__main__" :
 		print "################################################"
 		print "Output Statistics"
 		print "################################################"
-		tp_rate =nTP/(nTP + nFN)
-		fp_rate =nFP/(nFP + nTN)
-		tn_rate = nTN/(nTN + nFP)
-		fn_rate = 1.0 - tp_rate
-		precision = tp_rate/(tp_rate + fp_rate)
-		recall = tp_rate/(tp_rate + fn_rate)
+
+		if nTP + nFN == 0 :
+			tp_rate = "Not Applicable"
+		else:
+			tp_rate =nTP/(nTP + nFN)
+
+		if nFP + nTN == 0 :
+			fp_rate = "Not Applicable"
+		else:
+			fp_rate =nFP/(nFP + nTN)
+
+		if nTN + nFP == 0 :
+			tn_rate = "Not Applicable"
+		else:
+			tn_rate = nTN/(nTN + nFP)
+
+		if tp_rate == "Not Applicable" :
+			fn_rate = "Not Applicable"
+		else:
+			fn_rate = 1.0 - tp_rate
+
+		if tp_rate == "Not Applicable" or fp_rate == "Not Applicable" :
+			precision = "Not Applicable"
+		else:
+			precision = tp_rate/(tp_rate + fp_rate)
+
+		if tp_rate == "Not Applicable" or fn_rate == "Not Applicable" :
+			recall = "Not Applicable"
+		else:
+			recall = tp_rate/(tp_rate + fn_rate)
 
 		print "True Positive Rate:      ",tp_rate
 		print "False Positive Rate:     ",fp_rate
@@ -296,16 +325,18 @@ if __name__ == "__main__" :
 		print "Precision:               ",precision
 		print "Recall:                  ",recall
 
-		print ""
-		print ""
-		print "#################################################"
-		print "Detection Time (multiply by sampling rate ts) ..."
-		print "#################################################"
-		for attackType in detectionTimeLabels :
-			if attackType in detectionTimeData.keys():
-				print attackType, ":		", detectionTimeData[attackType]
-			else:
-				print attackType, ":		NOT DETECTED"
+		if len(detectionTimeLabels) > 0 :
+
+			print ""
+			print ""
+			print "#################################################"
+			print "Detection Time (multiply by sampling rate ts) ..."
+			print "#################################################"
+			for attackType in detectionTimeLabels :
+				if attackType in detectionTimeData.keys():
+					print attackType, ":           ", detectionTimeData[attackType]
+				else:
+					print attackType, ":            NOT DETECTED"
 	
 
 	if testHMMForecasting == True :

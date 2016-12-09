@@ -8,9 +8,9 @@ import numpy as np
 scriptDir = os.path.dirname(os.path.realpath(__file__))
 
 
-def extract_features(filepath=dirname(scriptDir)+ "/datasets/microgrid_datasets"):
-	train_folder = filepath + '/train/'
-	attack_folder = filepath + '/attack/'
+def extract_features(filepath=dirname(scriptDir)+ "/datasets/microgrid_datasets",scenario_name="all_taps"):
+	train_folder = filepath + '/train/' + scenario_name + "/"
+	attack_folder = filepath + '/attack/' + scenario_name + "/"
 	data = {}
 
 	pcap_files_train = os.listdir(train_folder)

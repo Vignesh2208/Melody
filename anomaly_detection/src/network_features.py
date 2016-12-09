@@ -8,7 +8,7 @@ def dst_list(filename):
     i = 0
     start_ts = 0
 
-    print "Filename  =",filename
+    print "Extracting features from: ",filename
     pcap_reader = open(filename,'r')
     #print pcap_reader
     for ts, pkt in dpkt.pcap.Reader(pcap_reader):

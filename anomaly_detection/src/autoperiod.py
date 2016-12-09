@@ -117,11 +117,13 @@ def getPeriodHints(X,fs=1.0) :
 				candidatePeriods.append(float(1.0/f[i]))
 
 
+	newCandidatePeriods = []
 	for i in xrange(0,len(candidatePeriods)) :
-		if candidatePeriods[i] >= float(N/2) or candidatePeriods[i] <= 2.0 :
-			candidatePeriods.remove(candidatePeriods[i])
-			
+		if candidatePeriods[i] < float(N/2) and candidatePeriods[i] > 2.0 :
+			newCandidatePeriods.append(candidatePeriods[i])
 
+			
+	candidatePeriods = newCandidatePeriods
 	if len(candidatePeriods) == 0 :
 
 		print "Periodicity Test failed. Threshold = " , pThreshold
