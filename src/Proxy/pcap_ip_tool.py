@@ -3,6 +3,7 @@ import dpkt
 import socket
 from dpkt.loopback import Loopback
 from dpkt.ethernet import Ethernet
+from dpkt.sll import SLL
 
 
 def inet_to_str(inet):
@@ -33,32 +34,13 @@ def str_to_inet(str):
         return socket.inet_pton(socket.AF_INET6, str)
 
 
-def get_ip(buf):
-    # Unpack the data within the Ethernet frame (the IP packet)
-    # Pulling out src, dst, length, fragment info, TTL, and Protocol
-    lp = Loopback(buf)
-    lp.unpack(buf)
-    ip = lp.data
-    return ip
-
-
-def get_src_dst_ip_str(buf):
+def get_src_dst_ip_str(ip):
     """
     :param buf: A string buffer containing the entire packet
     :return: A tuple with source and destination IP strings
     """
 
-    ip = get_ip(buf)
     return inet_to_str(ip.src), inet_to_str(ip.dst)
-
-
-def get_ip_payload_str(buf):
-    """
-    :param buf: A string buffer containing the entire packet
-    :return: A string buffer with IP payload
-    """
-    ip = get_ip(buf)
-    return ip.data
 
 
 class PCAPIPTool(object):
@@ -73,7 +55,7 @@ class PCAPIPTool(object):
         :return: None
         """
 
-        pcap_reader = dpkt.pcap.Reader(open(self.input_pcap_file_path))
+        pcap_reader = dpkt.pcap.Reader(open(self.input_pcap_file_path, "rb"))
         l2_type = pcap_reader.datalink()
 
         pcap_writer = dpkt.pcap.Writer(open(output_pcap_file_path, "w"), linktype=l2_type)
@@ -81,15 +63,21 @@ class PCAPIPTool(object):
         for ts, buf in pcap_reader:
 
             l2 = None
+
+            # Unpack the data within the Ethernet frame (the IP packet)
+            # Pulling out src, dst, length, fragment info, TTL, and Protocol
+            
             if l2_type == dpkt.pcap.DLT_NULL:
                 l2 = Loopback(buf)
+            elif l2_type == dpkt.pcap.DLT_LINUX_SLL:
+                l2 = SLL(buf)
             else:
                 l2 = Ethernet(buf)
 
             l2.unpack(buf)
             modified_ip = l2.data
 
-            src_ip_str, dst_ip_str = get_src_dst_ip_str(buf)
+            src_ip_str, dst_ip_str = get_src_dst_ip_str(l2.data)
             print 'IP: %s -> %s ' % (src_ip_str, dst_ip_str)
 
             if src_ip_str in ip_mappings:
@@ -109,10 +97,10 @@ class PCAPIPTool(object):
 
 
 def main():
-    t = PCAPIPTool("pmu_access-mod.pcap")
-    t.generate_mapped_pcap({"10.1.0.40": "10.0.0.7",
-                            "10.0.50.10": "10.0.0.2"},
-                           "pmu_access-mapped.pcap")
+    t = PCAPIPTool("DNP3_TestData021914.pcap")
+    t.generate_mapped_pcap({"10.196.30.40": "10.0.0.7",
+                            "10.196.30.47": "10.0.0.1"},
+                           "DNP3_TestData021914-mapped.pcap")
 
 if __name__ == "__main__":
     main()

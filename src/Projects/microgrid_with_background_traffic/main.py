@@ -249,7 +249,7 @@ class Main:
         self.start_switch_link_pkt_captures()
         self.start_proxy_process()
         self.start_attack_dispatcher()
-        self.start_background_traffic()
+        #self.start_background_traffic()
         self.run()
 
         print "Stopping project..."
@@ -298,7 +298,7 @@ def main():
 
                                                         ],                       
                                                  project_name="microgrid_with_background_traffic",
-                                                 run_time=60,
+                                                 run_time=120,
                                                  power_simulator_ip="127.0.0.1"
                                                  )
 

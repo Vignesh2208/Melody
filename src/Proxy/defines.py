@@ -6,6 +6,7 @@ import dpkt
 import socket
 from dpkt.loopback import Loopback
 from dpkt.ethernet import Ethernet
+from dpkt.sll import SLL
 from dpkt.ip import IP
 
 # Error Defines
@@ -32,7 +33,6 @@ POWERSIM_TYPE = "POWER_WORLD" # POWER_WORLD/RTDS
 POWERSIM_ID_HDR_LEN = 10      # 10 characters for holding the length of power sim id. currently only used for power world
 
 ETH_TYPE_FRAME=1 # Ethernet
-ETH_TYPE_LOOPBACK = 0
 
 
 def extractPowerSimIdFromPkt(pkt):
@@ -92,18 +92,24 @@ def get_ip_ethernet(buf):
     return ip
 
 
+def get_ip_sll(buf):
+    lp = SLL(buf)
+    lp.unpack(buf)
+    ip = lp.data
+    return ip
+
 def get_pkt_src_dst_IP(buf,DL_TYPE=ETH_TYPE_FRAME):
     """
     :param buf: A string buffer containing the entire packet
     :return: A tuple with source and destination IP strings
     """
 
-    if DL_TYPE == ETH_TYPE_LOOPBACK:
+    if DL_TYPE == dpkt.pcap.DLT_NULL:
         ip = get_ip_loopback(buf)
-
+    elif DL_TYPE == dpkt.pcap.DLT_LINUX_SLL:
+        ip = get_ip_sll(buf)
     else :
         ip = get_ip_ethernet(buf)
-
 
     return inet_to_str(ip.src), inet_to_str(ip.dst)
 
@@ -114,12 +120,12 @@ def get_raw_ip_pkt(buf,DL_TYPE=ETH_TYPE_FRAME):
     :return: A string buffer with IP payload
     """
 
-    if DL_TYPE == ETH_TYPE_LOOPBACK:
+    if DL_TYPE == dpkt.pcap.DLT_NULL:
         ip = get_ip_loopback(buf)
+    elif DL_TYPE == dpkt.pcap.DLT_LINUX_SLL:
+        ip = get_ip_sll(buf)
     else:
         ip = get_ip_ethernet(buf)
-
-
 
     return ip
 

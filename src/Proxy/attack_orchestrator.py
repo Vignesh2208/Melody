@@ -137,8 +137,11 @@ class attack_orchestrator():
         idx = pkt_no
 
         if l2_type == dpkt.pcap.DLT_NULL:
-            src_ip, dst_ip = get_pkt_src_dst_IP(curr_pkt, 0)
-            raw_ip_pkt = get_raw_ip_pkt(curr_pkt, 0)
+            src_ip, dst_ip = get_pkt_src_dst_IP(curr_pkt, dpkt.pcap.DLT_NULL)
+            raw_ip_pkt = get_raw_ip_pkt(curr_pkt, dpkt.pcap.DLT_NULL)
+        elif l2_type == dpkt.pcap.DLT_LINUX_SLL:
+            src_ip, dst_ip = get_pkt_src_dst_IP(curr_pkt, dpkt.pcap.DLT_LINUX_SLL)
+            raw_ip_pkt = get_raw_ip_pkt(curr_pkt, dpkt.pcap.DLT_LINUX_SLL)
         else:
             src_ip, dst_ip = get_pkt_src_dst_IP(curr_pkt)
             raw_ip_pkt = get_raw_ip_pkt(curr_pkt)
