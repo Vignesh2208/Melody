@@ -65,9 +65,16 @@ class TrafficFlow(threading.Thread):
                   self.root_user_name + ' ' +\
                   self.root_password + ' ' + self.dst_mn_node.IP() 
           
+
             print "Client command:", cmd
-            result = self.src_mn_node.pexec(cmd)
-	    print result
+            try:
+                result = self.src_mn_node.pexec(cmd)
+                #result = self.src_mn_node.sendCmd(cmd)
+            except AssertionError:
+                print "Failed to start client with cmd:", cmd
+                raise
+
+            print "Client command:", cmd
 
             if self.type == TRAFFIC_FLOW_PERIODIC:
                 sleep_for = self.inter_flow_period
@@ -81,23 +88,39 @@ class TrafficFlow(threading.Thread):
                 print "Invalid traffic flow type"
                 raise Exception
 
+    def parse_pid_from_result(self, result):
+
+        pid = None
+
+        for line in result.split("\r"):
+            if line[0] == "[" and line[2] == "]":
+                pid = int(line.split()[1])
+      
+        return pid
+
     def start_server(self):
 
         if self.server_process_start_cmd:
 
             # Start the server
-            print "Server command:", self.server_process_start_cmd
             result = self.dst_mn_node.cmd(self.server_process_start_cmd)
+            aa = self.dst_mn_node.waitOutput()
+            print "Server command:", self.server_process_start_cmd, "result:", result
 
-            for line in result.split("\r"):
-                if line[0] == "[" and line[2] == "]":
-                    self.server_pid = int(line.split()[1])
-                    print self.server_pid
+            # If no result is captured then wait some time
+            if result == '':
+                time.sleep(1)            
+                print "After waiting, Server command:", self.server_process_start_cmd, "result:", result
+
+            self.server_pid = self.parse_pid_from_result(result)
+
 
     def stop_server(self):
 
         # Stop the server
-        result = self.dst_mn_node.cmd("sudo kill " + str(self.server_pid))
+        if self.server_process_start_cmd:
+            print "Stopping server with cmd: ", self.server_process_start_cmd, " at pid:", self.server_pid
+            result = self.dst_mn_node.cmd("sudo kill " + str(self.server_pid))
 
     def run(self):
 

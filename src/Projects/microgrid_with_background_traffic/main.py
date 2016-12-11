@@ -107,7 +107,7 @@ class Main:
                         dst_mn_node=self.network_configuration.mininet_obj.get("h1"),
                         root_user_name="ubuntu",
                         root_password="ubuntu",
-                        server_process_start_cmd="/usr/sbin/sshd -D&",
+                        server_process_start_cmd="/usr/sbin/sshd -D -o ListenAddress=" + self.network_configuration.mininet_obj.get("h1").IP() + "&",
                         client_expect_file=self.base_dir + '/src/cyber_network/ssh_session.expect'),
 
             TrafficFlow(type=TRAFFIC_FLOW_ONE_SHOT,
@@ -140,7 +140,7 @@ class Main:
                         dst_mn_node=self.network_configuration.mininet_obj.get("h1"),
                         root_user_name="ubuntu",
                         root_password="ubuntu",
-                        server_process_start_cmd="/usr/sbin/sshd -D&",
+                        server_process_start_cmd="/usr/sbin/sshd -D -o ListenAddress=" + self.network_configuration.mininet_obj.get("h1").IP() + "&",
                         client_expect_file=self.base_dir + '/src/cyber_network/ssh_session.expect')
         ])
 
@@ -272,14 +272,13 @@ class Main:
         self.start_proxy_process()
         #self.start_attack_dispatcher()
         self.start_background_traffic()
-        self.start_dnp3_flow()
+        #self.start_dnp3_flow()
         self.run()
 
         print "Stopping project..."
         self.stop_project()
 
     def stop_project(self):
-        print "Cleaning up ..."
 
         # Join the threads for background processes to wait on them
         for tf in self.emulated_traffic_flows:
@@ -289,6 +288,7 @@ class Main:
             tf.join()
 
 
+        print "Cleaning up ..."
         self.network_configuration.cleanup_mininet()
 
 
