@@ -14,8 +14,8 @@ class TrafficFlow(threading.Thread):
     def __init__(self, type, offset, inter_flow_period, run_time, src_mn_node, dst_mn_node,
                  root_user_name, root_password,
                  server_process_start_cmd,
-                 #server_process_stop_cmd,
-                 client_expect_file):
+                 client_expect_file,
+                 long_running=False):
         '''
         'type', 'offset' and rate' do the following:
             - Periodic: That repeats itself after af fixed period determined by inter_flow_period seconds,
@@ -44,15 +44,20 @@ class TrafficFlow(threading.Thread):
         self.root_password = root_password
 
         self.server_process_start_cmd = server_process_start_cmd
-        self.server_pid = None
+      
+        self.long_running = long_running
         self.client_expect_file = client_expect_file
 
         self.start_time = None
         self.elasped_time = None
 
+        self.server_popen = None
+        self.client_popen = None
+ 
+
     def client_loop(self):
 
-        print "Starting client loop..."
+        #print "Starting client loop..."
 
         while True:
 
@@ -65,16 +70,15 @@ class TrafficFlow(threading.Thread):
                   self.root_user_name + ' ' +\
                   self.root_password + ' ' + self.dst_mn_node.IP() 
           
-
-            print "Client command:", cmd
+            #print "Client command:", cmd
             try:
-                result = self.src_mn_node.popen(cmd)
+                self.client_popen = self.src_mn_node.popen(cmd)
 
             except AssertionError:
                 print "Failed to start client with cmd:", cmd
                 raise
 
-            print "Client command:", cmd
+            #print "Client command:", cmd
 
             if self.type == TRAFFIC_FLOW_PERIODIC:
                 sleep_for = self.inter_flow_period
@@ -88,28 +92,27 @@ class TrafficFlow(threading.Thread):
                 print "Invalid traffic flow type"
                 raise Exception
 
-    def parse_pid_from_result(self, result):
+            #if not self.long_running:
+            #    self.client_popen.terminate()
 
-        pid = None
-
-        for line in result.split("\r"):
-            if line[0] == "[" and line[2] == "]":
-                pid = int(line.split()[1])
-      
-        return pid
-
+        # For long running flows, clean up after everything else.
+        #if self.long_running:
+        #    self.client_popen.terminate()
+        
     def start_server(self):
 
         if self.server_process_start_cmd:
 
             # Start the server
-            result = self.dst_mn_node.popen(self.server_process_start_cmd)
+            self.server_popen = self.dst_mn_node.popen(self.server_process_start_cmd)
 
     def stop_server(self):
 
         # Stop the server
         if self.server_process_start_cmd:
-            print "Stopping server with cmd: ", self.server_process_start_cmd, " at pid:", self.server_pid
+            #print "Stopping server with cmd: ", self.server_process_start_cmd
+            pass
+            #self.server_popen.terminate()
 
     def run(self):
 
@@ -130,3 +133,5 @@ class TrafficFlow(threading.Thread):
 
         # Kill the server process
         self.stop_server()
+        
+

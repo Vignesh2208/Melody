@@ -4,5 +4,5 @@
 #set password [lindex $argv 1];
 #set host [lindex $argv 2];
 
-exec python /home/palani2/NetPower_TestBed/src/cyber_network/master.py
+exec python /home/netpower/NetPower_TestBed/src/cyber_network/master.py
 

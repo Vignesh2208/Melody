@@ -75,8 +75,9 @@ class Main:
                         dst_mn_node=self.network_configuration.mininet_obj.get("h2"),
                         root_user_name="ubuntu",
                         root_password="ubuntu",
-                        server_process_start_cmd='sudo python ' + self.base_dir + "/src/cyber_network/slave.py &",
-                        client_expect_file=self.base_dir + '/src/cyber_network/dnp3_master.expect')
+                        server_process_start_cmd='sudo python ' + self.base_dir + "/src/cyber_network/slave.py",
+                        client_expect_file=self.base_dir + '/src/cyber_network/dnp3_master.expect',
+                        long_running=True)
             
 			
         ])
