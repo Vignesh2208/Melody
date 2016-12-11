@@ -61,11 +61,13 @@ class TrafficFlow(threading.Thread):
             if self.elasped_time - self.start_time > self.run_time:
                 break
 
-            cmd = self.client_expect_file + ' ' +\
+            cmd = "sudo " + self.client_expect_file + ' ' +\
                   self.root_user_name + ' ' +\
-                  self.root_password + ' ' + self.dst_mn_node.IP()
-
+                  self.root_password + ' ' + self.dst_mn_node.IP() 
+          
+            print "Client command:", cmd
             result = self.src_mn_node.pexec(cmd)
+	    print result
 
             if self.type == TRAFFIC_FLOW_PERIODIC:
                 sleep_for = self.inter_flow_period
@@ -84,11 +86,10 @@ class TrafficFlow(threading.Thread):
         if self.server_process_start_cmd:
 
             # Start the server
+            print "Server command:", self.server_process_start_cmd
             result = self.dst_mn_node.cmd(self.server_process_start_cmd)
-            print result
 
             for line in result.split("\r"):
-                print line
                 if line[0] == "[" and line[2] == "]":
                     self.server_pid = int(line.split()[1])
                     print self.server_pid

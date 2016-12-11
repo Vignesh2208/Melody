@@ -30,6 +30,7 @@ class Main:
         self.node_mappings = {}
         self.control_node_id = None
         self.emulated_traffic_flows = []
+        self.dnp3_emulated_traffic_flows = []
 
         self.script_dir = os.path.dirname(os.path.realpath(__file__))
         idx = self.script_dir.index('NetPower_TestBed')
@@ -61,7 +62,28 @@ class Main:
                         lineTowrite = lineTowrite + roles[i][1][j] + "\n"
 
                 outfile.write(lineTowrite)
+	
+	
 
+    def start_dnp3_flow(self):
+        self.dnp3_emulated_traffic_flows.extend([
+			TrafficFlow(type=TRAFFIC_FLOW_ONE_SHOT,
+                        offset=5,
+                        inter_flow_period=2,
+                        run_time=self.run_time,
+                        src_mn_node=self.network_configuration.mininet_obj.get("h1"),
+                        dst_mn_node=self.network_configuration.mininet_obj.get("h2"),
+                        root_user_name="ubuntu",
+                        root_password="ubuntu",
+                        server_process_start_cmd='sudo python ' + self.base_dir + "/src/cyber_network/slave.py &",
+                        client_expect_file=self.base_dir + '/src/cyber_network/dnp3_master.expect')
+            
+			
+        ])
+        for tf in self.dnp3_emulated_traffic_flows:
+            tf.start()
+
+        print "DNP3 traffic threads started..."
 
 
     def start_background_traffic(self):
@@ -248,8 +270,9 @@ class Main:
         self.start_host_processes()
         self.start_switch_link_pkt_captures()
         self.start_proxy_process()
-        self.start_attack_dispatcher()
-        #self.start_background_traffic()
+        #self.start_attack_dispatcher()
+        self.start_background_traffic()
+        self.start_dnp3_flow()
         self.run()
 
         print "Stopping project..."
@@ -261,6 +284,10 @@ class Main:
         # Join the threads for background processes to wait on them
         for tf in self.emulated_traffic_flows:
             tf.join()
+
+        for tf in self.dnp3_emulated_traffic_flows:
+            tf.join()
+
 
         self.network_configuration.cleanup_mininet()
 
@@ -277,8 +304,8 @@ def main():
                                                  {"num_switches": 5,
                                                   "per_switch_links": 3,
                                                   "num_hosts_per_switch": 1,
-                                                  "switch_switch_link_latency_range": (40, 50),
-                                                  "host_switch_link_latency_range": (10, 20)
+                                                  #"switch_switch_link_latency_range": (40, 50),
+                                                  #"host_switch_link_latency_range": (10, 20)
                                                   },
                                                  conf_root="configurations/",
                                                  synthesis_name="SimpleMACSynthesis",
@@ -298,7 +325,7 @@ def main():
 
                                                         ],                       
                                                  project_name="microgrid_with_background_traffic",
-                                                 run_time=120,
+                                                 run_time=10,
                                                  power_simulator_ip="127.0.0.1"
                                                  )
 
