@@ -68,7 +68,7 @@ class Main:
     def start_dnp3_flow(self):
         self.dnp3_emulated_traffic_flows.extend([
 			TrafficFlow(type=TRAFFIC_FLOW_ONE_SHOT,
-                        offset=5,
+                        offset=1,
                         inter_flow_period=2,
                         run_time=self.run_time,
                         src_mn_node=self.network_configuration.mininet_obj.get("h1"),
@@ -107,7 +107,7 @@ class Main:
                         dst_mn_node=self.network_configuration.mininet_obj.get("h1"),
                         root_user_name="ubuntu",
                         root_password="ubuntu",
-                        server_process_start_cmd="/usr/sbin/sshd -D -o ListenAddress=" + self.network_configuration.mininet_obj.get("h1").IP() + "&",
+                        server_process_start_cmd="/usr/sbin/sshd -D -o ListenAddress=" + self.network_configuration.mininet_obj.get("h1").IP(),
                         client_expect_file=self.base_dir + '/src/cyber_network/ssh_session.expect'),
 
             TrafficFlow(type=TRAFFIC_FLOW_ONE_SHOT,
@@ -118,7 +118,7 @@ class Main:
                         dst_mn_node=self.network_configuration.mininet_obj.get("h2"),
                         root_user_name="ubuntu",
                         root_password="ubuntu",
-                        server_process_start_cmd="sudo socat tcp-l:23,reuseaddr,fork exec:/bin/login,pty,setsid,setpgid,stderr,ctty&",
+                        server_process_start_cmd="sudo socat tcp-l:23,reuseaddr,fork exec:/bin/login,pty,setsid,setpgid,stderr,ctty",
                         client_expect_file=self.base_dir + '/src/cyber_network/socat_session.expect'),
 
             TrafficFlow(type=TRAFFIC_FLOW_EXPONENTIAL,
@@ -129,7 +129,7 @@ class Main:
                         dst_mn_node=self.network_configuration.mininet_obj.get("h1"),
                         root_user_name="ubuntu",
                         root_password="ubuntu",
-                        server_process_start_cmd="python -m SimpleHTTPServer&",
+                        server_process_start_cmd="python -m SimpleHTTPServer",
                         client_expect_file=self.base_dir + '/src/cyber_network/http_session.expect'),
 
             TrafficFlow(type=TRAFFIC_FLOW_EXPONENTIAL,
@@ -140,7 +140,7 @@ class Main:
                         dst_mn_node=self.network_configuration.mininet_obj.get("h1"),
                         root_user_name="ubuntu",
                         root_password="ubuntu",
-                        server_process_start_cmd="/usr/sbin/sshd -D -o ListenAddress=" + self.network_configuration.mininet_obj.get("h1").IP() + "&",
+                        server_process_start_cmd="/usr/sbin/sshd -D -o ListenAddress=" + self.network_configuration.mininet_obj.get("h1").IP(),
                         client_expect_file=self.base_dir + '/src/cyber_network/ssh_session.expect')
         ])
 
@@ -272,7 +272,7 @@ class Main:
         self.start_proxy_process()
         #self.start_attack_dispatcher()
         self.start_background_traffic()
-        #self.start_dnp3_flow()
+        self.start_dnp3_flow()
         self.run()
 
         print "Stopping project..."
@@ -325,7 +325,7 @@ def main():
 
                                                         ],                       
                                                  project_name="microgrid_with_background_traffic",
-                                                 run_time=10,
+                                                 run_time=30,
                                                  power_simulator_ip="127.0.0.1"
                                                  )
 

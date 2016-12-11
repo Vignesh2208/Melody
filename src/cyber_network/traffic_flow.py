@@ -68,8 +68,8 @@ class TrafficFlow(threading.Thread):
 
             print "Client command:", cmd
             try:
-                result = self.src_mn_node.pexec(cmd)
-                #result = self.src_mn_node.sendCmd(cmd)
+                result = self.src_mn_node.popen(cmd)
+
             except AssertionError:
                 print "Failed to start client with cmd:", cmd
                 raise
@@ -103,24 +103,13 @@ class TrafficFlow(threading.Thread):
         if self.server_process_start_cmd:
 
             # Start the server
-            result = self.dst_mn_node.cmd(self.server_process_start_cmd)
-            aa = self.dst_mn_node.waitOutput()
-            print "Server command:", self.server_process_start_cmd, "result:", result
-
-            # If no result is captured then wait some time
-            if result == '':
-                time.sleep(1)            
-                print "After waiting, Server command:", self.server_process_start_cmd, "result:", result
-
-            self.server_pid = self.parse_pid_from_result(result)
-
+            result = self.dst_mn_node.popen(self.server_process_start_cmd)
 
     def stop_server(self):
 
         # Stop the server
         if self.server_process_start_cmd:
             print "Stopping server with cmd: ", self.server_process_start_cmd, " at pid:", self.server_pid
-            result = self.dst_mn_node.cmd("sudo kill " + str(self.server_pid))
 
     def run(self):
 
