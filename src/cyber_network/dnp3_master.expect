@@ -1,0 +1,8 @@
+#!/usr/bin/expect -f
+
+#set username [lindex $argv 0];
+#set password [lindex $argv 1];
+#set host [lindex $argv 2];
+
+exec python /home/netpower/NetPower_TestBed/src/cyber_network/master.py
+

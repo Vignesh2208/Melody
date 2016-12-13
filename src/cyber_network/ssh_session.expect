@@ -4,7 +4,7 @@ set username [lindex $argv 0];
 set password [lindex $argv 1];
 set host [lindex $argv 2];
 
-spawn ssh $username@$host
+spawn sudo ssh -oStrictHostKeyChecking=no $username@$host
 expect "password: "
 send "$password\r"
 expect "$ "
