@@ -1,12 +1,9 @@
-
 import json
 import os
 import time
 import subprocess
 import datetime
 import sys
-
-
 
 sys.path.append("./")
 from cyber_network.network_configuration import NetworkConfiguration
@@ -65,6 +62,8 @@ class Main:
 	
 	
 
+<<<<<<< HEAD
+=======
     def start_dnp3_flow(self):
         self.dnp3_emulated_traffic_flows.extend([
 			TrafficFlow(type=TRAFFIC_FLOW_ONE_SHOT,
@@ -87,6 +86,7 @@ class Main:
         print "DNP3 traffic threads started..."
 
 
+>>>>>>> 585ced35c78cf9a7976c34cabc97b570555d331b
     def start_background_traffic(self):
         self.emulated_traffic_flows.extend([
             TrafficFlow(type=TRAFFIC_FLOW_PERIODIC,
@@ -197,9 +197,6 @@ class Main:
                 capture_cmd = capture_cmd + " -w " + capture_log_file + " &"
                 os.system(capture_cmd)
 
-
-
-
     def start_proxy_process(self):
 
         print "Starting Proxy Process at " + str(datetime.datetime.now())
@@ -216,10 +213,11 @@ class Main:
         print "Starting Attack Dispatcher at " + str(datetime.datetime.now())
         replay_pcaps_dir = self.script_dir + "/pcaps"
 
+        self.disable_TCP_RST()
+
         if os.path.isdir(replay_pcaps_dir) :
             attack_dispatcher_script = self.proxy_dir + "/attack_orchestrator.py"
             os.system("python " + str(attack_dispatcher_script) + " -c " + replay_pcaps_dir + " -l " + self.node_mappings_file_path + " -r " + str(self.run_time) + " &")
-
 
     def disable_TCP_RST(self):
         print "DISABLING TCP RST"
@@ -227,13 +225,11 @@ class Main:
             mininet_host = self.network_configuration.mininet_obj.hosts[i]
             mininet_host.cmd("sudo iptables -I OUTPUT -p tcp --tcp-flags RST RST -j DROP ")
 
-
     def enable_TCP_RST(self):
         print "RE-ENABLING TCP RST"
         for i in xrange(len(self.network_configuration.roles)):
             mininet_host = self.network_configuration.mininet_obj.hosts[i]
             mininet_host.cmd("sudo iptables -I OUTPUT -p tcp --tcp-flags RST RST -j ACCEPT ")
-
 
     def run(self):
         if self.run_time > 0:
@@ -298,7 +294,7 @@ class Main:
 def main():
 
     network_configuration = NetworkConfiguration("ryu",
-                                                  "127.0.0.1",
+                                                 "127.0.0.1",
                                                  6633,
                                                  "http://localhost:8080/",
                                                  "admin",

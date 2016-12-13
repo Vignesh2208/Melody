@@ -97,10 +97,10 @@ class PCAPIPTool(object):
 
 
 def main():
-    t = PCAPIPTool("DNP3_TestData021914.pcap")
-    t.generate_mapped_pcap({"10.196.30.40": "10.0.0.7",
-                            "10.196.30.47": "10.0.0.1"},
-                           "DNP3_TestData021914-mapped.pcap")
+    t = PCAPIPTool("/home/ubuntu/NetPower_TestBed/src/Projects/microgrid_with_background_traffic/pcaps/replay-0.pcap")
+    t.generate_mapped_pcap(
+        {"10.0.0.7": "10.0.0.2", "10.196.30.47": "10.0.0.1"},
+        "/home/ubuntu/NetPower_TestBed/src/Projects/microgrid_with_background_traffic/pcaps/replay-0-mapped.pcap")
 
 if __name__ == "__main__":
     main()
