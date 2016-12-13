@@ -53,7 +53,7 @@ class TrafficFlow(threading.Thread):
 
         self.server_popen = None
         self.client_popen = None
- 
+	self.looped = False 
 
     def client_loop(self):
 
@@ -71,12 +71,10 @@ class TrafficFlow(threading.Thread):
                   self.root_password + ' ' + self.dst_mn_node.IP() 
           
             #print "Client command:", cmd
-            try:
-                self.client_popen = self.src_mn_node.popen(cmd)
-
-            except AssertionError:
-                print "Failed to start client with cmd:", cmd
-                raise
+            if self.long_running and self.looped:
+		pass
+	    else:
+	        self.client_popen = self.src_mn_node.popen(cmd)
 
             #print "Client command:", cmd
 
@@ -86,8 +84,12 @@ class TrafficFlow(threading.Thread):
             elif self.type == TRAFFIC_FLOW_EXPONENTIAL:
                 sleep_for = random.expovariate(1.0/self.inter_flow_period)
                 time.sleep(sleep_for)
-            elif self.type == TRAFFIC_FLOW_ONE_SHOT:
-                break
+            elif self.type == TRAFFIC_FLOW_ONE_SHOT and not self.long_running:
+		time.sleep(1)               
+		break
+	    elif self.long_running:
+		#time.sleep(self.elasped_time-self.run_time)
+		self.looped = True
             else:
                 print "Invalid traffic flow type"
                 raise Exception
@@ -97,7 +99,8 @@ class TrafficFlow(threading.Thread):
 
         # For long running flows, clean up after everything else.
         #if self.long_running:
-        #    self.client_popen.terminate()
+       	self.client_popen.terminate()
+	self.looped = False
         
     def start_server(self):
 
@@ -111,8 +114,8 @@ class TrafficFlow(threading.Thread):
         # Stop the server
         if self.server_process_start_cmd:
             #print "Stopping server with cmd: ", self.server_process_start_cmd
-            pass
-            #self.server_popen.terminate()
+            #pass
+            self.server_popen.terminate()
 
     def run(self):
 

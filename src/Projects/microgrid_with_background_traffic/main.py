@@ -109,7 +109,8 @@ class Main:
                         root_user_name="ubuntu",
                         root_password="ubuntu",
                         server_process_start_cmd="/usr/sbin/sshd -D -o ListenAddress=" + self.network_configuration.mininet_obj.get("h1").IP(),
-                        client_expect_file=self.base_dir + '/src/cyber_network/ssh_session.expect'),
+                        client_expect_file=self.base_dir + '/src/cyber_network/ssh_session.expect',
+			long_running = False),
 
             TrafficFlow(type=TRAFFIC_FLOW_ONE_SHOT,
                         offset=10,
@@ -120,7 +121,8 @@ class Main:
                         root_user_name="ubuntu",
                         root_password="ubuntu",
                         server_process_start_cmd="sudo socat tcp-l:23,reuseaddr,fork exec:/bin/login,pty,setsid,setpgid,stderr,ctty",
-                        client_expect_file=self.base_dir + '/src/cyber_network/socat_session.expect'),
+                        client_expect_file=self.base_dir + '/src/cyber_network/socat_session.expect',
+			long_running = False),
 
             TrafficFlow(type=TRAFFIC_FLOW_EXPONENTIAL,
                         offset=1,
@@ -326,7 +328,7 @@ def main():
 
                                                         ],                       
                                                  project_name="microgrid_with_background_traffic",
-                                                 run_time=30,
+                                                 run_time=60,
                                                  power_simulator_ip="127.0.0.1"
                                                  )
 
