@@ -23,6 +23,7 @@ class Main:
         # Value is a tuple -- (IP Address, Role)
         self.project_name = self.network_configuration.project_name
         self.run_time = self.network_configuration.run_time
+        self.ng = None
         self.power_simulator_ip = self.network_configuration.power_simulator_ip
         self.node_mappings = {}
         self.control_node_id = None
@@ -256,9 +257,28 @@ class Main:
             except KeyboardInterrupt:
                 print "Interrupted ..."
 
+    def print_topo_info(self):
+        print "Links in the network topology:"
+        for link in self.ng.get_switch_link_data():
+            print link
+
+        print "All the hosts in the topology:"
+        for sw in self.ng.get_switches():
+            print "Hosts at switch:", sw.node_id
+            for h in sw.attached_hosts:
+                print "Name:", h.node_id, "IP:", h.ip_addr, "Port:", h.switch_port
+
+        print "Roles assigned to the hosts:"
+        host_index = 1
+        for role in self.network_configuration.roles:
+            print "h"+str(host_index), ":", role
+            host_index += 1
+
     def start_project(self):
         print "Starting project ..."
-        ng = self.network_configuration.setup_network_graph(mininet_setup_gap=1, synthesis_setup_gap=1)
+        self.ng = self.network_configuration.setup_network_graph(mininet_setup_gap=1, synthesis_setup_gap=1)
+        self.print_topo_info()
+
         self.generate_node_mappings(self.network_configuration.roles)
         self.start_host_processes()
         self.start_switch_link_pkt_captures()
