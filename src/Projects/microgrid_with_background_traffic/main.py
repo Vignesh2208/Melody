@@ -59,11 +59,7 @@ class Main:
                         lineTowrite = lineTowrite + roles[i][1][j] + "\n"
 
                 outfile.write(lineTowrite)
-	
-	
 
-<<<<<<< HEAD
-=======
     def start_dnp3_flow(self):
         self.dnp3_emulated_traffic_flows.extend([
 			TrafficFlow(type=TRAFFIC_FLOW_ONE_SHOT,
@@ -85,8 +81,6 @@ class Main:
 
         print "DNP3 traffic threads started..."
 
-
->>>>>>> 585ced35c78cf9a7976c34cabc97b570555d331b
     def start_background_traffic(self):
         self.emulated_traffic_flows.extend([
             TrafficFlow(type=TRAFFIC_FLOW_PERIODIC,

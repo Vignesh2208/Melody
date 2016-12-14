@@ -97,10 +97,8 @@ class PCAPIPTool(object):
 
 
 def main():
-    t = PCAPIPTool("/home/ubuntu/NetPower_TestBed/src/Projects/microgrid_with_background_traffic/pcaps/replay-0.pcap")
-    t.generate_mapped_pcap(
-        {"10.0.0.7": "10.0.0.2", "10.196.30.47": "10.0.0.1"},
-        "/home/ubuntu/NetPower_TestBed/src/Projects/microgrid_with_background_traffic/pcaps/replay-0-mapped.pcap")
+    t = PCAPIPTool("pmu_access-orig.pcap")
+    t.generate_mapped_pcap({"10.1.0.40": "10.0.0.7", "10.0.50.10": "10.0.0.2"}, "pmu_access-orig-mapped.pcap")
 
 if __name__ == "__main__":
     main()
