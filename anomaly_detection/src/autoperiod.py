@@ -112,7 +112,7 @@ def getPeriodHints(X,fs=1.0) :
 	N = len(X)
 	NCoeffs = len(PWSD)
 	for i in xrange(0,NCoeffs) :
-		if PWSD[i] >= pThreshold :
+		if PWSD[i] >= pThreshold and i < NCoeffs - 1 :
 			if i > 0 and PWSD[i] > PWSD[i-1] and PWSD[i] > PWSD[i+1]:
 				candidatePeriods.append(float(1.0/f[i]))
 
@@ -178,14 +178,14 @@ def getPeriodHints(X,fs=1.0) :
 	#f0 = 0.001/(posmax + 1)
 	f0 = float(fs)/(posmax + 1)
 
-	print "Fundamental Frequency (Hz) through Cepstral Analysis = ", f0
+	#print "Fundamental Frequency (Hz) through Cepstral Analysis = ", f0
 	#plt.plot(f,ceps[0:len(f)])
 	#plt.yscale('symlog')
 	#plt.show()
 	
 	
-	#f0 = freq_from_autocorr(X,fs)
-	#print "Fundamental Frequency through autocorrelation = ", f0
+	f0 = freq_from_autocorr(X,fs)
+	print "Fundamental Frequency through autocorrelation = ", f0
 	
 	#print "Plotting Power Spectral Density"
 	#plt.plot(f,PWSD)

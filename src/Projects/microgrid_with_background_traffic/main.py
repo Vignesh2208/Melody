@@ -208,7 +208,7 @@ class Main:
         print "Starting Attack Dispatcher at " + str(datetime.datetime.now())
         replay_pcaps_dir = self.script_dir + "/pcaps"
 
-        self.disable_TCP_RST()
+        #self.disable_TCP_RST()
 
         if os.path.isdir(replay_pcaps_dir) :
             attack_dispatcher_script = self.proxy_dir + "/attack_orchestrator.py"
@@ -241,7 +241,7 @@ class Main:
                             self.disable_TCP_RST()
                         if recv_msg == "END":
                             self.enable_TCP_RST()
-                    time.sleep(0.5)
+                    time.sleep(0.05)
         else:
             print "Running Project forever. Press Ctrl-C to quit ..."
             try:
@@ -253,7 +253,7 @@ class Main:
                             self.disable_TCP_RST()
                         if recv_msg == "END" :
                             self.enable_TCP_RST()
-                    time.sleep(1)
+                    time.sleep(0.05)
             except KeyboardInterrupt:
                 print "Interrupted ..."
 
@@ -283,9 +283,10 @@ class Main:
         self.start_host_processes()
         self.start_switch_link_pkt_captures()
         self.start_proxy_process()
-        #self.start_attack_dispatcher()
-        self.start_background_traffic()
-        self.start_dnp3_flow()
+        self.start_attack_dispatcher()
+
+        #self.start_background_traffic()
+        #self.start_dnp3_flow()
         self.run()
 
         print "Stopping project..."
@@ -317,8 +318,8 @@ def main():
                                                  {"num_switches": 5,
                                                   "per_switch_links": 3,
                                                   "num_hosts_per_switch": 1,
-                                                  #"switch_switch_link_latency_range": (40, 50),
-                                                  #"host_switch_link_latency_range": (10, 20)
+                                                  #"switch_switch_link_latency_range": (10, 10),
+                                                  #"host_switch_link_latency_range": (10, 10)
                                                   },
                                                  conf_root="configurations/",
                                                  synthesis_name="SimpleMACSynthesis",

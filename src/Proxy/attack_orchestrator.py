@@ -23,13 +23,15 @@ from dpkt.loopback import Loopback
 from dpkt.ethernet import Ethernet
 
 DUMMY_ID = 0
+FINISH = 1
+STOP = -1
 
 
 def usage():
     print "python attack_dispatcher.py <options>"
     print "Options:"
     print "-h or --help"
-    print "-c or --pcap-file-dir=    Absolute path to directory containing pcap replay files <required>"
+    print "-c or --attkplan-file-dir=    Absolute path to directory containing attack plan file <required>"
     print "-l or --netcfg-file=     Absolute path to netcfg File <required>"
     print "-r or --run-time=    Run time of host in seconds before it is shut-down <optional - default forever>"
     print "-p or --proxy-ip=     IP Address of proxy <optional - default 127.0.0.1>"
@@ -40,12 +42,12 @@ def parseOpts():
     netcfgFile = None
     runTime = 0
     proxyIP = DEFAULT_PROXY_IP
-    pcapsDirPath = "/home/ubuntu/Desktop/Workspace/NetPower_TestBed"
+    attkPlanDirPath = "/home/ubuntu/Desktop/Workspace/NetPower_TestBed"
 
     try:
         (opts, args) = getopt.getopt(sys.argv[1:],
                                      "hc:l:r:p:",
-                                     ["help", "pcap-file-dir=", "netcfg-file=", "run-time=", "proxy-ip="])
+                                     ["help", "attkplan-file-dir=", "netcfg-file=", "run-time=", "proxy-ip="])
     except getopt.GetoptError as e:
         print (str(e))
         usage()
@@ -54,8 +56,8 @@ def parseOpts():
         if o in ("-h", "--help"):
             usage()
 
-        if o in ("-c", "--pcap-file-dir="):
-            pcapsDirPath = str(v)
+        if o in ("-c", "--attkplan-file-dir="):
+            attkPlanDirPath = str(v)
         if o in ("-l", "--netcfg-file="):
             netcfgFile = str(v)
         if o in ("-r", "--run-time="):
@@ -64,20 +66,21 @@ def parseOpts():
         if o in ("-p", "--proxy-ip="):
             proxyIP = str(v)
 
-    assert (pcapsDirPath != None)
-    return (pcapsDirPath, netcfgFile, runTime, proxyIP)
+    assert (attkPlanDirPath != None)
+    return (attkPlanDirPath, netcfgFile, runTime, proxyIP)
 
 
 class attack_orchestrator():
 
 
-    def __init__(self, pcapDirPath, netCfgFile, runTime, proxyIP):
-        self.pcapsDirPath = pcapDirPath
+    def __init__(self, attkPlanDirPath, netCfgFile, runTime, proxyIP):
+        self.attkPlanDirPath = attkPlanDirPath
         self.netCfgFile = netcfgFile
         self.runTime = runTime
         self.proxyIP = proxyIP
         self.extractIPMapping()
         self.init_shared_buffers()
+        self.involved_replay_nodes = {}
 
 
 
@@ -129,72 +132,13 @@ class attack_orchestrator():
             print "Cmd channel buffer open failed! "
             sys.exit(0)
 
-
-
-
-    def replay_pkt(self,l2_type,curr_pkt,pkt_no):
-
-        idx = pkt_no
-
-        if l2_type == dpkt.pcap.DLT_NULL:
-            src_ip, dst_ip = get_pkt_src_dst_IP(curr_pkt, dpkt.pcap.DLT_NULL)
-            raw_ip_pkt = get_raw_ip_pkt(curr_pkt, dpkt.pcap.DLT_NULL)
-        elif l2_type == dpkt.pcap.DLT_LINUX_SLL:
-            src_ip, dst_ip = get_pkt_src_dst_IP(curr_pkt, dpkt.pcap.DLT_LINUX_SLL)
-            raw_ip_pkt = get_raw_ip_pkt(curr_pkt, dpkt.pcap.DLT_LINUX_SLL)
-        else:
-            src_ip, dst_ip = get_pkt_src_dst_IP(curr_pkt)
-            raw_ip_pkt = get_raw_ip_pkt(curr_pkt)
-
-        try:
-            srchostID = self.IPToHostMapping[src_ip]
-            dstHostID = self.IPToHostMapping[dst_ip]
-            #print "Dispatching Next Attack pkt no = ", idx, " Len = ", len(raw_ip_pkt), "Src Host = ", srchostID, " Dst Host = ", dstHostID
-            ret = 0
-
-            pkt_hex_str = binascii.hexlify(raw_ip_pkt.__str__())
-            #print "ip_payload = ", pkt_hex_str
-
-            while ret <= 0:
-                # ret = self.shared_bufs[dstHostID].write("RX:" + str(raw_ip_pkt),DUMMY_ID)
-                ret = self.sharedBufferArray.write(str(dstHostID) + "attk-channel-buffer", "RX:" + str(pkt_hex_str), 0)
-
-            ret = 0
-            while ret <= 0:
-                # ret = self.shared_bufs[srchostID].write("TX:" + str(raw_ip_pkt),DUMMY_ID)
-                ret = self.sharedBufferArray.write(str(srchostID) + "attk-channel-buffer", "TX:" + str(pkt_hex_str), 0)
-
-            #print "Waiting for attk pkt simulation completion"
-
-            recv_msg = ''
-            while recv_msg != "ACK":
-                if time.time() - self.start_time >= self.runTime:
-                    print "run time Expired. Stopping ..."
-                    sys.exit(0)
-                # dummy_id, recv_msg = self.shared_bufs[dstHostID].read()
-                dummy_id, recv_msg = self.sharedBufferArray.read(str(dstHostID) + "attk-channel-buffer")
-
-
-        except Exception as e:
-            print "Error in replaying pkt no: ", idx, " Error = ", str(e)
-            sys.exit(0)
-
-
     def signal_end_of_replay_phase(self):
-
-
-        hostIDS = self.PowerSimIdMapping.keys()
-        for hostID in hostIDS :
-            ret = 0
-            while ret <= 0:
-                ret = self.sharedBufferArray.write(str(hostID) + "attk-channel-buffer", "END", 0)
 
         ret = 0
         while ret <= 0 :
             ret = self.sharedBufferArray.write("cmd-channel-buffer","END",0)
 
         print "Signalled end of replay phase ..."
-        time.sleep(5.0)
 
     def signal_start_of_replay_phase(self):
 
@@ -202,45 +146,153 @@ class attack_orchestrator():
         while ret <= 0 :
             ret = self.sharedBufferArray.write("cmd-channel-buffer","START",0)
         print "Signalled start of replay phase ..."
-        time.sleep(5.0)
 
 
+    def extract_involved_replay_nodes(self,replay_pcap_f_name):
+        assert os.path.isfile(self.attkPlanDirPath + "/" + replay_pcap_f_name)
+        self.involved_replay_nodes[replay_pcap_f_name] = []
+
+        pcapFilePath = self.attkPlanDirPath + "/" + replay_pcap_f_name
+        replay_pcap_reader = dpkt.pcap.Reader(open(pcapFilePath, 'rb'))
+
+
+        l2_type = replay_pcap_reader.datalink()
+
+        for ts, curr_pkt in replay_pcap_reader:
+
+            if l2_type == dpkt.pcap.DLT_NULL:
+                src_ip, dst_ip = get_pkt_src_dst_IP(curr_pkt, dpkt.pcap.DLT_NULL)
+            elif l2_type == dpkt.pcap.DLT_LINUX_SLL:
+                src_ip, dst_ip = get_pkt_src_dst_IP(curr_pkt, dpkt.pcap.DLT_LINUX_SLL)
+            else:
+                src_ip, dst_ip = get_pkt_src_dst_IP(curr_pkt)
+
+            try:
+                srchostID = self.IPToHostMapping[src_ip]
+                dstHostID = self.IPToHostMapping[dst_ip]
+
+                if srchostID not in self.involved_replay_nodes[replay_pcap_f_name]:
+                    self.involved_replay_nodes[replay_pcap_f_name].append(srchostID)
+
+                if dstHostID not in self.involved_replay_nodes[replay_pcap_f_name]:
+                    self.involved_replay_nodes[replay_pcap_f_name].append(dstHostID)
+
+            except:
+                pass
+
+
+
+
+    def run_replay_phase(self,replay_pcap_f_name):
+
+
+        print "Loading Replay Phase for Pcap File = ", replay_pcap_f_name
+        return_val = FINISH
+
+        print "Involved Nodes = ", self.involved_replay_nodes[replay_pcap_f_name]
+        for nodeID in self.involved_replay_nodes[replay_pcap_f_name] :
+            ret = 0
+            while ret <= 0 :
+                ret = self.sharedBufferArray.write(str(nodeID) + "attk-channel-buffer", "REPLAY:" + str(self.attkPlanDirPath + "/" + replay_pcap_f_name), 0)
+
+
+
+        for nodeID in self.involved_replay_nodes[replay_pcap_f_name] :
+
+            if return_val == STOP:
+                break
+            recv_msg = ''
+            while recv_msg != "LOADED":
+                if time.time() - self.start_time >= self.runTime:
+                    print "Run time Expired. Stopping ..."
+                    return_val = STOP
+                    break
+                dummy_id, recv_msg = self.sharedBufferArray.read(str(nodeID) + "attk-channel-buffer")
+
+
+
+        for nodeID in self.involved_replay_nodes[replay_pcap_f_name] :
+            ret = 0
+            while ret <= 0 :
+                ret = self.sharedBufferArray.write(str(nodeID) + "attk-channel-buffer", "START", 0)
+
+
+        print "Waiting for Replay Phase to Complete ..."
+        for nodeID in self.involved_replay_nodes[replay_pcap_f_name] :
+
+            if return_val == STOP:
+                break
+            recv_msg = ''
+            while recv_msg != "DONE":
+                if time.time() - self.start_time >= self.runTime:
+                    print "Run time Expired. Stopping ..."
+                    return_val = STOP
+                    break
+                dummy_id, recv_msg = self.sharedBufferArray.read(str(nodeID) + "attk-channel-buffer")
+
+        return return_val
+
+
+    def run_emulation_phase(self,emulation_phase_id):
+
+        hostIDs = self.PowerSimIdMapping.keys()
+        return_val = FINISH
+
+        print "Starting Emulation Phase with ID = ", emulation_phase_id
+        for host in hostIDs :
+            ret = 0
+            while ret <= 0:
+                ret = self.sharedBufferArray.write(str(host) + "attk-channel-buffer","EMULATE:" + str(emulation_phase_id), 0)
+
+        print "Waiting for Emulation Phase to Complete ..."
+        for host in hostIDs :
+            if return_val == STOP:
+                break
+            recv_msg = ''
+            while recv_msg != "DONE":
+                if time.time() - self.start_time >= self.runTime:
+                    print "Run time Expired. Stopping ..."
+                    return_val = STOP
+                    break
+                dummy_id, recv_msg = self.sharedBufferArray.read(str(host) + "attk-channel-buffer")
+
+        return return_val
 
     def run(self):
-        assert os.path.exists(self.pcapsDirPath)
+        assert os.path.exists(self.attkPlanDirPath)
+        assert os.path.isfile(self.attkPlanDirPath + "/attack_plan.txt")
 
-
-        replay_pcaps = fnmatch.filter(os.listdir(self.pcapsDirPath), 'replay*.pcap')
-        replay_pcaps = sorted(replay_pcaps)
-        self.signal_start_of_replay_phase()
+        with open(self.attkPlanDirPath + "/attack_plan.txt","r") as f:
+            stages = f.readlines()
 
         self.start_time = time.time()
-        for replay_pcap_f_name in replay_pcaps:
-            pcapFilePath = self.pcapsDirPath + "/" + replay_pcap_f_name
-            assert os.path.isfile(pcapFilePath)
-            replay_pcap_reader = dpkt.pcap.Reader(open(pcapFilePath, 'rb'))
 
-            print "Current Replay file = ", replay_pcap_f_name
-            idx = 0
-            l2_type = replay_pcap_reader.datalink()
+        for stage in stages :
+            curr_stage = stage.rstrip('\r\n')
 
-            for ts,curr_pkt in replay_pcap_reader:
+            if curr_stage.endswith(".pcap") :
+                replay_pcap_f_name = curr_stage
+                self.extract_involved_replay_nodes(replay_pcap_f_name)
+                self.signal_start_of_replay_phase()
+                result = self.run_replay_phase(replay_pcap_f_name)
+                self.signal_end_of_replay_phase()
+            else:
+                emulation_phase_id = curr_stage
+                result = self.run_emulation_phase(emulation_phase_id)
 
-                if time.time() - self.start_time >= self.runTime:
-                    print "Stopping ..."
-                    sys.exit(0)
+            if result == STOP:
+                print "Stopping Attack Orchestrator at: ", curr_stage, " stage due to Run time Expiry"
+                sys.exit(0)
 
-                self.replay_pkt(l2_type=l2_type,curr_pkt=curr_pkt,pkt_no=idx)
-                idx = idx + 1
+        print "Finished Executing Attack Plan. Stopping Attack Orchestrator..."
+        sys.exit(0)
 
 
-        self.signal_end_of_replay_phase()
 
 
 
 if __name__ == "__main__":
-    pcapDirPath, netcfgFile, runTime, proxyIP = parseOpts()
-
-    attk_orchestrator = attack_orchestrator(pcapDirPath, netcfgFile, runTime, proxyIP)
+    attkPlanDirPath, netcfgFile, runTime, proxyIP = parseOpts()
+    attk_orchestrator = attack_orchestrator(attkPlanDirPath, netcfgFile, runTime, proxyIP)
     assert attk_orchestrator != None
     sys.exit(attk_orchestrator.run())

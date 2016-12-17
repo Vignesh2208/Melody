@@ -25,75 +25,100 @@ class attackPlaybackThread(threading.Thread) :
     def post_playback(self):
         pass
 
+    def signal_end_of_replay_stage(self):
+
+        self.attackLayer.accessLock.acquire()
+        ret = 0
+        while ret <= 0:
+            ret = self.attackLayer.sharedBufferArray.write(self.attackLayer.attk_channel_bufName, "DONE", 0)
+        self.attackLayer.running_replay_stage = False
+        self.attackLayer.accessLock.release()
+
+        print "Signalling End of Replay Stage ..."
+
 
     def run(self):
         start_time = time.time()
         self.raw_rx_sock = socket.socket(socket.PF_PACKET, socket.SOCK_RAW, socket.htons(0x0800))
         self.raw_rx_sock.settimeout(5.0)
         print "Running Attack Playback Thread"
+        curr_send_idx = 0
+        curr_send_event = None
+
         while True :
             self.attackLayer.stoppingLock.acquire()
             if self.attackLayer.stopping == True:
+                self.attackLayer.running_replay_stage = False
+                self.attackLayer.running_emulate_stage = False
+                self.attackLayer.emulate_stage_id = "None"
                 self.attackLayer.stoppingLock.release()
                 self.raw_rx_sock.close()
                 print "Stopped Attack playback thread ..."
                 break
             self.attackLayer.stoppingLock.release()
 
-            try :
-                raw_pkt = self.raw_rx_sock.recv(MAXPKTSIZE)
-            except socket.error as e :
-                raw_pkt = None
+            self.attackLayer.accessLock.acquire()
+            if self.attackLayer.running_replay_stage == False :
+                curr_send_idx = 0
+                curr_send_event = None
+                self.attackLayer.accessLock.release()
                 continue
 
 
-            assert len(raw_pkt) != 0
-            raw_ip_pkt = get_raw_ip_pkt(raw_pkt)
-            #
-            ip_payload = binascii.hexlify(raw_ip_pkt.__str__( ))
-            #print "Rx raw_ip (src,dst) = ", inet_to_str(raw_ip_pkt.src), inet_to_str(raw_ip_pkt.dst)
-            #print "Rx pkt len = ", len(raw_ip_pkt), " pkt check = ", self.attackLayer.rx_pkt_check," Rx payload = ", ip_payload
+            if curr_send_event == None :
 
 
-            self.attackLayer.accessLock.acquire()
-            if self.attackLayer.rx_pkt_check_updated == False:
-                recv_msg = ''
-                dummy_id, recv_msg = self.attackLayer.sharedBufferArray.read(self.attackLayer.attk_channel_bufName)
-                if len(recv_msg) != 0 and recv_msg[0:2] == "RX" :
-                    self.attackLayer.rx_pkt_check = recv_msg[3:]
-                    self.attackLayer.rx_pkt_check_updated = True
-                    #print "Rx check = ", recv_msg[3:]
-                elif len(recv_msg) != 0 and recv_msg[0:2] == "TX" :
-                    payload = binascii.unhexlify(recv_msg[3:])
-                    src_ip, dst_ip = decode_raw_ip_payload_src_dst(payload)
-                    #print "Tx (src,dst) = ", src_ip, dst_ip, " len = ", len(payload), " payload = ", recv_msg[3:]
-                    self.attackLayer.raw_tx_sock.sendto(payload, (dst_ip, 0))
-                elif len(recv_msg) != 0 and recv_msg[0:3] == "END" :
-                    self.attackLayer.end_of_replay_phase = True
-                    print "Playback phase finished. stopping attack playback thread ..."
-                    self.attackLayer.accessLock.release()
-                    break
-                elif self.attackLayer.end_of_replay_phase == True:
-                    print "Playback phase finished. stopping attack playback thread ..."
-                    self.attackLayer.accessLock.release()
-                    break
-                elif len(recv_msg) != 0:
-                    print "Recv unknown msg type. Msg = ", recv_msg
+                if curr_send_idx < len(self.attackLayer.send_events) :
+                    curr_send_event = self.attackLayer.send_events[curr_send_idx]
+                    payload = binascii.unhexlify(str(curr_send_event[0]))
+                    dst_ip = curr_send_event[1]
+                    n_required_recv_events = curr_send_event[2]
 
-            if self.attackLayer.end_of_replay_phase == True:
-                print "Playback phase finished. stopping attack playback thread ..."
-                self.attackLayer.accessLock.release()
-                break
-
-
-            if ip_payload == self.attackLayer.rx_pkt_check :
-                ret = 0
-                self.attackLayer.rx_pkt_check = None
-                self.attackLayer.rx_pkt_check_updated = False
-                while ret <= 0 :
-                    ret = self.attackLayer.sharedBufferArray.write(self.attackLayer.attk_channel_bufName,"ACK",0)
+                    print "Sending Replay Event: Dst = ", dst_ip, " N Req Recv events = ", n_required_recv_events
 
             self.attackLayer.accessLock.release()
+
+            if curr_send_event == None :
+                self.signal_end_of_replay_stage()
+                continue
+
+
+
+            if n_required_recv_events == 0 :
+                self.attackLayer.raw_tx_sock.sendto(payload, (dst_ip, 0))
+                curr_send_event = None
+                curr_send_idx = curr_send_idx + 1
+
+            else:
+                try :
+                    raw_pkt = self.raw_rx_sock.recv(MAXPKTSIZE)
+                except socket.error as e :
+                    raw_pkt = None
+                    continue
+
+
+                assert len(raw_pkt) != 0
+                raw_ip_pkt = get_raw_ip_pkt(raw_pkt)
+                ip_payload = binascii.hexlify(raw_ip_pkt.__str__( ))
+
+                self.attackLayer.accessLock.acquire()
+                try :
+                    if len(self.attackLayer.recv_events[ip_payload]) > 0 :
+                        first_send_window = self.attackLayer.recv_events[ip_payload][0]
+
+                        assert (first_send_window >= curr_send_idx)
+                        if first_send_window == curr_send_idx :
+                            n_required_recv_events = n_required_recv_events - 1
+                        else :
+                            self.attackLayer.recv_events[ip_payload].pop(0)
+                            self.attackLayer.send_events[first_send_window] = [self.attackLayer.send_events[first_send_window][0],self.attackLayer.send_events[first_send_window][1],self.attackLayer.send_events[first_send_window][2] - 1]
+                    else:
+                        pass
+
+                except KeyError as e:
+                    pass
+
+                self.attackLayer.accessLock.release()
 
         self.post_playback()
 
@@ -121,6 +146,8 @@ class basicHostAttackLayer(threading.Thread):
         self.log = logger.Logger(logFile, "Host " + str(hostID) + " Attack Layer Thread")
         self.IPCLayer = IPCLayer
         self.NetServiceLayer = NetworkServiceLayer
+        self.IPMapping = self.NetServiceLayer.IPMap
+        self.myIP = self.IPMapping[self.hostID][0]
 
 
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP
@@ -132,7 +159,12 @@ class basicHostAttackLayer(threading.Thread):
         self.stoppingLock = threading.Lock()
         self.accessLock = threading.Lock()
         self.attack_playback_thread_started = False
-        self.end_of_replay_phase = False
+        self.running_emulate_stage = False
+        self.running_replay_stage = False
+        self.emulate_stage_id = "None"
+        self.send_events = []
+        self.recv_events = {}
+
 
         self.attack_playback_thread = attackPlaybackThread(self)
 
@@ -204,27 +236,92 @@ class basicHostAttackLayer(threading.Thread):
         self.accessLock.acquire()
         dummy_id, recv_msg = self.sharedBufferArray.read(self.attk_channel_bufName)
         if len(recv_msg) != 0:
-            if recv_msg[0:2] == "TX":
-                payload = binascii.unhexlify(recv_msg[3:])
-                src_ip, dst_ip = decode_raw_ip_payload_src_dst(payload)
-                #print "Tx (src,dst) = ", src_ip, dst_ip, "len = ", len(payload), " payload = ", recv_msg[3:]
-                self.raw_tx_sock.sendto(payload, (dst_ip, 0))
+            if "REPLAY:" in recv_msg:
+
+
+                replay_pcap_file = recv_msg.split(":")[1]
+                print "Replay PCAP FILE = ", replay_pcap_file
+                print "MY IP = ", self.myIP
+                self.recv_events = {}
+                self.send_events = []
                 self.accessLock.release()
-            elif recv_msg[0:2] == "RX":
-                self.rx_pkt_check = recv_msg[3:]
-                self.rx_pkt_check_updated = True
-                #print "Rx check = ", recv_msg[3:]
+
+
+                replay_pcap_reader = dpkt.pcap.Reader(open(replay_pcap_file, 'rb'))
+                l2_type = replay_pcap_reader.datalink()
+
+                curr_send_idx = 0
+                curr_send_n_recv_events = 0
+
+
+                for ts, curr_pkt in replay_pcap_reader:
+
+                    if l2_type == dpkt.pcap.DLT_NULL:
+                        src_ip, dst_ip = get_pkt_src_dst_IP(curr_pkt, dpkt.pcap.DLT_NULL)
+                        raw_ip_pkt = get_raw_ip_pkt(curr_pkt,dpkt.pcap.DLT_NULL)
+                    elif l2_type == dpkt.pcap.DLT_LINUX_SLL:
+                        src_ip, dst_ip = get_pkt_src_dst_IP(curr_pkt, dpkt.pcap.DLT_LINUX_SLL)
+                        raw_ip_pkt = get_raw_ip_pkt(curr_pkt, dpkt.pcap.DLT_LINUX_SLL)
+                    else:
+                        src_ip, dst_ip = get_pkt_src_dst_IP(curr_pkt)
+                        raw_ip_pkt = get_raw_ip_pkt(curr_pkt)
+
+                    if src_ip == self.myIP :
+                        ip_payload = binascii.hexlify(raw_ip_pkt.__str__())
+                        self.send_events.append([ip_payload,dst_ip,curr_send_n_recv_events])
+                        curr_send_n_recv_events = 0
+                        curr_send_idx = curr_send_idx + 1
+                    else :
+                        curr_send_n_recv_events = curr_send_n_recv_events + 1
+                        ip_payload = binascii.hexlify(raw_ip_pkt.__str__())
+                        try:
+                            self.recv_events[ip_payload].append(curr_send_idx)
+                        except:
+                            self.recv_events[ip_payload] = []
+                            self.recv_events[ip_payload].append(curr_send_idx)
+
+                ret = 0
+                while ret <= 0 :
+                    ret = self.sharedBufferArray.write(self.attk_channel_bufName,"LOADED",0)
+
+                print "LOADED PCAP LOCALLY ..."
+                print "N SEND EVENTS = ", len(self.send_events)
+                print "N RECV EVENTS = ", len(self.recv_events.keys())
+
+
+            elif "START" in recv_msg :
+                assert(self.running_emulate_stage == False and self.emulate_stage_id == "None")
+                self.running_replay_stage = True
+
+                print "SIGNALLED START REPLAY ..."
                 self.accessLock.release()
-            elif recv_msg[0:3] == "END" :
-                self.end_of_replay_phase = True
-                self.stopping = True
+
+            elif "EMULATE:" in recv_msg :
+
+                assert(self.running_replay_stage == False)
+                self.running_emulate_stage = True
+                self.emulate_stage_id = recv_msg.split(":")[1]
+                print "STARTING NEW EMULATION STAGE WITH ID = ", self.emulate_stage_id
                 self.accessLock.release()
+
+
+
+
             else:
-                print "Recv unknown msg type. Msg = ", recv_msg
+                print "Recv unknown cmd type. Msg = ", recv_msg
                 self.accessLock.release()
         else:
             self.accessLock.release()
 
+
+    def signal_end_of_emulate_stage(self):
+        self.accessLock.acquire()
+        self.running_emulate_stage = False
+        self.emulate_stage_id = "None"
+        ret = 0
+        while ret <= 0:
+            ret = self.sharedBufferArray.write(self.attk_channel_bufName, "DONE", 0)
+        self.accessLock.release()
 
     def init_shared_attk_playback_buffer(self):
         self.attk_channel_bufName = str(self.hostID) + "attk-channel-buffer"
