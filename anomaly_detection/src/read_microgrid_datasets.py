@@ -10,7 +10,7 @@ scriptDir = os.path.dirname(os.path.realpath(__file__))
 
 def extract_features(filepath=dirname(scriptDir)+ "/datasets/microgrid_datasets",scenario_name="all_taps"):
 	train_folder = filepath + '/train/' + scenario_name + "/"
-	attack_folder = filepath + '/attack/' + scenario_name + "/"
+	attack_folder = filepath + '/attack/'
 	data = {}
 
 	pcap_files_train = os.listdir(train_folder)
@@ -23,24 +23,49 @@ def extract_features(filepath=dirname(scriptDir)+ "/datasets/microgrid_datasets"
 	print "Extracting features for Training ..."
 
 	feature_list = []
+	train_power_series_keys = {}
+	train_network_series_keys = {}
 	for i in range(0,len(pcap_files_train)):
 		current_file = train_folder+pcap_files_train[i]
-		power_series = pf(current_file)
-		dst_list, start, end = nf.dst_list(current_file)
-		network_series = nf.network_features(current_file, dst_list, start,end)
+		train_power_series = pf(current_file)
 
-		for node in power_series:
-			feature_list.append(np.array(power_series[node]))
-		for node in network_series:
-			feature_list.append(np.array(network_series[node][0]))
-			feature_list.append(np.array(network_series[node][1]))
-			feature_list.append(np.array(network_series[node][2]))
+		train_power_series_keys[i] = []
+		train_network_series_keys[i] = []
+
+		train_dst_list, start, end = nf.dst_list(current_file)
+		train_network_series = nf.network_features(current_file, train_dst_list, start,end)
+
+
+
+		for node in train_power_series:
+
+			train_power_series_keys[i].append(node)
+			#if node == "2" :
+
+			# plt.plot(power_series[node])
+			# plt.ylim([min(power_series[node]),max(power_series[node])])
+			# print "Min Training = ", min(power_series[node])
+			# print "Max Training = ", max(power_series[node])
+			# plt.title("Training " + node)
+			# plt.show()
+
+			feature_list.append(np.array(train_power_series[node]))
+
+		for node in train_network_series:
+
+			train_network_series_keys[i].append(node)
+			feature_list.append(np.array(train_network_series[node][0]))
+			feature_list.append(np.array(train_network_series[node][1]))
+			feature_list.append(np.array(train_network_series[node][2]))
 
 
 
 	trainfeatureTimeSeries = []
 	nSamples = len(feature_list[0])
+	nSamples = 300
 	nFeatures = len(feature_list)
+
+
 
 
 
@@ -79,39 +104,85 @@ def extract_features(filepath=dirname(scriptDir)+ "/datasets/microgrid_datasets"
 	for attackType in pcap_attack_subdirs :
 
 		print "Extracting features for attack type: ", attackType
-		attk_type_dir = attack_folder + attackType
+		attk_type_dir = attack_folder + attackType + "/" + scenario_name + "/"
 		pcap_files_attack = os.listdir(attk_type_dir)
+
+		if attackType == "breaker":
+			continue
+
 		data['Attack'][attackType] = []
+		nAttkSamples = 1000000
+
+		print "nAttk pcap files = ", len(pcap_files_attack)
 		for i in range(0,len(pcap_files_attack)):
-			current_file = attk_type_dir +pcap_files_attack[i]
+			current_file = attk_type_dir + pcap_files_attack[i]
 			power_series = pf(current_file)
 			dst_list, start, end = nf.dst_list(current_file)
 			network_series = nf.network_features(current_file, dst_list, start,end)
 
-			for node in power_series:
-				data['Attack'][attackType].append(power_series[node])
-			for node in network_series:
-				data['Attack'][attackType].append(network_series[node][0])
-				data['Attack'][attackType].append(network_series[node][1])
-				data['Attack'][attackType].append(network_series[node][2])
+
+			for node in network_series :
+				if min(len(network_series[node][0]), len(network_series[node][1]),len(network_series[node][2])) < nAttkSamples:
+					nAttkSamples = min(len(network_series[node][0]), len(network_series[node][1]),len(network_series[node][2]))
+
+
+			for node in power_series :
+				if len(power_series[node]) < nAttkSamples:
+					nAttkSamples = len(power_series[node])
+
+			for node in train_power_series_keys[i]:
+				# if node == "2" :
+				# plt.plot(power_series[node])
+				# plt.title("Attack type - " + attackType + " Node = " + node)
+				# plt.ylim([min(power_series[node]), max(power_series[node])])
+				# plt.show()
+				# print "Min Attack = ", min(power_series[node])
+				# print "Max Attack = ", max(power_series[node])
+
+				if node not in power_series.keys() :
+					data['Attack'][attackType].append([0.0]*nAttkSamples)
+				else:
+					data['Attack'][attackType].append(np.array(power_series[node]))
+					#if len(power_series[node]) < nAttkSamples :
+					#	nAttkSamples = len(power_series[node])
+
+			for node in train_network_series_keys[i]:
+
+				if node not in network_series.keys():
+					data['Attack'][attackType].append([0.0]*nAttkSamples)
+					data['Attack'][attackType].append([0.0]*nAttkSamples)
+					data['Attack'][attackType].append([0.0]*nAttkSamples)
+				else:
+					data['Attack'][attackType].append(np.array(network_series[node][0]))
+					data['Attack'][attackType].append(np.array(network_series[node][1]))
+					data['Attack'][attackType].append(np.array(network_series[node][2]))
+
+					#if min(len(network_series[node][0]),len(network_series[node][1]),len(network_series[node][2])) < nAttkSamples :
+					#	nAttkSamples = min(len(network_series[node][0]),len(network_series[node][1]),len(network_series[node][2]))
 
 
 		curr_attack_timeseries = []
-		for idx in xrange(0, nSamples):
+		print "Normalizing samples for Attack Type :", attackType
+		feature_list = data['Attack'][attackType]
+		print "Attk Samples = ", nAttkSamples, " nFeatures = ", nFeatures
+
+		for idx in xrange(0, nAttkSamples):
 			curr_idx_values = []
 			for feature in xrange(0, nFeatures):
 				curr_idx_values.append(feature_list[feature][idx])
 
 			curr_attack_timeseries.append(curr_idx_values)
-			print "Normalizing samples for Attack Type :", attackType
+			curr_attack_data = curr_attack_timeseries
 			curr_attack_data = normalize(curr_attack_timeseries,featureMax)
+
 		data['Attack'][attackType] = curr_attack_data
 
 
 
 	print "Feature Extraction Completed ..."
+	trainingData = trainfeatureTimeSeries
 	trainingData = normalize(trainfeatureTimeSeries, featureMax)
 	data['Train'] = trainingData
+
 	return data,0
 
-#print feature_list(filepath)

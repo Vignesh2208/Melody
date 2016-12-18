@@ -29,7 +29,7 @@ def power_features(filename):
 			node_id = ip.data.data[10:(10+node_id_length)]
 			measurement = float(ip.data.data[(10+node_id_length):])
 
-			if node_id in node_measures:
+			if node_id in node_measures.keys():
 				pass
 			else:
 				node_measures[node_id] = [0] * (int(end_ts-start_ts)+1)

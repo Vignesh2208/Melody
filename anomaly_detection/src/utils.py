@@ -47,17 +47,30 @@ def getRMSErrs(orig_values,arimaResultCls,windowSize,threshold=None) :
 	rmsErrs = []
 	j = 1
 	nSamples = len(orig_values)
-	detection_time = None
+	detection_time = -1
+	n_dectections = 0
 	while j + windowSize < nSamples :
 
 		predicted_values = arimaResultCls.predict(start=j,end=j+windowSize-1)
+
+		if len(predicted_values) < windowSize :
+			j = j + windowSize
+			break
+
 		rms_err = math.sqrt(mean_squared_error(predicted_values,orig_values[j:j+windowSize]))
 		rmsErrs.append(rms_err)
 
-		if detection_time == None and threshold != None :
+		if detection_time == -1 and threshold != None :
 			if rms_err > threshold :
 				detection_time = j + windowSize -1
+				n_dectections = n_dectections + 1
+		elif threshold != None :
+			if rms_err > threshold:
+				n_dectections = n_dectections + 1
+
 		j = j + windowSize
+		#j = j + 1
+
 
 
 
@@ -65,18 +78,25 @@ def getRMSErrs(orig_values,arimaResultCls,windowSize,threshold=None) :
 	if j < nSamples - 1 :
 		predicted_values = arimaResultCls.predict(start=j,end=nSamples-1)
 
+		if len(predicted_values) < nSamples -1 - j :
+			return rmsErrs, detection_time, n_dectections
 		rms_err = math.sqrt(mean_squared_error(predicted_values,orig_values[j:]))
 		rmsErrs.append(rms_err)
 
 
-		if detection_time == None and threshold != None :
+		if detection_time == -1 and threshold != None :
 			if rms_err > threshold :
 				detection_time = j + windowSize - 1
+				n_dectections = n_dectections + 1
+
+		elif threshold != None :
+			if rms_err > threshold:
+				n_dectections = n_dectections + 1
 
 
 
 
-	return rmsErrs,detection_time
+	return rmsErrs,detection_time,n_dectections
 	
 
 def plotSignal(signal,N=100):
