@@ -9,6 +9,9 @@ sys.path.append("./")
 from cyber_network.network_configuration import NetworkConfiguration
 from cyber_network.traffic_flow import TrafficFlow
 from cyber_network.traffic_flow import TRAFFIC_FLOW_PERIODIC, TRAFFIC_FLOW_EXPONENTIAL ,TRAFFIC_FLOW_ONE_SHOT
+from cyber_network.network_scan_event import NetworkScanEvent
+from cyber_network.network_scan_event import NETWORK_SCAN_NMAP_PORT
+
 import Proxy.shared_buffer
 from Proxy.shared_buffer import *
 from Proxy.defines import *
@@ -28,6 +31,7 @@ class Main:
         self.node_mappings = {}
         self.control_node_id = None
         self.emulated_traffic_flows = []
+        self.emulated_network_scan_events = []
         self.dnp3_emulated_traffic_flows = []
 
         self.script_dir = os.path.dirname(os.path.realpath(__file__))
@@ -63,7 +67,7 @@ class Main:
 
     def start_dnp3_flow(self):
         self.dnp3_emulated_traffic_flows.extend([
-			TrafficFlow(type=TRAFFIC_FLOW_ONE_SHOT,
+            TrafficFlow(type=TRAFFIC_FLOW_ONE_SHOT,
                         offset=1,
                         inter_flow_period=2,
                         run_time=self.run_time,
@@ -74,8 +78,8 @@ class Main:
                         server_process_start_cmd='sudo python ' + self.base_dir + "/src/cyber_network/slave.py",
                         client_expect_file=self.base_dir + '/src/cyber_network/dnp3_master.expect',
                         long_running=True)
-            
-			
+
+
         ])
         for tf in self.dnp3_emulated_traffic_flows:
             tf.start()
@@ -105,7 +109,7 @@ class Main:
                         root_password="ubuntu",
                         server_process_start_cmd="/usr/sbin/sshd -D -o ListenAddress=" + self.network_configuration.mininet_obj.get("h1").IP(),
                         client_expect_file=self.base_dir + '/src/cyber_network/ssh_session.expect',
-			long_running = False),
+                        long_running = False),
 
             TrafficFlow(type=TRAFFIC_FLOW_ONE_SHOT,
                         offset=10,
@@ -117,7 +121,7 @@ class Main:
                         root_password="ubuntu",
                         server_process_start_cmd="sudo socat tcp-l:23,reuseaddr,fork exec:/bin/login,pty,setsid,setpgid,stderr,ctty",
                         client_expect_file=self.base_dir + '/src/cyber_network/socat_session.expect',
-			long_running = False),
+                        long_running = False),
 
             TrafficFlow(type=TRAFFIC_FLOW_EXPONENTIAL,
                         offset=1,
@@ -200,7 +204,7 @@ class Main:
         #subprocess.Popen(['python',str(proxy_py_script),'-c',self.node_mappings_file_path,'-l',proxy_log_file,
         #                  '-r',str(self.run_time),'-p',self.power_simulator_ip,'-d', str(self.control_node_id)])
         os.system("python " + str(proxy_py_script) + " -c " + self.node_mappings_file_path + " -l " + proxy_log_file \
-                 + " -r " + str(self.run_time) + " -p " + self.power_simulator_ip + " -d " + str(self.control_node_id) + " &")
+                  + " -r " + str(self.run_time) + " -p " + self.power_simulator_ip + " -d " + str(self.control_node_id) + " &")
 
     def start_attack_dispatcher(self):
         #print "Waiting for 5 secs for all processes to spawn up ..."
@@ -274,6 +278,20 @@ class Main:
             print "h"+str(host_index), ":", role
             host_index += 1
 
+    def start_network_scan_event_traffic(self):
+
+        self.emulated_network_scan_events = []
+
+        self.emulated_network_scan_events.extend([
+            NetworkScanEvent(src_mn_node=self.network_configuration.mininet_obj.get("h1"),
+                             dst_mn_node=self.network_configuration.mininet_obj.get("h2"),
+                             type=NETWORK_SCAN_NMAP_PORT,
+                             offset=5,
+                             duration=15)])
+
+        for tf in self.emulated_network_scan_events:
+            tf.start()
+
     def start_project(self):
         print "Starting project ..."
         self.ng = self.network_configuration.setup_network_graph(mininet_setup_gap=1, synthesis_setup_gap=1)
@@ -282,10 +300,14 @@ class Main:
         self.generate_node_mappings(self.network_configuration.roles)
         self.start_host_processes()
         self.start_switch_link_pkt_captures()
-        self.start_proxy_process()
+
+        #self.start_proxy_process()
         #self.start_attack_dispatcher()
         self.start_background_traffic()
-        self.start_dnp3_flow()
+        #self.start_dnp3_flow()
+
+        self.start_network_scan_event_traffic()
+
         self.run()
 
         print "Stopping project..."
@@ -300,6 +322,8 @@ class Main:
         for tf in self.dnp3_emulated_traffic_flows:
             tf.join()
 
+        for tf in self.emulated_network_scan_events:
+            tf.join()
 
         print "Cleaning up ..."
         self.network_configuration.cleanup_mininet()
@@ -325,20 +349,20 @@ def main():
                                                  synthesis_params={},
                                                  # Can map multiple power simulator objects to same cyber node.
                                                  roles=[
-                                                         # internal field bus network. clique topology structure created only for this
-                                                         ("controller_node",["control;1"]),
-                                                         ("pilot_buses_set_1",["2","25","29"]),
-                                                         ("pilot_buses_set_2",["22","23","19"]),
-                                                         ("pilot_buses_set_3",["20","10","6", "9"]),
-                                                         ("generator",["30;1","31;1","32;1","33;1","34;1","35;1","36;1","37;1","38;1","39;1"]),
+                                                     # internal field bus network. clique topology structure created only for this
+                                                     ("controller_node",["control;1"]),
+                                                     ("pilot_buses_set_1",["2","25","29"]),
+                                                     ("pilot_buses_set_2",["22","23","19"]),
+                                                     ("pilot_buses_set_3",["20","10","6", "9"]),
+                                                     ("generator",["30;1","31;1","32;1","33;1","34;1","35;1","36;1","37;1","38;1","39;1"]),
 
-                                                         # part of enterprise network. Linear topology which is attached to the clique at one switch
-                                                         ("enterprise-1",["vpn-gateway;1"]),
-                                                         ("enterprise-2",["attacker;1"])
+                                                     # part of enterprise network. Linear topology which is attached to the clique at one switch
+                                                     ("enterprise-1",["vpn-gateway;1"]),
+                                                     ("enterprise-2",["attacker;1"])
 
-                                                        ],                       
+                                                 ],
                                                  project_name="microgrid_with_background_traffic",
-                                                 run_time=60,
+                                                 run_time=30,
                                                  power_simulator_ip="127.0.0.1"
                                                  )
 

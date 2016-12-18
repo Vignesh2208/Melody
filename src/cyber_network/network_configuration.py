@@ -137,7 +137,7 @@ class NetworkConfiguration(object):
         flow_specs = []
 
         flow_match = Match(is_wildcard=True)
-        flow_match["ethernet_type"] = 0x0800
+        #flow_match["ethernet_type"] = 0x0800
 
         for src_host_id, dst_host_id in permutations(self.ng.host_ids, 2):
 

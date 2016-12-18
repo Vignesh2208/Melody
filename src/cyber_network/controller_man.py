@@ -1,4 +1,5 @@
 import subprocess
+import os
 
 
 class ControllerMan(object):
@@ -12,6 +13,8 @@ class ControllerMan(object):
             pass
 
     def get_next_ryu(self):
+
+        os.system("sudo killall ryu-manager")
 
         ryu_cmd = ["ryu-manager", "--observe-links", "ryu.app.ofctl_rest", "ryu.app.rest_topology"]
         self.ryu_proc = subprocess.Popen(ryu_cmd, stdout=subprocess.PIPE)

@@ -26,8 +26,9 @@ class TrafficFlow(threading.Thread):
 
         'run_time' determines the total time for which the traffic is generated.
 
+        'offset' determines how long after the thread started, the traffic is generated.
 
-        'src_node_id' and 'dst_node_id' define the endpoints of the flow
+        'src_mn_node' and 'dst_mn_node' define the endpoints of the flow
         '''
 
         super(TrafficFlow, self).__init__()
