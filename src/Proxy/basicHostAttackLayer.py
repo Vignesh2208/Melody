@@ -317,6 +317,8 @@ class basicHostAttackLayer(threading.Thread):
     def signal_end_of_emulate_stage(self):
         self.accessLock.acquire()
         self.running_emulate_stage = False
+
+        print "ENDING EMULATION STAGE: ", self.emulate_stage_id
         self.emulate_stage_id = "None"
         ret = 0
         while ret <= 0:

@@ -112,8 +112,10 @@ def main(hostID,netCfgFile,logFile,runTime,projectName,isControlHost) :
 	if isControlHost == True :
 		hostIPCLayer = __import__("Projects." + str(projectName) + ".hostControlLayer", globals(), locals(), ['hostControlLayer'], -1)
 		hostIPCLayer = hostIPCLayer.hostControlLayer
-		hostAttackLayer = __import__("basicHostAttackLayer", globals(), locals(), ['basicHostAttackLayer'], -1)
-		hostAttackLayer = hostAttackLayer.basicHostAttackLayer
+		#hostAttackLayer = __import__("basicHostAttackLayer", globals(), locals(), ['basicHostAttackLayer'], -1)
+		#hostAttackLayer = hostAttackLayer.basicHostAttackLayer
+		hostAttackLayer = __import__("Projects." + str(projectName) + ".hostAttackLayer", globals(), locals(),['hostAttackLayer'], -1)
+		hostAttackLayer = hostAttackLayer.hostAttackLayer
 	else:
 		hostIPCLayer = __import__("basicHostIPCLayer", globals(), locals(), ['basicHostIPCLayer'], -1)
 		hostIPCLayer = hostIPCLayer.basicHostIPCLayer

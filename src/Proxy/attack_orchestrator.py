@@ -19,6 +19,7 @@ import getopt
 import socket
 from defines import *
 import dpkt
+
 from dpkt.loopback import Loopback
 from dpkt.ethernet import Ethernet
 
@@ -270,13 +271,18 @@ class attack_orchestrator():
         for stage in stages :
             curr_stage = stage.rstrip('\r\n')
 
-            if curr_stage.endswith(".pcap") :
+            if curr_stage.startswith("#"):
+                continue
+            elif curr_stage.endswith(".pcap") :
                 replay_pcap_f_name = curr_stage
                 self.extract_involved_replay_nodes(replay_pcap_f_name)
                 self.signal_start_of_replay_phase()
                 result = self.run_replay_phase(replay_pcap_f_name)
                 self.signal_end_of_replay_phase()
             else:
+
+                print "curr_stage:", curr_stage
+
                 emulation_phase_id = curr_stage
                 result = self.run_emulation_phase(emulation_phase_id)
 

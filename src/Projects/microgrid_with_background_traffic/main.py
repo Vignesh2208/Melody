@@ -210,7 +210,7 @@ class Main:
         #print "Waiting for 5 secs for all processes to spawn up ..."
         #time.sleep(5)
         print "Starting Attack Dispatcher at " + str(datetime.datetime.now())
-        replay_pcaps_dir = self.script_dir + "/pcaps"
+        replay_pcaps_dir = self.script_dir + "/attack_plan"
 
         #self.disable_TCP_RST()
 

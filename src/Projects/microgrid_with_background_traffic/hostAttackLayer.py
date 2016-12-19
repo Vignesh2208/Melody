@@ -1,17 +1,22 @@
 import sys
 import os
+import time
 import threading
 import Proxy.shared_buffer
 from Proxy.shared_buffer import *
 import Proxy.logger
 from Proxy.logger import Logger
 from Proxy.defines import *
+from timeit import default_timer as timer
 from Proxy.basicHostAttackLayer import basicHostAttackLayer
 
 
 class hostAttackLayer(basicHostAttackLayer):
     def __init__(self, hostID, logFile, IPCLayer, NetworkServiceLayer, sharedBufferArray):
         basicHostAttackLayer.__init__(self, hostID, logFile, IPCLayer, NetworkServiceLayer, sharedBufferArray)
+
+        self.init_time = None
+        self.elasped_time = None
 
     # Callback on each received pkt from Net layer
     # By default it is injected to IPC layer
@@ -47,5 +52,18 @@ class hostAttackLayer(basicHostAttackLayer):
     #  Function called repeatedly.
     def idle(self):
         # Put logic for specific attacks here.  Can be used to do Async sends to IPC and Network layers
+        if self.running_emulate_stage == True:
+            if self.emulate_stage_id == "emulation-stage-nmap-from-1-to-2":
+                print "Inside emulation-stage-nmap", self.getHostID()
+                print self.IPMapping
 
-        pass
+                # Start keeping track of time
+                if not self.init_time:
+                    self.init_time = timer()
+
+                # Measure how long has it been since the start
+                self.elasped_time = timer() - self.init_time
+
+                # If it has been longer than desired duration
+                if self.elasped_time > 5:
+                    self.signal_end_of_emulate_stage()
