@@ -361,7 +361,7 @@ def main():
 
                                                  ],
                                                  project_name="microgrid_with_background_traffic",
-                                                 run_time=30,
+                                                 run_time=80,
                                                  power_simulator_ip="127.0.0.1"
                                                  )
 

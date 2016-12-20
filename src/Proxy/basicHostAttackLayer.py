@@ -122,15 +122,6 @@ class attackPlaybackThread(threading.Thread) :
 
         self.post_playback()
 
-
-
-
-
-
-
-
-
-
 class basicHostAttackLayer(threading.Thread):
     def __init__(self, hostID, logFile, IPCLayer, NetworkServiceLayer,sharedBufferArray):
 
