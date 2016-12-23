@@ -11,8 +11,7 @@ with open(sys.argv[1], "r") as infile:
         x.append(bro_dict['latency']*1000)
 
 # the histogram of the data
-n, bins, patches = plt.hist(x, 50, facecolor='green',
-        alpha=0.75)
+n, bins, patches = plt.hist(x, 50, facecolor='green', alpha=0.75)
 
 
 print "Mean Latency:", np.mean(x)
