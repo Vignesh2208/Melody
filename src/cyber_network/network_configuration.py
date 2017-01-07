@@ -51,7 +51,6 @@ class NetworkConfiguration(object):
                  synthesis_params,
                  roles,
                  project_name="test",
-                 run_time=0,
                  power_simulator_ip="127.0.0.1"):
 
         self.controller = controller
@@ -63,7 +62,6 @@ class NetworkConfiguration(object):
         self.synthesis_params = synthesis_params
         self.roles = roles
         self.project_name = project_name
-        self.run_time = run_time
         self.power_simulator_ip = power_simulator_ip
 
         self.controller_ip = controller_ip

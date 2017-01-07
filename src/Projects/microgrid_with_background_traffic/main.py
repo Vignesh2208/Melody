@@ -19,24 +19,32 @@ from Proxy.defines import *
 
 class Main:
 
-    def __init__(self, network_configuration):
+    def __init__(self,
+                 run_time,
+                 network_configuration,
+                 script_dir,
+                 base_dir,
+                 emulated_background_traffic_flows,
+                 emulated_network_scan_events,
+                 emulated_dnp3_traffic_flows):
+
         self.network_configuration = network_configuration
 
         # Dictionary containing mappings, keyed by the id of the mininet host
         # Value is a tuple -- (IP Address, Role)
         self.project_name = self.network_configuration.project_name
-        self.run_time = self.network_configuration.run_time
-        self.ng = None
+        self.run_time = run_time
         self.power_simulator_ip = self.network_configuration.power_simulator_ip
         self.node_mappings = {}
         self.control_node_id = None
-        self.emulated_traffic_flows = []
-        self.emulated_network_scan_events = []
-        self.dnp3_emulated_traffic_flows = []
 
-        self.script_dir = os.path.dirname(os.path.realpath(__file__))
-        idx = self.script_dir.index('NetPower_TestBed')
-        self.base_dir = self.script_dir[0:idx] + "NetPower_TestBed"
+        self.script_dir = script_dir
+        self.base_dir = base_dir
+
+        self.emulated_background_traffic_flows = emulated_background_traffic_flows
+        self.emulated_network_scan_events = emulated_network_scan_events
+        self.emulated_dnp3_traffic_flows = emulated_dnp3_traffic_flows
+
         self.node_mappings_file_path = self.script_dir + "/node_mappings.txt"
         self.log_dir = self.base_dir + "/logs/" + str(self.project_name)
         self.proxy_dir = self.base_dir + "/src/Proxy"
@@ -65,92 +73,6 @@ class Main:
 
                 outfile.write(lineTowrite)
 
-    def start_dnp3_flow(self):
-        self.dnp3_emulated_traffic_flows.extend([
-            TrafficFlow(type=TRAFFIC_FLOW_ONE_SHOT,
-                        offset=1,
-                        inter_flow_period=2,
-                        run_time=self.run_time,
-                        src_mn_node=self.network_configuration.mininet_obj.get("h1"),
-                        dst_mn_node=self.network_configuration.mininet_obj.get("h2"),
-                        root_user_name="ubuntu",
-                        root_password="ubuntu",
-                        server_process_start_cmd='sudo python ' + self.base_dir + "/src/cyber_network/slave.py",
-                        client_expect_file=self.base_dir + '/src/cyber_network/dnp3_master.expect',
-                        long_running=True)
-
-
-        ])
-        for tf in self.dnp3_emulated_traffic_flows:
-            tf.start()
-
-        print "DNP3 traffic threads started..."
-
-    def start_background_traffic(self):
-        self.emulated_traffic_flows.extend([
-            TrafficFlow(type=TRAFFIC_FLOW_PERIODIC,
-                        offset=1,
-                        inter_flow_period=1,
-                        run_time=self.run_time,
-                        src_mn_node=self.network_configuration.mininet_obj.get("h7"),
-                        dst_mn_node=self.network_configuration.mininet_obj.get("h1"),
-                        root_user_name="ubuntu",
-                        root_password="ubuntu",
-                        server_process_start_cmd="",
-                        client_expect_file=self.base_dir + '/src/cyber_network/ping_session.expect'),
-
-            TrafficFlow(type=TRAFFIC_FLOW_ONE_SHOT,
-                        offset=5,
-                        inter_flow_period=1,
-                        run_time=self.run_time,
-                        src_mn_node=self.network_configuration.mininet_obj.get("h7"),
-                        dst_mn_node=self.network_configuration.mininet_obj.get("h1"),
-                        root_user_name="ubuntu",
-                        root_password="ubuntu",
-                        server_process_start_cmd="/usr/sbin/sshd -D -o ListenAddress=" + self.network_configuration.mininet_obj.get("h1").IP(),
-                        client_expect_file=self.base_dir + '/src/cyber_network/ssh_session.expect',
-                        long_running = False),
-
-            TrafficFlow(type=TRAFFIC_FLOW_ONE_SHOT,
-                        offset=10,
-                        inter_flow_period=2,
-                        run_time=self.run_time,
-                        src_mn_node=self.network_configuration.mininet_obj.get("h1"),
-                        dst_mn_node=self.network_configuration.mininet_obj.get("h2"),
-                        root_user_name="ubuntu",
-                        root_password="ubuntu",
-                        server_process_start_cmd="sudo socat tcp-l:23,reuseaddr,fork exec:/bin/login,pty,setsid,setpgid,stderr,ctty",
-                        client_expect_file=self.base_dir + '/src/cyber_network/socat_session.expect',
-                        long_running = False),
-
-            TrafficFlow(type=TRAFFIC_FLOW_EXPONENTIAL,
-                        offset=1,
-                        inter_flow_period=self.run_time/2,
-                        run_time=self.run_time,
-                        src_mn_node=self.network_configuration.mininet_obj.get("h7"),
-                        dst_mn_node=self.network_configuration.mininet_obj.get("h1"),
-                        root_user_name="ubuntu",
-                        root_password="ubuntu",
-                        server_process_start_cmd="python -m SimpleHTTPServer",
-                        client_expect_file=self.base_dir + '/src/cyber_network/http_session.expect'),
-
-            TrafficFlow(type=TRAFFIC_FLOW_EXPONENTIAL,
-                        offset=1,
-                        inter_flow_period=self.run_time/2,
-                        run_time=self.run_time,
-                        src_mn_node=self.network_configuration.mininet_obj.get("h7"),
-                        dst_mn_node=self.network_configuration.mininet_obj.get("h1"),
-                        root_user_name="ubuntu",
-                        root_password="ubuntu",
-                        server_process_start_cmd="/usr/sbin/sshd -D -o ListenAddress=" + self.network_configuration.mininet_obj.get("h1").IP(),
-                        client_expect_file=self.base_dir + '/src/cyber_network/ssh_session.expect')
-        ])
-
-        for tf in self.emulated_traffic_flows:
-            tf.start()
-
-        print "Background traffic threads started..."
-
     def start_host_processes(self):
         print "Starting all Host Commands ..."
         for i in xrange(len(self.network_configuration.roles)):
@@ -162,8 +84,6 @@ class Main:
                 host_log_file = self.log_dir + "/host_" + str(host_id) + "_log.txt"
             else:
                 host_log_file = self.log_dir + "/controller_node_log.txt"
-
-
 
             host_py_script = self.proxy_dir + "/host.py"
             cmd_to_run = "python " + str(host_py_script) + " -c " + self.node_mappings_file_path + " -l " + host_log_file + " -r " + str(self.run_time) \
@@ -263,11 +183,11 @@ class Main:
 
     def print_topo_info(self):
         print "Links in the network topology:"
-        for link in self.ng.get_switch_link_data():
+        for link in self.network_configuration.ng.get_switch_link_data():
             print link
 
         print "All the hosts in the topology:"
-        for sw in self.ng.get_switches():
+        for sw in self.network_configuration.ng.get_switches():
             print "Hosts at switch:", sw.node_id
             for h in sw.attached_hosts:
                 print "Name:", h.node_id, "IP:", h.ip_addr, "Port:", h.switch_port
@@ -278,23 +198,43 @@ class Main:
             print "h"+str(host_index), ":", role
             host_index += 1
 
-    def start_network_scan_event_traffic(self):
-
-        self.emulated_network_scan_events = []
-
-        self.emulated_network_scan_events.extend([
-            NetworkScanEvent(src_mn_node=self.network_configuration.mininet_obj.get("h1"),
-                             dst_mn_node=self.network_configuration.mininet_obj.get("h2"),
-                             type=NETWORK_SCAN_NMAP_PORT,
-                             offset=5,
-                             duration=15)])
+    def start_emulated_traffic_threads(self):
 
         for tf in self.emulated_network_scan_events:
             tf.start()
 
+        print "Network scan event threads started..."
+
+        for tf in self.emulated_dnp3_traffic_flows:
+            tf.start()
+
+        print "DNP3 traffic threads started..."
+
+        for tf in self.emulated_background_traffic_flows:
+            tf.start()
+
+        print "Background traffic threads started..."
+
+    def stop_emulated_traffic_threads(self):
+
+        # Join the threads for background processes to wait on them
+        for tf in self.emulated_background_traffic_flows:
+            tf.join()
+
+        print "Network scan event threads stopped..."
+
+        for tf in self.emulated_dnp3_traffic_flows:
+            tf.join()
+
+        print "DNP3 traffic threads stopped..."
+
+        for tf in self.emulated_network_scan_events:
+            tf.join()
+
+        print "Background traffic threads stopped..."
+
     def start_project(self):
         print "Starting project ..."
-        self.ng = self.network_configuration.setup_network_graph(mininet_setup_gap=1, synthesis_setup_gap=1)
         self.print_topo_info()
 
         self.generate_node_mappings(self.network_configuration.roles)
@@ -303,32 +243,115 @@ class Main:
 
         self.start_proxy_process()
         self.start_attack_dispatcher()
-        #self.start_background_traffic()
-        #self.start_dnp3_flow()
-        #self.start_network_scan_event_traffic()
+
+        self.start_emulated_traffic_threads()
 
         self.run()
 
-        print "Stopping project..."
-        self.stop_project()
-
-    def stop_project(self):
-
-        # Join the threads for background processes to wait on them
-        for tf in self.emulated_traffic_flows:
-            tf.join()
-
-        for tf in self.dnp3_emulated_traffic_flows:
-            tf.join()
-
-        for tf in self.emulated_network_scan_events:
-            tf.join()
+        self.stop_emulated_traffic_threads()
 
         print "Cleaning up ..."
         self.network_configuration.cleanup_mininet()
 
 
-def main():
+def get_emulated_background_traffic_flows(network_configuration, run_time, base_dir):
+    emulated_background_traffic_flows = [
+        TrafficFlow(type=TRAFFIC_FLOW_PERIODIC,
+                    offset=1,
+                    inter_flow_period=1,
+                    run_time=run_time,
+                    src_mn_node=network_configuration.mininet_obj.get("h7"),
+                    dst_mn_node=network_configuration.mininet_obj.get("h1"),
+                    root_user_name="ubuntu",
+                    root_password="ubuntu",
+                    server_process_start_cmd="",
+                    client_expect_file=base_dir + '/src/cyber_network/ping_session.expect'),
+
+        TrafficFlow(type=TRAFFIC_FLOW_ONE_SHOT,
+                    offset=5,
+                    inter_flow_period=1,
+                    run_time=run_time,
+                    src_mn_node=network_configuration.mininet_obj.get("h7"),
+                    dst_mn_node=network_configuration.mininet_obj.get("h1"),
+                    root_user_name="ubuntu",
+                    root_password="ubuntu",
+                    server_process_start_cmd="/usr/sbin/sshd -D -o ListenAddress=" + network_configuration.mininet_obj.get(
+                        "h1").IP(),
+                    client_expect_file=base_dir + '/src/cyber_network/ssh_session.expect',
+                    long_running=False),
+
+        TrafficFlow(type=TRAFFIC_FLOW_ONE_SHOT,
+                    offset=10,
+                    inter_flow_period=2,
+                    run_time=run_time,
+                    src_mn_node=network_configuration.mininet_obj.get("h1"),
+                    dst_mn_node=network_configuration.mininet_obj.get("h2"),
+                    root_user_name="ubuntu",
+                    root_password="ubuntu",
+                    server_process_start_cmd="sudo socat tcp-l:23,reuseaddr,fork exec:/bin/login,pty,setsid,setpgid,stderr,ctty",
+                    client_expect_file=base_dir + '/src/cyber_network/socat_session.expect',
+                    long_running=False),
+
+        TrafficFlow(type=TRAFFIC_FLOW_EXPONENTIAL,
+                    offset=1,
+                    inter_flow_period=run_time / 2,
+                    run_time=run_time,
+                    src_mn_node=network_configuration.mininet_obj.get("h7"),
+                    dst_mn_node=network_configuration.mininet_obj.get("h1"),
+                    root_user_name="ubuntu",
+                    root_password="ubuntu",
+                    server_process_start_cmd="python -m SimpleHTTPServer",
+                    client_expect_file=base_dir + '/src/cyber_network/http_session.expect'),
+
+        TrafficFlow(type=TRAFFIC_FLOW_EXPONENTIAL,
+                    offset=1,
+                    inter_flow_period=run_time / 2,
+                    run_time=run_time,
+                    src_mn_node=network_configuration.mininet_obj.get("h7"),
+                    dst_mn_node=network_configuration.mininet_obj.get("h1"),
+                    root_user_name="ubuntu",
+                    root_password="ubuntu",
+                    server_process_start_cmd="/usr/sbin/sshd -D -o ListenAddress=" + network_configuration.mininet_obj.get(
+                        "h1").IP(),
+                    client_expect_file=base_dir + '/src/cyber_network/ssh_session.expect')
+    ]
+
+    return emulated_background_traffic_flows
+
+
+def get_emulated_network_scan_events(network_configuration, run_time, base_dir):
+
+    emulated_network_scan_events = [
+        NetworkScanEvent(src_mn_node=network_configuration.mininet_obj.get("h1"),
+                         dst_mn_node=network_configuration.mininet_obj.get("h2"),
+                         type=NETWORK_SCAN_NMAP_PORT,
+                         offset=5,
+                         duration=15)
+    ]
+
+    return emulated_network_scan_events
+
+
+def get_emulated_dnp3_traffic_flows(network_configuration, run_time, base_dir):
+
+    emulated_dnp3_traffic_flows = [
+        TrafficFlow(type=TRAFFIC_FLOW_ONE_SHOT,
+                    offset=1,
+                    inter_flow_period=2,
+                    run_time=run_time,
+                    src_mn_node=network_configuration.mininet_obj.get("h1"),
+                    dst_mn_node=network_configuration.mininet_obj.get("h2"),
+                    root_user_name="ubuntu",
+                    root_password="ubuntu",
+                    server_process_start_cmd='sudo python ' + base_dir + "/src/cyber_network/slave.py",
+                    client_expect_file=base_dir + '/src/cyber_network/dnp3_master.expect',
+                    long_running=True)
+    ]
+
+    return emulated_dnp3_traffic_flows
+
+
+def get_network_configuration():
 
     network_configuration = NetworkConfiguration("ryu",
                                                  "127.0.0.1",
@@ -361,11 +384,44 @@ def main():
 
                                                  ],
                                                  project_name="microgrid_with_background_traffic",
-                                                 run_time=80,
                                                  power_simulator_ip="127.0.0.1"
                                                  )
 
-    exp = Main(network_configuration)
+    network_configuration.setup_network_graph(mininet_setup_gap=1, synthesis_setup_gap=1)
+
+    return network_configuration
+
+
+def main():
+
+    run_time = 80
+
+    script_dir = os.path.dirname(os.path.realpath(__file__))
+    idx = script_dir.index('NetPower_TestBed')
+    base_dir = script_dir[0:idx] + "NetPower_TestBed"
+
+    network_configuration = get_network_configuration()
+
+    emulated_background_traffic_flows = get_emulated_background_traffic_flows(network_configuration,
+                                                                              run_time,
+                                                                              base_dir)
+
+    emulated_network_scan_events = get_emulated_network_scan_events(network_configuration,
+                                                                    run_time,
+                                                                    base_dir)
+
+    emulated_dnp3_traffic_flows = get_emulated_dnp3_traffic_flows(network_configuration,
+                                                                  run_time,
+                                                                  base_dir)
+
+    exp = Main(run_time,
+               network_configuration,
+               script_dir,
+               base_dir,
+               [],#emulated_background_traffic_flows,
+               [],#emulated_network_scan_events,
+               [])#emulated_dnp3_traffic_flows)
+
     exp.start_project()
 
 if __name__ == "__main__":

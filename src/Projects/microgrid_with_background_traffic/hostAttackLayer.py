@@ -11,6 +11,7 @@ from Proxy.defines import *
 from timeit import default_timer as timer
 from Proxy.basicHostAttackLayer import basicHostAttackLayer
 
+
 class hostAttackLayer(basicHostAttackLayer):
     def __init__(self, hostID, logFile, IPCLayer, NetworkServiceLayer, sharedBufferArray):
         basicHostAttackLayer.__init__(self, hostID, logFile, IPCLayer, NetworkServiceLayer, sharedBufferArray)
