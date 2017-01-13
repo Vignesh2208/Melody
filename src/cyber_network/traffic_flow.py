@@ -9,7 +9,7 @@ TRAFFIC_FLOW_EXPONENTIAL = 'Exponential'
 TRAFFIC_FLOW_ONE_SHOT = 'One Shot'
 
 
-class TrafficFlow(threading.Thread):
+class EmulatedTrafficFlow(threading.Thread):
 
     def __init__(self, type, offset, inter_flow_period, run_time, src_mn_node, dst_mn_node,
                  root_user_name, root_password,
@@ -31,7 +31,7 @@ class TrafficFlow(threading.Thread):
         'src_mn_node' and 'dst_mn_node' define the endpoints of the flow
         '''
 
-        super(TrafficFlow, self).__init__()
+        super(EmulatedTrafficFlow, self).__init__()
 
         self.type = type
         self.offset = offset

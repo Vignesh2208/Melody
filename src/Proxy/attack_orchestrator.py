@@ -263,7 +263,7 @@ class attack_orchestrator():
         assert os.path.exists(self.attkPlanDirPath)
         assert os.path.isfile(self.attkPlanDirPath + "/attack_plan.txt")
 
-        with open(self.attkPlanDirPath + "/attack_plan.txt","r") as f:
+        with open(self.attkPlanDirPath + "/attack_plan.txt", "r") as f:
             stages = f.readlines()
 
         self.start_time = time.time()

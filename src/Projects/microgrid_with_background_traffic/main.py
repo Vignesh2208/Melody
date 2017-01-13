@@ -7,7 +7,7 @@ import sys
 
 sys.path.append("./")
 from cyber_network.network_configuration import NetworkConfiguration
-from cyber_network.traffic_flow import TrafficFlow
+from cyber_network.traffic_flow import EmulatedTrafficFlow
 from cyber_network.traffic_flow import TRAFFIC_FLOW_PERIODIC, TRAFFIC_FLOW_EXPONENTIAL ,TRAFFIC_FLOW_ONE_SHOT
 from cyber_network.network_scan_event import NetworkScanEvent
 from cyber_network.network_scan_event import NETWORK_SCAN_NMAP_PORT
@@ -24,6 +24,7 @@ class Main:
                  network_configuration,
                  script_dir,
                  base_dir,
+                 replay_pcaps_dir,
                  emulated_background_traffic_flows,
                  emulated_network_scan_events,
                  emulated_dnp3_traffic_flows):
@@ -40,6 +41,7 @@ class Main:
 
         self.script_dir = script_dir
         self.base_dir = base_dir
+        self.replay_pcaps_dir = replay_pcaps_dir
 
         self.emulated_background_traffic_flows = emulated_background_traffic_flows
         self.emulated_network_scan_events = emulated_network_scan_events
@@ -130,13 +132,14 @@ class Main:
         #print "Waiting for 5 secs for all processes to spawn up ..."
         #time.sleep(5)
         print "Starting Attack Dispatcher at " + str(datetime.datetime.now())
-        replay_pcaps_dir = self.script_dir + "/attack_plan"
+
 
         #self.disable_TCP_RST()
 
-        if os.path.isdir(replay_pcaps_dir) :
+        if os.path.isdir(self.replay_pcaps_dir):
             attack_dispatcher_script = self.proxy_dir + "/attack_orchestrator.py"
-            os.system("python " + str(attack_dispatcher_script) + " -c " + replay_pcaps_dir + " -l " + self.node_mappings_file_path + " -r " + str(self.run_time) + " &")
+            os.system("python " + str(attack_dispatcher_script) + " -c " + self.replay_pcaps_dir + " -l " +
+                      self.node_mappings_file_path + " -r " + str(self.run_time) + " &")
 
     def disable_TCP_RST(self):
         print "DISABLING TCP RST"
@@ -256,64 +259,64 @@ class Main:
 
 def get_emulated_background_traffic_flows(network_configuration, run_time, base_dir):
     emulated_background_traffic_flows = [
-        TrafficFlow(type=TRAFFIC_FLOW_PERIODIC,
-                    offset=1,
-                    inter_flow_period=1,
-                    run_time=run_time,
-                    src_mn_node=network_configuration.mininet_obj.get("h7"),
-                    dst_mn_node=network_configuration.mininet_obj.get("h1"),
-                    root_user_name="ubuntu",
-                    root_password="ubuntu",
-                    server_process_start_cmd="",
-                    client_expect_file=base_dir + '/src/cyber_network/ping_session.expect'),
+        EmulatedTrafficFlow(type=TRAFFIC_FLOW_PERIODIC,
+                            offset=1,
+                            inter_flow_period=1,
+                            run_time=run_time,
+                            src_mn_node=network_configuration.mininet_obj.get("h7"),
+                            dst_mn_node=network_configuration.mininet_obj.get("h1"),
+                            root_user_name="ubuntu",
+                            root_password="ubuntu",
+                            server_process_start_cmd="",
+                            client_expect_file=base_dir + '/src/cyber_network/ping_session.expect'),
 
-        TrafficFlow(type=TRAFFIC_FLOW_ONE_SHOT,
-                    offset=5,
-                    inter_flow_period=1,
-                    run_time=run_time,
-                    src_mn_node=network_configuration.mininet_obj.get("h7"),
-                    dst_mn_node=network_configuration.mininet_obj.get("h1"),
-                    root_user_name="ubuntu",
-                    root_password="ubuntu",
-                    server_process_start_cmd="/usr/sbin/sshd -D -o ListenAddress=" + network_configuration.mininet_obj.get(
+        EmulatedTrafficFlow(type=TRAFFIC_FLOW_ONE_SHOT,
+                            offset=5,
+                            inter_flow_period=1,
+                            run_time=run_time,
+                            src_mn_node=network_configuration.mininet_obj.get("h7"),
+                            dst_mn_node=network_configuration.mininet_obj.get("h1"),
+                            root_user_name="ubuntu",
+                            root_password="ubuntu",
+                            server_process_start_cmd="/usr/sbin/sshd -D -o ListenAddress=" + network_configuration.mininet_obj.get(
                         "h1").IP(),
-                    client_expect_file=base_dir + '/src/cyber_network/ssh_session.expect',
-                    long_running=False),
+                            client_expect_file=base_dir + '/src/cyber_network/ssh_session.expect',
+                            long_running=False),
 
-        TrafficFlow(type=TRAFFIC_FLOW_ONE_SHOT,
-                    offset=10,
-                    inter_flow_period=2,
-                    run_time=run_time,
-                    src_mn_node=network_configuration.mininet_obj.get("h1"),
-                    dst_mn_node=network_configuration.mininet_obj.get("h2"),
-                    root_user_name="ubuntu",
-                    root_password="ubuntu",
-                    server_process_start_cmd="sudo socat tcp-l:23,reuseaddr,fork exec:/bin/login,pty,setsid,setpgid,stderr,ctty",
-                    client_expect_file=base_dir + '/src/cyber_network/socat_session.expect',
-                    long_running=False),
+        EmulatedTrafficFlow(type=TRAFFIC_FLOW_ONE_SHOT,
+                            offset=10,
+                            inter_flow_period=2,
+                            run_time=run_time,
+                            src_mn_node=network_configuration.mininet_obj.get("h1"),
+                            dst_mn_node=network_configuration.mininet_obj.get("h2"),
+                            root_user_name="ubuntu",
+                            root_password="ubuntu",
+                            server_process_start_cmd="sudo socat tcp-l:23,reuseaddr,fork exec:/bin/login,pty,setsid,setpgid,stderr,ctty",
+                            client_expect_file=base_dir + '/src/cyber_network/socat_session.expect',
+                            long_running=False),
 
-        TrafficFlow(type=TRAFFIC_FLOW_EXPONENTIAL,
-                    offset=1,
-                    inter_flow_period=run_time / 2,
-                    run_time=run_time,
-                    src_mn_node=network_configuration.mininet_obj.get("h7"),
-                    dst_mn_node=network_configuration.mininet_obj.get("h1"),
-                    root_user_name="ubuntu",
-                    root_password="ubuntu",
-                    server_process_start_cmd="python -m SimpleHTTPServer",
-                    client_expect_file=base_dir + '/src/cyber_network/http_session.expect'),
+        EmulatedTrafficFlow(type=TRAFFIC_FLOW_EXPONENTIAL,
+                            offset=1,
+                            inter_flow_period=run_time / 2,
+                            run_time=run_time,
+                            src_mn_node=network_configuration.mininet_obj.get("h7"),
+                            dst_mn_node=network_configuration.mininet_obj.get("h1"),
+                            root_user_name="ubuntu",
+                            root_password="ubuntu",
+                            server_process_start_cmd="python -m SimpleHTTPServer",
+                            client_expect_file=base_dir + '/src/cyber_network/http_session.expect'),
 
-        TrafficFlow(type=TRAFFIC_FLOW_EXPONENTIAL,
-                    offset=1,
-                    inter_flow_period=run_time / 2,
-                    run_time=run_time,
-                    src_mn_node=network_configuration.mininet_obj.get("h7"),
-                    dst_mn_node=network_configuration.mininet_obj.get("h1"),
-                    root_user_name="ubuntu",
-                    root_password="ubuntu",
-                    server_process_start_cmd="/usr/sbin/sshd -D -o ListenAddress=" + network_configuration.mininet_obj.get(
+        EmulatedTrafficFlow(type=TRAFFIC_FLOW_EXPONENTIAL,
+                            offset=1,
+                            inter_flow_period=run_time / 2,
+                            run_time=run_time,
+                            src_mn_node=network_configuration.mininet_obj.get("h7"),
+                            dst_mn_node=network_configuration.mininet_obj.get("h1"),
+                            root_user_name="ubuntu",
+                            root_password="ubuntu",
+                            server_process_start_cmd="/usr/sbin/sshd -D -o ListenAddress=" + network_configuration.mininet_obj.get(
                         "h1").IP(),
-                    client_expect_file=base_dir + '/src/cyber_network/ssh_session.expect')
+                            client_expect_file=base_dir + '/src/cyber_network/ssh_session.expect')
     ]
 
     return emulated_background_traffic_flows
@@ -335,17 +338,17 @@ def get_emulated_network_scan_events(network_configuration, run_time, base_dir):
 def get_emulated_dnp3_traffic_flows(network_configuration, run_time, base_dir):
 
     emulated_dnp3_traffic_flows = [
-        TrafficFlow(type=TRAFFIC_FLOW_ONE_SHOT,
-                    offset=1,
-                    inter_flow_period=2,
-                    run_time=run_time,
-                    src_mn_node=network_configuration.mininet_obj.get("h1"),
-                    dst_mn_node=network_configuration.mininet_obj.get("h2"),
-                    root_user_name="ubuntu",
-                    root_password="ubuntu",
-                    server_process_start_cmd='sudo python ' + base_dir + "/src/cyber_network/slave.py",
-                    client_expect_file=base_dir + '/src/cyber_network/dnp3_master.expect',
-                    long_running=True)
+        EmulatedTrafficFlow(type=TRAFFIC_FLOW_ONE_SHOT,
+                            offset=1,
+                            inter_flow_period=2,
+                            run_time=run_time,
+                            src_mn_node=network_configuration.mininet_obj.get("h1"),
+                            dst_mn_node=network_configuration.mininet_obj.get("h2"),
+                            root_user_name="ubuntu",
+                            root_password="ubuntu",
+                            server_process_start_cmd='sudo python ' + base_dir + "/src/cyber_network/slave.py",
+                            client_expect_file=base_dir + '/src/cyber_network/dnp3_master.expect',
+                            long_running=True)
     ]
 
     return emulated_dnp3_traffic_flows
@@ -399,6 +402,7 @@ def main():
     script_dir = os.path.dirname(os.path.realpath(__file__))
     idx = script_dir.index('NetPower_TestBed')
     base_dir = script_dir[0:idx] + "NetPower_TestBed"
+    replay_pcaps_dir = script_dir + "/attack_plan"
 
     network_configuration = get_network_configuration()
 
@@ -418,6 +422,7 @@ def main():
                network_configuration,
                script_dir,
                base_dir,
+               replay_pcaps_dir,
                [],#emulated_background_traffic_flows,
                [],#emulated_network_scan_events,
                [])#emulated_dnp3_traffic_flows)
