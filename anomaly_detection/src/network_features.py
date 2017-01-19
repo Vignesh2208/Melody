@@ -1,7 +1,7 @@
 import dpkt
 import socket
 
-filename='/Users/kartik/Desktop/Siebel Project/microgrid_with_background_traffic/icmp_trial.pcap'
+#filename='/Users/kartik/Desktop/Siebel Project/microgrid_with_background_traffic/icmp_trial.pcap'
 
 def dst_list(filename):
     dst_list = []
@@ -105,5 +105,5 @@ def network_features(filename, dst_list, start, end):
 
   return stats
 
-dst_list, start_ts, final_ts = dst_list(filename)
-print network_features(filename,dst_list, start_ts, final_ts)
+#dst_list, start_ts, final_ts = dst_list(filename)
+#print network_features(filename,dst_list, start_ts, final_ts)

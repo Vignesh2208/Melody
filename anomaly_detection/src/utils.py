@@ -45,9 +45,10 @@ def getFFT(signal,T):
 
 def getRMSErrs(orig_values,arimaResultCls,windowSize,threshold=None) :
 	rmsErrs = []
-	j = 1
+	j = 10
 	nSamples = len(orig_values)
 	detection_time = -1
+	last_detection_time = -1
 	n_dectections = 0
 	while j + windowSize < nSamples :
 
@@ -63,10 +64,12 @@ def getRMSErrs(orig_values,arimaResultCls,windowSize,threshold=None) :
 		if detection_time == -1 and threshold != None :
 			if rms_err > threshold :
 				detection_time = j + windowSize -1
+				last_detection_time = detection_time
 				n_dectections = n_dectections + 1
 		elif threshold != None :
 			if rms_err > threshold:
 				n_dectections = n_dectections + 1
+				last_detection_time = j + windowSize -1
 
 		j = j + windowSize
 		#j = j + 1
@@ -79,7 +82,7 @@ def getRMSErrs(orig_values,arimaResultCls,windowSize,threshold=None) :
 		predicted_values = arimaResultCls.predict(start=j,end=nSamples-1)
 
 		if len(predicted_values) < nSamples -1 - j :
-			return rmsErrs, detection_time, n_dectections
+			return rmsErrs, detection_time, n_dectections, last_detection_time
 		rms_err = math.sqrt(mean_squared_error(predicted_values,orig_values[j:]))
 		rmsErrs.append(rms_err)
 
@@ -87,16 +90,18 @@ def getRMSErrs(orig_values,arimaResultCls,windowSize,threshold=None) :
 		if detection_time == -1 and threshold != None :
 			if rms_err > threshold :
 				detection_time = j + windowSize - 1
+				last_detection_time = detection_time
 				n_dectections = n_dectections + 1
 
 		elif threshold != None :
 			if rms_err > threshold:
 				n_dectections = n_dectections + 1
+				last_detection_time = j + windowSize - 1
 
 
 
 
-	return rmsErrs,detection_time,n_dectections
+	return rmsErrs,detection_time,n_dectections, last_detection_time
 	
 
 def plotSignal(signal,N=100):

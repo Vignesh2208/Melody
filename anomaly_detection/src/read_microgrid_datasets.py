@@ -8,7 +8,7 @@ import numpy as np
 scriptDir = os.path.dirname(os.path.realpath(__file__))
 
 
-def extract_features(filepath=dirname(scriptDir)+ "/datasets/microgrid_datasets",scenario_name="all_taps"):
+def extract_features(filepath=dirname(scriptDir)+ "/datasets/microgrid_datasets",scenario_name="all_taps", feature_subsets = 'all'):
 	train_folder = filepath + '/train/' + scenario_name + "/"
 	attack_folder = filepath + '/attack/'
 	data = {}
@@ -25,6 +25,7 @@ def extract_features(filepath=dirname(scriptDir)+ "/datasets/microgrid_datasets"
 	feature_list = []
 	train_power_series_keys = {}
 	train_network_series_keys = {}
+	n_network_features = {}
 	for i in range(0,len(pcap_files_train)):
 		current_file = train_folder+pcap_files_train[i]
 		train_power_series = pf(current_file)
@@ -36,33 +37,28 @@ def extract_features(filepath=dirname(scriptDir)+ "/datasets/microgrid_datasets"
 		train_network_series = nf.network_features(current_file, train_dst_list, start,end)
 
 
+		if feature_subsets != 'network':
+			for node in train_power_series:
 
-		for node in train_power_series:
+				train_power_series_keys[i].append(node)
+				feature_list.append(np.array(train_power_series[node]))
 
-			train_power_series_keys[i].append(node)
-			#if node == "2" :
+		if feature_subsets != 'power' :
 
-			# plt.plot(power_series[node])
-			# plt.ylim([min(power_series[node]),max(power_series[node])])
-			# print "Min Training = ", min(power_series[node])
-			# print "Max Training = ", max(power_series[node])
-			# plt.title("Training " + node)
-			# plt.show()
+			for node in train_network_series:
 
-			feature_list.append(np.array(train_power_series[node]))
+				train_network_series_keys[i].append(node)
+				n_network_features[node] = len(train_network_series[node])
 
-		for node in train_network_series:
+				for k in xrange(0, len(train_network_series[node])) :
+					feature_list.append(np.array(train_network_series[node][k]))
 
-			train_network_series_keys[i].append(node)
-			feature_list.append(np.array(train_network_series[node][0]))
-			feature_list.append(np.array(train_network_series[node][1]))
-			feature_list.append(np.array(train_network_series[node][2]))
 
 
 
 	trainfeatureTimeSeries = []
 	nSamples = len(feature_list[0])
-	nSamples = 300
+	#nSamples = 300
 	nFeatures = len(feature_list)
 
 
@@ -99,7 +95,7 @@ def extract_features(filepath=dirname(scriptDir)+ "/datasets/microgrid_datasets"
 		i = i + 1
 
 
-
+	nAttkSamples = {}
 
 	for attackType in pcap_attack_subdirs :
 
@@ -111,7 +107,7 @@ def extract_features(filepath=dirname(scriptDir)+ "/datasets/microgrid_datasets"
 			continue
 
 		data['Attack'][attackType] = []
-		nAttkSamples = 1000000
+		nAttkSamples[attackType] = 1000000
 
 		print "nAttk pcap files = ", len(pcap_files_attack)
 		for i in range(0,len(pcap_files_attack)):
@@ -121,52 +117,46 @@ def extract_features(filepath=dirname(scriptDir)+ "/datasets/microgrid_datasets"
 			network_series = nf.network_features(current_file, dst_list, start,end)
 
 
-			for node in network_series :
-				if min(len(network_series[node][0]), len(network_series[node][1]),len(network_series[node][2])) < nAttkSamples:
-					nAttkSamples = min(len(network_series[node][0]), len(network_series[node][1]),len(network_series[node][2]))
+			if feature_subsets != 'power' :
+				for node in network_series :
+
+					for k in xrange(0,len(network_series[node])) :
+						if nAttkSamples[attackType] > len(network_series[node][k]) :
+							nAttkSamples[attackType] = len(network_series[node][k])
 
 
-			for node in power_series :
-				if len(power_series[node]) < nAttkSamples:
-					nAttkSamples = len(power_series[node])
+			if feature_subsets != 'network' :
+				for node in power_series :
+					if len(power_series[node]) < nAttkSamples[attackType]:
+						nAttkSamples[attackType] = len(power_series[node])
 
-			for node in train_power_series_keys[i]:
-				# if node == "2" :
-				# plt.plot(power_series[node])
-				# plt.title("Attack type - " + attackType + " Node = " + node)
-				# plt.ylim([min(power_series[node]), max(power_series[node])])
-				# plt.show()
-				# print "Min Attack = ", min(power_series[node])
-				# print "Max Attack = ", max(power_series[node])
+				for node in train_power_series_keys[i]:
 
-				if node not in power_series.keys() :
-					data['Attack'][attackType].append([0.0]*nAttkSamples)
-				else:
-					data['Attack'][attackType].append(np.array(power_series[node]))
-					#if len(power_series[node]) < nAttkSamples :
-					#	nAttkSamples = len(power_series[node])
 
-			for node in train_network_series_keys[i]:
+					if node not in power_series.keys() :
+						data['Attack'][attackType].append([0.0]*nAttkSamples[attackType])
+					else:
+						data['Attack'][attackType].append(np.array(power_series[node][0:nAttkSamples[attackType]]))
 
-				if node not in network_series.keys():
-					data['Attack'][attackType].append([0.0]*nAttkSamples)
-					data['Attack'][attackType].append([0.0]*nAttkSamples)
-					data['Attack'][attackType].append([0.0]*nAttkSamples)
-				else:
-					data['Attack'][attackType].append(np.array(network_series[node][0]))
-					data['Attack'][attackType].append(np.array(network_series[node][1]))
-					data['Attack'][attackType].append(np.array(network_series[node][2]))
 
-					#if min(len(network_series[node][0]),len(network_series[node][1]),len(network_series[node][2])) < nAttkSamples :
-					#	nAttkSamples = min(len(network_series[node][0]),len(network_series[node][1]),len(network_series[node][2]))
+			if feature_subsets != 'power' :
+				for node in train_network_series_keys[i]:
+
+					if node not in network_series.keys():
+						for k in xrange(0,n_network_features[node]) :
+							data['Attack'][attackType].append([0.0]*nAttkSamples[attackType])
+					else:
+
+						for k in xrange(0,len(network_series[node])) :
+							data['Attack'][attackType].append(np.array(network_series[node][k][0:nAttkSamples[attackType]]))
 
 
 		curr_attack_timeseries = []
 		print "Normalizing samples for Attack Type :", attackType
 		feature_list = data['Attack'][attackType]
-		print "Attk Samples = ", nAttkSamples, " nFeatures = ", nFeatures
+		print "Attk Samples = ", nAttkSamples[attackType], " nFeatures = ", nFeatures
 
-		for idx in xrange(0, nAttkSamples):
+		for idx in xrange(0, nAttkSamples[attackType]):
 			curr_idx_values = []
 			for feature in xrange(0, nFeatures):
 				curr_idx_values.append(feature_list[feature][idx])
