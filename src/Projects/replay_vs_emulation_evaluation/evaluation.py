@@ -1,4 +1,5 @@
 import sys
+import random
 
 sys.path.append("./")
 from cyber_network.network_configuration import NetworkConfiguration
@@ -30,20 +31,25 @@ class Evaluation:
 
         emulated_background_traffic_flows = []
         emulated_network_scan_events = []
+        emulated_dnp3_traffic_flows = []
 
-        emulated_dnp3_traffic_flows = [
-            EmulatedTrafficFlow(type=TRAFFIC_FLOW_ONE_SHOT,
-                                offset=1,
-                                inter_flow_period=2,
-                                run_time=run_time,
-                                src_mn_node=network_configuration.mininet_obj.get("h1"),
-                                dst_mn_node=network_configuration.mininet_obj.get("h2"),
-                                root_user_name="ubuntu",
-                                root_password="ubuntu",
-                                server_process_start_cmd='sudo python ' + base_dir + "/src/cyber_network/slave.py",
-                                client_expect_file=base_dir + '/src/cyber_network/dnp3_master.expect',
-                                long_running=True)
-        ]
+        random_host_pairs = random.sample(list(network_configuration.ng.host_obj_pair_iter()), background_spec)
+
+        for host_pair in random_host_pairs:
+
+            flow = EmulatedTrafficFlow(type=TRAFFIC_FLOW_ONE_SHOT,
+                                       offset=1,
+                                       inter_flow_period=2,
+                                       run_time=run_time,
+                                       src_mn_node=network_configuration.mininet_obj.get(host_pair[0].node_id),
+                                       dst_mn_node=network_configuration.mininet_obj.get(host_pair[1].node_id),
+                                       root_user_name="ubuntu",
+                                       root_password="ubuntu",
+                                       server_process_start_cmd='sudo python ' + base_dir + "/src/cyber_network/slave.py",
+                                       client_expect_file=base_dir + '/src/cyber_network/dnp3_master.expect',
+                                       long_running=True)
+
+            emulated_dnp3_traffic_flows.append(flow)
 
         return emulated_background_traffic_flows, emulated_network_scan_events, emulated_dnp3_traffic_flows
 
@@ -116,12 +122,12 @@ def get_network_configurations(link_latencies):
 def main():
 
     # Vary the delays (in miilseconds) on the links
-    link_latencies = [5, 10]
+    link_latencies = [5]
 
     # Vary the the amount of 'load' that is running by modifying the background emulation threads
-    background_specs = [5]
+    background_specs = [1]
 
-    run_time = 10
+    run_time = 60
 
     script_dir = os.path.dirname(os.path.realpath(__file__))
     idx = script_dir.index('NetPower_TestBed')
