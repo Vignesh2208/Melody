@@ -128,7 +128,7 @@ def main():
     # Vary the the amount of 'load' that is running by modifying the background emulation threads
     background_specs = [1]#, 2, 3]
 
-    run_time = 60
+    run_time = 300
 
     script_dir = os.path.dirname(os.path.realpath(__file__))
     idx = script_dir.index('NetPower_TestBed')
