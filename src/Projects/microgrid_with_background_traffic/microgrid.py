@@ -299,9 +299,9 @@ def main():
     idx = script_dir.index('NetPower_TestBed')
     base_dir = script_dir[0:idx] + "NetPower_TestBed"
     replay_pcaps_dir = script_dir + "/attack_plan"
-
+    
     network_configuration = get_network_configuration()
-
+    log_dir = base_dir + "/logs/" + str(network_configuration.project_name)
     #emulated_background_traffic_flows = get_emulated_background_traffic_flows(network_configuration,run_time,base_dir)
 
     #emulated_network_scan_events = get_emulated_network_scan_events(network_configuration,run_time,base_dir)
@@ -315,6 +315,7 @@ def main():
                script_dir,
                base_dir,
                replay_pcaps_dir,
+	       log_dir,
                dataset_flows,
                [],
                [])
