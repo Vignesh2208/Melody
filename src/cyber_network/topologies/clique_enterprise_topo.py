@@ -69,7 +69,6 @@ class CliqueEnterpriseTopo(Topo):
         self.addLink(self.switch_names[0], self.switch_names[-1], **switch_switch_link_opts)
         self.add_enterprise_net_with_attk_node(host_switch_link_opts,switch_switch_link_opts)
 
-
     def add_enterprise_net_with_attk_node(self,host_switch_link_opts,switch_switch_link_opts):
         # For now it contains only one VPN gateway and 1 attack node connected in Liner fashion
         vpn_switch = self.addSwitch("s" + str(self.num_switches + 1), protocols="OpenFlow14")
@@ -88,8 +87,6 @@ class CliqueEnterpriseTopo(Topo):
         self.addLink(simulated_internet_switch, simulated_attack_host, **host_switch_link_opts)
         self.addLink(simulated_internet_switch,vpn_switch,**switch_switch_link_opts)
         self.addLink(vpn_switch,self.switch_names[self.num_switches-1],**switch_switch_link_opts)
-
-
 
     def __str__(self):
         params_str = ''
