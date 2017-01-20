@@ -13,6 +13,7 @@ class Main:
                  script_dir,
                  base_dir,
                  replay_pcaps_dir,
+                 log_dir,
                  emulated_background_traffic_flows,
                  emulated_network_scan_events,
                  emulated_dnp3_traffic_flows):
@@ -36,7 +37,7 @@ class Main:
         self.emulated_dnp3_traffic_flows = emulated_dnp3_traffic_flows
 
         self.node_mappings_file_path = self.script_dir + "/node_mappings.txt"
-        self.log_dir = self.base_dir + "/logs/" + str(self.project_name)
+        self.log_dir = log_dir
         self.proxy_dir = self.base_dir + "/src/Proxy"
         self.sharedBufferArray = shared_buffer_array()
 

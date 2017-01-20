@@ -60,6 +60,7 @@ class Evaluation:
                            self.script_dir,
                            self.base_dir,
                            self.replay_pcaps_dir,
+                           self.base_dir + "/logs/" + str(nc.project_name) + "_" + str(spec),
                            background[0],
                            background[1],
                            background[2])
@@ -103,7 +104,7 @@ def get_network_configurations(link_latencies):
                                                          ("enterprise-2",["attacker;1"])
 
                                                      ],
-                                                     project_name="microgrid_with_background_traffic",
+                                                     project_name="evaluation_" + str(link_latency),
                                                      power_simulator_ip="127.0.0.1"
                                                      )
 
@@ -118,7 +119,7 @@ def main():
     link_latencies = [5, 10]
 
     # Vary the the amount of 'load' that is running by modifying the background emulation threads
-    background_specs = [5, 10]
+    background_specs = [5]
 
     run_time = 10
 

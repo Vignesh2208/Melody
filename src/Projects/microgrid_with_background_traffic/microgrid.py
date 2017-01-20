@@ -173,14 +173,15 @@ def get_network_configuration():
 
 def main():
 
+    network_configuration = get_network_configuration()
+
     run_time = 80
 
     script_dir = os.path.dirname(os.path.realpath(__file__))
     idx = script_dir.index('NetPower_TestBed')
     base_dir = script_dir[0:idx] + "NetPower_TestBed"
     replay_pcaps_dir = script_dir + "/attack_plan"
-
-    network_configuration = get_network_configuration()
+    log_dir = base_dir + "/logs/" + str(network_configuration.project_name)
 
     emulated_background_traffic_flows = get_emulated_background_traffic_flows(network_configuration,
                                                                               run_time,
@@ -199,6 +200,7 @@ def main():
                script_dir,
                base_dir,
                replay_pcaps_dir,
+               log_dir,
                emulated_background_traffic_flows,
                emulated_network_scan_events,
                emulated_dnp3_traffic_flows)
