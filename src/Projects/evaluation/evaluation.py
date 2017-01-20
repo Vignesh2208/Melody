@@ -66,7 +66,7 @@ class Evaluation:
                            self.script_dir,
                            self.base_dir,
                            self.replay_pcaps_dir,
-                           self.base_dir + "/logs/" + str(nc.project_name) + "_" + str(spec),
+                           self.base_dir + "/logs/" + str(nc.project_name) + "_" + str(nc.link_latency) + "_" + str(spec),
                            background[0],
                            background[1],
                            background[2])
@@ -110,8 +110,9 @@ def get_network_configurations(link_latencies):
                                                          ("enterprise-2",["attacker;1"])
 
                                                      ],
-                                                     project_name="evaluation_" + str(link_latency),
-                                                     power_simulator_ip="127.0.0.1"
+                                                     project_name="evaluation",
+                                                     power_simulator_ip="127.0.0.1",
+                                                     link_latency=link_latency
                                                      )
 
         network_configurations.append(network_configuration)
@@ -122,10 +123,10 @@ def get_network_configurations(link_latencies):
 def main():
 
     # Vary the delays (in miilseconds) on the links
-    link_latencies = [5]
+    link_latencies = [5]#, 10]
 
     # Vary the the amount of 'load' that is running by modifying the background emulation threads
-    background_specs = [1]
+    background_specs = [1]#, 2, 3]
 
     run_time = 60
 
