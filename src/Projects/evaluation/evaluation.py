@@ -1,5 +1,7 @@
 import sys
+import json
 import random
+import numpy as np
 
 sys.path.append("./")
 from cyber_network.network_configuration import NetworkConfiguration
@@ -26,6 +28,18 @@ class Evaluation:
         self.base_dir = base_dir
         self.replay_pcaps_dir = replay_pcaps_dir
         self.background_specs = background_specs
+
+    def get_bro_x(self, filepath):
+        x = []
+        with open(filepath, "r") as infile:
+            for l in infile.readlines():
+                bro_dict = json.loads(l)
+                x.append(bro_dict['latency'] * 1000)
+
+        return x
+
+    def trigger_bro(self, ):
+        pass
 
     def get_background_emulated_traffic_flows(self, network_configuration, run_time, base_dir, background_spec):
 
@@ -71,7 +85,14 @@ class Evaluation:
                            background[1],
                            background[2])
 
+                # Generate pcaps
                 exp.start_project()
+
+                # Trigger bro parsing
+                pass
+
+                # Parse and capture latencies
+                pass
 
 
 def get_network_configurations(link_latencies):
@@ -128,7 +149,7 @@ def main():
     # Vary the the amount of 'load' that is running by modifying the background emulation threads
     background_specs = [1]#, 2, 3]
 
-    run_time = 300
+    run_time = 60
 
     script_dir = os.path.dirname(os.path.realpath(__file__))
     idx = script_dir.index('NetPower_TestBed')

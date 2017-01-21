@@ -105,6 +105,8 @@ class EmulatedTrafficFlow(threading.Thread):
         
     def start_server(self):
 
+        print "Starting server with cmd: ", self.server_process_start_cmd
+
         if self.server_process_start_cmd:
 
             # Start the server
@@ -114,7 +116,7 @@ class EmulatedTrafficFlow(threading.Thread):
 
         # Stop the server
         if self.server_process_start_cmd:
-            #print "Stopping server with cmd: ", self.server_process_start_cmd
+            print "Stopping server with cmd: ", self.server_process_start_cmd
             #pass
             self.server_popen.terminate()
 
