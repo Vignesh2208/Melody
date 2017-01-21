@@ -29,18 +29,6 @@ class Evaluation:
         self.replay_pcaps_dir = replay_pcaps_dir
         self.background_specs = background_specs
 
-    def get_bro_x(self, filepath):
-        x = []
-        with open(filepath, "r") as infile:
-            for l in infile.readlines():
-                bro_dict = json.loads(l)
-                x.append(bro_dict['latency'] * 1000)
-
-        return x
-
-    def trigger_bro(self, ):
-        pass
-
     def get_background_emulated_traffic_flows(self, network_configuration, run_time, base_dir, background_spec, evaluation_type):
 
         emulated_background_traffic_flows = []
@@ -69,18 +57,18 @@ class Evaluation:
 
             print "ping, from", host_pair[0].node_id, "to:", host_pair[1].node_id
 
-            # flow = EmulatedTrafficFlow(type=TRAFFIC_FLOW_PERIODIC,
-            #                            offset=1,
-            #                            inter_flow_period=1,
-            #                            run_time=run_time,
-            #                            src_mn_node=network_configuration.mininet_obj.get(host_pair[0].node_id),
-            #                            dst_mn_node=network_configuration.mininet_obj.get(host_pair[1].node_id),
-            #                            root_user_name="ubuntu",
-            #                            root_password="ubuntu",
-            #                            server_process_start_cmd="",
-            #                            client_expect_file=base_dir + '/src/cyber_network/ping_session.expect')
-            #
-            # emulated_background_traffic_flows.append(flow)
+            flow = EmulatedTrafficFlow(type=TRAFFIC_FLOW_PERIODIC,
+                                       offset=1,
+                                       inter_flow_period=1,
+                                       run_time=run_time,
+                                       src_mn_node=network_configuration.mininet_obj.get(host_pair[0].node_id),
+                                       dst_mn_node=network_configuration.mininet_obj.get(host_pair[1].node_id),
+                                       root_user_name="ubuntu",
+                                       root_password="ubuntu",
+                                       server_process_start_cmd="",
+                                       client_expect_file=base_dir + '/src/cyber_network/ping_session.expect')
+
+            emulated_background_traffic_flows.append(flow)
 
         return emulated_background_traffic_flows, emulated_network_scan_events, emulated_dnp3_traffic_flows
 
@@ -102,16 +90,9 @@ class Evaluation:
                            background[1],
                            background[2])
 
-                # Generate pcaps
                 exp.start_project()
 
-                # Trigger bro parsing
-                pass
-
-                # Parse and capture latencies
-                pass
-
-
+                
 def get_network_configurations(link_latencies):
 
     network_configurations = []
@@ -161,10 +142,10 @@ def get_network_configurations(link_latencies):
 def main():
 
     # Vary the delays (in miilseconds) on the links
-    link_latencies = [5]#, 10]
+    link_latencies = [5, 10]
 
     # Vary the the amount of 'load' that is running by modifying the background emulation threads
-    background_specs = [5]#, 2, 3]
+    background_specs = [5]#, 10, 15, 20]
 
     run_time = 60
 
