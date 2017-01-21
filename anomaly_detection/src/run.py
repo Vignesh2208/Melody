@@ -233,6 +233,7 @@ def main(model_orders,scenario_name,covType,features) :
 			currSignal = np.array(map(itemgetter(i), trainData))
 			print "Extracting Fundamental periods for signal ", i, " ..."
 			f, PWSD, candidatePeriods, pThreshold, f0 = getPeriodHints(X=currSignal, fs=1.0)
+			#f, PWSD, candidatePeriods, pThreshold, f0 = 0, [], [], 0, 0
 
 			if f0 != 0:
 				# if i == 0 :
@@ -564,7 +565,7 @@ if __name__ == "__main__" :
 
 	main(model_orders_network_features, scenario_name, covType, 'all')
 
-	#sys.exit(0)
+	sys.exit(0)
 
 	first_detection_times_net, last_detection_times_net = main(model_orders_network_features,scenario_name,covType,'network')
 	first_detection_times_power, last_detection_times_power = main(model_orders_power_features,scenario_name,covType,'power')
