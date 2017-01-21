@@ -29,15 +29,22 @@ class Evaluation:
         self.replay_pcaps_dir = replay_pcaps_dir
         self.background_specs = background_specs
 
-    def get_background_emulated_traffic_flows(self, network_configuration, run_time, base_dir, background_spec, evaluation_type):
+    def configure(self, network_configuration, run_time, base_dir, background_spec, evaluation_type):
 
         emulated_background_traffic_flows = []
         emulated_network_scan_events = []
 
         if evaluation_type == "replay":
+            with open(self.replay_pcaps_dir + "/attack_plan.txt", "w") as attack_plan_file:
+                attack_plan_file.write("dnp3.pcap\n")
+
             emulated_dnp3_traffic_flows = []
 
         elif evaluation_type == "emulation":
+
+            with open(self.replay_pcaps_dir + "/attack_plan.txt", "w") as attack_plan_file:
+                attack_plan_file.write("#dnp3.pcap\n")
+
             emulated_dnp3_traffic_flows = [
                 EmulatedTrafficFlow(type=TRAFFIC_FLOW_ONE_SHOT,
                                     offset=1,
@@ -78,7 +85,7 @@ class Evaluation:
             for spec in self.background_specs:
 
                 nc.setup_network_graph(mininet_setup_gap=1, synthesis_setup_gap=1)
-                background = self.get_background_emulated_traffic_flows(nc, self.run_time, self.base_dir, spec, evaluation_type)
+                background = self.configure(nc, self.run_time, self.base_dir, spec, evaluation_type)
 
                 exp = Main(self.run_time,
                            nc,
@@ -142,12 +149,12 @@ def get_network_configurations(link_latencies):
 def main():
 
     # Vary the delays (in miilseconds) on the links
-    link_latencies = [5, 10]
+    link_latencies = [5]#, 10]
 
     # Vary the the amount of 'load' that is running by modifying the background emulation threads
     background_specs = [5]#, 10, 15, 20]
 
-    run_time = 60
+    run_time = 300
 
     script_dir = os.path.dirname(os.path.realpath(__file__))
     idx = script_dir.index('NetPower_TestBed')
@@ -163,7 +170,8 @@ def main():
                      replay_pcaps_dir,
                      background_specs)
 
-    evaluation_type = "emulation"
+    #evaluation_type = "emulation"
+    evaluation_type = "replay"
     exp.trigger(evaluation_type)
 
 if __name__ == "__main__":
