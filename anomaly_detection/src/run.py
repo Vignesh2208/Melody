@@ -9,16 +9,23 @@ import warnings
 
 warnings.simplefilter("ignore")
 
-
+scriptDir = os.path.dirname(os.path.realpath(__file__))
+outputDir = scriptDir + "/../output"
 
 runPeriods = [9]
 maxMixtures = 10
 windowSize = 1
 
+
+
 usePCA = True
 testFourierExtrapolation = True
 testArimaForecasting = True
 testHMMForecasting = False
+
+# Mostly need to play with only these two params
+arima_train_and_test = True   # if it is false it looks for pre-trained models and tests
+scenario_name = "tap_config_3"
 
 model_orders_all_features = {
 	"MSU" :
@@ -166,8 +173,14 @@ def main(model_orders,scenario_name,covType,features) :
 	else:
 		data, nMaxAttackSamples = read_microgrid_datasets.extract_features(scenario_name=scenario_name,feature_subsets=features)
 
-	with open("model_order_" + scenario_name + "-" + features + "_features", "w") as f:
-		pass
+
+	if arima_train_and_test == True :
+		with open(outputDir + "/model_order_" + scenario_name + "-" + features + "_features", "w") as f:
+			pass
+	else :
+		new_orders = refresh_model_orders(scenario_name,features)
+		print "Updated Model Orders = ", new_orders
+		model_orders[scenario_name] = new_orders
 
 	trainData = data['Train']
 	attackData = []
@@ -231,40 +244,6 @@ def main(model_orders,scenario_name,covType,features) :
 			powerSpectralDensity[i] = (f, PWSD, pThreshold)
 			print "Fundamental Period = ", fundamentalPeriods[i]
 
-		"""
-        if nSignals % 2 == 0 :
-            nrows = nSignals/2
-        else :
-            nrows = int(nSignals/2) + 1
-
-        ncols = 2
-        fig, axarr = plt.subplots(nrows=nrows, ncols=ncols)
-        for i in xrange(0,nrows) :
-            for j in xrange(0,ncols) :
-                signal_no = i*ncols + j
-
-                if nrows == 1 and signal_no in powerSpectralDensity.keys():
-                    axarr[j].plot(powerSpectralDensity[signal_no][0],powerSpectralDensity[signal_no][1], label="Power Spectral Density")
-                    axarr[j].plot(powerSpectralDensity[signal_no][0],[powerSpectralDensity[signal_no][2]]*len(powerSpectralDensity[signal_no][0]), label="Threshold")
-                    axarr[j].set_title('Periodicity Test with Threshold for PCA Signal:' + str(signal_no + 1), fontsize=10)
-                    axarr[j].grid(True)
-
-                elif signal_no in powerSpectralDensity.keys():
-                    axarr[i,j].plot(powerSpectralDensity[signal_no][0],powerSpectralDensity[signal_no][1], label="Power Spectral Density")
-                    axarr[i,j].plot(powerSpectralDensity[signal_no][0],[powerSpectralDensity[signal_no][2]]*len(powerSpectralDensity[signal_no][0]), label="Threshold")
-                    axarr[i,j].set_title('Periodicity Test with Threshold for PCA Signal:' + str(signal_no + 1), fontsize=10)
-                    axarr[i,j].grid(True)
-                else:
-                    if nrows == 1 :
-                        axarr[j].axis('off')
-                    else:
-                        axarr[i,j].axis('off')
-
-        for ax in axarr.flatten():
-            ax.set_yscale('log')
-        plt.tight_layout()
-        plt.show()
-        """
 
 	if testArimaForecasting == True:
 
@@ -300,10 +279,14 @@ def main(model_orders,scenario_name,covType,features) :
 			if scenario_name == "MSU":
 				modelOrder = model_orders[scenario_name][i]
 			else:
-				modelOrder = estimate_best_model_order(diffSignal, nLags, i,modelOrder,windowSize)
-				#modelOrder = model_orders[scenario_name][i]
-				with open("model_order_" + scenario_name + "-" + features + "_features", "a") as fptr:
-					fptr.write(str(modelOrder) + ",\n")
+
+				if arima_train_and_test == True :
+					modelOrder = estimate_best_model_order(diffSignal, nLags, i,modelOrder,windowSize)
+					with open(outputDir + "/model_order_" + scenario_name + "-" + features + "_features", "a") as fptr:
+						fptr.write(str(modelOrder) + ",\n")
+				else:
+					modelOrder = model_orders[scenario_name][i]
+
 
 			arima_model = statsmodels.tsa.arima_model.ARIMA(diffSignal, (modelOrder[0], modelOrder[1], modelOrder[2]))
 			res = arima_model.fit(transParams=True)
@@ -315,7 +298,7 @@ def main(model_orders,scenario_name,covType,features) :
 			std_dev_train_rms_err = stdev(trainDataRMS)
 
 			# detection_threshold = mean_train_rms_err + 3*std_dev_train_rms_err
-			detection_threshold = max_train_rms_err  # + std_dev_train_rms_err
+			detection_threshold = max_train_rms_err
 			boxPlotData[i].append(trainDataRMS)
 
 			for k in xrange(0, len(attackData)):
@@ -383,34 +366,34 @@ def main(model_orders,scenario_name,covType,features) :
 			nrows = int(nSignals / 2) + 1
 
 		ncols = 2
+		plotFigs = False
 
-		fig, axarr = plt.subplots(nrows=nrows, ncols=ncols)
-		for i in xrange(0, nrows):
-			for j in xrange(0, ncols):
-				signal_no = i * ncols + j
-				if nrows == 1 and signal_no in boxPlotData.keys():
-					axarr[j].boxplot(boxPlotData[signal_no], labels=boxPlotLabels)
-					axarr[j].set_title('RMS Error - PCA signal ' + str(signal_no + 1), fontsize=10)
-					axarr[j].grid(True)
+		if plotFigs == True :
+			fig, axarr = plt.subplots(nrows=nrows, ncols=ncols)
+			for i in xrange(0, nrows):
+				for j in xrange(0, ncols):
+					signal_no = i * ncols + j
+					if nrows == 1 and signal_no in boxPlotData.keys():
+						axarr[j].boxplot(boxPlotData[signal_no], labels=boxPlotLabels)
+						axarr[j].set_title('RMS Error - PCA signal ' + str(signal_no + 1), fontsize=10)
+						axarr[j].grid(True)
 
-				elif signal_no in boxPlotData.keys():
-					axarr[i, j].boxplot(boxPlotData[signal_no], labels=boxPlotLabels)
-					axarr[i, j].set_title('RMS Error - PCA signal ' + str(signal_no + 1), fontsize=10)
-					axarr[i, j].grid(True)
-				else:
-					if nrows == 1:
-						axarr[j].axis('off')
+					elif signal_no in boxPlotData.keys():
+						axarr[i, j].boxplot(boxPlotData[signal_no], labels=boxPlotLabels)
+						axarr[i, j].set_title('RMS Error - PCA signal ' + str(signal_no + 1), fontsize=10)
+						axarr[i, j].grid(True)
 					else:
-						axarr[i, j].axis('off')
+						if nrows == 1:
+							axarr[j].axis('off')
+						else:
+							axarr[i, j].axis('off')
 
-		for ax in axarr.flatten():
-			ax.set_yscale('log')
-		plt.tight_layout()
-		plt.show()
+			for ax in axarr.flatten():
+				ax.set_yscale('log')
+			plt.tight_layout()
+			plt.show()
 
-		print "################################################"
-		print "Output Statistics"
-		print "################################################"
+
 
 		if nTP + nFN == 0:
 			tp_rate = "Not Applicable"
@@ -442,7 +425,11 @@ def main(model_orders,scenario_name,covType,features) :
 		else:
 			recall = tp_rate / (tp_rate + fn_rate)
 
-		with open(scenario_name + "-" + features + "_features" + "_output.txt", "w") as f:
+		with open(outputDir + "/" + scenario_name + "-" + features + "_features" + "_output_naive_application.txt", "w") as f:
+			f.write("################################################\n")
+			f.write("Output Statistics\n")
+			f.write("################################################\n")
+
 			f.write("True Positive Rate:      " + str(tp_rate) + "\n")
 			f.write("False Positive Rate:     " + str(fp_rate) + "\n")
 			f.write("True Negative Rate:      " + str(tn_rate) + "\n")
@@ -459,8 +446,8 @@ def main(model_orders,scenario_name,covType,features) :
 				for attackType in detectionTimeLabels:
 					if attackType in detectionTimeData.keys() and detectionTimeData[attackType][0] != -1 and \
 									detectionTimeData[attackType][2] >= 0:
-						f.write(attackType + ":           " + str(
-							detectionTimeData[attackType][0]) + " Total Number of point anomalies = " + str(
+						f.write(attackType + ":           Earliest Detection time:" + str(
+							detectionTimeData[attackType][0])  + ", Total Number of point anomalies = " + str(
 							detectionTimeData[attackType][1]) + "\n")
 					else:
 						f.write(attackType + ":            NOT DETECTED\n")
@@ -546,24 +533,51 @@ def main(model_orders,scenario_name,covType,features) :
 			plt.show()
 
 
+def refresh_model_orders(scenario_name,features) :
+
+	path_to_file = outputDir + "/model_order_" + scenario_name + "-"  + features + "_features"
+
+	if not os.path.isfile(path_to_file) :
+		print "ERROR !"
+		print "Training host not been done for scenario : ", scenario_name, " Feature subsets : ", features
+		print "Please do the training first before testing"
+		sys.exit(0)
+
+	with open(path_to_file,"r") as f :
+		lines = f.readlines()
+		mylist = []
+
+	for line in lines :
+		if len(line) > 1 :
+			line = line[1:-3]
+			values = line.split(',')
+			mylist.append((int(values[0]),int(values[1]),int(values[2])))
+
+
+		#mylist = [tuple(map(float, i.split(','))) for i in f]
+	return mylist
+
+
 if __name__ == "__main__" :
 
 	covType = 'full'
-	scenario_name = "tap_config_1"
 
 	main(model_orders_network_features, scenario_name, covType, 'all')
+
+	#sys.exit(0)
+
 	first_detection_times_net, last_detection_times_net = main(model_orders_network_features,scenario_name,covType,'network')
 	first_detection_times_power, last_detection_times_power = main(model_orders_power_features,scenario_name,covType,'power')
-	print first_detection_times_net
-	print last_detection_times_power
+
 
 
 	attack_types = first_detection_times_net.keys()
 
-	with open(scenario_name + "-final_output.txt","w") as f :
-		f.write("first detection times net = " + str(first_detection_times_net) + "\n")
-		f.write("last detection times power = " + str(last_detection_times_power) + "\n")
+	with open(outputDir + "/" + scenario_name + "-final_output_modified_approach.txt","w") as f :
+		#f.write("first detection times net = " + str(first_detection_times_net) + "\n")
+		#f.write("last detection times power = " + str(last_detection_times_power) + "\n")
 
+		f.write("Results with the Modified Approach \n")
 		for attack in attack_types :
 			if last_detection_times_power[attack] < first_detection_times_net[attack] or last_detection_times_power[attack] == -1 :
 				f.write("ATTACK TYPE: " + attack + " NOT DETECTED\n")

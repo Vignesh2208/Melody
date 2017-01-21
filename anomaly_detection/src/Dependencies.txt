@@ -1,0 +1,12 @@
+Python Dependencies
+
+scipy
+numpy
+Cython
+pandas
+sklearn
+hmmlearn
+statistics
+statsmodels
+matplotlib
+dpkt
