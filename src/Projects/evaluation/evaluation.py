@@ -6,7 +6,7 @@ import numpy as np
 sys.path.append("./")
 from cyber_network.network_configuration import NetworkConfiguration
 from cyber_network.traffic_flow import EmulatedTrafficFlow
-from cyber_network.traffic_flow import TRAFFIC_FLOW_ONE_SHOT
+from cyber_network.traffic_flow import TRAFFIC_FLOW_ONE_SHOT, TRAFFIC_FLOW_PERIODIC
 from Projects.main import Main
 
 from Proxy.shared_buffer import *
@@ -41,46 +41,63 @@ class Evaluation:
     def trigger_bro(self, ):
         pass
 
-    def get_background_emulated_traffic_flows(self, network_configuration, run_time, base_dir, background_spec):
+    def get_background_emulated_traffic_flows(self, network_configuration, run_time, base_dir, background_spec, evaluation_type):
 
         emulated_background_traffic_flows = []
         emulated_network_scan_events = []
-        emulated_dnp3_traffic_flows = []
+
+        if evaluation_type == "replay":
+            emulated_dnp3_traffic_flows = []
+
+        elif evaluation_type == "emulation":
+            emulated_dnp3_traffic_flows = [
+                EmulatedTrafficFlow(type=TRAFFIC_FLOW_ONE_SHOT,
+                                    offset=1,
+                                    inter_flow_period=2,
+                                    run_time=run_time,
+                                    src_mn_node=network_configuration.mininet_obj.get("h1"),
+                                    dst_mn_node=network_configuration.mininet_obj.get("h2"),
+                                    root_user_name="ubuntu",
+                                    root_password="ubuntu",
+                                    server_process_start_cmd='sudo python ' + base_dir + "/src/cyber_network/slave.py",
+                                    client_expect_file=base_dir + '/src/cyber_network/dnp3_master.expect',
+                                    long_running=True)]
 
         random_host_pairs = random.sample(list(network_configuration.ng.host_obj_pair_iter()), background_spec)
 
         for host_pair in random_host_pairs:
 
-            flow = EmulatedTrafficFlow(type=TRAFFIC_FLOW_ONE_SHOT,
-                                       offset=1,
-                                       inter_flow_period=2,
-                                       run_time=run_time,
-                                       src_mn_node=network_configuration.mininet_obj.get(host_pair[0].node_id),
-                                       dst_mn_node=network_configuration.mininet_obj.get(host_pair[1].node_id),
-                                       root_user_name="ubuntu",
-                                       root_password="ubuntu",
-                                       server_process_start_cmd='sudo python ' + base_dir + "/src/cyber_network/slave.py",
-                                       client_expect_file=base_dir + '/src/cyber_network/dnp3_master.expect',
-                                       long_running=True)
+            print "ping, from", host_pair[0].node_id, "to:", host_pair[1].node_id
 
-            emulated_dnp3_traffic_flows.append(flow)
+            # flow = EmulatedTrafficFlow(type=TRAFFIC_FLOW_PERIODIC,
+            #                            offset=1,
+            #                            inter_flow_period=1,
+            #                            run_time=run_time,
+            #                            src_mn_node=network_configuration.mininet_obj.get(host_pair[0].node_id),
+            #                            dst_mn_node=network_configuration.mininet_obj.get(host_pair[1].node_id),
+            #                            root_user_name="ubuntu",
+            #                            root_password="ubuntu",
+            #                            server_process_start_cmd="",
+            #                            client_expect_file=base_dir + '/src/cyber_network/ping_session.expect')
+            #
+            # emulated_background_traffic_flows.append(flow)
 
         return emulated_background_traffic_flows, emulated_network_scan_events, emulated_dnp3_traffic_flows
 
-    def trigger(self):
+    def trigger(self, evaluation_type):
         for nc in self.network_configurations:
 
             for spec in self.background_specs:
 
                 nc.setup_network_graph(mininet_setup_gap=1, synthesis_setup_gap=1)
-                background = self.get_background_emulated_traffic_flows(nc, self.run_time, self.base_dir, spec)
+                background = self.get_background_emulated_traffic_flows(nc, self.run_time, self.base_dir, spec, evaluation_type)
 
                 exp = Main(self.run_time,
                            nc,
                            self.script_dir,
                            self.base_dir,
                            self.replay_pcaps_dir,
-                           self.base_dir + "/logs/" + str(nc.project_name) + "_" + str(nc.link_latency) + "_" + str(spec),
+                           self.base_dir + "/logs/" + str(nc.project_name) + "_" + evaluation_type + "_" + str(nc.link_latency) + "_" + str(spec),
                            background[0],
                            background[1],
                            background[2])
@@ -147,7 +164,7 @@ def main():
     link_latencies = [5]#, 10]
 
     # Vary the the amount of 'load' that is running by modifying the background emulation threads
-    background_specs = [1]#, 2, 3]
+    background_specs = [5]#, 2, 3]
 
     run_time = 60
 
@@ -165,7 +182,8 @@ def main():
                      replay_pcaps_dir,
                      background_specs)
 
-    exp.trigger()
+    evaluation_type = "emulation"
+    exp.trigger(evaluation_type)
 
 if __name__ == "__main__":
     main()
