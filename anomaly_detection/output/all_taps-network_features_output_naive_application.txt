@@ -1,0 +1,16 @@
+True Positive Rate:      1.0
+False Positive Rate:     1.0
+True Negative Rate:      0.0
+False Negative Rate:     0.0
+Precision:               0.5
+Recall:                  1.0
+
+######################################################
+Earliest Detection Time (multiply by sampling rate ts) ...
+######################################################
+normal-2:           88 Total Number of point anomalies = 12
+delay-2:           40 Total Number of point anomalies = 13
+random-2:           40 Total Number of point anomalies = 15
+normal:           54 Total Number of point anomalies = 5
+random:           28 Total Number of point anomalies = 20
+delay:           40 Total Number of point anomalies = 14

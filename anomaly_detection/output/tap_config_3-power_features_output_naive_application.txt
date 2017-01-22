@@ -1,0 +1,19 @@
+################################################
+Output Statistics
+################################################
+True Positive Rate:      1.0
+False Positive Rate:     1.0
+True Negative Rate:      0.0
+False Negative Rate:     0.0
+Precision:               0.5
+Recall:                  1.0
+
+######################################################
+Earliest Detection Time (multiply by sampling rate ts) ...
+######################################################
+normal-2:           Earliest Detection time:13, Total Number of point anomalies = 21
+delay-2:           Earliest Detection time:20, Total Number of point anomalies = 805
+random-2:           Earliest Detection time:10, Total Number of point anomalies = 1522
+normal:           Earliest Detection time:11, Total Number of point anomalies = 20
+random:           Earliest Detection time:16, Total Number of point anomalies = 1449
+delay:           Earliest Detection time:11, Total Number of point anomalies = 882

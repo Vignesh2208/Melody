@@ -24,7 +24,7 @@ testArimaForecasting = True
 testHMMForecasting = False
 
 # Mostly need to play with only these two params
-arima_train_and_test = True   # if it is false it looks for pre-trained models and tests
+arima_train_and_test = False   # if it is false it looks for pre-trained models and tests
 scenario_name = "tap_config_3"
 
 model_orders_all_features = {
@@ -562,6 +562,10 @@ def refresh_model_orders(scenario_name,features) :
 if __name__ == "__main__" :
 
 	covType = 'full'
+	nFP = 0.0
+	nFN = 0.0
+	nTP = 0.0
+	nTN = 0.0
 
 	main(model_orders_network_features, scenario_name, covType, 'all')
 
@@ -582,8 +586,60 @@ if __name__ == "__main__" :
 		for attack in attack_types :
 			if last_detection_times_power[attack] < first_detection_times_net[attack] or last_detection_times_power[attack] == -1 :
 				f.write("ATTACK TYPE: " + attack + " NOT DETECTED\n")
+				if "Normal" in attack or "normal" in attack:
+					nTN = nTN + 1.0
+				else:
+					nFN = nFN + 1.0
+
 			else :
 				f.write("ATTACK TYPE: " + attack + " DETECTED\n")
+				if "Normal" in attack or "normal" in attack:
+					nFP = nFP + 1.0
+				else:
+					nTP = nTP + 1.0
+
+		if nTP + nFN == 0:
+			tp_rate = "Not Applicable"
+		else:
+			tp_rate = nTP / (nTP + nFN)
+
+		if nFP + nTN == 0:
+			fp_rate = "Not Applicable"
+		else:
+			fp_rate = nFP / (nFP + nTN)
+
+		if nTN + nFP == 0:
+			tn_rate = "Not Applicable"
+		else:
+			tn_rate = nTN / (nTN + nFP)
+
+		if tp_rate == "Not Applicable":
+			fn_rate = "Not Applicable"
+		else:
+			fn_rate = 1.0 - tp_rate
+
+		if tp_rate == "Not Applicable" or fp_rate == "Not Applicable" or tp_rate + fp_rate == 0:
+			precision = "Not Applicable"
+		else:
+			precision = tp_rate / (tp_rate + fp_rate)
+
+		if tp_rate == "Not Applicable" or fn_rate == "Not Applicable" or tp_rate + fn_rate == 0:
+			recall = "Not Applicable"
+		else:
+			recall = tp_rate / (tp_rate + fn_rate)
+
+		f.write("################################################\n")
+		f.write("Output Statistics\n")
+		f.write("################################################\n")
+
+		f.write("True Positive Rate:      " + str(tp_rate) + "\n")
+		f.write("False Positive Rate:     " + str(fp_rate) + "\n")
+		f.write("True Negative Rate:      " + str(tn_rate) + "\n")
+		f.write("False Negative Rate:     " + str(fn_rate) + "\n")
+		f.write("Precision:               " + str(precision) + "\n")
+		f.write("Recall:                  " + str(recall) + "\n")
+
+
 
 
 
