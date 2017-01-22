@@ -1,7 +1,9 @@
 import os
+import csv
 import json
 import numpy as np
-
+from scipy import stats
+from collections import defaultdict
 
 class PCAPPostProcessing:
     
@@ -29,7 +31,10 @@ class PCAPPostProcessing:
         with open(bro_log_file_path, "r") as infile:
             for l in infile.readlines():
                 bro_dict = json.loads(l)
-                x.append(bro_dict['latency'] * 1000)
+                if "latency" in bro_dict:
+                    x.append(bro_dict['latency'] * 1000)
+                else:
+                    print "Missing latency entry in:", bro_log_file_path
         return x
 
     def process(self):
@@ -46,17 +51,56 @@ class PCAPPostProcessing:
 
                 print pcap_file_path + " Mean Latency:", np.mean(x)
                 print pcap_file_path + " Stdev Latency:", np.std(x)
+                print pcap_file_path + " Sterr Latency:", stats.sem(x)
+
+    def process_plotly(self):
+
+        field_names = ["Link Latency"]
+        for spec in self.background_specs:
+            field_names.extend(["Lower-Load-" + str(spec), "Number of background ping flows:" + str(spec), "Upper-Load-" + str(spec)])
+
+        plotly_data = defaultdict(defaultdict)
+        with open('plotly.csv', 'w') as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow(field_names)
+
+            for latency in self.link_latencies:
+                field_values = [latency]
+                for spec in self.background_specs:
+                    dir = self.base_dir + "/logs/evaluation_" + self.evaluation_type + "_" + str(latency) + "_" + str(spec)
+                    pcap_file_path = dir + "/" + "s1-eth2-s2-eth2.pcap"
+
+                    print "Processing:", pcap_file_path
+
+                    bro_log_file_path = self.parse_latency_timing_using_bro(pcap_file_path)
+                    x = self.collect_data(bro_log_file_path)
+
+                    mu = np.mean(x)
+                    sd = np.std(x)
+                    se = stats.sem(x)
+
+                    field_values.extend([mu - sd, mu, mu + sd])
+
+                writer.writerow(field_values)
 
 
 def main():
 
-    # Vary the delays (in miilseconds) on the links
-    link_latencies = [5]#, 10]
+    # # Vary the delays (in miilseconds) on the links
+    link_latencies = [5, 10, 15, 20, 25]
 
     # Vary the the amount of 'load' that is running by modifying the background emulation threads
-    background_specs = [5]#, 10, 15, 20]
+    background_specs = [10, 20, 30, 40]
 
-    evaluation_type = "emulation"
+    evaluation_type = "replay"
+
+    # Vary the delays (in miilseconds) on the links
+    # link_latencies = [5, 10, 15, 20, 25]
+    #
+    # # Vary the the amount of 'load' that is running by modifying the background emulation threads
+    # background_specs = [10, 20, 30, 40]
+    #
+    # evaluation_type = "emulation"
 
     script_dir = os.path.dirname(os.path.realpath(__file__))
     idx = script_dir.index('NetPower_TestBed')
@@ -64,7 +108,8 @@ def main():
     bro_dnp3_parser_dir = base_dir + "/dnp3_timing/dnp3_parser_bro/"
 
     p = PCAPPostProcessing(base_dir, bro_dnp3_parser_dir, link_latencies, background_specs, evaluation_type)
-    p.process()
+    #p.process()
+    p.process_plotly()
 
 
 if __name__ == "__main__":
