@@ -182,8 +182,6 @@ class PCAPPostProcessing:
         box = ax1.get_position()
         ax1.set_position([box.x0, box.y0 + box.height * 0.3, box.width, box.height * 0.7])
         handles, labels = ax1.get_legend_handles_labels()
-        # labels = [labels[0], labels[4], labels[5], labels[1], labels[2], labels[3]]
-        # handles = [handles[0], handles[4], handles[5], handles[1], handles[2], handles[3]]
 
         ax1.legend(handles, labels, shadow=True, fontsize=10, loc='upper center', ncol=2, markerscale=1.0,
                    frameon=True, fancybox=True, columnspacing=0.5, bbox_to_anchor=[0.5, -0.25])
@@ -198,9 +196,9 @@ def main():
     link_latencies = [5, 10, 15, 20, 25]
 
     # Vary the the amount of 'load' that is running by modifying the background emulation threads
-    background_specs = [10, 20, 30, 40]
+    background_specs = [0, 10, 20, 30, 40]
 
-    evaluation_type = "replay"
+    evaluation_type = "emulation"
 
     script_dir = os.path.dirname(os.path.realpath(__file__))
     idx = script_dir.index('NetPower_TestBed')
