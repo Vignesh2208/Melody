@@ -83,15 +83,23 @@ class PCAPPostProcessing:
         elif type(data_dict.keys()[0]) == str or type(data_dict.keys()[0]) == unicode:
             x = sorted(data_dict.keys())
 
+        data_means = []
+        data_sds = []
         data_sems = []
 
         for p in x:
+            mean = np.mean(data_dict[p])
+            sd = np.std(data_dict[p])
             sem = ss.sem(data_dict[p])
+
+            data_means.append(mean)
+            data_sds.append(sd)
             data_sems.append(sem)
 
-        return x, data_sems
+        return x, data_means, data_sds, data_sems
 
     def plot_lines_with_error_bars(self,
+                                   series,
                                    ax,
                                    x_label,
                                    y_label,
@@ -114,13 +122,18 @@ class PCAPPostProcessing:
         marker_i = 0
 
         for line_data_key in sorted(self.data.keys()):
-
             data_vals = self.data[line_data_key]
+            x, mean, sd, sem = self.prepare_matplotlib_data(data_vals)
+            y = None
 
-            x, sems = self.prepare_matplotlib_data(data_vals)
+            if series == "mean":
+                y = mean
+            elif series == "sd":
+                y = sd
+            elif series == "sem":
+                y = sem
 
-            ax.plot(x, sems, color="black",
-                        marker=markers[marker_i], markersize=7.0, label=line_data_key, ls='none')
+            ax.plot(x, y, color="black", marker=markers[marker_i], markersize=7.0, label=line_data_key, ls='none')
 
             marker_i += 1
 
@@ -156,16 +169,25 @@ class PCAPPostProcessing:
         if ytick_labels:
             ax.set_yticklabels(ytick_labels)
 
-    def plot_data(self):
+    def plot_data(self, series):
 
         f, (ax1) = plt.subplots(1, 1, sharex=True, sharey=False, figsize=(5.0, 4.0))
 
         data_xtick_labels = self.data["10"].keys()
         data_xticks = [int(x) for x in data_xtick_labels]
 
-        self.plot_lines_with_error_bars(ax1,
+        ylabel = None
+        if series == "mean":
+            ylabel = "Mean Latency"
+        elif series == "sd":
+            ylabel = "Standard Deviation of Latency"
+        elif series == "sem":
+            ylabel = "Standard Error of Mean of Latency"
+
+        self.plot_lines_with_error_bars(series,
+                                        ax1,
                                         "Per Link Latency",
-                                        "Standard Deviation of Transaction Latency",
+                                        ylabel,
                                         "",
                                         y_scale='linear',
                                         x_min_factor=0.75,
@@ -186,7 +208,7 @@ class PCAPPostProcessing:
         ax1.legend(handles, labels, shadow=True, fontsize=10, loc='upper center', ncol=2, markerscale=1.0,
                    frameon=True, fancybox=True, columnspacing=0.5, bbox_to_anchor=[0.5, -0.25])
 
-        plt.savefig("latency_evaluation_" + self.evaluation_type + ".png", dpi=1000)
+        plt.savefig(series + "_latency_evaluation_" + self.evaluation_type + ".png", dpi=1000)
         plt.show()
 
 
@@ -198,7 +220,7 @@ def main():
     # Vary the the amount of 'load' that is running by modifying the background emulation threads
     background_specs = [0, 10, 20, 30, 40]
 
-    evaluation_type = "emulation"
+    evaluation_type = "replay"
 
     script_dir = os.path.dirname(os.path.realpath(__file__))
     idx = script_dir.index('NetPower_TestBed')
@@ -207,7 +229,9 @@ def main():
 
     p = PCAPPostProcessing(base_dir, bro_dnp3_parser_dir, link_latencies, background_specs, evaluation_type)
     p.collect_data()
-    p.plot_data()
+
+    for series in ["mean", "sd", "sem"]:
+        p.plot_data(series)
 
     #p.process_plotly()
 
