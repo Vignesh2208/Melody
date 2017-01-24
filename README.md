@@ -12,6 +12,8 @@ Dependencies:
 #numpy
 #pypcapfile
 #openssh-server
+#dpkt
+#expect (sudo apt-get install expect)
 ```
 
 ```
