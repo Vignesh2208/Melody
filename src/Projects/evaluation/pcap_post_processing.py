@@ -233,6 +233,14 @@ def main():
     for series in ["mean", "sd", "sem"]:
         p.plot_data(series)
 
+    # plt.hist(p.data['0']['5'], bins=40, histtype="step")
+    # plt.hist(p.data['0']['10'], bins=40, histtype="step")
+    # plt.hist(p.data['0']['15'], bins=40, histtype="step")
+    # plt.hist(p.data['0']['20'], bins=40, histtype="step")
+    # plt.hist(p.data['0']['25'], bins=40, histtype="step")
+    #
+    # plt.show()
+
     #p.process_plotly()
 
 
