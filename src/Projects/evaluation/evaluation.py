@@ -149,7 +149,7 @@ def get_network_configurations(link_latencies):
 def main():
 
     # Vary the delays (in miilseconds) on the links
-    link_latencies = [5]#, 10]
+    link_latencies = [0]#, 10]
 
     # Vary the the amount of 'load' that is running by modifying the background emulation threads
     background_specs = [5]#, 10, 15, 20]

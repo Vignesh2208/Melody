@@ -12,19 +12,23 @@ from matplotlib.ticker import MaxNLocator
 
 class PCAPPostProcessing:
     
-    def __init__(self, base_dir, bro_dnp3_parser_dir, link_latencies, background_specs, evaluation_type):
+    def __init__(self, base_dir, bro_dnp3_parser_dir, bro_cmd, bro_json_log_conf,
+                 link_latencies, background_specs, evaluation_type):
+
         self.base_dir = base_dir
         self.bro_dnp3_parser_dir = bro_dnp3_parser_dir
+        self.bro_cmd = bro_cmd
+        self.bro_json_log_conf = bro_json_log_conf
         self.link_latencies = link_latencies
         self.background_specs = background_specs
         self.evaluation_type = evaluation_type
         self.data = defaultdict(defaultdict)
 
     def parse_latency_timing_using_bro(self, pcap_file_path):
-        bro_json_log_conf = "/usr/local/bro/share/bro/policy/tuning/json-logs.bro"
+        cmd = self.bro_cmd + " -b -C -r " + pcap_file_path + " " + self.bro_dnp3_parser_dir + " " + self.bro_json_log_conf
 
         # Run bro parser
-        os.system("/usr/local/bro/bin/bro -b -C -r " + pcap_file_path + " " + self.bro_dnp3_parser_dir + " " + bro_json_log_conf)
+        os.system(cmd)
 
         # Move the file to pcap directory
         bro_log_file_path = pcap_file_path + ".log"
@@ -215,10 +219,10 @@ class PCAPPostProcessing:
 def main():
 
     # # Vary the delays (in miilseconds) on the links
-    link_latencies = [5, 10, 15, 20, 25]
+    link_latencies = [0]#[5, 10, 15, 20, 25]
 
     # Vary the the amount of 'load' that is running by modifying the background emulation threads
-    background_specs = [0, 10, 20, 30, 40]
+    background_specs = [0]#[0, 10, 20, 30, 40]
 
     evaluation_type = "replay"
 
@@ -227,7 +231,13 @@ def main():
     base_dir = script_dir[0:idx] + "NetPower_TestBed"
     bro_dnp3_parser_dir = base_dir + "/dnp3_timing/dnp3_parser_bro/"
 
-    p = PCAPPostProcessing(base_dir, bro_dnp3_parser_dir, link_latencies, background_specs, evaluation_type)
+    # bro_json_log_conf = "/usr/local/bro/share/bro/policy/tuning/json-logs.bro"
+    bro_json_log_conf = "/home/rakesh/bro/scripts/policy/tuning/json-logs.bro"
+    # bro_cmd = "/usr/local/bro/bin/bro"
+    bro_cmd = "/usr/bin/bro"
+
+    p = PCAPPostProcessing(base_dir, bro_cmd, bro_json_log_conf, bro_dnp3_parser_dir,
+                           link_latencies, background_specs, evaluation_type)
     p.collect_data()
 
     for series in ["mean", "sd", "sem"]:
