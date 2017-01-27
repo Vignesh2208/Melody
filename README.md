@@ -37,4 +37,7 @@ Pre-Run Steps:
 - Install shared buffer python IPC (for python 2.7)
     - cd NetPower_Testbed/src/Proxy/libs
     - sudo python setup.py build_ext --inplace
+    
+- Install Ryu
+    - sudo pip install ryu==4.0
 ```
