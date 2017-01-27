@@ -12,7 +12,7 @@ from defines import *
 
 import socket
 import time
-
+from copy import deepcopy
 
 
 class attackPlaybackThread(threading.Thread) :
@@ -40,7 +40,7 @@ class attackPlaybackThread(threading.Thread) :
     def run(self):
         start_time = time.time()
         self.raw_rx_sock = socket.socket(socket.PF_PACKET, socket.SOCK_RAW, socket.htons(0x0800))
-        self.raw_rx_sock.settimeout(5.0)
+        #self.raw_rx_sock.settimeout(5.0)
         print "Running Attack Playback Thread"
         curr_send_idx = 0
         curr_send_event = None
@@ -65,6 +65,102 @@ class attackPlaybackThread(threading.Thread) :
                 continue
 
 
+
+            n_send_pkts = 0
+
+
+            if self.attackLayer.myIP == "10.0.0.1" :
+                send = True
+                time.sleep(5)
+
+                while True:
+                    if send == True:
+                        n_send_pkts = n_send_pkts + 1
+                        my_first_pkt_evt = self.attackLayer.send_events[0]
+                        send_payload_1 = binascii.unhexlify(str(my_first_pkt_evt[0]))
+                        dst_ip_1 = my_first_pkt_evt[1]
+
+                        my_sec_pkt_evt = self.attackLayer.send_events[1]
+                        send_payload_2 = binascii.unhexlify(str(my_sec_pkt_evt[0]))
+                        dst_ip_2 = my_sec_pkt_evt[1]
+
+                        print "Sending pkt id = ", n_send_pkts, " payload 1= ", send_payload_1, " payload 2 = ", send_payload_2
+                        if n_send_pkts == 1000:
+                            break
+
+                        #print "sending payload 1"
+                        self.attackLayer.raw_tx_sock.sendto(send_payload_1, (dst_ip_1, 0))
+                        #print "sending payload 2"
+                        self.attackLayer.raw_tx_sock.sendto(send_payload_2, (dst_ip_2, 0))
+
+                        n_req_recv_events = 2
+
+                    raw_pkt = self.raw_rx_sock.recv(MAXPKTSIZE)
+                    assert len(raw_pkt) != 0
+                    raw_ip_pkt = get_raw_ip_pkt(raw_pkt)
+                    ip_payload = binascii.hexlify(raw_ip_pkt.__str__())
+
+                    if n_req_recv_events == 0 :
+                        send = True
+                    else:
+                        send = False
+                        if ip_payload == self.attackLayer.first_recv_payload or ip_payload == self.attackLayer.sec_recv_payload :
+                            n_req_recv_events = n_req_recv_events - 1
+                        if n_req_recv_events == 0 :
+                            send = True
+
+            if self.attackLayer.myIP == "10.0.0.2":
+
+                n_req_recv_events = 2
+                send = False
+
+                while True:
+
+                    raw_pkt = self.raw_rx_sock.recv(MAXPKTSIZE)
+                    assert len(raw_pkt) != 0
+                    raw_ip_pkt = get_raw_ip_pkt(raw_pkt)
+                    ip_payload = binascii.hexlify(raw_ip_pkt.__str__())
+
+                    if n_req_recv_events == 0:
+                        send = True
+                        n_req_recv_events = 2
+                    else:
+                        send = False
+                        if ip_payload == self.attackLayer.first_recv_payload or ip_payload == self.attackLayer.sec_recv_payload:
+                            #print "Got 1 payload ..."
+                            #print "first recv payload = ", self.attackLayer.first_recv_payload
+                            #print "second recv payload = ", self.attackLayer.sec_recv_payload
+                            n_req_recv_events = n_req_recv_events - 1
+                        if n_req_recv_events == 0:
+                            send = True
+                            n_req_recv_events = 2
+
+                    if send == True:
+                        n_send_pkts = n_send_pkts + 1
+                        my_first_pkt_evt = self.attackLayer.send_events[0]
+                        send_payload_1 = binascii.unhexlify(str(my_first_pkt_evt[0]))
+                        dst_ip_1 = my_first_pkt_evt[1]
+
+                        my_sec_pkt_evt = self.attackLayer.send_events[1]
+                        send_payload_2 = binascii.unhexlify(str(my_sec_pkt_evt[0]))
+                        dst_ip_2 = my_sec_pkt_evt[1]
+
+                        print "Sending pkt id = ", n_send_pkts, "payload = ", send_payload_1, send_payload_2
+                        if n_send_pkts == 1000:
+                            break
+                        self.attackLayer.raw_tx_sock.sendto(send_payload_1, (dst_ip_1, 0))
+                        #time.sleep(1)
+                        self.attackLayer.raw_tx_sock.sendto(send_payload_2, (dst_ip_2, 0))
+
+
+
+
+
+
+            self.attackLayer.accessLock.release()
+            self.signal_end_of_replay_stage()
+            return
+
             if curr_send_event == None :
 
 
@@ -80,6 +176,7 @@ class attackPlaybackThread(threading.Thread) :
 
             if curr_send_event == None :
                 self.signal_end_of_replay_stage()
+
                 continue
 
 
@@ -155,6 +252,12 @@ class basicHostAttackLayer(threading.Thread):
         self.emulate_stage_id = "None"
         self.send_events = []
         self.recv_events = {}
+
+        self.orig_send_events = []
+        self.orig_recv_events = {}
+
+        self.first_recv_payload = None
+        self.sec_recv_payload = None
 
 
         self.attack_playback_thread = attackPlaybackThread(self)
@@ -262,9 +365,27 @@ class basicHostAttackLayer(threading.Thread):
                         self.send_events.append([ip_payload,dst_ip,curr_send_n_recv_events])
                         curr_send_n_recv_events = 0
                         curr_send_idx = curr_send_idx + 1
-                    else :
+
+                        if curr_send_idx == 10:
+                            break
+                    else:
                         curr_send_n_recv_events = curr_send_n_recv_events + 1
+
+
                         ip_payload = binascii.hexlify(raw_ip_pkt.__str__())
+
+
+                        if self.first_recv_payload and not self.sec_recv_payload :
+                            self.sec_recv_payload = ip_payload
+
+                        if not self.first_recv_payload:
+                            self.first_recv_payload = ip_payload
+
+
+
+
+
+
                         try:
                             self.recv_events[ip_payload].append(curr_send_idx)
                         except:
@@ -278,6 +399,8 @@ class basicHostAttackLayer(threading.Thread):
                 print "LOADED PCAP LOCALLY ..."
                 print "N SEND EVENTS = ", len(self.send_events)
                 print "N RECV EVENTS = ", len(self.recv_events.keys())
+
+
 
 
             elif "START" in recv_msg :

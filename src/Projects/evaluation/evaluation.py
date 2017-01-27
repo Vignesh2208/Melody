@@ -152,9 +152,9 @@ def main():
     link_latencies = [5]#, 10]
 
     # Vary the the amount of 'load' that is running by modifying the background emulation threads
-    background_specs = [5]#, 10, 15, 20]
+    background_specs = [0]#, 10, 15, 20]
 
-    run_time = 300
+    run_time = 60
 
     script_dir = os.path.dirname(os.path.realpath(__file__))
     idx = script_dir.index('NetPower_TestBed')
