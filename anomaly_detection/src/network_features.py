@@ -1,7 +1,7 @@
 import dpkt
 import socket
 
-#filename='/Users/kartik/Desktop/Siebel Project/microgrid_with_background_traffic/icmp_trial.pcap'
+#filename='/Users/kartik/Desktop/Siebel Project/microgrid/icmp_trial.pcap'
 
 def dst_list(filename):
     dst_list = []

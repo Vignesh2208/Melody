@@ -1,7 +1,7 @@
 import dpkt
 from array import array
 
-#filename='/Users/kartik/Desktop/Siebel Project/microgrid_with_background_traffic/s1-eth2-s2-eth2.pcap'
+#filename='/Users/kartik/Desktop/Siebel Project/microgrid/s1-eth2-s2-eth2.pcap'
 
 def power_features(filename):
 	node_measures = {}

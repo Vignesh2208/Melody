@@ -1,11 +1,11 @@
 import json
 import os
 from cyber_network.network_configuration import NetworkConfiguration
+from cyber_network.background_traffic import TrafficFlow, BackgroundTraffic
 from core.defines import *
 import time
 import subprocess
 import datetime
-#from datetime import datetime
 
 
 class Main:
@@ -19,7 +19,7 @@ class Main:
         self.run_time = self.network_configuration.run_time
         self.power_simulator_ip = self.network_configuration.power_simulator_ip
         self.node_mappings = {}
-
+        self.control_node_id = None
 
         self.script_dir = os.path.dirname(os.path.realpath(__file__))
         idx = self.script_dir.index('NetPower_TestBed')
@@ -29,10 +29,6 @@ class Main:
         self.proxy_dir = self.base_dir + "/src/core"
         if not os.path.exists(self.log_dir):
             os.makedirs(self.log_dir)
-
-
-
-
 
     def generate_node_mappings(self, roles):
         with open(self.node_mappings_file_path,"w") as outfile:
@@ -52,13 +48,13 @@ class Main:
         #with open('node_mappings.json', 'w') as outfile:
         #    json.dump(self.node_mappings, outfile)
 
+    def start_background_traffic(self):
+        traffic_flows = [TrafficFlow("poisson", 5, 1, "ssh", "h1", "h2")]
+        bt = BackgroundTraffic(self.network_configuration.mininet_obj, traffic_flows, "ubuntu", "ubuntu", self.base_dir)
 
+        bt.start()
 
-    def start_project(self):
-        print "Starting project ..."
-        ng = self.network_configuration.setup_network_graph(mininet_setup_gap=1, synthesis_setup_gap=1)
-        self.generate_node_mappings(self.network_configuration.roles)
-
+    def start_host_processes(self):
         print "Starting all Host Commands ..."
         for i in range(len(self.network_configuration.mininet_obj.hosts)):
             mininet_host = self.network_configuration.mininet_obj.hosts[i]
@@ -75,22 +71,25 @@ class Main:
 
             if "controller" in host_role :
                 cmd_to_run = cmd_to_run + " -i"
-                control_node_id = host_id
+                self.control_node_id = host_id
             print "Starting cmd for host: " + str(mininet_host.name) + " at " + str(datetime.datetime.now())
             mininet_host.cmd(cmd_to_run)
+
+    def start_proxy_process(self):
 
         print "Starting core Process at " + str(datetime.datetime.now())
         proxy_py_script = self.proxy_dir + "/proxy.py"
         proxy_log_file = self.log_dir + "/proxy_log.txt"
         subprocess.Popen(['python',str(proxy_py_script),'-c',self.node_mappings_file_path,'-l',proxy_log_file,
-                        '-r',str(self.run_time),'-p',self.power_simulator_ip,'-d',str(control_node_id)])
+                        '-r',str(self.run_time),'-p',self.power_simulator_ip,'-d', str(self.control_node_id)])
         #os.system("python " + str(proxy_py_script) + " -c " + self.node_mappings_file_path + " -l " + proxy_log_file \
         #         + " -r " + str(self.run_time) + " -p " + self.power_simulator_ip + " -d " + str(self.control_node_id))
 
-        if self.run_time > 0 :
+    def run(self):
+        if self.run_time > 0:
             print "Running Project for roughly (runtime + 5) =  " + str(self.run_time + 5) + " secs ..."
             time.sleep(self.run_time + 5)
-        else :
+        else:
             print "Running Project forever. Press Ctrl-C to quit ..."
             try:
                 while 1:
@@ -98,6 +97,15 @@ class Main:
             except KeyboardInterrupt:
                 print "Interrupted ..."
 
+    def start_project(self):
+        print "Starting project ..."
+        ng = self.network_configuration.setup_network_graph(mininet_setup_gap=1, synthesis_setup_gap=1)
+        self.generate_node_mappings(self.network_configuration.roles)
+
+        self.start_background_traffic()
+        self.start_host_processes()
+        self.start_proxy_process()
+        self.run()
 
         print "Stopping project..."
         self.stop_project()
@@ -110,7 +118,7 @@ class Main:
 def main():
 
     network_configuration = NetworkConfiguration("ryu",
-                                                 "127.0.0.1",
+                                                  "127.0.0.1",
                                                  6633,
                                                  "http://localhost:8080/",
                                                  "admin",
@@ -128,12 +136,12 @@ def main():
                                                  # Can map multiple power simulator objects to same cyber node.
                                                  roles=[
                                                          ("controller_node",["control;1"]),
-                                                         ("operations_nodes",["operations;1","operations;2"]),
-                                                         ("distribution_ieds",["distribution;1"]),
-                                                         ("renewable_generator_ieds",["generator;1"]),
-                                                         ("thermal_generator_ieds",["generator;2"])
+                                                         ("pilot_buses_set_1",["2","25","29"]),
+                                                         ("pilot_buses_set_2",["22","23","19"]),
+                                                         ("pilot_buses_set_3",["20","10","6","9"]),
+                                                         ("generator",["30;1","31;1","32;1","33;1","34;1","35;1","36;1","37;1","38;1","39;1"])
                                                         ],
-                                                 project_name="test",
+                                                 project_name="microgrid",
                                                  run_time=10,
                                                  power_simulator_ip="127.0.0.1"
                                                  )
