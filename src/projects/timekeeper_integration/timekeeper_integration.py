@@ -1,4 +1,6 @@
 import sys
+print sys.path
+sys.path.append("./")
 
 from cyber_network.network_configuration import NetworkConfiguration
 from cyber_network.traffic_flow import EmulatedTrafficFlow
