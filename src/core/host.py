@@ -9,6 +9,7 @@ import time
 import getopt
 import traceback
 import signal
+from utils.sleep_functions import sleep
 
 
 def extractIPMapping(netCfgFile) :
@@ -127,13 +128,13 @@ def main(hostID,netCfgFile,logFile,runTime,projectName,isControlHost) :
 	IPCLayer.start()
 
 	if runTime != 0 : # dont run forever
-		time.sleep(runTime)
+		sleep(runTime)
 		IPCLayer.cancelThread()
 		AttackLayer.cancelThread()
 		NetLayer.cancelThread()
 	else :			  # run forever
 		while True :
-			time.sleep(1)
+			sleep(1)
 
 
 	IPCLayer.join()

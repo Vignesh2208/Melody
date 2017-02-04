@@ -1,6 +1,7 @@
-import time
 import datetime
+import time
 from shared_buffer import *
+from utils.sleep_functions import sleep
 from defines import *
 
 
@@ -118,7 +119,7 @@ class NetPower(object):
 
     def start_attack_dispatcher(self):
         #print "Waiting for 5 secs for all processes to spawn up ..."
-        #time.sleep(5)
+        #sleep(5)
         print "Starting Attack Dispatcher at " + str(datetime.datetime.now())
 
 
@@ -156,7 +157,7 @@ class NetPower(object):
                             self.disable_TCP_RST()
                         if recv_msg == "END":
                             self.enable_TCP_RST()
-                    time.sleep(0.05)
+                    sleep(0.05)
         else:
             print "Running Project forever. Press Ctrl-C to quit ..."
             try:
@@ -168,7 +169,7 @@ class NetPower(object):
                             self.disable_TCP_RST()
                         if recv_msg == "END" :
                             self.enable_TCP_RST()
-                    time.sleep(0.05)
+                    sleep(0.05)
             except KeyboardInterrupt:
                 print "Interrupted ..."
 

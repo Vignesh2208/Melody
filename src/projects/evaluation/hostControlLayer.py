@@ -8,7 +8,7 @@ from core.logger import Logger
 from core.defines import *
 from core.basicHostIPCLayer import basicHostIPCLayer
 from datetime import datetime
-import time
+from utils.sleep_functions import sleep
 import threading
 import numpy as np
 
@@ -65,7 +65,7 @@ class controlLoopThread(threading.Thread) :
 				busnum, gid, voltsp = GEN_ID[i][0], GEN_ID[i][1], self.vg[i]
 				#self.controlLayer.txPktToPowerSim("%d;%d"%(busnum,gid), str(voltsp))
 			# self.controlLayer.txPktToPowerSim("2","HelloWorld!")
-			time.sleep(0.5)
+			sleep(0.5)
 
 			
 class hostControlLayer(basicHostIPCLayer) :

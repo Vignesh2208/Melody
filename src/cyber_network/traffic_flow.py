@@ -1,8 +1,8 @@
-import time
 import threading
 import random
 
 from timeit import default_timer as timer
+from utils.sleep_functions import sleep_vt
 
 TRAFFIC_FLOW_PERIODIC = 'Periodic'
 TRAFFIC_FLOW_EXPONENTIAL = 'Exponential'
@@ -81,15 +81,15 @@ class EmulatedTrafficFlow(threading.Thread):
 
             if self.type == TRAFFIC_FLOW_PERIODIC:
                 sleep_for = self.inter_flow_period
-                time.sleep(sleep_for)
+                sleep_vt(sleep_for)
             elif self.type == TRAFFIC_FLOW_EXPONENTIAL:
                 sleep_for = random.expovariate(1.0/self.inter_flow_period)
-                time.sleep(sleep_for)
+                sleep_vt(sleep_for)
             elif self.type == TRAFFIC_FLOW_ONE_SHOT and not self.long_running:
-		time.sleep(1)               
+		sleep_vt(1)
 		break
 	    elif self.long_running:
-		#time.sleep(self.elasped_time-self.run_time)
+		#sleep_vt(self.elasped_time-self.run_time)
 		self.looped = True
             else:
                 print "Invalid traffic flow type"
@@ -127,13 +127,13 @@ class EmulatedTrafficFlow(threading.Thread):
         self.start_time = timer()
 
         # First wait for offset seconds
-        time.sleep(self.offset)
+        sleep_vt(self.offset)
 
         # Start the server process
         self.start_server()
 
         # Wait a second before starting the client loop
-        time.sleep(1)
+        sleep_vt(1)
 
         self.client_loop()
 

@@ -1,4 +1,4 @@
-import time
+from utils.sleep_functions import sleep
 
 # import opendnp3 instead of from opendnp3 import *
 # In DataObserver._Update, there is a serious of ifs
@@ -120,7 +120,7 @@ def main():
 	# Need to wait because the polling is now occurring on its own
 	# thread.  If we exited immediately, the callbacks would never
 	# be called.
-	time.sleep(2)
+	sleep(2)
 
 	print('Binaries: %d' % (len(binary_list)))
 	print('Analogs: %d' % (len(analog_list)))
@@ -129,7 +129,7 @@ def main():
 	print('Setpointstatus: %d' % (len(setpointstatus_list)))
 
 	while (True):
-		time.sleep(60)
+		sleep(60)
 
 if __name__ == '__main__':
 	main()

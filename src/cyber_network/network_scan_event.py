@@ -1,8 +1,8 @@
-import time
 import threading
 import random
 
 from timeit import default_timer as timer
+from utils.sleep_functions import sleep_vt
 
 NETWORK_SCAN_NMAP_PORT = 'Nmap-port'
 
@@ -41,7 +41,7 @@ class NetworkScanEvent(threading.Thread):
         self.client_popen = self.src_mn_node.popen(cmd)
 
         print "Waiting for duration:", self.duration
-        time.sleep(self.duration)
+        sleep_vt(self.duration)
 
         print "Terminating cmd:", cmd
         self.client_popen.terminate()
@@ -53,7 +53,7 @@ class NetworkScanEvent(threading.Thread):
         self.start_time = timer()
 
         # First wait for offset seconds
-        time.sleep(self.offset)
+        sleep_vt(self.offset)
 
         # Start the server process
         self.trigger_scan()

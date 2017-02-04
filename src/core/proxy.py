@@ -8,6 +8,7 @@ from proxyIPCLayer import proxyIPCLayer
 import time
 import getopt
 import socket
+from utils.sleep_functions import sleep
 
 
 
@@ -112,13 +113,13 @@ def main(netCfgFile,logFile,runTime,powerSimIP,controlCenterID) :
 	IPCLayer.start()
 
 	if runTime != 0 : # dont run forever
-		time.sleep(runTime)
+		sleep(runTime)
 		IPCLayer.cancelThread()
 		TransportLayer.cancelThread()
 		NetLayer.cancelThread()
 	else :			  # run forever
 		while True :
-			time.sleep(1)
+			sleep(1)
 
 	IPCLayer.join()
 	TransportLayer.join()
