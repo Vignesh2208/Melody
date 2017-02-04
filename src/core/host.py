@@ -2,15 +2,6 @@ import sys
 import os
 import shared_buffer
 from shared_buffer import  *
-
-scriptDir = os.path.dirname(os.path.realpath(__file__))
-if scriptDir not in sys.path:
-	sys.path.append(scriptDir)
-
-srcDir = scriptDir + "/.."
-if srcDir not in sys.path:
-	sys.path.append(srcDir)
-
 import logger
 from logger import *
 from basicNetworkServiceLayer import basicNetworkServiceLayer
@@ -18,9 +9,6 @@ import time
 import getopt
 import traceback
 import signal
-
-
-
 
 
 def extractIPMapping(netCfgFile) :

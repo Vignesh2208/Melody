@@ -1,15 +1,6 @@
 import sys
 import os
 
-scriptDir = os.path.dirname(os.path.realpath(__file__))
-if scriptDir not in sys.path:
-	sys.path.append(scriptDir)
-
-srcDir = scriptDir + "/.."
-if srcDir not in sys.path:
-	sys.path.append(srcDir)
-	
-
 from logger import *
 from proxyNetworkLayer import proxyNetworkServiceLayer
 from proxyTransportLayer import proxyTransportLayer

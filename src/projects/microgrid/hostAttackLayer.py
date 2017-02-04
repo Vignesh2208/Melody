@@ -1,9 +1,13 @@
 import sys
+
+print sys.path
+
+
 import subprocess
 import os
 import time
 import threading
-import core.shared_buffer
+import core
 from core.shared_buffer import *
 import core.logger
 from core.logger import Logger

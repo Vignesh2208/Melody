@@ -40,4 +40,10 @@ Pre-Run Steps:
     
 - Install Ryu
     - sudo pip install ryu==4.0
+
+- Install six
+    - sudo pip install six
+
+- Install networkx
+    - sudo pip install networkx
 ```

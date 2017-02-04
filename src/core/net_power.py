@@ -4,7 +4,7 @@ from shared_buffer import *
 from defines import *
 
 
-class Core(object):
+class NetPower(object):
 
     def __init__(self,
                  run_time,

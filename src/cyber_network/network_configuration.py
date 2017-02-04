@@ -14,6 +14,7 @@ from itertools import permutations
 from collections import defaultdict
 from functools import partial
 from mininet.net import Mininet
+from mininet.cli import CLI
 from mininet.node import RemoteController
 from mininet.node import OVSSwitch
 from mininet.link import TCLink
@@ -212,6 +213,12 @@ class NetworkConfiguration(object):
         # Get all the ryu_switches from the inventory API
         remaining_url = 'stats/switches'
         resp, content = self.h.request(self.controller_api_base_url + remaining_url, "GET")
+
+        #CLI(self.mininet_obj)
+
+        #import pdb; pdb.set_trace()
+
+
 
         ryu_switch_numbers = json.loads(content)
 
@@ -430,6 +437,9 @@ class NetworkConfiguration(object):
         self.cleanup_mininet()
 
         if self.controller == "ryu":
+            print self.controller_ip
+            print self.controller_port
+
 
             self.mininet_obj = Mininet(topo=self.topo,
                                        cleanup=True,
@@ -438,7 +448,7 @@ class NetworkConfiguration(object):
                                        controller=lambda name: RemoteController(name,
                                                                                 ip=self.controller_ip,
                                                                                 port=self.controller_port),
-                                       switch=partial(OVSSwitch, protocols='OpenFlow14'))
+                                       switch=partial(OVSSwitch, protocols='OpenFlow13'))
 
             self.mininet_obj.start()
 

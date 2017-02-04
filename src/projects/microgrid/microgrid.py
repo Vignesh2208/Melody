@@ -1,19 +1,18 @@
 import sys
 
-sys.path.append("./")
 from cyber_network.network_configuration import NetworkConfiguration
 from cyber_network.traffic_flow import EmulatedTrafficFlow
 from cyber_network.traffic_flow import TRAFFIC_FLOW_PERIODIC, TRAFFIC_FLOW_EXPONENTIAL, TRAFFIC_FLOW_ONE_SHOT
 from cyber_network.network_scan_event import NetworkScanEvent
 from cyber_network.network_scan_event import NETWORK_SCAN_NMAP_PORT
-from core.core import Core
+from core.net_power import NetPower
 
 from core.shared_buffer import *
 
 from random import randint
 
 
-class Microgrid(Core):
+class Microgrid(NetPower):
 
     def __init__(self,
                  run_time,
@@ -249,6 +248,7 @@ def get_emulated_network_scan_event(flow_type, src, dst, network_configuration, 
                              offset=offset,
                              duration=15)
                         }
+    return emulated_network_scans[flow_type]
 
 def dataset_flow_generator(flow_count,run_time,emulated_flow_definitions,background_flows,scans,control_flows,network_configuration,base_dir):
     picked_protocols = []
@@ -289,7 +289,7 @@ def dataset_flow_generator(flow_count,run_time,emulated_flow_definitions,backgro
 
 def main():
 
-    run_time = 80
+    run_time = 20
     flow_count = 3
 
     emulated_flow_definitions = {'dnp3': [('h1','h2','h3','h4','h5'),('h1','h2','h3','h4','h5')], 'ping':[('h1','h6','h7'), ('h1','h2','h3','h4','h5','h6')], 'http':[('h1','h7'),('h1','h7')], 'ssh':[('h7',),('h1',)], 'telnet':[('h1',),('h2','h3','h4','h5')], 'nmap': [('h1','h6','h7'), ('h1','h2','h3','h4','h5','h6')]}
@@ -312,7 +312,7 @@ def main():
 
     dataset_flows =  dataset_flow_generator(flow_count,run_time,emulated_flow_definitions,background_flows,scans,control_flows,network_configuration,base_dir)
   
-    exp = Core(run_time,
+    exp = NetPower(run_time,
                network_configuration,
                script_dir,
                base_dir,
