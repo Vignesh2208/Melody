@@ -11,6 +11,7 @@ from logger import Logger
 from defines import *
 import time
 import Queue
+from utils.sleep_functions import sleep
 
 
 class basicHostIPCLayer(threading.Thread):
@@ -94,7 +95,7 @@ class basicHostIPCLayer(threading.Thread):
         self.log.info("Relaying pkt: " + str(pkt) + " to core")
         while ret <= 0:
             ret = self.sharedBufferArray.write(self.sharedBufName,pkt, PROXY_NODE_ID)
-            time.sleep(0.05)
+            sleep(0.05)
         # print "Return val = ", ret
 
         self.log.info("Relayed pkt: " + str(pkt) + " to core")

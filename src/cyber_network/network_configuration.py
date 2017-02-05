@@ -437,10 +437,6 @@ class NetworkConfiguration(object):
         self.cleanup_mininet()
 
         if self.controller == "ryu":
-            print self.controller_ip
-            print self.controller_port
-
-
             self.mininet_obj = Mininet(topo=self.topo,
                                        cleanup=True,
                                        autoStaticArp=True,

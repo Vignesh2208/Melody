@@ -1,7 +1,8 @@
-import time
 import datetime
 from datetime import datetime
+import time
 from shared_buffer import *
+from utils.sleep_functions import sleep
 from defines import *
 from timekeeper_functions import *
 import subprocess
@@ -206,6 +207,7 @@ class NetPower(object):
         print "Starting Attack Dispatcher at " + str(datetime.now())
 
 
+
         #self.disable_TCP_RST()
 
         if os.path.isdir(self.replay_pcaps_dir):
@@ -262,6 +264,7 @@ class NetPower(object):
                     if recv_msg == "END":
                         self.enable_TCP_RST()
                 time.sleep(0.05)
+
         else:
             print "Running Project forever. Press Ctrl-C to quit ..."
             try:
@@ -273,7 +276,7 @@ class NetPower(object):
                             self.disable_TCP_RST()
                         if recv_msg == "END" :
                             self.enable_TCP_RST()
-                    time.sleep(0.05)
+                    sleep(0.05)
             except KeyboardInterrupt:
                 print "Interrupted ..."
 
