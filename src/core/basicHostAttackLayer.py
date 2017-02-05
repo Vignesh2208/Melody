@@ -41,7 +41,8 @@ class attackPlaybackThread(threading.Thread) :
         start_time = time.time()
         self.raw_rx_sock = socket.socket(socket.PF_PACKET, socket.SOCK_RAW, socket.htons(0x0800))
         self.raw_rx_sock.settimeout(5.0)
-        print "Running Attack Playback Thread"
+        print "Running Attack Playback Thread at ", str(datetime.now())
+        sys.stdout.flush()
         curr_send_idx = 0
         curr_send_event = None
 
@@ -53,7 +54,8 @@ class attackPlaybackThread(threading.Thread) :
                 self.attackLayer.emulate_stage_id = "None"
                 self.attackLayer.stoppingLock.release()
                 self.raw_rx_sock.close()
-                print "Stopped Attack playback thread ..."
+                print "Stopped Attack playback thread at ", str(datetime.now())
+                sys.stdout.flush()
                 break
             self.attackLayer.stoppingLock.release()
 
@@ -220,7 +222,7 @@ class basicHostAttackLayer(threading.Thread):
     def attack_playback_pass(self):
         if self.attack_playback_thread_started == False:
             self.attack_playback_thread_started = True
-            self.log.info("Starting Attack playback thread ...")
+            self.log.info("Starting Attack playback thread " + str(datetime.now()))
             self.attack_playback_thread.start()
 
         recv_msg = ''
@@ -331,7 +333,8 @@ class basicHostAttackLayer(threading.Thread):
     def run(self):
 
         pktToSend = None
-        self.log.info("Started ...")
+        self.log.info("Started at " + str(datetime.now()))
+        sys.stdout.flush()
 
         assert (self.NetServiceLayer != None)
         assert (self.IPCLayer != None)
@@ -339,11 +342,13 @@ class basicHostAttackLayer(threading.Thread):
 
             currCmd = self.getcurrCmd()
             if currCmd != None and currCmd == CMD_QUIT:
+                self.log.info("Stopping " + str(datetime.now()))
+                sys.stdout.flush()
                 self.stoppingLock.acquire()
                 self.stopping = True
                 self.stoppingLock.release()
                 self.attack_playback_thread.join()
-                self.log.info("Stopping ...")
+                
                 break
 
             callbackFns = []

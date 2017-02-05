@@ -5,6 +5,8 @@ import os
 import socket
 import threading
 import logger
+import datetime
+from datetime import datetime
 from logger import Logger
 from defines import *
 import time
@@ -133,23 +135,23 @@ class basicHostIPCLayer(threading.Thread):
             self.log.info("Shared Buffer open succeeded")
             return True
 
-    def run(self):
-
-        self.log.info("Started ...")
+    def run(self) :
+        self.log.info("Started at " + str(datetime.now()))
 
         #init_res = self.init_shared_ipc_buffer()
         #if init_res == False :
         #    self.log.info("Shared Buffer initialization failed. Stopping Thread.")
         #    return
-
         self.log.info("power sim id to host id map = " + str(self.powerSimIDtohostID))
         self.log.info("host id to powersim id map = " + str(self.hostIDtoPowerSimID))
+        sys.stdout.flush()
         assert (self.attackLayer != None)
         while True:
 
             currCmd = self.getcurrCmd()
             if currCmd != None and currCmd == CMD_QUIT:
-                self.log.info("Stopping ...")
+                self.log.info("Stopping at " + str(datetime.now()))
+                sys.stdout.flush()
                 break
 
             callbackFns = []

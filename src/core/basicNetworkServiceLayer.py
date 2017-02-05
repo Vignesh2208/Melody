@@ -57,9 +57,9 @@ class basicNetworkServiceLayer(threading.Thread) :
 
 	def run(self) :
 
-
-		self.log.info("Started listening on IP: " + self.hostIP + " PORT: " + str(self.listenPort))
-		assert(self.attackLayer != None)
+		self.log.info("Started listening on IP: " + self.hostIP + " PORT: " + str(self.listenPort) + " at " + str(datetime.now()))
+		sys.stdout.flush()
+		#assert(self.attackLayer != None)
 		sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP
 		sock.settimeout(SOCKET_TIMEOUT)
 		sock.bind((self.hostIP, self.listenPort))
@@ -67,7 +67,8 @@ class basicNetworkServiceLayer(threading.Thread) :
 		while True :
 			currCmd = self.getcurrCmd()
 			if currCmd != None and currCmd == CMD_QUIT :
-				self.log.info("Stopping ...")
+				self.log.info("Stopping at " + str(datetime.now()) )
+				sys.stdout.flush()
 				sock.close()
 				break
 

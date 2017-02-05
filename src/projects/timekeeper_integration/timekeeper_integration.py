@@ -1,4 +1,5 @@
 import sys
+import os
 
 from cyber_network.network_configuration import NetworkConfiguration
 from cyber_network.traffic_flow import EmulatedTrafficFlow
@@ -10,6 +11,9 @@ from core.net_power import NetPower
 from core.shared_buffer import *
 
 from random import randint
+
+ENABLE_TIMEKEEPER = 1
+TDF = 2
 
 
 class TimeKeeperIntegration(NetPower):
@@ -33,7 +37,12 @@ class TimeKeeperIntegration(NetPower):
                                         log_dir,
                                         emulated_background_traffic_flows,
                                         emulated_network_scan_events,
-                                        emulated_dnp3_traffic_flows)
+                                        emulated_dnp3_traffic_flows,
+										ENABLE_TIMEKEEPER,
+										TDF
+					)
+
+
 
 def get_network_configuration():
 
@@ -75,10 +84,12 @@ def get_network_configuration():
 
     return network_configuration
 
+	
+
 
 def main():
 
-    run_time = 20
+    run_time = 5
     flow_count = 3
 
     emulated_flow_definitions = {'dnp3': [('h1','h2','h3','h4','h5'),('h1','h2','h3','h4','h5')], 'ping':[('h1','h6','h7'), ('h1','h2','h3','h4','h5','h6')], 'http':[('h1','h7'),('h1','h7')], 'ssh':[('h7',),('h1',)], 'telnet':[('h1',),('h2','h3','h4','h5')], 'nmap': [('h1','h6','h7'), ('h1','h2','h3','h4','h5','h6')]}
@@ -104,6 +115,8 @@ def main():
                             root_password="ubuntu",
                             server_process_start_cmd="",
                             client_expect_file=base_dir + '/src/cyber_network/ping_session.expect')]
+
+    bg_flows = []
 
     exp = TimeKeeperIntegration(run_time,
                network_configuration,
