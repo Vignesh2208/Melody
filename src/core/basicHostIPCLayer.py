@@ -137,7 +137,9 @@ class basicHostIPCLayer(threading.Thread):
             return True
 
     def run(self) :
+        #sleep(3)   
         self.log.info("Started at " + str(datetime.now()))
+		
 
         #init_res = self.init_shared_ipc_buffer()
         #if init_res == False :
@@ -181,3 +183,9 @@ class basicHostIPCLayer(threading.Thread):
         if len(recvPkt) != 0:
             self.log.info("Received pkt: " + str(recvPkt) + " from core for Dst Node Id =  " + str(dstCyberNodeID))
             self.onRxPktFromProxy(recvPkt, dstCyberNodeID)
+
+        print "Before = ", str(datetime.now())
+        sys.stdout.flush()
+        sleep(1)
+        print "After = ", str(datetime.now())
+        sys.stdout.flush()

@@ -38,7 +38,7 @@ int main(int argc, char * argv[] ){
 	int pid = atoi(argv[1]);
 	gettimepid(pid, &tv, &tz);
 	
-	printf("%ld\n",tv.tv_sec);
+	printf("%ld.%ld\n",tv.tv_sec,tv.tv_usec);
 	return 0;
 	
 }

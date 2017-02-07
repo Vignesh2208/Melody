@@ -1,8 +1,11 @@
 import threading
 import random
+import datetime
+from datetime import datetime
 
 from timeit import default_timer as timer
 from utils.sleep_functions import sleep_vt
+from utils.sleep_functions import *
 
 TRAFFIC_FLOW_PERIODIC = 'Periodic'
 TRAFFIC_FLOW_EXPONENTIAL = 'Exponential'
@@ -56,26 +59,34 @@ class EmulatedTrafficFlow(threading.Thread):
         self.client_popen = None
 	self.looped = False 
 
+    def send_command_to_node(self,node_name,cmd) :
+
+        filename = "/tmp/" + node_name + "-reader"
+        with open(filename,"w+") as f :
+            f.write(cmd)
+
     def client_loop(self):
 
         #print "Starting client loop..."
 
         while True:
 
-            self.elasped_time = timer()
+            self.elasped_time = get_current_vt()
 
             if self.elasped_time - self.start_time > self.run_time:
                 break
 
             cmd = "sudo " + self.client_expect_file + ' ' +\
                   self.root_user_name + ' ' +\
-                  self.root_password + ' ' + self.dst_mn_node.IP() 
+                  self.root_password + ' ' + self.dst_mn_node.IP() + " &" 
           
-            #print "Client command:", cmd
+            print "Running Client command at ", str(datetime.now())
             if self.long_running and self.looped:
 		pass
 	    else:
-	        self.client_popen = self.src_mn_node.popen(cmd)
+	        #self.client_popen = self.src_mn_node.popen(cmd)
+                self.client_popen = None
+                self.send_command_to_node(self.src_mn_node.name,cmd)
 
             #print "Client command:", cmd
 
@@ -100,7 +111,8 @@ class EmulatedTrafficFlow(threading.Thread):
 
         # For long running flows, clean up after everything else.
         #if self.long_running:
-       	self.client_popen.terminate()
+        #if self.client_popen != None :
+        #    self.client_popen.terminate()
 	self.looped = False
         
     def start_server(self):
@@ -110,21 +122,23 @@ class EmulatedTrafficFlow(threading.Thread):
         if self.server_process_start_cmd:
 
             # Start the server
-            self.server_popen = self.dst_mn_node.popen(self.server_process_start_cmd)
-
+            #self.server_popen = self.dst_mn_node.popen(self.server_process_start_cmd)
+            self.server_popen = None
+            self.send_command_to_node(self.dst_mn_node.name, start_cmd)
     def stop_server(self):
 
         # Stop the server
         if self.server_process_start_cmd:
             print "Stopping server with cmd: ", self.server_process_start_cmd
             #pass
-            self.server_popen.terminate()
+            if self.server_popen != None :
+                self.server_popen.terminate()
 
     def run(self):
 
         print "Starting thread..."
 
-        self.start_time = timer()
+        self.start_time = get_current_vt()
 
         # First wait for offset seconds
         sleep_vt(self.offset)

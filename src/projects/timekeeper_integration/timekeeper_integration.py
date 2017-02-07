@@ -16,7 +16,7 @@ from core.shared_buffer import *
 from random import randint
 
 ENABLE_TIMEKEEPER = 1
-TDF = 2
+TDF = 5
 
 
 class TimeKeeperIntegration(NetPower):
@@ -59,8 +59,8 @@ def get_network_configuration():
                                                  {"num_switches": 5,
                                                   "per_switch_links": 3,
                                                   "num_hosts_per_switch": 1,
-                                                  #"switch_switch_link_latency_range": (10, 10),
-                                                  #"host_switch_link_latency_range": (10, 10)
+                                                  #"switch_switch_link_latency_range": (50, 50),
+                                                  #"host_switch_link_latency_range": (50, 50)
                                                   },
                                                  conf_root="configurations/",
                                                  synthesis_name="SimpleMACSynthesis",
@@ -92,7 +92,7 @@ def get_network_configuration():
 
 def main():
 
-    run_time = 5
+    run_time = 10
     flow_count = 3
 
     emulated_flow_definitions = {'dnp3': [('h1','h2','h3','h4','h5'),('h1','h2','h3','h4','h5')], 'ping':[('h1','h6','h7'), ('h1','h2','h3','h4','h5','h6')], 'http':[('h1','h7'),('h1','h7')], 'ssh':[('h7',),('h1',)], 'telnet':[('h1',),('h2','h3','h4','h5')], 'nmap': [('h1','h6','h7'), ('h1','h2','h3','h4','h5','h6')]}
@@ -109,7 +109,7 @@ def main():
     log_dir = base_dir + "/logs/" + str(network_configuration.project_name)
 
     bg_flows = [EmulatedTrafficFlow(type=TRAFFIC_FLOW_PERIODIC,
-                            offset=5,
+                            offset=2,
                             inter_flow_period=1,
                             run_time=run_time,
                             src_mn_node=network_configuration.mininet_obj.get("h1"),
@@ -117,9 +117,9 @@ def main():
                             root_user_name="ubuntu",
                             root_password="ubuntu",
                             server_process_start_cmd="",
-                            client_expect_file=base_dir + '/src/cyber_network/ping_session.expect')]
+                            client_expect_file=base_dir + '/src/cyber_network/ping_session.sh')]
 
-    bg_flows = []
+    #bg_flows = []
 
     exp = TimeKeeperIntegration(run_time,
                network_configuration,

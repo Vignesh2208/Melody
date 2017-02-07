@@ -289,11 +289,24 @@ def get_current_virtual_time() :
         lines = [x.strip() for x in lines]
         first_dilated_pid = int(lines[0])
         
-        curr_time = int(subprocess.check_output([script_dir + "/bin/gettimepid", str(first_dilated_pid)]))
+        curr_time = float(subprocess.check_output([script_dir + "/bin/gettimepid", str(first_dilated_pid)]))
         return curr_time
     except:
-        print "Get current virtual time error ! Returning real time ..." 
+        #print "Get current virtual time error ! Returning real time ..." 
         return time.time()
 		
-
+def get_current_virtual_time_specified_pid(specified_pid) :
+    try :
+        script_dir = os.path.dirname(os.path.realpath(__file__))
+        with open(script_dir + "/dilate_pids.txt","r") as f :
+             lines = f.readlines()
+        lines = [x.strip() for x in lines]
+        first_dilated_pid = int(specified_pid)
+        
+        curr_time = float(subprocess.check_output([script_dir + "/bin/gettimepid", str(first_dilated_pid)]))
+        return curr_time
+    except:
+        #print "Get current virtual time error ! Returning real time ..." 
+        return time.time()
+		
 

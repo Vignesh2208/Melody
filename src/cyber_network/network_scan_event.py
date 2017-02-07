@@ -3,6 +3,7 @@ import random
 
 from timeit import default_timer as timer
 from utils.sleep_functions import sleep_vt
+from utils.sleep_functions import *
 
 NETWORK_SCAN_NMAP_PORT = 'Nmap-port'
 
@@ -50,7 +51,7 @@ class NetworkScanEvent(threading.Thread):
 
         print "Starting NetworkScanEvent thread..."
 
-        self.start_time = timer()
+        self.start_time = get_current_vt()
 
         # First wait for offset seconds
         sleep_vt(self.offset)
