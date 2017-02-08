@@ -40,7 +40,7 @@ class attackPlaybackThread(threading.Thread) :
     def run(self):
         start_time = time.time()
         self.raw_rx_sock = socket.socket(socket.PF_PACKET, socket.SOCK_RAW, socket.htons(0x0800))
-        self.raw_rx_sock.settimeout(5.0)
+        #self.raw_rx_sock.settimeout(5.0)
         print "Running Attack Playback Thread at ", str(datetime.now())
         sys.stdout.flush()
         curr_send_idx = 0
@@ -77,6 +77,7 @@ class attackPlaybackThread(threading.Thread) :
                     n_required_recv_events = curr_send_event[2]
 
                     print "Sending Replay Event: Dst = ", dst_ip, " N Req Recv events = ", n_required_recv_events
+                    sys.stdout.flush()
 
             self.attackLayer.accessLock.release()
 
@@ -107,6 +108,8 @@ class attackPlaybackThread(threading.Thread) :
                 try :
                     if len(self.attackLayer.recv_events[ip_payload]) > 0 :
                         first_send_window = self.attackLayer.recv_events[ip_payload][0]
+                        print "Received Replay Event ..."
+                        sys.stdout.flush()
 
                         assert (first_send_window >= curr_send_idx)
                         if first_send_window == curr_send_idx :

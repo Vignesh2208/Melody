@@ -1,0 +1,47 @@
+Starting Debug for h1
+Running Command sudo iptables -I OUTPUT -p tcp --tcp-flags RST RST -j DROP
+Running Command sudo /home/user/Desktop/NetPower_TestBed/src/cyber_network/ping_session.sh ubuntu ubuntu 10.0.0.2
+PING 10.0.0.2 (10.0.0.2): 56 data bytes
+
+--- 10.0.0.2 ping statistics ---
+1 packets transmitted, 1 packets received, 0% packet loss
+round-trip min/avg/max = 0.841/0.841/0.841 ms
+Running Command sudo /home/user/Desktop/NetPower_TestBed/src/cyber_network/ping_session.sh ubuntu ubuntu 10.0.0.2
+PING 10.0.0.2 (10.0.0.2): 56 data bytes
+
+--- 10.0.0.2 ping statistics ---
+1 packets transmitted, 1 packets received, 0% packet loss
+round-trip min/avg/max = 0.891/0.891/0.891 ms
+Running Command sudo /home/user/Desktop/NetPower_TestBed/src/cyber_network/ping_session.sh ubuntu ubuntu 10.0.0.2
+PING 10.0.0.2 (10.0.0.2): 56 data bytes
+
+--- 10.0.0.2 ping statistics ---
+1 packets transmitted, 1 packets received, 0% packet loss
+round-trip min/avg/max = 2.393/2.393/2.393 ms
+Running Command sudo /home/user/Desktop/NetPower_TestBed/src/cyber_network/ping_session.sh ubuntu ubuntu 10.0.0.2
+PING 10.0.0.2 (10.0.0.2): 56 data bytes
+
+--- 10.0.0.2 ping statistics ---
+1 packets transmitted, 1 packets received, 0% packet loss
+round-trip min/avg/max = 1.943/1.943/1.943 ms
+Running Command sudo /home/user/Desktop/NetPower_TestBed/src/cyber_network/ping_session.sh ubuntu ubuntu 10.0.0.2
+PING 10.0.0.2 (10.0.0.2): 56 data bytes
+
+--- 10.0.0.2 ping statistics ---
+1 packets transmitted, 1 packets received, 0% packet loss
+round-trip min/avg/max = 1.049/1.049/1.049 ms
+Running Command sudo /home/user/Desktop/NetPower_TestBed/src/cyber_network/ping_session.sh ubuntu ubuntu 10.0.0.2
+PING 10.0.0.2 (10.0.0.2): 56 data bytes
+
+--- 10.0.0.2 ping statistics ---
+1 packets transmitted, 1 packets received, 0% packet loss
+round-trip min/avg/max = 2.466/2.466/2.466 ms
+Running Command sudo /home/user/Desktop/NetPower_TestBed/src/cyber_network/ping_session.sh ubuntu ubuntu 10.0.0.2
+PING 10.0.0.2 (10.0.0.2): 56 data bytes
+
+--- 10.0.0.2 ping statistics ---
+1 packets transmitted, 1 packets received, 0% packet loss
+round-trip min/avg/max = 0.324/0.324/0.324 ms
+sh: 1: g_session.sh: not found
+Running Command sudo iptables -I OUTPUT -p tcp --tcp-flags RST RST -j ACCEPT
+sh: 1: g_session.sh: not found

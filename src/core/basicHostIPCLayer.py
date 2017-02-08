@@ -184,8 +184,8 @@ class basicHostIPCLayer(threading.Thread):
             self.log.info("Received pkt: " + str(recvPkt) + " from core for Dst Node Id =  " + str(dstCyberNodeID))
             self.onRxPktFromProxy(recvPkt, dstCyberNodeID)
 
-        print "Before = ", str(datetime.now())
-        sys.stdout.flush()
-        sleep(1)
-        print "After = ", str(datetime.now())
-        sys.stdout.flush()
+        #print "Before = ", str(datetime.now())
+        #sys.stdout.flush()
+        #sleep(1)
+        #print "After = ", str(datetime.now())
+        #sys.stdout.flush()

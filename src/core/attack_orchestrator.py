@@ -13,6 +13,7 @@ import dpkt
 
 from dpkt.loopback import Loopback
 from dpkt.ethernet import Ethernet
+from timekeeper_functions import *
 
 DUMMY_ID = 0
 FINISH = 1
@@ -195,18 +196,19 @@ class attack_orchestrator():
                 break
             recv_msg = ''
             while recv_msg != "LOADED":
-                if time.time() - self.start_time >= self.runTime:
+                if get_current_virtual_time() - self.start_time >= self.runTime:
                     print "Run time Expired. Stopping ..."
                     return_val = STOP
                     break
                 dummy_id, recv_msg = self.sharedBufferArray.read(str(nodeID) + "attk-channel-buffer")
 
 
-
+        print "Loaded pcap for the current stage ..."
         for nodeID in self.involved_replay_nodes[replay_pcap_f_name] :
             ret = 0
             while ret <= 0 :
                 ret = self.sharedBufferArray.write(str(nodeID) + "attk-channel-buffer", "START", 0)
+                time.sleep(0.1)
 
 
         print "Waiting for Replay Phase to Complete ..."
@@ -216,7 +218,7 @@ class attack_orchestrator():
                 break
             recv_msg = ''
             while recv_msg != "DONE":
-                if time.time() - self.start_time >= self.runTime:
+                if get_current_virtual_time() - self.start_time >= self.runTime:
                     print "Run time Expired. Stopping ..."
                     return_val = STOP
                     break
@@ -242,7 +244,7 @@ class attack_orchestrator():
                 break
             recv_msg = ''
             while recv_msg != "DONE":
-                if time.time() - self.start_time >= self.runTime:
+                if get_current_virtual_time() - self.start_time >= self.runTime:
                     print "Run time Expired. Stopping ..."
                     return_val = STOP
                     break
@@ -251,13 +253,15 @@ class attack_orchestrator():
         return return_val
 
     def run(self):
+
+        time.sleep(5)
         assert os.path.exists(self.attkPlanDirPath)
         assert os.path.isfile(self.attkPlanDirPath + "/attack_plan.txt")
 
         with open(self.attkPlanDirPath + "/attack_plan.txt", "r") as f:
             stages = f.readlines()
 
-        self.start_time = time.time()
+        self.start_time = get_current_virtual_time()
 
         for stage in stages :
             curr_stage = stage.rstrip('\r\n')

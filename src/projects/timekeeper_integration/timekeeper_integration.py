@@ -16,7 +16,7 @@ from core.shared_buffer import *
 from random import randint
 
 ENABLE_TIMEKEEPER = 1
-TDF = 5
+TDF = 1
 
 
 class TimeKeeperIntegration(NetPower):

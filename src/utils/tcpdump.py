@@ -6,6 +6,9 @@ import datetime
 import os
 from sleep_functions import *
 import socket
+from ctypes import *
+
+libgtod = cdll.LoadLibrary('/home/user/Desktop/NetPower_TestBed/src/utils/libgtod.so')
 
 class TCPDump(object):
 
@@ -16,11 +19,15 @@ class TCPDump(object):
         self.packet_count = 0
         pid = str(os.getpid())
         file('tcpdump'+self.intf_name, 'w').write(pid)
+        self.gt = libgtod.gt
+        self.gt.restype = c_longdouble
+
 
     def start_capture(self):
         self.pcap_writer = dpkt.pcap.Writer(open(self.out_pcap_file_path, "w"))
         p = pcapy.open_live(self.intf_name, 65535, True, 1)
         #p.setnonblock(0)
+        """
         while True :
             try:
                 header,data = p.next()
@@ -28,21 +35,22 @@ class TCPDump(object):
                     self.handle_packet(header,data)
                 #time.sleep(0.5)
             except socket.timeout:
-                #time.sleep(0.01)
+                #time.sleep(0.1)
                 continue
                 
-
+        """
         #try:
-        #p.loop(-1, self.handle_packet)
+        p.loop(-1, self.handle_packet)
         #except:
         #    self.pcap_writer.close()
         #    print "Wrote:", self.packet_count, "packets to file:", self.out_pcap_file_path
 
     def handle_packet(self, header, data):
         #ts = (datetime.datetime.now() - datetime.datetime(1970,1,1)).total_seconds()
-        ts = get_current_vt()
+        #ts = get_current_vt()
         #ts = get_current_vt_specified_pid(os.getppid())
         #ts = time.time()
+        ts = self.gt()
         pid = str(os.getpid())
         file('tcpdump'+self.intf_name, 'w').write(pid)
         self.pcap_writer.writepkt(data, ts)

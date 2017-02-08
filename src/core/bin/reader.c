@@ -41,7 +41,7 @@ int main(int argc, char ** argv)
     ufds.fd = fd;
     ufds.events = POLLIN;
     while (1) {
-    	rv = poll(&ufds, 1, 1000);
+    	rv = poll(&ufds, 1, 100);
 		if (rv == -1) {
 	    	perror("poll"); // error occurred in poll()
 		} else if (rv == 0) {

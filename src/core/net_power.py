@@ -54,6 +54,8 @@ class NetPower(object):
         self.proxy_dir = self.base_dir + "/src/core"
         self.sharedBufferArray = shared_buffer_array()
         self.tcpdump_procs = []
+        self.n_actual_tcpdump_procs = 0
+        self.n_dilated_tcpdump_procs = 0
 
         result = self.sharedBufferArray.open(bufName="cmd-channel-buffer",isProxy=False)
         if result == BUF_NOT_INITIALIZED or result == FAILURE:
@@ -73,7 +75,7 @@ class NetPower(object):
             print "Removing Timekeeper module"
             os.system("rmmod " + self.timekeeper_dir + "/build/TimeKeeper.ko")
             time.sleep(1)
-            print"Inseting Timekeeper module"
+            print"Inserting Timekeeper module"
             os.system("insmod " + self.timekeeper_dir + "/build/TimeKeeper.ko")
             time.sleep(1)
 
@@ -81,13 +83,15 @@ class NetPower(object):
         if pid != -1 and self.enable_timekeeper == 1 :
             dilate_all(pid,tdf)
             addToExp(pid) 
-            print "Added Host ", pid , " to synchronized experiment. TDF = ", self.tdf
+            print "Added Process ", pid , " to synchronized experiment. TDF = ", self.tdf
 
     def set_freeze_quantum(self):
-        timeslice = 10000000
-        freeze_quantum = timeslice/2 		  # in nano seconds
-        freeze_quantum = freeze_quantum/1000000
-        set_cbe_experiment_timeslice(freeze_quantum*self.tdf)
+
+        if self.tdf > 1 :
+            timeslice = 1000000
+        else:
+            timeslice = 2000000
+        set_cbe_experiment_timeslice(timeslice*self.tdf)
 		
 
     def dilate_nodes(self) :
@@ -100,9 +104,21 @@ class NetPower(object):
                 self.dilate_node(self.pid_list[i],self.tdf)
                 pass
 
-            print "List of dilated pids = ", self.pid_list
+            print "########################################################################"
+            print ""
+            print "                        List of dilated pids"
+            print  self.pid_list
+            print ""
+            print "########################################################################"
+            print ""
+            print "Number of dilated processes         = ", len(self.pid_list)
+            print "Number of dilated tcpdump processes = ", self.n_dilated_tcpdump_procs
+            print "Actual number of tcpdump processes  = ", self.n_actual_tcpdump_procs
+            print "Number of hosts                     = ", len(self.network_configuration.roles)
+            print "Number of switches                  = ", len(self.network_configuration.mininet_obj.switches)
+            print ""
+            print "########################################################################"
             script_dir = os.path.dirname(os.path.realpath(__file__))
-            print "Writing to file : ", script_dir + "/dilate_pids.txt"
             with open(script_dir + "/dilate_pids.txt","w") as f :
                 for i in xrange(0,len(self.pid_list)) :
                     f.write(str(self.pid_list[i]) + "\n")
@@ -120,7 +136,7 @@ class NetPower(object):
             print "Experiment start time", self.start_time, " local Time = " + str(datetime.now())
         else:
             self.start_time = time.time()
-            print "Experiment started with TimeKeeper disabled. Ignoring TDF settings ... "
+            print "Experiment started with TimeKeeper Disabled. Ignoring TDF settings ... "
 
     def stop_synchronized_experiment(self) :
         if self.enable_timekeeper == 1 :
@@ -165,15 +181,9 @@ class NetPower(object):
         print "Starting all Host Commands ..."
         for i in xrange(len(self.network_configuration.roles)):
             mininet_host = self.network_configuration.mininet_obj.hosts[i]
-            print "PID of host ", i , " = ", mininet_host.pid
-            #self.dilate_node(mininet_host.pid,self.tdf)
             self.pid_list.append(int(mininet_host.pid))
             host_id = int(mininet_host.name[1:])
             host_role = self.node_mappings[mininet_host.name][1][0]
-
-
-            #route_add_cmd = "sudo route add -net 10.0.0.0 netmask 255.255.0.0 " + mininet_host.name + "-eth0"
-            #mininet_host.cmd(route_add_cmd)
 
             if "controller" not in host_role:
                 host_log_file = self.log_dir + "/host_" + str(host_id) + "_log.txt"
@@ -181,8 +191,7 @@ class NetPower(object):
                 host_log_file = self.log_dir + "/controller_node_log.txt"
 
             host_py_script = self.proxy_dir + "/host.py"
-            cmd_to_run = "python " + str(host_py_script) + " -c " + self.node_mappings_file_path + " -l " + host_log_file + " -r " + str(self.run_time) \
-                         + " -n " + str(self.project_name) + " -d " + str(host_id)
+            cmd_to_run = "python " + str(host_py_script) + " -c " + self.node_mappings_file_path + " -l " + host_log_file + " -r " + str(self.run_time) + " -n " + str(self.project_name) + " -d " + str(host_id)
 
             if "controller" in host_role :
                 cmd_to_run = cmd_to_run + " -i"
@@ -193,12 +202,13 @@ class NetPower(object):
             mininet_host.cmd(cmd_to_run)
 
     def start_switch_link_pkt_captures(self):
-        print "Starting wireshark capture on switches ..."
+        print "Starting tcpdump capture on switches ..."
 
         for i in range(len(self.network_configuration.mininet_obj.links)):
             mininet_link = self.network_configuration.mininet_obj.links[i]
             switchIntfs = mininet_link.intf1
-            core_cmd = "python " + self.base_dir + "/src/utils/tcpdump.py"
+            #core_cmd = "python " + self.base_dir + "/src/utils/tcpdump.py"
+            core_cmd = "tcpdump"
             capture_cmd = "sudo " + core_cmd 
 
             if mininet_link.intf1.name.startswith("s") and mininet_link.intf2.name.startswith("s") :
@@ -208,21 +218,19 @@ class NetPower(object):
                     pass
 				
                 capture_cmd = capture_cmd + " -i "  + str(switchIntfs.name)
-                capture_cmd = capture_cmd + " -w " + capture_log_file + " &"
+                capture_cmd = capture_cmd + " -w " + capture_log_file + " -B 20000 ip &"
                 print "capture_cmd:", capture_cmd
+                self.n_actual_tcpdump_procs = self.n_actual_tcpdump_procs + 1
 
-                #if mininet_link.intf1.name == "s1-eth2" :
                 proc = subprocess.Popen(capture_cmd, shell=True)
                 self.tcpdump_procs.append(proc)
-                taskset_cmd = "sudo taskset -cp 0,1 " + str(proc.pid)
-                subprocess.Popen(taskset_cmd, shell=True)
-				 
-				
-                #self.dilate_node(proc.pid,self.tdf)
                 #self.pid_list.append(int(proc.pid))
+                taskset_cmd = "sudo taskset -cp 0,1 " + str(proc.pid) + " > /dev/null"
+                subprocess.Popen(taskset_cmd, shell=True)	 
+               
+                
         
-        #time.sleep(1)
-        # Get all the pids of tcpdump children
+        time.sleep(2)
         try:
             ps_output = subprocess.check_output("ps -e -o command:200,pid | grep '^" + core_cmd + "'", shell=True)
         except subprocess.CalledProcessError:
@@ -233,10 +241,10 @@ class NetPower(object):
             if not p_tokens:
                 continue
             pid = int(p_tokens[len(p_tokens)-1])
-            print "TCP Dump child pid  = ", pid
-            #self.pid_list.append(int(pid))
-            taskset_cmd = "sudo taskset -cp 0,1 " + str(pid)
-            subprocess.Popen(taskset_cmd, shell=True)
+            self.pid_list.append(int(pid))
+            self.n_dilated_tcpdump_procs = self.n_dilated_tcpdump_procs + 1
+            #taskset_cmd = "sudo taskset -cp 0,1 " + str(pid)
+            #subprocess.Popen(taskset_cmd, shell=True)
 
         
         # Get all the pids of sudo tcpdump parents
@@ -246,53 +254,76 @@ class NetPower(object):
             if not p_tokens:
                 continue
             pid = int(p_tokens[len(p_tokens)-1])
-            print "TCP Dump sudo parent pid  = ", pid
-            taskset_cmd = "sudo taskset -cp 0,1 " + str(pid)
+            #self.pid_list.append(int(pid))
+            taskset_cmd = "sudo taskset -cp 0,1 " + str(pid)  + " > /dev/null"
             subprocess.Popen(taskset_cmd, shell=True)
+        
         
 
         for i in xrange(0,len(self.network_configuration.mininet_obj.switches)) :
             mininet_switch = self.network_configuration.mininet_obj.switches[i]
-            print "PID of switch ", i ," = ", mininet_switch.pid
-            #self.dilate_node(mininet_switch.pid,self.tdf)
             self.pid_list.append(int(mininet_switch.pid))
+            
 
-        #sys.exit(0)
     def start_proxy_process(self):
 
-        print "Starting core Process at " + str(datetime.now())
+        print "Starting Proxy Process at " + str(datetime.now())
         proxy_py_script = self.proxy_dir + "/proxy.py"
         proxy_log_file = self.log_dir + "/proxy_log.txt"
-        #subprocess.Popen(['python',str(proxy_py_script),'-c',self.node_mappings_file_path,'-l',proxy_log_file,
-        #                  '-r',str(self.run_time),'-p',self.power_simulator_ip,'-d', str(self.control_node_id)])
-        os.system("python " + str(proxy_py_script) + " -c " + self.node_mappings_file_path + " -l " + proxy_log_file \
-                  + " -r " + str(self.run_time) + " -p " + self.power_simulator_ip + " -d " + str(self.control_node_id) + " &")
+        core_proxy_start_cmd = "python " + str(proxy_py_script)
+        proxy_start_cmd = core_proxy_start_cmd  + " -c " + self.node_mappings_file_path + " -l " + proxy_log_file + " -r " + str(self.run_time) + " -p " + self.power_simulator_ip + " -d " + str(self.control_node_id) + " &"
+        os.system(proxy_start_cmd)
+        
+
+
 
     def start_attack_dispatcher(self):
-        #time.sleep(5)
         print "Starting Attack Dispatcher at " + str(datetime.now())
 
         if os.path.isdir(self.replay_pcaps_dir):
             attack_dispatcher_script = self.proxy_dir + "/attack_orchestrator.py"
-            os.system("python " + str(attack_dispatcher_script) + " -c " + self.replay_pcaps_dir + " -l " +
-                      self.node_mappings_file_path + " -r " + str(self.run_time) + " &")
+            core_attk_dispatcher_cmd = "python " + str(attack_dispatcher_script)
+            attk_dispatcher_start_cmd = core_attk_dispatcher_cmd + " -c " + self.replay_pcaps_dir + " -l " + self.node_mappings_file_path + " -r " + str(self.run_time + 2) + " &"
+            proc = subprocess.Popen(attk_dispatcher_start_cmd,shell=True) 
+            print "Setting Attack Dispatcher affinity to cores 0,1 ..."
+            taskset_cmd = "sudo taskset -cp 0,1 " + str(proc.pid) + " > /dev/null"
+            subprocess.Popen(taskset_cmd, shell=True)
+
+
+            ps_output = subprocess.check_output("ps -e -o command:200,pid | grep '^" + core_attk_dispatcher_cmd + "'", shell=True)
+            for p in ps_output.split('\n'):
+                p_tokens = p.split()
+                if not p_tokens:
+                    continue
+                pid = int(p_tokens[len(p_tokens)-1])
+                taskset_cmd = "sudo taskset -cp 0,1 " + str(pid) + " > /dev/null"
+                subprocess.Popen(taskset_cmd, shell=True)
+
+    def send_cmd_to_node(self,node_name,cmd) :
+        filename = "/tmp/" + node_name + "-reader"
+        with open(filename,"w+") as f :
+            f.write(cmd)
 
     def disable_TCP_RST(self):
-        print "DISABLING TCP RST"
+        
         for i in xrange(len(self.network_configuration.roles)):
             mininet_host = self.network_configuration.mininet_obj.hosts[i]
-            mininet_host.cmd("sudo iptables -I OUTPUT -p tcp --tcp-flags RST RST -j DROP ")
+            #mininet_host.cmd("sudo iptables -I OUTPUT -p tcp --tcp-flags RST RST -j DROP &")
+            self.send_cmd_to_node(mininet_host.name,"sudo iptables -I OUTPUT -p tcp --tcp-flags RST RST -j DROP &")
+        print "DISABLED TCP RST"
 
     def enable_TCP_RST(self):
-        print "RE-ENABLING TCP RST"
+        
         for i in xrange(len(self.network_configuration.roles)):
             mininet_host = self.network_configuration.mininet_obj.hosts[i]
-            mininet_host.cmd("sudo iptables -I OUTPUT -p tcp --tcp-flags RST RST -j ACCEPT ")
+            #mininet_host.cmd("sudo iptables -I OUTPUT -p tcp --tcp-flags RST RST -j ACCEPT &")
+            self.send_cmd_to_node(mininet_host.name,"sudo iptables -I OUTPUT -p tcp --tcp-flags RST RST -j ACCEPT &")
+        print "RE-ENABLED TCP RST"
 
     def run(self):
         if self.run_time > 0:
-            print "Running Project for roughly (runtime + 5) =  " + str(self.run_time + 5) + " secs ..."
-            start_time = self.start_time
+            print "Running Project for roughly (runtime + 2) =  " + str(self.run_time + 2) + " secs ..."
+            start_time = get_current_virtual_time()
             prev_time  = self.start_time
             run_time = self.run_time + 2
 
@@ -308,6 +339,7 @@ class NetPower(object):
                          if curr_time - prev_time >= 1.0 :
                              k = k + int(curr_time - prev_time)
                              print k," secs of virtual time elapsed, curr_time = ", curr_time
+                             sys.stdout.flush()
                              prev_time = curr_time
 						
 

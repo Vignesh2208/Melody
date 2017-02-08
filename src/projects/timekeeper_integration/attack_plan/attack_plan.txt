@@ -1,4 +1,4 @@
-#vpn_access-mapped.pcap
+vpn_access-mapped.pcap
 #fuzzing_attack-mapped.pcap
 #pmu_access-mapped.pcap
 #emulation-stage-nmap-from-1-to-2-duration-20

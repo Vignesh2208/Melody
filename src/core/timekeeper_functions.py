@@ -123,6 +123,7 @@ def set_cbe_experiment_timeslice(timeslice) :
 		print "ERROR setting timeslice value"
 		return -1
 	
+	timeslice = int(timeslice/2000000)
 	cmd = SET_CBE_EXP_TIMESLICE + "," + str(timeslice)
 
 	return send_to_timekeeper(cmd)
