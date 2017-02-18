@@ -1,5 +1,6 @@
 import sys
 import os
+import time
 print sys.path
 sys.path.append("./")
 
@@ -16,7 +17,7 @@ from core.shared_buffer import *
 from random import randint
 
 ENABLE_TIMEKEEPER = 1
-TDF = 1
+TDF = 5
 
 
 class TimeKeeperIntegration(NetPower):
@@ -59,7 +60,7 @@ def get_network_configuration():
                                                  {"num_switches": 5,
                                                   "per_switch_links": 3,
                                                   "num_hosts_per_switch": 1,
-                                                  #"switch_switch_link_latency_range": (50, 50),
+                                                  "switch_switch_link_latency_range": (500, 500),
                                                   #"host_switch_link_latency_range": (50, 50)
                                                   },
                                                  conf_root="configurations/",
@@ -72,7 +73,7 @@ def get_network_configuration():
                                                      ("pilot_buses_set_1",["2","25","29"]),
                                                      ("pilot_buses_set_2",["22","23","19"]),
                                                      ("pilot_buses_set_3",["20","10","6", "9"]),
-                                                     ("generator",["30;1","31;1","32;1","33;1","34;1","35;1","36;1","37;1","38;1","39;1"]),
+                                                     ("generator",		["30;1","31;1","32;1","33;1","34;1","35;1","36;1","37;1","38;1","39;1"]),
 
                                                      # part of enterprise network. Linear topology which is attached to the clique at one switch
                                                      ("enterprise-1",["vpn-gateway;1"]),
@@ -94,6 +95,7 @@ def main():
 
     run_time = 10
     flow_count = 3
+    
 
     emulated_flow_definitions = {'dnp3': [('h1','h2','h3','h4','h5'),('h1','h2','h3','h4','h5')], 'ping':[('h1','h6','h7'), ('h1','h2','h3','h4','h5','h6')], 'http':[('h1','h7'),('h1','h7')], 'ssh':[('h7',),('h1',)], 'telnet':[('h1',),('h2','h3','h4','h5')], 'nmap': [('h1','h6','h7'), ('h1','h2','h3','h4','h5','h6')]}
     background_flows = ['ssh', 'telnet', 'http', 'ping']
@@ -117,7 +119,10 @@ def main():
                             root_user_name="ubuntu",
                             root_password="ubuntu",
                             server_process_start_cmd="",
-                            client_expect_file=base_dir + '/src/cyber_network/ping_session.sh')]
+                            client_expect_file='ping -c1 10.0.0.2')
+                            #client_expect_file='python ' + base_dir + '/src/cyber_network/test_2.py')]
+                            #client_expect_file=base_dir + '/src/cyber_network/ping_session.expect')
+                            ]
 
     #bg_flows = []
 

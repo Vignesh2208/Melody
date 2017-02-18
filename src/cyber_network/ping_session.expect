@@ -6,38 +6,4 @@ set host [lindex $argv 2];
 
 exec ping -c1 $host
 
-sleep 1
-
-exec ping -c1 $host
-
-sleep 1
-
-exec ping -c1 $host
-
-sleep 1
-
-exec ping -c1 $host
-
-sleep 1
-
-exec ping -c1 $host
-
-sleep 1
-
-exec ping -c1 $host
-
-sleep 1
-
-exec ping -c1 $host
-
-sleep 1
-
-exec ping -c1 $host
-
-sleep 1
-
-exec ping -c1 $host
-
-sleep 1
-exec ping -c1 $host
 

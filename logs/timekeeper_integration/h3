@@ -1,3 +1,3 @@
-Starting Debug for h3
+Starting Debug for h3. Reader Process pid = 25549
 Running Command sudo iptables -I OUTPUT -p tcp --tcp-flags RST RST -j DROP
-Running Command sudo iptables -I OUTPUT -p tcp --tcp-flags RST RST -j ACCEPT
+Reader Child Process pid = 26006

@@ -1,47 +1,48 @@
-Starting Debug for h1
+Starting Debug for h1. Reader Process pid = 25547
 Running Command sudo iptables -I OUTPUT -p tcp --tcp-flags RST RST -j DROP
-Running Command sudo /home/user/Desktop/NetPower_TestBed/src/cyber_network/ping_session.sh ubuntu ubuntu 10.0.0.2
+Reader Child Process pid = 25975
+Running Command sudo ping -c1 10.0.0.2
+Reader Child Process pid = 7789
 PING 10.0.0.2 (10.0.0.2): 56 data bytes
-
+64 bytes from 10.0.0.2: icmp_seq=0 ttl=64 time=1009.636 ms
 --- 10.0.0.2 ping statistics ---
 1 packets transmitted, 1 packets received, 0% packet loss
-round-trip min/avg/max = 0.841/0.841/0.841 ms
-Running Command sudo /home/user/Desktop/NetPower_TestBed/src/cyber_network/ping_session.sh ubuntu ubuntu 10.0.0.2
+round-trip min/avg/max/stddev = 1009.636/1009.636/1009.636/0.000 ms
+Running Command sudo ping -c1 10.0.0.2
+Reader Child Process pid = 18396
 PING 10.0.0.2 (10.0.0.2): 56 data bytes
-
+64 bytes from 10.0.0.2: icmp_seq=0 ttl=64 time=988.902 ms
 --- 10.0.0.2 ping statistics ---
 1 packets transmitted, 1 packets received, 0% packet loss
-round-trip min/avg/max = 0.891/0.891/0.891 ms
-Running Command sudo /home/user/Desktop/NetPower_TestBed/src/cyber_network/ping_session.sh ubuntu ubuntu 10.0.0.2
+round-trip min/avg/max/stddev = 988.902/988.902/988.902/0.000 ms
+Running Command sudo ping -c1 10.0.0.2
+Reader Child Process pid = 22932
 PING 10.0.0.2 (10.0.0.2): 56 data bytes
-
+64 bytes from 10.0.0.2: icmp_seq=0 ttl=64 time=874.579 ms
 --- 10.0.0.2 ping statistics ---
 1 packets transmitted, 1 packets received, 0% packet loss
-round-trip min/avg/max = 2.393/2.393/2.393 ms
-Running Command sudo /home/user/Desktop/NetPower_TestBed/src/cyber_network/ping_session.sh ubuntu ubuntu 10.0.0.2
+round-trip min/avg/max/stddev = 874.579/874.579/874.579/0.000 ms
+Running Command sudo ping -c1 10.0.0.2
+Reader Child Process pid = 29056
 PING 10.0.0.2 (10.0.0.2): 56 data bytes
-
+64 bytes from 10.0.0.2: icmp_seq=0 ttl=64 time=1022.833 ms
 --- 10.0.0.2 ping statistics ---
 1 packets transmitted, 1 packets received, 0% packet loss
-round-trip min/avg/max = 1.943/1.943/1.943 ms
-Running Command sudo /home/user/Desktop/NetPower_TestBed/src/cyber_network/ping_session.sh ubuntu ubuntu 10.0.0.2
+round-trip min/avg/max/stddev = 1022.833/1022.833/1022.833/0.000 ms
+Running Command sudo ping -c1 10.0.0.2
+Reader Child Process pid = 2445
 PING 10.0.0.2 (10.0.0.2): 56 data bytes
-
+64 bytes from 10.0.0.2: icmp_seq=0 ttl=64 time=1005.902 ms
 --- 10.0.0.2 ping statistics ---
 1 packets transmitted, 1 packets received, 0% packet loss
-round-trip min/avg/max = 1.049/1.049/1.049 ms
-Running Command sudo /home/user/Desktop/NetPower_TestBed/src/cyber_network/ping_session.sh ubuntu ubuntu 10.0.0.2
+round-trip min/avg/max/stddev = 1005.902/1005.902/1005.902/0.000 ms
+Running Command sudo ping -c1 10.0.0.2
+Reader Child Process pid = 9156
 PING 10.0.0.2 (10.0.0.2): 56 data bytes
-
 --- 10.0.0.2 ping statistics ---
-1 packets transmitted, 1 packets received, 0% packet loss
-round-trip min/avg/max = 2.466/2.466/2.466 ms
-Running Command sudo /home/user/Desktop/NetPower_TestBed/src/cyber_network/ping_session.sh ubuntu ubuntu 10.0.0.2
+1 packets transmitted, 0 packets received, 100% packet loss
+Running Command sudo ping -c1 10.0.0.2
+Reader Child Process pid = 863
 PING 10.0.0.2 (10.0.0.2): 56 data bytes
-
 --- 10.0.0.2 ping statistics ---
-1 packets transmitted, 1 packets received, 0% packet loss
-round-trip min/avg/max = 0.324/0.324/0.324 ms
-sh: 1: g_session.sh: not found
-Running Command sudo iptables -I OUTPUT -p tcp --tcp-flags RST RST -j ACCEPT
-sh: 1: g_session.sh: not found
+1 packets transmitted, 0 packets received, 100% packet loss

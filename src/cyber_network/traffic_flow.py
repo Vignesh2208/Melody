@@ -76,9 +76,9 @@ class EmulatedTrafficFlow(threading.Thread):
             if self.elasped_time - self.start_time > self.run_time:
                 break
 
-            cmd = "sudo " + self.client_expect_file + ' ' +\
-                  self.root_user_name + ' ' +\
-                  self.root_password + ' ' + self.dst_mn_node.IP() + " &" 
+            cmd = "sudo " + self.client_expect_file #+ ' ' +\
+                  #self.root_user_name + ' ' +\
+                  #self.root_password + ' ' + self.dst_mn_node.IP() + " &" 
           
             print "Running Client command at ", str(datetime.now())
             if self.long_running and self.looped:

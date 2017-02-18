@@ -1,14 +1,14 @@
 Host 4 Attack Layer Thread >> INFO >> Attk playback buffer open suceeded !
-Host 4 Network Layer Thread >> INFO >> Started listening on IP: 10.0.0.4 PORT: 5100 at 2017-02-08 11:33:27.507546
-Host 4 Attack Layer Thread >> INFO >> Started at 2017-02-08 11:33:27.531298
-Host 4 Attack Layer Thread >> INFO >> Starting Attack playback thread 2017-02-08 11:33:27.538543
-Signalled Start threads at  2017-02-08 11:33:27.553727
-Host 4 IPC Thread >> INFO >> Started at 2017-02-08 11:33:27.554028
+Host 4 Network Layer Thread >> INFO >> Started listening on IP: 10.0.0.4 PORT: 5100 at 2017-02-17 17:32:56.812659
+Host 4 Attack Layer Thread >> INFO >> Started at 2017-02-17 17:32:56.826704
+Host 4 Attack Layer Thread >> INFO >> Starting Attack playback thread 2017-02-17 17:32:56.826944
+Signalled Start threads at  2017-02-17 17:32:56.838013
+Host 4 IPC Thread >> INFO >> Started at 2017-02-17 17:32:56.838101
 Host 4 IPC Thread >> INFO >> power sim id to host id map = {'34;1': 5, '35;1': 5, '36;1': 5, '32;1': 5, '25': 2, '20': 4, '37;1': 5, '23': 3, 'vpn-gateway;1': 6, '29': 2, '2': 2, '6': 4, '9': 4, '38;1': 5, '39;1': 5, '10': 4, '22': 3, '19': 3, 'attacker;1': 7, 'control;1': 1, '30;1': 5, '33;1': 5, '31;1': 5}
 Host 4 IPC Thread >> INFO >> host id to powersim id map = {1: ['control;1'], 2: ['2', '25', '29'], 3: ['22', '23', '19'], 4: ['20', '10', '6', '9'], 5: ['30;1', '31;1', '32;1', '33;1', '34;1', '35;1', '36;1', '37;1', '38;1', '39;1'], 6: ['vpn-gateway;1'], 7: ['attacker;1']}
-Running Attack Playback Thread at  2017-02-08 11:33:27.647752
-Host 4 Attack Layer Thread >> INFO >> Stopping 2017-02-08 11:33:40.251380
-Host 4 Network Layer Thread >> INFO >> Stopping at 2017-02-08 11:33:40.251523
-Host 4 IPC Thread >> INFO >> Stopping at 2017-02-08 11:33:40.251692
-Stopped Attack playback thread at  2017-02-08 11:36:07.909084
+Running Attack Playback Thread at  2017-02-17 17:32:56.886379
+Host 4 IPC Thread >> INFO >> Stopping at 2017-02-17 17:33:12.338446
+Host 4 Attack Layer Thread >> INFO >> Stopping 2017-02-17 17:33:12.338560
+Stopped Attack playback thread at  2017-02-17 17:33:12.344817
+Host 4 Network Layer Thread >> INFO >> Stopping at 2017-02-17 17:33:12.608696
 Shutting Down Host  4

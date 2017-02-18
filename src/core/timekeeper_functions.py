@@ -29,6 +29,7 @@ FIX_TIMELINE = 'L'
 RESET = 'M'
 STOP_EXP = 'N'
 SET_CBE_EXP_TIMESLICE = 'T'
+SET_NETDEVICE_OWNER  = 'U'
 
 
 
@@ -49,6 +50,18 @@ def is_Module_Loaded() :
 	else :
 		print "Timekeeper module is not loaded"
 		return 0
+
+
+# Associates the given pid with a net_device
+def set_netdevice_owner(pid,dev_name) :
+
+	if is_root() == 0 or is_Module_Loaded() == 0 :
+		print "ERROR in Set Netdevice Owner. TimeKeeper is not loaded!"
+		return -1
+	cmd = SET_NETDEVICE_OWNER + "," + str(pid) + "," + str(dev_name)
+
+	return send_to_timekeeper(cmd)
+
 
 
 

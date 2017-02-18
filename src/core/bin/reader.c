@@ -4,13 +4,24 @@
 #include <unistd.h>
 #include <sys/poll.h>
 #include <stdlib.h>
+#include <string.h>
 #define MAX_BUF 1024
+
+void flush_buffer(char * buf, int size) {
+
+	int i = 0;
+	for(i = 0; i < size; i++)
+		buf[i] = '\0';
+
+}
 
 
 int main(int argc, char ** argv)
 {
     int fd;
     char buf[MAX_BUF];
+    char output_buf[MAX_BUF];
+	char log_file[MAX_BUF];
     char debug[MAX_BUF];
     char command[MAX_BUF];
     char myfifo[MAX_BUF];
@@ -22,8 +33,9 @@ int main(int argc, char ** argv)
     
     char * log_dir = argv[2];
     char * hostname = argv[1];
+	int my_pid = getpid();
     
-    sprintf(debug, "echo Starting Debug for %s > %s/%s", hostname, log_dir, hostname);
+    sprintf(debug, "echo Starting Debug for %s. Reader Process pid = %d > %s/%s", hostname, my_pid, log_dir, hostname);
     system(debug);
 
 	
@@ -41,7 +53,7 @@ int main(int argc, char ** argv)
     ufds.fd = fd;
     ufds.events = POLLIN;
     while (1) {
-    	rv = poll(&ufds, 1, 100);
+    	rv = poll(&ufds, 1, 0);
 		if (rv == -1) {
 	    	perror("poll"); // error occurred in poll()
 		} else if (rv == 0) {
@@ -49,6 +61,7 @@ int main(int argc, char ** argv)
 		} else {
 	    	// check for events on s1:
 	    	if (ufds.revents & POLLIN) {
+				flush_buffer(buf,MAX_BUF);
         		result = read(fd, buf, MAX_BUF); // receive normal data
          		if (strcmp(buf, "exit") == 0) {
 		       		printf("Exiting..\n");
@@ -57,10 +70,41 @@ int main(int argc, char ** argv)
 	    		pid = fork();
 				if (pid == 0) { //in child
 			
+					
+					my_pid  = getpid();
+					flush_buffer(debug,MAX_BUF);
 		    		sprintf(debug, "echo Running Command %s >> %s/%s", buf, log_dir, hostname);
-		    		sprintf(command, "%s >> %s/%s 2>&1 &", buf, log_dir, hostname);
-		    		system(debug);	
-		    		system(command);
+					system(debug);
+					flush_buffer(debug,MAX_BUF);
+					sprintf(debug,"echo Reader Child Process pid = %d >> %s/%s", my_pid, log_dir, hostname);
+					system(debug);
+
+					sprintf(log_file, "%s/%s", log_dir,hostname);
+
+
+		    		sprintf(command, "%s >> %s/%s 2>&1", buf, log_dir, hostname);
+					system(command);
+
+					/*
+					sprintf(command, "%s 2>&1", buf);					
+		    
+                    FILE *cm_pipe = popen(command, "r");
+					int num_bytes_received = 0;
+					int start_idx = 0;                    
+                    while(fgets(output_buf + start_idx, MAX_BUF - num_bytes_received, cm_pipe) != NULL) {
+						num_bytes_received = strlen(output_buf);
+						start_idx = num_bytes_received; 
+
+					}
+					FILE * fp = fopen(log_file,"a");
+					if(fp != NULL) {
+						fprintf(fp,"%s\n",output_buf);
+					}
+					pclose(cm_pipe);
+					fclose(fp);
+					*/
+
+		    		
 		    		return 0;
 	    		}
    		}

@@ -130,10 +130,15 @@ def main(hostID,netCfgFile,logFile,runTime,projectName,isControlHost) :
 	IPCLayer.start()
 	print "Signalled Start threads at ", str(datetime.now())
 	sys.stdout.flush()
-	
+
+	sleep(3)
+	start_time = time.time()
 
 	if runTime != 0 : # dont run forever
 		sleep(runTime + 2)
+		while time.time() < start_time + float(runTime + 2):
+			sleep(1)
+
 		IPCLayer.cancelThread()
 		AttackLayer.cancelThread()
 		NetLayer.cancelThread()
