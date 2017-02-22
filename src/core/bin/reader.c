@@ -5,6 +5,8 @@
 #include <sys/poll.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/resource.h>
+
 #define MAX_BUF 1024
 
 void flush_buffer(char * buf, int size) {
@@ -34,9 +36,18 @@ int main(int argc, char ** argv)
     char * log_dir = argv[2];
     char * hostname = argv[1];
 	int my_pid = getpid();
-    
+    //setpriority(PRIO_PROCESS,0,-5);
     sprintf(debug, "echo Starting Debug for %s. Reader Process pid = %d > %s/%s", hostname, my_pid, log_dir, hostname);
     system(debug);
+
+	flush_buffer(debug,MAX_BUF);
+	sprintf(debug, "sudo iptables -I INPUT -p icmp -j ACCEPT &");
+    system(debug);
+
+
+	flush_buffer(debug,MAX_BUF);
+	sprintf(debug, "sudo iptables -I OUTPUT -p icmp -j ACCEPT &");
+    system(debug);	
 
 	
     sprintf(myfifo, "/tmp/%s-reader", hostname);
@@ -53,7 +64,7 @@ int main(int argc, char ** argv)
     ufds.fd = fd;
     ufds.events = POLLIN;
     while (1) {
-    	rv = poll(&ufds, 1, 0);
+    	rv = poll(&ufds, 1, -1);
 		if (rv == -1) {
 	    	perror("poll"); // error occurred in poll()
 		} else if (rv == 0) {

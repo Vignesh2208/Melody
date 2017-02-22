@@ -21,6 +21,6 @@ echo "MY GRAND PARENT PID = " $GPPID
 
 echo "Sending Ping !!"
 date +%s
-ping -c1 $host -q
+ping -c 10 $host -v
 echo "Received Ping !!"
 date +%s

@@ -96,7 +96,7 @@ class NetPower(object):
         if self.tdf > 1 :
             timeslice = 1000000
         else:
-            timeslice = 2000000
+            timeslice = 1000000
         set_cbe_experiment_timeslice(timeslice*self.tdf)
 		
 
@@ -196,7 +196,12 @@ class NetPower(object):
             #reader_cmd = "sudo nice -5 su -c \'" + self.base_dir + "/src/core/bin/reader " + str(mininet_host.name)  + " " + self.log_dir + " >> " + self.log_dir + "/" + mininet_host.name + " 2>&1 &\'"
 
             reader_cmd =  self.base_dir + "/src/core/bin/reader " + str(mininet_host.name)  + " " + self.log_dir + " >> " + self.log_dir + "/" + mininet_host.name + " 2>&1 &"
+
             mininet_host.cmd(reader_cmd)
+
+            if mininet_host.name == "h2" :
+                tcpdump_cmd = self.base_dir + "/src/cyber_network/capture_host.sh &"
+                mininet_host.cmd(tcpdump_cmd)
 
     def start_host_processes(self):
         print "Starting all Host Commands ..."
@@ -214,10 +219,12 @@ class NetPower(object):
                 host_log_file = self.log_dir + "/controller_node_log.txt"
 
 
-            if mininet_host.name == "h2" :
-                host_py_script = self.proxy_dir + "/test.py"
-            else:
-                host_py_script = self.proxy_dir + "/host.py"
+            #if mininet_host.name == "h2" :
+            #    host_py_script = self.proxy_dir + "/test.py"
+            #else:
+
+
+            host_py_script = self.proxy_dir + "/host.py"
             cmd_to_run = "python " + str(host_py_script) + " -c " + self.node_mappings_file_path + " -l " + host_log_file + " -r " + str(self.run_time) + " -n " + str(self.project_name) + " -d " + str(host_id)
 
             if "controller" in host_role :
@@ -266,7 +273,20 @@ class NetPower(object):
                 proc = subprocess.Popen(capture_cmd, shell=True)
                 self.tcpdump_procs.append(proc)
                 set_cpu_affinity(int(proc.pid))
-               
+            
+            if mininet_link.intf1.name.startswith("s2-eth1")  :
+
+                capture_log_file = self.log_dir  + "/" + mininet_link.intf2.name + "-" + mininet_link.intf1.name + ".pcap"
+                with open(capture_log_file , "w") as f :
+                    pass
+				
+                capture_cmd = capture_cmd + " -i "  + str(mininet_link.intf1.name)
+                capture_cmd = capture_cmd + " -w " + capture_log_file + " -B 20000 ip & > /dev/null"
+                self.n_actual_tcpdump_procs = self.n_actual_tcpdump_procs + 1
+
+                proc = subprocess.Popen(capture_cmd, shell=True)
+                self.tcpdump_procs.append(proc)
+                set_cpu_affinity(int(proc.pid))
                 
         
         time.sleep(2)
@@ -288,14 +308,22 @@ class NetPower(object):
 
 
     def set_switch_netdevice_owners(self) :
+        pid = 0
         print "Setting switch interface owner pids ..."
         for i in xrange(0,len(self.network_configuration.mininet_obj.switches)) :
             mininet_switch = self.network_configuration.mininet_obj.switches[i]
+            if i == 0:
+                pid = mininet_switch.pid
             for name in mininet_switch.intfNames():
                 if name != "lo" :
+                    #set_netdevice_owner(pid,name)
                     set_netdevice_owner(mininet_switch.pid,name)
-                
-    
+
+        for i in xrange(len(self.network_configuration.roles)):
+            mininet_host = self.network_configuration.mininet_obj.hosts[i]        
+            for name in mininet_host.intfNames():
+                if name != "lo" :
+                    set_netdevice_owner(mininet_host.pid,name)
 
     def start_proxy_process(self):
 
@@ -334,6 +362,17 @@ class NetPower(object):
             self.send_cmd_to_node(mininet_host.name,"sudo iptables -I OUTPUT -p tcp --tcp-flags RST RST -j DROP &")
         print "DISABLED TCP RST"
 
+    def allow_icmp_requests(self):
+        for i in xrange(len(self.network_configuration.roles)):
+            mininet_host = self.network_configuration.mininet_obj.hosts[i]
+            self.send_cmd_to_node(mininet_host.name,"sudo iptables -I OUTPUT -p icmp -j ACCEPT &")
+
+    def allow_icmp_responses(self):
+        for i in xrange(len(self.network_configuration.roles)):
+            mininet_host = self.network_configuration.mininet_obj.hosts[i]
+            self.send_cmd_to_node(mininet_host.name,"sudo iptables -I INPUT -p icmp -j ACCEPT &")
+        
+
     def enable_TCP_RST(self):
         
         for i in xrange(len(self.network_configuration.roles)):
@@ -362,6 +401,8 @@ class NetPower(object):
                      else :
                          if curr_time - prev_time >= 1.0 :
                              k = k + int(curr_time - prev_time)
+                             if k == 1 :
+                                 self.allow_icmp_requests()
                              print k," secs of virtual time elapsed"
                              sys.stdout.flush()
                              prev_time = curr_time
