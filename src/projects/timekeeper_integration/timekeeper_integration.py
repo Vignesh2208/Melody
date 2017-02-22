@@ -16,7 +16,7 @@ from core.shared_buffer import *
 
 from random import randint
 
-ENABLE_TIMEKEEPER = 1
+ENABLE_TIMEKEEPER = 0
 TDF = 5
 
 

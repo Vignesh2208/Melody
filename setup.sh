@@ -13,14 +13,21 @@ sudo pip install dpkt
 sudo pip install six
 sudo pip install networkx
 
+sudo apt-get -y install openssh-server
+sudo apt-get -y install expect
+sudo ufw disable
+
 echo "#############################################################################"
 echo "Setting up mininet"
 echo "#############################################################################"
 
-sudo apt-get -y install openssh-server
-sudo apt-get -y install expect
-sudo ufw disable
-sudo apt-get -y install mininet
+pushd ~/Downloads
+git clone https://www.github.com/mininet/mininet.git
+pushd mininet
+git checkout 2.2.1
+./util/install.sh -fnv
+popd
+popd
 
 echo "#############################################################################"
 echo "Setting up NetPower"
@@ -66,4 +73,4 @@ echo "##########################################################################
 echo "Setting up TimeKeeper"
 echo "#############################################################################"
 
-sudo ln -s $HOME/Desktop/TimeKeeper/dilation-code $HOME/NetPower_TestBed/src/core/dilation-code
+sudo ln -s $HOME/Desktop/TimeKeeper/dilation-code $HOME/Desktop/NetPower_TestBed/src/core/

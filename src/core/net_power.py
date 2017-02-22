@@ -77,7 +77,7 @@ class NetPower(object):
 
 
     def load_timekeeper(self) :
-        if self.enable_timekeeper != None :
+        if self.enable_timekeeper:
             print "Removing Timekeeper module"
             os.system("rmmod " + self.timekeeper_dir + "/build/TimeKeeper.ko")
             time.sleep(1)
@@ -512,17 +512,19 @@ class NetPower(object):
         self.start_proxy_process()
         self.start_attack_dispatcher()
 
-        #TimeKeeper related ...
-        self.set_switch_netdevice_owners()
-        self.dilate_nodes()
-        self.start_synchronized_experiment()
+        if self.enable_timekeeper:
+            #TimeKeeper related ...
+            self.set_switch_netdevice_owners()
+            self.dilate_nodes()
+            self.start_synchronized_experiment()
 
         #Background related ...
         self.start_emulated_traffic_threads()
         self.run()
 
         #Clean up ...
-        self.stop_synchronized_experiment()
+        if self.enable_timekeeper:
+            self.stop_synchronized_experiment()
         self.stop_emulated_traffic_threads()
 
         print "Cleaning up ..."
