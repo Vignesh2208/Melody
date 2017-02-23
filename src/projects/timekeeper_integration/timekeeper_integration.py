@@ -1,7 +1,6 @@
 import sys
 import os
 import time
-print sys.path
 sys.path.append("./")
 
 

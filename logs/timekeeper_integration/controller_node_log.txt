@@ -1,12 +1,10 @@
 Host 1 Attack Layer Thread >> INFO >> Attk playback buffer open suceeded !
-Host 1 Network Layer Thread >> INFO >> Started listening on IP: 10.0.0.1 PORT: 5100 at 2017-02-21 16:09:31.396539
-Host 1 Attack Layer Thread >> INFO >> Started at 2017-02-21 16:09:31.398402
-Host 1 Attack Layer Thread >> INFO >> Starting Attack playback thread 2017-02-21 16:09:31.398506
-Signalled Start threads at  2017-02-21 16:09:31.423807
+Host 1 Network Layer Thread >> INFO >> Started listening on IP: 10.0.0.1 PORT: 5100 at 2017-02-22 18:32:44.573871
 Host 1 IPC Thread >> INFO >> Started control layer run
-Running Attack Playback Thread at  2017-02-21 16:09:31.462073
-Host 1 Attack Layer Thread >> INFO >> Stopping 2017-02-21 16:09:47.507037
-Stopped Attack playback thread at  2017-02-21 16:19:00.716953
-Host 1 Network Layer Thread >> INFO >> Stopping at 2017-02-21 16:19:00.717353
+Signalled Start threads at  2017-02-22 18:32:44.595268
+Host 1 Attack Layer Thread >> INFO >> Started at 2017-02-22 18:32:44.581913
+Host 1 Attack Layer Thread >> INFO >> Starting Attack playback thread 2017-02-22 18:32:44.596150
+Running Attack Playback Thread at  2017-02-22 18:32:44.622753
+Host 1 Attack Layer Thread >> INFO >> Stopping 2017-02-22 18:32:59.595623
+Stopped Attack playback thread at  2017-02-22 18:32:59.603272
 Host 1 IPC Thread >> INFO >> Stopping ...
-Shutting Down Host  1

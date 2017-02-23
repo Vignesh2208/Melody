@@ -1,5 +1,3 @@
-Starting Debug for h4. Reader Process pid = 6044
+Starting Debug for h4. Reader Process pid = 9457
 Running Command sudo iptables -I OUTPUT -p tcp --tcp-flags RST RST -j DROP
-Reader Child Process pid = 6332
-Running Command sudo iptables -I OUTPUT -p icmp -j ACCEPT
-Reader Child Process pid = 14932
+Reader Child Process pid = 9709

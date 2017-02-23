@@ -1,0 +1,17 @@
+all: reader_process client_process server_process kill_router pcap_packet_sniff routing_table stress_increase routing_table_read gettime thread_spawn
+
+reader_process: reader.c
+	gcc -o reader reader.c
+
+
+gettime: gettimepid.c
+	gcc -o gettimepid gettimepid.c
+
+thread_spawn: thread_spawner.c
+	gcc -o thread_spawner thread_spawner.c -lpthread
+
+clean:
+	rm *.o
+	rm reader 
+	rm gettimepid
+

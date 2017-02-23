@@ -1,10 +1,17 @@
-Starting Debug for h1. Reader Process pid = 6040
-Running Command sudo iptables -I OUTPUT -p tcp --tcp-flags RST RST -j DROP
-Reader Child Process pid = 6665
-Running Command sudo iptables -I OUTPUT -p icmp -j ACCEPT
-Reader Child Process pid = 15280
+Starting Debug for h1. Reader Process pid = 9447
 Running Command sudo ping -c8 10.0.0.2
-Reader Child Process pid = 31143
-PING 10.0.0.2 (10.0.0.2): 48 data bytes
+Reader Child Process pid = 9700
+Running Command sudo iptables -I OUTPUT -p tcp --tcp-flags RST RST -j DROP
+Reader Child Process pid = 9707
+PING 10.0.0.2 (10.0.0.2): 56 data bytes
+64 bytes from 10.0.0.2: icmp_seq=0 ttl=64 time=30.368 ms
+64 bytes from 10.0.0.2: icmp_seq=1 ttl=64 time=30.108 ms
+64 bytes from 10.0.0.2: icmp_seq=2 ttl=64 time=30.111 ms
+64 bytes from 10.0.0.2: icmp_seq=3 ttl=64 time=30.117 ms
+64 bytes from 10.0.0.2: icmp_seq=4 ttl=64 time=30.126 ms
+64 bytes from 10.0.0.2: icmp_seq=5 ttl=64 time=30.123 ms
+64 bytes from 10.0.0.2: icmp_seq=6 ttl=64 time=30.111 ms
+64 bytes from 10.0.0.2: icmp_seq=7 ttl=64 time=30.099 ms
 --- 10.0.0.2 ping statistics ---
-8 packets transmitted, 0 packets received, 100% packet loss
+8 packets transmitted, 8 packets received, 0% packet loss
+round-trip min/avg/max/stddev = 30.099/30.145/30.368/0.085 ms

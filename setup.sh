@@ -5,14 +5,17 @@ echo "Installing python packages"
 echo "#############################################################################"
 
 sudo apt-get -y install python-pip
+sudo apt-get -y install libpcap-dev
 sudo apt-get -y install python-httplib2
 sudo pip install ryu==4.0
 sudo pip install numpy
 sudo pip install pypcapfile
 sudo pip install dpkt
-sudo pip install six
+sudo pip install pcapy
+sudo pip install six==1.9.0
 sudo pip install networkx
 
+sudo apt-get -y install inetutils-ping
 sudo apt-get -y install openssh-server
 sudo apt-get -y install expect
 sudo ufw disable
@@ -38,6 +41,11 @@ pushd src/core/libs
 sudo python setup.py build_ext --inplace
 popd
 
+pushd src/core/bin
+sudo make clean
+sudo make
+sudo chmod 777 *
+popd
 
 echo "#############################################################################"
 echo "Building openvswitch"

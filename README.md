@@ -13,37 +13,29 @@ Dependencies:
 #pypcapfile
 #openssh-server
 #dpkt
-#expect (sudo apt-get install expect)
+#expect 
+#mininet
+#openvswitch
+#TimeKeeper
 ```
 
 ```
 Pre-Run Steps:
 
-- Install expect
-    - sudo apt-get install expect
+- Install TimeKeeper. Compile the New TimeKeeper Kernel
 
-- Install numpy
-    - sudo pip install numpy
+- Setup the environment
+    - cd NetPower_TestBed
+    - sudo ./setup.sh
 
-- Install pypcapfile
-   - sudo pip install pypcapfile
+- Settin up the python path
+    - Add the following to ~/.bashrc
+      export PYTHONPATH=$PYTHONPATH:<path-to-netpower-testbed>/src
 
-- Install openssh-server
-   - sudo apt-get install openssh-server
+    - Do the following
+      sudo visudo
+      
+      -Append this line
+      Defaults env_keep += "PYTHONPATH"
 
-- Disable firewall (if any)
-    sudo ufw disable
-    
-- Install shared buffer python IPC (for python 2.7)
-    - cd NetPower_Testbed/src/Proxy/libs
-    - sudo python setup.py build_ext --inplace
-    
-- Install Ryu
-    - sudo pip install ryu==4.0
-
-- Install six
-    - sudo pip install six
-
-- Install networkx
-    - sudo pip install networkx
 ```

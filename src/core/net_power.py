@@ -5,7 +5,7 @@ import time
 from shared_buffer import *
 from utils.sleep_functions import sleep
 from utils.util_functions import *
-from utils import tcpdump
+#from utils import tcpdump
 from defines import *
 from timekeeper_functions import *
 import subprocess

@@ -4,11 +4,11 @@ import os
 import ctypes
 from ctypes import *
 
-script_dir = os.path.dirname(os.path.realpath(__file__))
-sys.path.append(script_dir + "/../core")
+#script_dir = os.path.dirname(os.path.realpath(__file__))
+#sys.path.append(script_dir + "/../core")
 
 #import core
-from timekeeper_functions import *
+from core.timekeeper_functions import *
 libc = CDLL("libc.so.6")
 
 class Timespec(ctypes.Structure):
