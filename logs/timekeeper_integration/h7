@@ -1,3 +1,0 @@
-Starting Debug for h7. Reader Process pid = 9468
-Running Command sudo iptables -I OUTPUT -p tcp --tcp-flags RST RST -j DROP
-Reader Child Process pid = 9712

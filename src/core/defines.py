@@ -22,6 +22,9 @@ CMD_QUIT = 1
 MAXPKTSIZE  = 10000
 SOCKET_TIMEOUT = 5
 
+TRAFFIC_FLOW_PERIODIC = 'Periodic'
+TRAFFIC_FLOW_EXPONENTIAL = 'Exponential'
+TRAFFIC_FLOW_ONE_SHOT = 'OneShot'
 
 
 PROXY_UDP_PORT = 9999         #core listens on this port for udp pkts from PowerSim

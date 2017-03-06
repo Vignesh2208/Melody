@@ -1,0 +1,6 @@
+
+Starting Debug for h4. Reader Process pid = 12891
+
+Running New Command sudo iptables -I OUTPUT -p tcp --tcp-flags RST RST -j DROP &
+
+Running New Command sudo iptables -I OUTPUT -p tcp --tcp-flags RST RST -j ACCEPT &

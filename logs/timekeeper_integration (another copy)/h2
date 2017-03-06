@@ -1,0 +1,17 @@
+
+Starting Debug for h2. Reader Process pid = 12887
+
+Running New Command sudo iptables -I OUTPUT -p tcp --tcp-flags RST RST -j DROP &
+
+Running New Command python /home/user/Desktop/NetPower_TestBed/src/cyber_network/slave.py
+Running the Slave
+The stack state has changed: COMMS_DOWN
+Binaries: 0
+Analogs: 0
+Counters: 0
+ControlStatus: 0
+Setpointstatus: 0
+The stack state has changed: COMMS_UP
+The stack state has changed: COMMS_DOWN
+
+Running New Command sudo iptables -I OUTPUT -p tcp --tcp-flags RST RST -j ACCEPT &

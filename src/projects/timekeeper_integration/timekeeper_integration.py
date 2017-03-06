@@ -15,8 +15,8 @@ from core.shared_buffer import *
 
 from random import randint
 
-ENABLE_TIMEKEEPER = 0
-TDF = 5
+ENABLE_TIMEKEEPER = 1
+TDF = 2
 
 
 class TimeKeeperIntegration(NetPower):
@@ -33,17 +33,17 @@ class TimeKeeperIntegration(NetPower):
                  emulated_dnp3_traffic_flows):
 
         super(TimeKeeperIntegration, self).__init__(run_time,
-                                        network_configuration,
-                                        script_dir,
-                                        base_dir,
-                                        replay_pcaps_dir,
-                                        log_dir,
-                                        emulated_background_traffic_flows,
-                                        emulated_network_scan_events,
-                                        emulated_dnp3_traffic_flows,
-										ENABLE_TIMEKEEPER,
-										TDF
-					)
+                                                    network_configuration,
+                                                    script_dir,
+                                                    base_dir,
+                                                    replay_pcaps_dir,
+                                                    log_dir,
+                                                    emulated_background_traffic_flows,
+                                                    emulated_network_scan_events,
+                                                    emulated_dnp3_traffic_flows,
+                                                    ENABLE_TIMEKEEPER,
+                                                    TDF
+                                                    )
 
 
 
@@ -87,16 +87,23 @@ def get_network_configuration():
 
     return network_configuration
 
-	
+
 
 
 def main():
 
-    run_time = 10
+    run_time = 15
     flow_count = 3
-    
 
-    emulated_flow_definitions = {'dnp3': [('h1','h2','h3','h4','h5'),('h1','h2','h3','h4','h5')], 'ping':[('h1','h6','h7'), ('h1','h2','h3','h4','h5','h6')], 'http':[('h1','h7'),('h1','h7')], 'ssh':[('h7',),('h1',)], 'telnet':[('h1',),('h2','h3','h4','h5')], 'nmap': [('h1','h6','h7'), ('h1','h2','h3','h4','h5','h6')]}
+    emulated_flow_definitions = {'dnp3': [('h1','h2','h3','h4','h5'),
+                                          ('h1','h2','h3','h4','h5')],
+                                 'ping':[('h1','h6','h7'),
+                                         ('h1','h2','h3','h4','h5','h6')],
+                                 'http':[('h1','h7'),('h1','h7')],
+                                 'ssh':[('h7',),('h1',)],
+                                 'telnet':[('h1',),('h2','h3','h4','h5')],
+                                 'nmap': [('h1','h6','h7'), ('h1','h2','h3','h4','h5','h6')]}
+
     background_flows = ['ssh', 'telnet', 'http', 'ping']
     scans = ['nmap']
     control_flows = ['dnp3']
@@ -105,11 +112,24 @@ def main():
     idx = script_dir.index('NetPower_TestBed')
     base_dir = script_dir[0:idx] + "NetPower_TestBed"
     replay_pcaps_dir = script_dir + "/attack_plan"
-    
+
     network_configuration = get_network_configuration()
     log_dir = base_dir + "/logs/" + str(network_configuration.project_name)
 
-    bg_flows = [EmulatedTrafficFlow(type=TRAFFIC_FLOW_ONE_SHOT,
+    bg_flows = [
+                
+                #EmulatedTrafficFlow(type=TRAFFIC_FLOW_ONE_SHOT,
+                #                    offset=1,
+                #                    inter_flow_period=0,
+                #                    run_time=run_time,
+                #                    src_mn_node=network_configuration.mininet_obj.get("h1"),
+                #                    dst_mn_node=network_configuration.mininet_obj.get("h2"),
+                #                    root_user_name="ubuntu",
+                #                    root_password="ubuntu",
+                #                    server_process_start_cmd="",
+                #                    client_expect_file='ping -c8 10.0.0.2'),
+                
+                EmulatedTrafficFlow(type=TRAFFIC_FLOW_ONE_SHOT,
                             offset=1,
                             inter_flow_period=0,
                             run_time=run_time,
@@ -117,25 +137,35 @@ def main():
                             dst_mn_node=network_configuration.mininet_obj.get("h2"),
                             root_user_name="ubuntu",
                             root_password="ubuntu",
-                            server_process_start_cmd="",
-                            client_expect_file='ping -c8 10.0.0.2')
-                            #client_expect_file='python ' + base_dir + '/src/cyber_network/test_2.py')
-                            #client_expect_file=base_dir + '/src/cyber_network/ping_session.sh')
-                            ]
+                            server_process_start_cmd='python ' + base_dir + "/src/cyber_network/slave.py",
+                            client_expect_file='python ' + base_dir + "/src/cyber_network/master.py",
+                            long_running=True)
+                
 
+                #EmulatedTrafficFlow(type=TRAFFIC_FLOW_ONE_SHOT,
+                #                    offset=1,
+                #                    inter_flow_period=0,
+                #                    run_time=run_time,
+                #                    src_mn_node=network_configuration.mininet_obj.get("h1"),
+                #                    dst_mn_node=network_configuration.mininet_obj.get("h2"),
+                #                    root_user_name="ubuntu",
+                #                    root_password="ubuntu",
+                #                    server_process_start_cmd="",
+                #                    client_expect_file=base_dir + "/src/core/bin/timerfd_test &"),
+                ]
 
     exp = TimeKeeperIntegration(run_time,
-               network_configuration,
-               script_dir,
-               base_dir,
-               replay_pcaps_dir,
-               log_dir,
-               bg_flows,
-               [],
-               [])
+                                network_configuration,
+                                script_dir,
+                                base_dir,
+                                replay_pcaps_dir,
+                                log_dir,
+                                bg_flows,
+                                [],
+                                [])
 
     exp.start_project()
-    
+
 if __name__ == "__main__":
     main()
 

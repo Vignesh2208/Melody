@@ -23,7 +23,7 @@ int main(int argc, char ** argv)
     int fd;
     char buf[MAX_BUF];
     char output_buf[MAX_BUF];
-	char log_file[MAX_BUF];
+    char log_file[MAX_BUF];
     char debug[MAX_BUF];
     char command[MAX_BUF];
     char myfifo[MAX_BUF];
@@ -35,19 +35,21 @@ int main(int argc, char ** argv)
     
     char * log_dir = argv[2];
     char * hostname = argv[1];
-	int my_pid = getpid();
-    //setpriority(PRIO_PROCESS,0,-5);
-    sprintf(debug, "echo Starting Debug for %s. Reader Process pid = %d > %s/%s", hostname, my_pid, log_dir, hostname);
-    system(debug);
-
-	flush_buffer(debug,MAX_BUF);
-	sprintf(debug, "sudo iptables -I INPUT -p icmp -j ACCEPT &");
-    system(debug);
+    int my_pid = getpid();
+    
+    printf("Starting Debug for %s. Reader Process pid = %d\n", hostname, my_pid);
+    fflush(stdout);
 
 
-	flush_buffer(debug,MAX_BUF);
-	sprintf(debug, "sudo iptables -I OUTPUT -p icmp -j ACCEPT &");
-    system(debug);	
+
+    //flush_buffer(debug,MAX_BUF);
+    //sprintf(debug, "sudo iptables -I INPUT -p icmp -j ACCEPT &");
+    //system(debug);
+
+
+    //flush_buffer(debug,MAX_BUF);
+    //sprintf(debug, "sudo iptables -I OUTPUT -p icmp -j ACCEPT &");
+    //system(debug);	
 
 	
     sprintf(myfifo, "/tmp/%s-reader", hostname);
@@ -59,6 +61,7 @@ int main(int argc, char ** argv)
     int rv;
     int pid;
     
+    sprintf(log_file, "%s/%s", log_dir,hostname);
 
     
     ufds.fd = fd;
@@ -66,58 +69,35 @@ int main(int argc, char ** argv)
     while (1) {
     	rv = poll(&ufds, 1, -1);
 		if (rv == -1) {
-	    	perror("poll"); // error occurred in poll()
+	    		perror("poll"); // error occurred in poll()
 		} else if (rv == 0) {
 	   		//printf("rv is 0\n");
 		} else {
 	    	// check for events on s1:
 	    	if (ufds.revents & POLLIN) {
-				flush_buffer(buf,MAX_BUF);
-        		result = read(fd, buf, MAX_BUF); // receive normal data
-         		if (strcmp(buf, "exit") == 0) {
-		       		printf("Exiting..\n");
-		       		break;
-	    		}
-	    		pid = fork();
-				if (pid == 0) { //in child
-			
-					
+
+			int evt_no = 0;
+			for(evt_no = 0; evt_no < 1; evt_no ++){
+				memset(buf,0,MAX_BUF);
+				result = read(fd, buf, MAX_BUF); // receive normal data
+		 		if (strcmp(buf, "exit") == 0) {
+			       		printf("Exiting..\n");
+			       		break;
+		    		}
+		    		pid = fork();
+				if (pid == 0) { //in child	
 					my_pid  = getpid();
-					flush_buffer(debug,MAX_BUF);
-		    		sprintf(debug, "echo Running Command %s >> %s/%s", buf, log_dir, hostname);
-					system(debug);
-					flush_buffer(debug,MAX_BUF);
-					sprintf(debug,"echo Reader Child Process pid = %d >> %s/%s", my_pid, log_dir, hostname);
-					system(debug);
-
-					sprintf(log_file, "%s/%s", log_dir,hostname);
-
-
-		    		sprintf(command, "%s >> %s/%s 2>&1", buf, log_dir, hostname);
+					printf("\nRunning New Command %s\n", buf);
+					fflush(stdout);
+					
+					sprintf(command, "%s >> %s/%s 2>&1", buf, log_dir, hostname);
 					system(command);
+					fflush(stdout);
 
-					/*
-					sprintf(command, "%s 2>&1", buf);					
-		    
-                    FILE *cm_pipe = popen(command, "r");
-					int num_bytes_received = 0;
-					int start_idx = 0;                    
-                    while(fgets(output_buf + start_idx, MAX_BUF - num_bytes_received, cm_pipe) != NULL) {
-						num_bytes_received = strlen(output_buf);
-						start_idx = num_bytes_received; 
 
-					}
-					FILE * fp = fopen(log_file,"a");
-					if(fp != NULL) {
-						fprintf(fp,"%s\n",output_buf);
-					}
-					pclose(cm_pipe);
-					fclose(fp);
-					*/
-
-		    		
-		    		return 0;
-	    		}
+					return 0;
+	    			}
+			}
    		}
 	}
 

@@ -1,4 +1,4 @@
-all: reader_process client_process server_process kill_router pcap_packet_sniff routing_table stress_increase routing_table_read gettime thread_spawn
+all: reader_process gettime
 
 reader_process: reader.c
 	gcc -o reader reader.c

@@ -1,0 +1,6 @@
+
+Starting Debug for h6. Reader Process pid = 12895
+
+Running New Command sudo iptables -I OUTPUT -p tcp --tcp-flags RST RST -j DROP &
+
+Running New Command sudo iptables -I OUTPUT -p tcp --tcp-flags RST RST -j ACCEPT &

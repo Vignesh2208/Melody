@@ -1,11 +1,9 @@
 import datetime
-import shlex
+import json
 from datetime import datetime
-import time
 from shared_buffer import *
 from utils.sleep_functions import sleep
 from utils.util_functions import *
-from utils import tcpdump
 from defines import *
 from timekeeper_functions import *
 import subprocess
@@ -48,10 +46,19 @@ class NetPower(object):
         self.pid_list = []
         self.host_pids = []
         self.switch_pids = []
+        self.driver_pids = []
+        self.driver_ids = []
 
         self.emulated_background_traffic_flows = emulated_background_traffic_flows
         self.emulated_network_scan_events = emulated_network_scan_events
         self.emulated_dnp3_traffic_flows = emulated_dnp3_traffic_flows
+
+        self.emulation_driver_params = []
+        self.get_emulation_driver_params()
+
+        for edp in self.emulation_driver_params :
+            self.driver_ids.append(edp["driver_id"])
+
 
         self.node_mappings_file_path = self.script_dir + "/node_mappings.txt"
         self.log_dir = log_dir
@@ -69,15 +76,43 @@ class NetPower(object):
         if not os.path.exists(self.log_dir):
             os.makedirs(self.log_dir)
 
+        self.open_main_cmd_channel_buffers()
         self.load_timekeeper()
         #if self.enable_timekeeper == 1 :
         #    set_cpu_affinity(int(os.getpid())
-        
-		
+
+    def get_emulation_driver_params(self):
+        for bg_flow in self.emulated_background_traffic_flows:
+
+            if bg_flow.client_expect_file:
+                self.emulation_driver_params.append({"type": bg_flow.type,
+                                                     "cmd": bg_flow.client_expect_file,
+                                                     "offset": bg_flow.offset + 1,
+                                                     "inter_flow_period": bg_flow.inter_flow_period,
+                                                     "run_time": bg_flow.run_time,
+                                                     "long_running": bg_flow.long_running,
+                                                     "root_user_name": bg_flow.root_user_name,
+                                                     "root_password": bg_flow.root_password,
+                                                     "node_id": bg_flow.src_mn_node.name,
+                                                     "driver_id": bg_flow.src_mn_node.name + bg_flow.type})
+
+
+            if bg_flow.server_process_start_cmd:
+                self.emulation_driver_params.append({"type": TRAFFIC_FLOW_ONE_SHOT,
+                                                     "cmd": bg_flow.server_process_start_cmd,
+                                                     "offset": bg_flow.offset,
+                                                     "inter_flow_period": bg_flow.inter_flow_period,
+                                                     "run_time": bg_flow.run_time,
+                                                     "long_running": bg_flow.long_running,
+                                                     "root_user_name": bg_flow.root_user_name,
+                                                     "root_password": bg_flow.root_password,
+                                                     "node_id": bg_flow.dst_mn_node.name,
+                                                     "driver_id": bg_flow.dst_mn_node.name + bg_flow.type})
+
 
 
     def load_timekeeper(self) :
-        if self.enable_timekeeper != None :
+        if self.enable_timekeeper:
             print "Removing Timekeeper module"
             os.system("rmmod " + self.timekeeper_dir + "/build/TimeKeeper.ko")
             time.sleep(1)
@@ -133,8 +168,14 @@ class NetPower(object):
             print "                        Switch pids"
             print  self.switch_pids
             print ""
-            print "########################################################################" 
- 
+            print "########################################################################"
+            print ""
+            print "                        Driver pids"
+            print  self.driver_pids
+            print ""
+            print "########################################################################"
+
+
             script_dir = os.path.dirname(os.path.realpath(__file__))
             with open(script_dir + "/dilate_pids.txt","w") as f :
                 for i in xrange(0,len(self.pid_list)) :
@@ -149,22 +190,26 @@ class NetPower(object):
             sys.stdout.flush()
             synchronizeAndFreeze()
             print "Sync and Freeze completed. Starting Exp ... "
-            sys.stdout.flush()
-            self.start_time = get_current_virtual_time()
+            sys.stdout.flush()          
             startExp()
-            print "Experiment start time", self.start_time, " local Time = " + str(datetime.now())
+            print "Experiment started: TDF = ", self.tdf, " local Time = " + str(datetime.now())
+
         else:
             self.start_time = time.time()
             print "Experiment started with TimeKeeper Disabled. Ignoring TDF settings ... "
 
     def stop_synchronized_experiment(self) :
+
+        print "########################################################################"
         if self.enable_timekeeper == 1 :
             stopExp()
             print "Stopping synchronized experiment at local time = ", str(datetime.now())
-            time.sleep(10)
+            time.sleep(5)
+            self.trigger_all_processes("EXIT")
             print "Stopped synchronized experiment"
         else: 
             print "Stopping synchronized experiment at local time = ", str(datetime.now())
+        print "########################################################################"
         
         
 			
@@ -191,25 +236,17 @@ class NetPower(object):
             mininet_host = self.network_configuration.mininet_obj.hosts[i]
             host_id = int(mininet_host.name[1:])
             host_role = self.node_mappings[mininet_host.name][1][0]
-
-            #start reader process
-            #reader_cmd = "sudo nice -5 su -c \'" + self.base_dir + "/src/core/bin/reader " + str(mininet_host.name)  + " " + self.log_dir + " >> " + self.log_dir + "/" + mininet_host.name + " 2>&1 &\'"
-
+            os.system("echo '' > " + self.log_dir + "/" + mininet_host.name)
             reader_cmd =  self.base_dir + "/src/core/bin/reader " + str(mininet_host.name)  + " " + self.log_dir + " >> " + self.log_dir + "/" + mininet_host.name + " 2>&1 &"
 
             mininet_host.cmd(reader_cmd)
 
-            if mininet_host.name == "h2" :
-                tcpdump_cmd = self.base_dir + "/src/cyber_network/capture_host.sh &"
-                mininet_host.cmd(tcpdump_cmd)
 
     def start_host_processes(self):
         print "Starting all Host Commands ..."
-        self.start_host_reader_processes()
+        
         for i in xrange(len(self.network_configuration.roles)):
             mininet_host = self.network_configuration.mininet_obj.hosts[i]
-            self.pid_list.append(int(mininet_host.pid))
-            self.host_pids.append(int(mininet_host.pid))
             host_id = int(mininet_host.name[1:])
             host_role = self.node_mappings[mininet_host.name][1][0]
 
@@ -217,12 +254,6 @@ class NetPower(object):
                 host_log_file = self.log_dir + "/host_" + str(host_id) + "_log.txt"
             else:
                 host_log_file = self.log_dir + "/controller_node_log.txt"
-
-
-            #if mininet_host.name == "h2" :
-            #    host_py_script = self.proxy_dir + "/test.py"
-            #else:
-
 
             host_py_script = self.proxy_dir + "/host.py"
             cmd_to_run = "python " + str(host_py_script) + " -c " + self.node_mappings_file_path + " -l " + host_log_file + " -r " + str(self.run_time) + " -n " + str(self.project_name) + " -d " + str(host_id)
@@ -233,6 +264,11 @@ class NetPower(object):
 
             cmd_to_run = cmd_to_run + " >> " + host_log_file + " 2>&1" + " &"
             mininet_host.cmd(cmd_to_run)
+
+        pid_list = get_pids_with_cmd(cmd="python " + str(host_py_script),expected_no_of_pids=len(self.network_configuration.roles))
+        assert len(pid_list)  == len(self.network_configuration.roles)
+        self.host_pids.extend(pid_list)
+        self.pid_list.extend(pid_list)
 
 
     def start_switch_link_pkt_captures(self):
@@ -259,44 +295,13 @@ class NetPower(object):
                 set_cpu_affinity(int(proc.pid))	
 
             capture_cmd = "sudo " + core_cmd
- 
-            if mininet_link.intf1.name.startswith("s1-eth2")  :
-
-                capture_log_file = self.log_dir  + "/" + mininet_link.intf2.name + "-" + mininet_link.intf1.name + ".pcap"
-                with open(capture_log_file , "w") as f :
-                    pass
-				
-                capture_cmd = capture_cmd + " -i "  + str(mininet_link.intf2.name)
-                capture_cmd = capture_cmd + " -w " + capture_log_file + " -B 20000 ip & > /dev/null"
-                self.n_actual_tcpdump_procs = self.n_actual_tcpdump_procs + 1
-
-                proc = subprocess.Popen(capture_cmd, shell=True)
-                self.tcpdump_procs.append(proc)
-                set_cpu_affinity(int(proc.pid))
-            
-            if mininet_link.intf1.name.startswith("s2-eth1")  :
-
-                capture_log_file = self.log_dir  + "/" + mininet_link.intf2.name + "-" + mininet_link.intf1.name + ".pcap"
-                with open(capture_log_file , "w") as f :
-                    pass
-				
-                capture_cmd = capture_cmd + " -i "  + str(mininet_link.intf1.name)
-                capture_cmd = capture_cmd + " -w " + capture_log_file + " -B 20000 ip & > /dev/null"
-                self.n_actual_tcpdump_procs = self.n_actual_tcpdump_procs + 1
-
-                proc = subprocess.Popen(capture_cmd, shell=True)
-                self.tcpdump_procs.append(proc)
-                set_cpu_affinity(int(proc.pid))
-                
         
-        time.sleep(2)
         # Get all the pids of actual tcpdump processes
-        actual_tcpdump_pids = get_pids_with_cmd(core_cmd)
-        #self.pid_list.extend(actual_tcpdump_pids)
-        #self.n_dilated_tcpdump_procs = self.n_dilated_tcpdump_procs + len(actual_tcpdump_pids)
+        actual_tcpdump_pids = get_pids_with_cmd(cmd=core_cmd, expected_no_of_pids=self.n_actual_tcpdump_procs)
+        set_cpu_affinity_pid_list(actual_tcpdump_pids) 
         
         # Get all the pids of sudo tcpdump parents
-        sudo_tcpdump_parent_pids = get_pids_with_cmd("sudo " + core_cmd)
+        sudo_tcpdump_parent_pids = get_pids_with_cmd(cmd="sudo " + core_cmd,expected_no_of_pids=self.n_actual_tcpdump_procs)
         set_cpu_affinity_pid_list(sudo_tcpdump_parent_pids) 
         
 
@@ -316,14 +321,13 @@ class NetPower(object):
                 pid = mininet_switch.pid
             for name in mininet_switch.intfNames():
                 if name != "lo" :
-                    #set_netdevice_owner(pid,name)
                     set_netdevice_owner(mininet_switch.pid,name)
 
         for i in xrange(len(self.network_configuration.roles)):
             mininet_host = self.network_configuration.mininet_obj.hosts[i]        
             for name in mininet_host.intfNames():
                 if name != "lo" :
-                    set_netdevice_owner(mininet_host.pid,name)
+                    set_netdevice_owner(pid,name)
 
     def start_proxy_process(self):
 
@@ -346,21 +350,14 @@ class NetPower(object):
             
             print "Setting Attack Dispatcher affinity to cores 0,1 ..."
             set_cpu_affinity(int(proc.pid))
-            actual_attk_dispatcher_pids = get_pids_with_cmd(core_attk_dispatcher_cmd)
+            actual_attk_dispatcher_pids = get_pids_with_cmd(cmd=core_attk_dispatcher_cmd,expected_no_of_pids=1)
             set_cpu_affinity_pid_list(actual_attk_dispatcher_pids)
             
 
     def send_cmd_to_node(self,node_name,cmd) :
-        filename = "/tmp/" + node_name + "-reader"
-        with open(filename,"w+") as f :
-            f.write(cmd)
-
-    def disable_TCP_RST(self):
-        
-        for i in xrange(len(self.network_configuration.roles)):
-            mininet_host = self.network_configuration.mininet_obj.hosts[i]
-            self.send_cmd_to_node(mininet_host.name,"sudo iptables -I OUTPUT -p tcp --tcp-flags RST RST -j DROP &")
-        print "DISABLED TCP RST"
+        mininet_host = self.network_configuration.mininet_obj.get(node_name)
+        if mininet_host != None:
+            mininet_host.cmd(cmd)
 
     def allow_icmp_requests(self):
         for i in xrange(len(self.network_configuration.roles)):
@@ -372,37 +369,80 @@ class NetPower(object):
             mininet_host = self.network_configuration.mininet_obj.hosts[i]
             self.send_cmd_to_node(mininet_host.name,"sudo iptables -I INPUT -p icmp -j ACCEPT &")
         
+    def disable_TCP_RST(self):
+        
+        for i in xrange(len(self.network_configuration.roles)):
+            mininet_host = self.network_configuration.mininet_obj.hosts[i]
+            self.send_cmd_to_node(mininet_host.name,"sudo iptables -I OUTPUT -p tcp --tcp-flags RST RST -j DROP &")
+        print "DISABLED TCP RST"
+
 
     def enable_TCP_RST(self):
         
         for i in xrange(len(self.network_configuration.roles)):
             mininet_host = self.network_configuration.mininet_obj.hosts[i]
             self.send_cmd_to_node(mininet_host.name,"sudo iptables -I OUTPUT -p tcp --tcp-flags RST RST -j ACCEPT &")
-        print "RE-ENABLED TCP RST"
+        print "ENABLED TCP RST"
+
+    def open_main_cmd_channel_buffers(self):
+
+
+        for i in xrange(len(self.network_configuration.roles)):
+            mininet_host = self.network_configuration.mininet_obj.hosts[i]
+            result = self.sharedBufferArray.open(bufName=str(mininet_host.name) + "main-cmd-channel-buffer", isProxy=True)
+            if result == BUF_NOT_INITIALIZED or result == FAILURE:
+                print "Shared Buffer open failed! Buffer not initialized for host: " + str(mininet_host.name)
+                sys.exit(0)
+
+        for driver_id in self.driver_ids:
+            result = self.sharedBufferArray.open(bufName=str(driver_id) + "main-cmd-channel-buffer", isProxy=True)
+            if result == BUF_NOT_INITIALIZED or result == FAILURE:
+                print "Shared Buffer open failed! Buffer not initialized for driver: " + str(driver_id)
+                sys.exit(0)
+
+        print "Opened Main channel buffers "
+
+
+    def trigger_all_processes(self,trigger_cmd):
+        for i in xrange(len(self.network_configuration.roles)):
+            mininet_host = self.network_configuration.mininet_obj.hosts[i]
+            ret = 0
+            while ret <= 0:
+                ret = self.sharedBufferArray.write(str(mininet_host.name) + "main-cmd-channel-buffer", trigger_cmd, 0)
+
+        for driver_id in self.driver_ids:
+            ret = 0
+            while ret <= 0 :
+                ret = self.sharedBufferArray.write(str(driver_id) + "main-cmd-channel-buffer", trigger_cmd, 0)
+
+        print "Triggered hosts and drivers with cmd = ", trigger_cmd
 
     def run(self):
 
-        
         if self.run_time > 0:
-            print "Running Project for roughly (runtime + 2) =  " + str(self.run_time + 2) + " secs ..."
+            print "########################################################################"
+            print ""
+            print "             Starting Experiment. Run time = ", self.run_time
+            print ""
+            print "########################################################################"
+
+            self.trigger_all_processes("START")
             sys.stdout.flush()
             start_time = get_current_virtual_time()
             prev_time  = start_time
-            run_time   = self.run_time + 2
+            run_time   = self.run_time
 
             k = 0		
             while True :
 
                 if self.enable_timekeeper == 1 :
                      curr_time = get_current_virtual_time()
-
-                     if curr_time - start_time >= run_time :					
-                         break;
+                     if k >= run_time :
+                         sys.stdout.flush()
+                         break
                      else :
                          if curr_time - prev_time >= 1.0 :
                              k = k + int(curr_time - prev_time)
-                             if k == 1 :
-                                 self.allow_icmp_requests()
                              print k," secs of virtual time elapsed"
                              sys.stdout.flush()
                              prev_time = curr_time
@@ -412,6 +452,7 @@ class NetPower(object):
                     if k >= run_time :
                          break
                     k= k + 1
+                    print k," secs of real time elapsed"
                     # sleep until runtime expires	
                     time.sleep(1)
 
@@ -422,7 +463,9 @@ class NetPower(object):
                         self.disable_TCP_RST()
                     if recv_msg == "END":
                         self.enable_TCP_RST()
-                time.sleep(0.05)
+                time.sleep(1)
+
+
 
         else:
             print "Running Project forever. Press Ctrl-C to quit ..."
@@ -466,24 +509,68 @@ class NetPower(object):
         print ""
         print "########################################################################"
 
+    def start_emulation_drivers(self):
+
+        n_drivers = 0
+        for edp in self.emulation_driver_params:
+
+            mininet_host = self.network_configuration.mininet_obj.get(edp["node_id"])
+            driver_log_file = self.log_dir + "/" + str(edp["driver_id"]) + "_log.txt"
+            driver_py_script = self.proxy_dir + "/emulation_driver.py"
+
+
+            input_params_file_path = self.log_dir + "/" + edp["driver_id"] + ".json"
+            with open(input_params_file_path, "w") as f:
+                json.dump(edp, f)
+
+            cmd_to_run = "python " + str(driver_py_script) + " --input_params_file_path " + input_params_file_path
+            cmd_to_run = cmd_to_run + " > " + driver_log_file + " 2>&1" + " &"
+
+            mininet_host.cmd(cmd_to_run)
+            n_drivers = n_drivers + 1
+
+        pid_list = get_pids_with_cmd(cmd="python " + str(driver_py_script),expected_no_of_pids=n_drivers)
+        assert len(pid_list) == n_drivers
+        self.driver_pids.extend(pid_list)
+        self.pid_list.extend(pid_list)
+
+    def stop_emulation_drivers(self):
+        pass
+
+
     def start_emulated_traffic_threads(self):
 
+        print "########################################################################"
+        print ""
+        print "                        Starting Background threads"
+        print ""
+        print "########################################################################"
+
         for tf in self.emulated_network_scan_events:
+            tf.start_time = self.start_time
             tf.start()
 
         print "Network scan event threads started..."
 
         for tf in self.emulated_dnp3_traffic_flows:
+            tf.start_time = self.start_time
             tf.start()
 
         print "DNP3 traffic threads started..."
 
         for tf in self.emulated_background_traffic_flows:
+            tf.start_time = self.start_time
             tf.start()
 
         print "Background traffic threads started..."
 
     def stop_emulated_traffic_threads(self):
+
+        print "########################################################################"
+        print ""
+        print "                        Stopping Background threads"
+        print ""
+        print "########################################################################"
 
         # Join the threads for background processes to wait on them
         for tf in self.emulated_background_traffic_flows:
@@ -501,34 +588,20 @@ class NetPower(object):
 
         print "Background traffic threads stopped..."
 
-    def start_project(self):
-        print "Starting project ..."
-        self.print_topo_info()
-        
-        #General Startup ...
-        self.generate_node_mappings(self.network_configuration.roles)
-        self.start_host_processes()
-        self.start_switch_link_pkt_captures()
-        self.start_proxy_process()
-        self.start_attack_dispatcher()
-
-        if self.enable_timekeeper:
-            #TimeKeeper related ...
-            self.set_switch_netdevice_owners()
-            self.dilate_nodes()
-            self.start_synchronized_experiment()
-
-        #Background related ...
-        self.start_emulated_traffic_threads()
-        self.run()
+    def cleanup(self):
 
         #Clean up ...
         if self.enable_timekeeper:
             self.stop_synchronized_experiment()
-        self.stop_emulated_traffic_threads()
+        else:
+            self.trigger_all_processes("EXIT")
+            time.sleep(10)
+        #self.stop_emulated_traffic_threads()
+
+        self.stop_emulation_drivers()
 
         print "Cleaning up ..."
-
+        self.enable_TCP_RST()
         script_dir = os.path.dirname(os.path.realpath(__file__))
         with open(script_dir + "/dilate_pids.txt","w") as f :
             pass
@@ -539,6 +612,48 @@ class NetPower(object):
 
         except:
             pass
+            
+        for pid in self.host_pids:
+            os.system("sudo kill " + str(pid))
+        for pid in self.driver_pids:
+            os.system("sudo kill " + str(pid))
+        
 
-        os.system("sudo killall reader")
+        try:
+            os.system("sudo killall reader")
+        except:
+            pass
+            
         self.network_configuration.cleanup_mininet()
+
+    def start_project(self):
+        print "Starting project ..."
+        self.print_topo_info()
+        
+        #General Startup ...
+        self.generate_node_mappings(self.network_configuration.roles)
+        self.start_host_processes()
+        self.start_switch_link_pkt_captures()
+        self.start_proxy_process()
+        self.start_attack_dispatcher()
+        self.disable_TCP_RST()
+
+        self.start_emulation_drivers()
+
+        if self.enable_timekeeper:
+            #TimeKeeper related ...
+            self.set_switch_netdevice_owners()
+            self.dilate_nodes()
+            self.start_synchronized_experiment()
+            self.start_time = get_current_virtual_time()
+        else:
+            self.start_time = time.time()
+
+        #Background related ...
+        #self.start_emulated_traffic_threads()
+        self.run()
+        self.cleanup()
+        
+        
+
+        

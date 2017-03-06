@@ -1,5 +1,5 @@
 from utils.sleep_functions import sleep
-
+import sys
 # import opendnp3 instead of from opendnp3 import *
 # In DataObserver._Update, there is a serious of ifs
 # which check the type of a point (if (t == opendnp3.Binary)).
@@ -63,12 +63,14 @@ class DataObserver(opendnp3.IDataObserver):
 	def _Start(self):
 		# nothing to do
 		print('Start')
+		sys.stdout.flush()
 
 	# this implements a virtual function in the ITransactable class
 	# virtual void _End() = 0;
 	def _End(self):
 		print('End')
 		self.newData = False
+		print('Start')
 
 def main():
 	# 1. Extend IDataObserver and IStackObserver
@@ -78,6 +80,7 @@ def main():
 	# 5. Let the process run
 	
 	print "Running the Master"
+	sys.stdout.flush()
 	
 	stack_observer = StackObserver()
 	observer = DataObserver()
@@ -88,20 +91,20 @@ def main():
 	
 	stack_manager = opendnp3.StackManager()
 	stack_manager.AddTCPClient('tcpclient', phys_layer_settings, '10.0.0.2', 20000)
+	#stack_manager.AddTCPClient('tcpclient', phys_layer_settings, '127.0.0.1', 20000)
 	#stack_manager.AddTCPClient('tcpclient', phys_layer_settings, '10.0.60.17', 20000)
-
 	master_stack_config = opendnp3.MasterStackConfig()
 	master_stack_config.master.DoUnsolOnStartup = True
 
 	master_stack_config.link.LocalAddr = 100
 	master_stack_config.link.RemoteAddr = 1
-#	master_stack_config.link.useConfirms = True
+    #master_stack_config.link.useConfirms = True
 
 	# set the stack observer callback to our Python-extended class
 	master_stack_config.master.mpObserver = stack_observer
 	
 	# the integrity rate is the # of milliseconds between integrity scans
-	master_stack_config.master.IntegrityRate = 100
+	master_stack_config.master.IntegrityRate = 1000
 	#master_stack_config.master.TaskRetryRate = 10
 	print master_stack_config.master.IntegrityRate
 	#master_stack_config.master.UnsolClassMask = opendnp3.IntToPointClass(1)
@@ -125,6 +128,7 @@ def main():
 
 	while (True):
 		sleep(60)
+		break
 
 if __name__ == '__main__':
 	main()

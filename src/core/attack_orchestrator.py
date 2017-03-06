@@ -111,10 +111,7 @@ class attack_orchestrator():
         self.sharedBufferArray = shared_buffer_array()
         for hostID in hostIDS :
 
-            #sharedBufName = str(hostID) + "attk-channel-buffer"
-            #self.shared_bufs[hostID] = shared_buffer(bufName=str(hostID) + "attk-channel-buffer", isProxy=True)
             result = self.sharedBufferArray.open(bufName=str(hostID) + "attk-channel-buffer", isProxy=True)
-            #result = self.shared_bufs[hostID].open()
             if result == BUF_NOT_INITIALIZED or result == FAILURE:
                 print "Shared Buffer open failed! Buffer not initialized for host: " + str(hostID)
                 sys.exit(0)
@@ -194,8 +191,9 @@ class attack_orchestrator():
 
             if return_val == STOP:
                 break
+
             recv_msg = ''
-            while recv_msg != "LOADED":
+            while "LOADED" not in recv_msg:
                 if get_current_virtual_time() - self.start_time >= self.runTime:
                     print "Run time Expired. Stopping ..."
                     return_val = STOP
@@ -217,7 +215,7 @@ class attack_orchestrator():
             if return_val == STOP:
                 break
             recv_msg = ''
-            while recv_msg != "DONE":
+            while "DONE" not in recv_msg:
                 if get_current_virtual_time() - self.start_time >= self.runTime:
                     print "Run time Expired. Stopping ..."
                     return_val = STOP

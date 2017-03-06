@@ -6,6 +6,7 @@ from utils.sleep_functions import sleep
 # It was causing a SWIG director method exception to be thrown
 # when the ifs were written if (t == Binary).
 import opendnp3
+import sys
 
 binary_list = []
 analog_list = []
@@ -19,6 +20,7 @@ class StackObserver(opendnp3.IStackObserver):
 
 	def OnStateChange(self, change):
 		print('The stack state has changed: %s' % opendnp3.ConvertStackStateToString(change))
+		sys.stdout.flush()
 
 class CmdAcceptor(opendnp3.ICommandAcceptor):
 	def __init__(self):
@@ -68,11 +70,13 @@ class DataObserver(opendnp3.IDataObserver):
 	def _Start(self):
 		# nothing to do
 		print('Start')
+		sys.stdout.flush()
 
 	# this implements a virtual function in the ITransactable class
 	# virtual void _End() = 0;
 	def _End(self):
 		print('End')
+		sys.stdout.flush()
 		self.newData = False
 
 def main():
@@ -90,9 +94,8 @@ def main():
 	phys_layer_settings = opendnp3.PhysLayerSettings()
 
 	stack_manager = opendnp3.StackManager()
-	# stack_manager.AddTCPClient('tcpclient', phys_layer_settings, '127.0.0.1', 20000)
 	stack_manager.AddTCPServer('tcpserver', phys_layer_settings, '10.0.0.2', 20000)
-	#stack_manager.AddTCPServer('tcpserver', phys_layer_settings, '10.0.60.17', 20000)
+	#stack_manager.AddTCPServer('tcpserver', phys_layer_settings, '127.0.0.1', 20000)
 
 	# master_stack_config = opendnp3.MasterStackConfig()
 	slave_stack_config = opendnp3.SlaveStackConfig()
@@ -130,6 +133,7 @@ def main():
 
 	while (True):
 		sleep(60)
+		break
 
 if __name__ == '__main__':
 	main()
