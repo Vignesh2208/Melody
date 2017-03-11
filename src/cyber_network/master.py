@@ -1,5 +1,8 @@
 from utils.sleep_functions import sleep
 import sys
+import argparse
+import os
+
 # import opendnp3 instead of from opendnp3 import *
 # In DataObserver._Update, there is a serious of ifs
 # which check the type of a point (if (t == opendnp3.Binary)).
@@ -71,15 +74,21 @@ class DataObserver(opendnp3.IDataObserver):
 		print('End')
 		self.newData = False
 		print('Start')
+		sys.stdout.flush()
 
 def main():
+
+	parser = argparse.ArgumentParser()
+	parser.add_argument('--slave_ip', dest="slave_ip", help='IP Address of the slave node.', required=True)
+	args = parser.parse_args()
+    
 	# 1. Extend IDataObserver and IStackObserver
 	# 2. Add a Physical Layer (TCP Client) to the StackManager
 	# 3. Create a MasterConfig.
 	# 4. Add a Master Stack to the StackManager
 	# 5. Let the process run
 	
-	print "Running the Master"
+	print "Running the Master. Pid = ", os.getpid()
 	sys.stdout.flush()
 	
 	stack_observer = StackObserver()
@@ -90,9 +99,7 @@ def main():
 	#opendnp3.ClassMask.class1 = True
 	
 	stack_manager = opendnp3.StackManager()
-	stack_manager.AddTCPClient('tcpclient', phys_layer_settings, '10.0.0.2', 20000)
-	#stack_manager.AddTCPClient('tcpclient', phys_layer_settings, '127.0.0.1', 20000)
-	#stack_manager.AddTCPClient('tcpclient', phys_layer_settings, '10.0.60.17', 20000)
+	stack_manager.AddTCPClient('tcpclient', phys_layer_settings, args.slave_ip, 20000)
 	master_stack_config = opendnp3.MasterStackConfig()
 	master_stack_config.master.DoUnsolOnStartup = True
 
@@ -104,9 +111,11 @@ def main():
 	master_stack_config.master.mpObserver = stack_observer
 	
 	# the integrity rate is the # of milliseconds between integrity scans
-	master_stack_config.master.IntegrityRate = 1000
+	master_stack_config.master.IntegrityRate = 100
 	#master_stack_config.master.TaskRetryRate = 10
 	print master_stack_config.master.IntegrityRate
+	sys.stdout.flush()
+	
 	#master_stack_config.master.UnsolClassMask = opendnp3.IntToPointClass(1)
 	#print master_stack_config.master.TaskRetryRate 
 	# The third argument needs to be a log FilterLevel.  The Python
@@ -114,7 +123,6 @@ def main():
 	# the AddMaster method because the PhysLayerSettings LogLevel
 	# member is a FilterLevel enum.
 	command_acceptor = stack_manager.AddMaster('tcpclient', 'master', phys_layer_settings.LogLevel, observer, master_stack_config)
-
 	# Need to wait because the polling is now occurring on its own
 	# thread.  If we exited immediately, the callbacks would never
 	# be called.
@@ -125,9 +133,10 @@ def main():
 	print('Counters: %d' % (len(counter_list)))
 	print('ControlStatus: %d' % (len(controlstatus_list)))
 	print('Setpointstatus: %d' % (len(setpointstatus_list)))
+	sys.stdout.flush()
 
 	while (True):
-		sleep(60)
+		sleep(10)
 		break
 
 if __name__ == '__main__':

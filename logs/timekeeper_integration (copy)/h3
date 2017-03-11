@@ -1,4 +1,0 @@
-
-Starting Debug for h3. Reader Process pid = 1549
-
-Running New Command sudo iptables -I OUTPUT -p tcp --tcp-flags RST RST -j DROP &

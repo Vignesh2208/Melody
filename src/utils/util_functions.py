@@ -11,6 +11,11 @@ def set_cpu_affinity_pid_list(pid_list) :
     for pid in pid_list :
         set_cpu_affinity(pid)
 
+def procStatus(pid):
+    for line in open("/proc/%d/status" % pid).readlines():
+        if line.startswith("State:"):
+            return line.split(":",1)[1].strip().split(' ')[0]
+    return None
 
 def get_pids_with_cmd(cmd, expected_no_of_pids=1) :
     pid_list = []
@@ -29,7 +34,8 @@ def get_pids_with_cmd(cmd, expected_no_of_pids=1) :
                 if not p_tokens:
 	                continue
                 pid = int(p_tokens[len(p_tokens)-1])
-                pid_list.append(pid)
+                if procStatus(pid) != 'D' :
+                    pid_list.append(pid)
         
         
 

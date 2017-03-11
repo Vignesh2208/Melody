@@ -9,6 +9,7 @@ from datetime import datetime
 import shared_buffer
 from shared_buffer import  *
 import time
+import subprocess
 
 
 class EmulationDriver(object):
@@ -53,7 +54,12 @@ class EmulationDriver(object):
             sleep(self.offset)
             print "Started command at ", str(datetime.now())
             sys.stdout.flush()
-            os.system(self.cmd)
+            #os.system(self.cmd + " &")
+            try:
+                cmd_list = self.cmd.split(' ')
+                p = subprocess.Popen(cmd_list,shell=False)
+            except:
+                print "Error running command: ", sys.exec_info()[0]
 
         elif self.type == TRAFFIC_FLOW_EXPONENTIAL:
             pass
@@ -89,8 +95,12 @@ def main():
     print "Waiting for exit command ..."
     sys.stdout.flush()
     recv_msg = ''
+    i = 1
     while "EXIT" not in recv_msg:
         recv_msg = ''
+        print "Checking for EXIT for the ", i ," time at: ", str(datetime.now())
+        sys.stdout.flush()
+        i = i + 1
         sleep(1)
         dummy_id, recv_msg = d.sharedBufferArray.read(str(d.driver_id) + "main-cmd-channel-buffer")
 

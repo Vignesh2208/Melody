@@ -1,3 +1,5 @@
+import argparse
+
 from utils.sleep_functions import sleep
 
 # import opendnp3 instead of from opendnp3 import *
@@ -7,6 +9,7 @@ from utils.sleep_functions import sleep
 # when the ifs were written if (t == Binary).
 import opendnp3
 import sys
+import os
 
 binary_list = []
 analog_list = []
@@ -80,12 +83,16 @@ class DataObserver(opendnp3.IDataObserver):
 		self.newData = False
 
 def main():
+
+	parser = argparse.ArgumentParser()
+	parser.add_argument('--slave_ip', dest="slave_ip", help='IP Address of the slave node.', required=True)
+	args = parser.parse_args()
 	# 1. Extend IDataObserver and IStackObserver
 	# 2. Add a Physical Layer (TCP Client) to the StackManager
 	# 3. Create a MasterConfig.
 	# 4. Add a Master Stack to the StackManager
 	# 5. Let the process run
-	print "Running the Slave"
+	print "Running the Slave. Pid = ", os.getpid()
 
 	stack_observer = StackObserver()
 	# observer = DataObserver()
@@ -94,8 +101,7 @@ def main():
 	phys_layer_settings = opendnp3.PhysLayerSettings()
 
 	stack_manager = opendnp3.StackManager()
-	stack_manager.AddTCPServer('tcpserver', phys_layer_settings, '10.0.0.2', 20000)
-	#stack_manager.AddTCPServer('tcpserver', phys_layer_settings, '127.0.0.1', 20000)
+	stack_manager.AddTCPServer('tcpserver', phys_layer_settings, args.slave_ip, 20000)
 
 	# master_stack_config = opendnp3.MasterStackConfig()
 	slave_stack_config = opendnp3.SlaveStackConfig()
@@ -130,9 +136,10 @@ def main():
 	print('Counters: %d' % (len(counter_list)))
 	print('ControlStatus: %d' % (len(controlstatus_list)))
 	print('Setpointstatus: %d' % (len(setpointstatus_list)))
+	sys.stdout.flush()
 
 	while (True):
-		sleep(60)
+		sleep(10)
 		break
 
 if __name__ == '__main__':

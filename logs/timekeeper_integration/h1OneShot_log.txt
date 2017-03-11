@@ -1,12 +1,52 @@
 Started emulation driver ...
 Cmd channel buffer open succeeded !
 Waiting for START command ... buf =  h1OneShotmain-cmd-channel-buffer
-Triggered emulation driver at  2017-03-03 22:23:04.548534
-Started command at  2017-03-03 22:23:06.553370
-Running the Master
-1000
+Triggered emulation driver at  2017-03-10 19:48:03.213066
+Started command at  2017-03-10 19:48:05.215050
+Waiting for exit command ...
+Checking for EXIT for the  1  time at:  2017-03-10 19:48:05.216061
+Running the Master. Pid =  11844
+100
 The stack state has changed: COMMS_DOWN
 The stack state has changed: COMMS_UP
+Start
+End
+Start
+Start
+End
+Start
+Start
+End
+Start
+Start
+End
+Start
+Start
+End
+Start
+Start
+End
+Start
+Checking for EXIT for the  2  time at:  2017-03-10 19:48:06.217055
+Start
+End
+Start
+Start
+End
+Start
+Start
+End
+Start
+Start
+End
+Start
+Start
+End
+Start
+Checking for EXIT for the  3  time at:  2017-03-10 19:48:07.219054
+Start
+End
+Start
 Start
 End
 Start
@@ -27,6 +67,7 @@ Start
 Start
 End
 Start
+Checking for EXIT for the  4  time at:  2017-03-10 19:48:08.227055
 Start
 End
 Start
@@ -39,29 +80,5 @@ Start
 Start
 End
 Start
-Start
-End
-Start
-Start
-End
-Start
-Start
-End
-Start
-Start
-End
-Start
-Start
-End
-Start
-Start
-End
-Start
-Start
-End
-Start
-Start
-End
-Start
+Checking for EXIT for the  5  time at:  2017-03-10 19:51:47.009468
 The stack state has changed: COMMS_DOWN
-Waiting for exit command ...

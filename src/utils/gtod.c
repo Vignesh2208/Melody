@@ -13,7 +13,9 @@ long double gt(){ struct timeval tv;
  res = ((long double) curtime + (long double)ms/1000000.0);
  //printf("%Lf\n", res);
  return res;
-}int  main(){
+}
+
+int  main(){
  gt();
  return 0;
 }

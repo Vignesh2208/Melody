@@ -71,8 +71,10 @@ echo "Setting up openvswitch"
 echo "#############################################################################"
 
 sudo cp -v start-ovs.sh ~/Downloads/openvswitch-2.3.0/
-sudo chmod +x ~/Downloads/openvswitch-2.3.0/start-ovs.sh
+#sudo chmod +x ~/Downloads/openvswitch-2.3.0/start-ovs.sh
+sudo sed "s/@HOME@/${HOME//\//\\/}/g" start_ovs.sh.template > start_ovs.sh
 sudo cp -v start_ovs.sh /etc/init.d/
+sudo rm start_ovs.sh
 sudo chmod +x /etc/init.d/start_ovs.sh
 sudo update-rc.d start_ovs.sh defaults
 

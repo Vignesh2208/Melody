@@ -1,6 +1,0 @@
-
-Starting Debug for h1. Reader Process pid = 1545
-
-Running New Command sudo ping -c8 10.0.0.2
-
-Running New Command sudo iptables -I OUTPUT -p tcp --tcp-flags RST RST -j DROP &
