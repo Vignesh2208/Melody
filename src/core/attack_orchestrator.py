@@ -101,10 +101,6 @@ class attack_orchestrator():
                     self.PowerSimIdMapping[hostID] = []
                 self.PowerSimIdMapping[hostID].append(PowerSimId)
 
-
-
-
-
     def init_shared_buffers(self):
         self.shared_bufs = {}
         hostIDS = self.PowerSimIdMapping.keys()

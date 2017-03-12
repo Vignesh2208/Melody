@@ -18,7 +18,7 @@ class NetPower(object):
                  network_configuration,
                  script_dir,
                  base_dir,
-                 replay_pcaps_dir,
+                 attack_plan_dir,
                  log_dir,
                  emulated_background_traffic_flows,
                  emulated_network_scan_events,
@@ -42,11 +42,12 @@ class NetPower(object):
         self.timekeeper_dir = self.base_dir + "/src/core/dilation-code"
         self.enable_timekeeper = ENABLE_TIMEKEEPER
         self.tdf = TDF
-        self.replay_pcaps_dir = replay_pcaps_dir
+        self.attack_plan_dir = attack_plan_dir
         self.pid_list = []
         self.host_pids = []
         self.switch_pids = []
-        self.driver_pids = []
+        self.emulation_driver_pids = []
+        self.replay_driver_pids = []
         self.driver_ids = []
 
         self.emulated_background_traffic_flows = emulated_background_traffic_flows
@@ -58,7 +59,6 @@ class NetPower(object):
 
         for edp in self.emulation_driver_params :
             self.driver_ids.append(edp["driver_id"])
-
 
         self.node_mappings_file_path = self.script_dir + "/node_mappings.txt"
         self.log_dir = log_dir
@@ -171,7 +171,7 @@ class NetPower(object):
             print "########################################################################"
             print ""
             print "                        Driver pids"
-            print  self.driver_pids
+            print  self.emulation_driver_pids
             print ""
             print "########################################################################"
 
@@ -354,22 +354,20 @@ class NetPower(object):
         proxy_start_cmd = core_proxy_start_cmd  + " -c " + self.node_mappings_file_path + " -l " + proxy_log_file + " -r " + str(self.run_time) + " -p " + self.power_simulator_ip + " -d " + str(self.control_node_id) + " &"
         os.system(proxy_start_cmd)
         
+    def start_attack_orchestrator(self):
+        print "Starting Attack orchestrator at " + str(datetime.now())
 
-    def start_attack_dispatcher(self):
-        print "Starting Attack Dispatcher at " + str(datetime.now())
-
-        if os.path.isdir(self.replay_pcaps_dir):
-            attack_dispatcher_script = self.proxy_dir + "/attack_orchestrator.py"
-            core_attk_dispatcher_cmd = "python " + str(attack_dispatcher_script)
-            attk_dispatcher_start_cmd = core_attk_dispatcher_cmd + " -c " + self.replay_pcaps_dir + " -l " + self.node_mappings_file_path + " -r " + str(self.run_time + 2) + " &"
-            proc = subprocess.Popen(attk_dispatcher_start_cmd,shell=True) 
+        if os.path.isdir(self.attack_plan_dir):
+            attack_orchestrator_script = self.proxy_dir + "/attack_orchestrator.py"
+            core_attk_orchestrator_cmd = "python " + str(attack_orchestrator_script)
+            attk_orchestrator_start_cmd = core_attk_orchestrator_cmd + " -c " + self.attack_plan_dir + " -l " + self.node_mappings_file_path + " -r " + str(self.run_time + 2) + " &"
+            proc = subprocess.Popen(attk_orchestrator_start_cmd,shell=True) 
             
-            print "Setting Attack Dispatcher affinity to cores 0,1 ..."
+            print "Setting Attack orchestrator affinity to cores 0,1 ..."
             set_cpu_affinity(int(proc.pid))
-            actual_attk_dispatcher_pids = get_pids_with_cmd(cmd=core_attk_dispatcher_cmd,expected_no_of_pids=1)
-            set_cpu_affinity_pid_list(actual_attk_dispatcher_pids)
+            actual_attk_orchestrator_pids = get_pids_with_cmd(cmd=core_attk_orchestrator_cmd,expected_no_of_pids=1)
+            set_cpu_affinity_pid_list(actual_attk_orchestrator_pids)
             
-
     def send_cmd_to_node(self,node_name,cmd) :
         mininet_host = self.network_configuration.mininet_obj.get(node_name)
         if mininet_host != None:
@@ -532,12 +530,12 @@ class NetPower(object):
     def start_emulation_drivers(self):
 
         n_drivers = 0
+        driver_py_script = self.proxy_dir + "/emulation_driver.py"
+
         for edp in self.emulation_driver_params:
 
             mininet_host = self.network_configuration.mininet_obj.get(edp["node_id"])
             driver_log_file = self.log_dir + "/" + str(edp["driver_id"]) + "_log.txt"
-            driver_py_script = self.proxy_dir + "/emulation_driver.py"
-
 
             input_params_file_path = self.log_dir + "/" + edp["driver_id"] + ".json"
             with open(input_params_file_path, "w") as f:
@@ -549,19 +547,55 @@ class NetPower(object):
             mininet_host.cmd(cmd_to_run)
             n_drivers = n_drivers + 1
 
-        pid_list = get_pids_with_cmd(cmd="python " + str(driver_py_script),expected_no_of_pids=n_drivers)
+        pid_list = get_pids_with_cmd(cmd="python " + str(driver_py_script), expected_no_of_pids=n_drivers)
         assert len(pid_list) == n_drivers
-        self.driver_pids.extend(pid_list)
+        self.emulation_driver_pids.extend(pid_list)
         self.pid_list.extend(pid_list)
 
     def stop_emulation_drivers(self):
-        for pid in self.driver_pids:
+        for pid in self.emulation_driver_pids:
             try:
                 os.system("sudo kill " + str(pid))
             except:
                 pass 
 
+    def start_replay_drivers(self):
 
+        n_drivers = 0
+        driver_py_script = self.proxy_dir + "/replay_driver.py"
+
+        for i in xrange(len(self.network_configuration.roles)):
+            mininet_host = self.network_configuration.mininet_obj.hosts[i]
+            
+            rdp = {"driver_id": mininet_host.name + "-replay",
+                   "run_time": self.run_time,
+                   "node_id": mininet_host.name,
+                   "node_ip": mininet_host.IP(),
+                   "attack_path_file_path": self.attack_plan_dir + "/attack_plan.json"}
+
+            driver_log_file = self.log_dir + "/" + str(rdp["driver_id"]) + "_log.txt"
+            input_params_file_path = self.log_dir + "/" + rdp["driver_id"] + ".json"
+            with open(input_params_file_path, "w") as f:
+                json.dump(rdp, f)
+
+            cmd_to_run = "python " + str(driver_py_script) + " --input_params_file_path " + input_params_file_path
+            cmd_to_run = cmd_to_run + " > " + driver_log_file + " 2>&1" + " &"
+
+            mininet_host.cmd(cmd_to_run)
+            n_drivers = n_drivers + 1
+
+        pid_list = get_pids_with_cmd(cmd="python " + str(driver_py_script), expected_no_of_pids=n_drivers)
+        assert len(pid_list) == n_drivers
+        self.replay_driver_pids.extend(pid_list)
+        self.pid_list.extend(pid_list)
+
+    def stop_replay_drivers(self):
+        for pid in self.replay_driver_pids:
+            try:
+                os.system("sudo kill " + str(pid))
+            except:
+                pass     
+    
     def start_emulated_traffic_threads(self):
 
         print "########################################################################"
@@ -639,9 +673,10 @@ class NetPower(object):
             
         for pid, host_name in self.host_pids:
             os.system("sudo kill " + str(pid))
-        for pid in self.driver_pids:
+        for pid in self.emulation_driver_pids:
             os.system("sudo kill " + str(pid))
-        
+        for pid in self.replay_driver_pids:
+            os.system("sudo kill " + str(pid))
 
         try:
             os.system("sudo killall reader")
@@ -659,10 +694,11 @@ class NetPower(object):
         self.start_host_processes()
         self.start_switch_link_pkt_captures()
         self.start_proxy_process()
-        self.start_attack_dispatcher()
+        self.start_attack_orchestrator()
         #self.disable_TCP_RST()
 
         self.start_emulation_drivers()
+        self.start_replay_drivers()
 
         if self.enable_timekeeper:
             #TimeKeeper related ...

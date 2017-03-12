@@ -1,6 +1,4 @@
 import sys
-import os
-import time
 sys.path.append("./")
 
 
@@ -10,13 +8,10 @@ from cyber_network.traffic_flow import TRAFFIC_FLOW_PERIODIC, TRAFFIC_FLOW_EXPON
 from cyber_network.network_scan_event import NetworkScanEvent
 from cyber_network.network_scan_event import NETWORK_SCAN_NMAP_PORT
 from core.net_power import NetPower
-
 from core.shared_buffer import *
 
-from random import randint
-
-ENABLE_TIMEKEEPER = 1
-TDF = 10
+ENABLE_TIMEKEEPER = 0
+TDF = 1
 
 
 class TimeKeeperIntegration(NetPower):
@@ -44,7 +39,6 @@ class TimeKeeperIntegration(NetPower):
                                                     ENABLE_TIMEKEEPER,
                                                     TDF
                                                     )
-
 
 
 def get_network_configuration():
@@ -88,12 +82,9 @@ def get_network_configuration():
     return network_configuration
 
 
-
-
 def main():
 
-    run_time = 5
-    flow_count = 3
+    run_time = 10
 
     emulated_flow_definitions = {'dnp3': [('h1','h2','h3','h4','h5'),
                                           ('h1','h2','h3','h4','h5')],
@@ -176,7 +167,7 @@ def main():
                                 base_dir,
                                 replay_pcaps_dir,
                                 log_dir,
-                                bg_flows,
+                                [],#bg_flows,
                                 [],
                                 [])
 
