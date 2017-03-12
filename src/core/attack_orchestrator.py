@@ -121,7 +121,7 @@ class attack_orchestrator():
             sys.exit(0)
 
         for node_id in self.mininet_node_ids:
-            result = self.sharedBufferArray.open(bufName=node_id + "main-cmd-channel-buffer", isProxy=False)
+            result = self.sharedBufferArray.open(bufName=node_id + "-replay" + "main-cmd-channel-buffer", isProxy=True)
             if result == BUF_NOT_INITIALIZED or result == FAILURE:
                 print "Cmd channel buffer open failed! "
                 sys.exit(0)
@@ -145,14 +145,14 @@ class attack_orchestrator():
 
         ret = 0
         while ret <= 0:
-            ret = self.sharedBufferArray.write(node_id + "main-cmd-channel-buffer", pcap_file_path, 0)
+            ret = self.sharedBufferArray.write(node_id + "-replay" + "main-cmd-channel-buffer", pcap_file_path, 0)
         print "Signalled start of replay phase ..."
 
     def signal_end_of_replay_phase_2(self, node_id):
 
         ret = 0
         while ret <= 0:
-            ret = self.sharedBufferArray.write(node_id, "main-cmd-channel-buffer", "END", 0)
+            ret = self.sharedBufferArray.write(node_id + "-replay" + "main-cmd-channel-buffer", "END", 0)
 
         print "Signalled end of replay phase ..."
 
@@ -266,7 +266,7 @@ class attack_orchestrator():
         while outstanding_node_ids:
             for node_id in outstanding_node_ids:
                 msg = ''
-                dummy_id, msg = self.sharedBufferArray.read(str(node_id) + "main-cmd-channel-buffer")
+                dummy_id, msg = self.sharedBufferArray.read(str(node_id) + "-replay" + "main-cmd-channel-buffer")
                 if msg == "LOADED":
                     outstanding_node_ids.remove(node_id)
                     print "Got a message from node:", node_id, "outstanding_node_ids now:", outstanding_node_ids

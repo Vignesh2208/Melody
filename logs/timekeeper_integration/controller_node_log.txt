@@ -1,2 +1,24 @@
 Host 1 Attack Layer Thread >> INFO >> Attk playback buffer open suceeded !
 Waiting for start command ... buf =  h1main-cmd-channel-buffer
+Host 1 Network Layer Thread >> INFO >> Started listening on IP: 10.0.0.1 PORT: 5100 at 2017-03-12 18:31:28.322632
+Host 1 Attack Layer Thread >> INFO >> Started at 2017-03-12 18:31:28.336831
+Host 1 Attack Layer Thread >> INFO >> Starting Attack playback thread 2017-03-12 18:31:28.336905
+Signalled Start threads at  2017-03-12 18:31:28.356350
+Waiting for exit command ...
+Checking for EXIT for the  1  time at:  2017-03-12 18:31:28.356428
+Host 1 IPC Thread >> INFO >> Started control layer run
+Running Attack Playback Thread at  2017-03-12 18:31:28.356913
+Checking for EXIT for the  2  time at:  2017-03-12 18:31:29.402127
+Checking for EXIT for the  3  time at:  2017-03-12 18:31:30.438048
+Checking for EXIT for the  4  time at:  2017-03-12 18:31:31.813394
+Checking for EXIT for the  5  time at:  2017-03-12 18:31:32.914160
+Checking for EXIT for the  6  time at:  2017-03-12 18:31:33.959241
+Checking for EXIT for the  7  time at:  2017-03-12 18:31:34.985597
+Checking for EXIT for the  8  time at:  2017-03-12 18:31:36.035661
+Checking for EXIT for the  9  time at:  2017-03-12 18:31:37.051239
+Checking for EXIT for the  10  time at:  2017-03-12 18:31:38.214920
+Shutting Down Host  1
+Host 1 Attack Layer Thread >> INFO >> Stopping 2017-03-12 18:31:39.222704
+Stopped Attack playback thread at  2017-03-12 18:31:39.259314
+Host 1 IPC Thread >> INFO >> Stopping ...
+Host 1 Network Layer Thread >> INFO >> Stopping at 2017-03-12 18:31:43.509918

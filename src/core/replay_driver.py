@@ -31,8 +31,7 @@ class ReplayDriver(object):
 
     def init_shared_buffers(self, run_time):
 
-        result = self.sharedBufferArray.open(bufName=str(self.node_id) + "main-cmd-channel-buffer", isProxy=True)
-
+        result = self.sharedBufferArray.open(bufName=str(self.driver_id) + "main-cmd-channel-buffer", isProxy=False)
         if result == BUF_NOT_INITIALIZED or result == FAILURE:
             print "Cmd channel buffer open failed !"
             sys.stdout.flush()
@@ -48,16 +47,15 @@ class ReplayDriver(object):
 
         print "Cmd channel buffer open succeeded !"
         sys.stdout.flush()
-        sys.stdout.flush()
-    
+
     def send_command_message(self, msg):
         ret = 0
         while ret <= 0:
-            ret = self.sharedBufferArray.write(self.node_id + "main-cmd-channel-buffer", msg, 0)
+            ret = self.sharedBufferArray.write(self.driver_id + "main-cmd-channel-buffer", msg, 0)
 
     def recv_command_message(self):
         msg = ''
-        dummy_id, msg = self.sharedBufferArray.read(str(self.node_id) + "main-cmd-channel-buffer")
+        dummy_id, msg = self.sharedBufferArray.read(str(self.driver_id) + "main-cmd-channel-buffer")
         return msg
     
     def load_pcap(self, pcap_file_path):
@@ -103,7 +101,6 @@ class ReplayDriver(object):
 
     def load_pcaps(self):
         for stage_dict in self.attack_plan:
-            print stage_dict
             if stage_dict["type"] == "emulation":
                 if self.node_id in stage_dict["involved_nodes"]:
                     self.loaded_pcaps[stage_dict["pcap_file_path"]] = self.load_pcap(stage_dict["pcap_file_path"])
@@ -182,6 +179,9 @@ class ReplayDriver(object):
         
         while "EXIT" not in recv_msg:
             recv_msg = self.recv_command_message()
+
+            if recv_msg == '':
+                continue
             
             # If the received msg is a pcap file path, then replay the pcap
             if recv_msg in self.loaded_pcaps:
