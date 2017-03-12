@@ -210,16 +210,12 @@ class NetPower(object):
         else: 
             print "Stopping synchronized experiment at local time = ", str(datetime.now())
         print "########################################################################"
-        
-        
-			
-            
 
     def generate_node_mappings(self, roles):
         with open(self.node_mappings_file_path,"w") as outfile:
             for i in xrange(0,len(roles)):
                 mininet_host = self.network_configuration.mininet_obj.hosts[i]
-                self.node_mappings[mininet_host.name] = (mininet_host.IP(), roles[i],DEFAULT_HOST_UDP_PORT)
+                self.node_mappings[mininet_host.name] = (mininet_host.IP(), roles[i], DEFAULT_HOST_UDP_PORT)
                 lineTowrite = str(mininet_host.name) + "," + str(mininet_host.IP()) + "," + str(DEFAULT_HOST_UDP_PORT) + ","
 
                 for j in xrange(0,len(roles[i][1])) :
@@ -323,8 +319,6 @@ class NetPower(object):
             mininet_switch = self.network_configuration.mininet_obj.switches[i]
             self.switch_pids.append(int(mininet_switch.pid))
             self.pid_list.append(int(mininet_switch.pid))
-            
-
 
     def set_switch_netdevice_owners(self) :
         pid = 0
@@ -361,11 +355,11 @@ class NetPower(object):
             attack_orchestrator_script = self.proxy_dir + "/attack_orchestrator.py"
             core_attk_orchestrator_cmd = "python " + str(attack_orchestrator_script)
             attk_orchestrator_start_cmd = core_attk_orchestrator_cmd + " -c " + self.attack_plan_dir + " -l " + self.node_mappings_file_path + " -r " + str(self.run_time + 2) + " &"
-            proc = subprocess.Popen(attk_orchestrator_start_cmd,shell=True) 
+            proc = subprocess.Popen(attk_orchestrator_start_cmd, shell=True)
             
             print "Setting Attack orchestrator affinity to cores 0,1 ..."
             set_cpu_affinity(int(proc.pid))
-            actual_attk_orchestrator_pids = get_pids_with_cmd(cmd=core_attk_orchestrator_cmd,expected_no_of_pids=1)
+            actual_attk_orchestrator_pids = get_pids_with_cmd(cmd=core_attk_orchestrator_cmd, expected_no_of_pids=1)
             set_cpu_affinity_pid_list(actual_attk_orchestrator_pids)
             
     def send_cmd_to_node(self,node_name,cmd) :
@@ -390,7 +384,6 @@ class NetPower(object):
             self.send_cmd_to_node(mininet_host.name,"sudo iptables -I OUTPUT -p tcp --tcp-flags RST RST -j DROP &")
         print "DISABLED TCP RST"
 
-
     def enable_TCP_RST(self):
         
         for i in xrange(len(self.network_configuration.roles)):
@@ -399,7 +392,6 @@ class NetPower(object):
         print "ENABLED TCP RST"
 
     def open_main_cmd_channel_buffers(self):
-
 
         for i in xrange(len(self.network_configuration.roles)):
             mininet_host = self.network_configuration.mininet_obj.hosts[i]
@@ -415,7 +407,6 @@ class NetPower(object):
                 sys.exit(0)
 
         print "Opened Main channel buffers "
-
 
     def trigger_all_processes(self,trigger_cmd):
         for i in xrange(len(self.network_configuration.roles)):
@@ -464,8 +455,6 @@ class NetPower(object):
                              print k," secs of virtual time elapsed"
                              sys.stdout.flush()
                              prev_time = curr_time
-						
-
                 else :
                     if k >= run_time :
                          break
@@ -482,8 +471,6 @@ class NetPower(object):
                     if recv_msg == "END":
                         self.enable_TCP_RST()
                 time.sleep(0.5)
-
-
 
         else:
             print "Running Project forever. Press Ctrl-C to quit ..."
@@ -582,7 +569,7 @@ class NetPower(object):
             cmd_to_run = cmd_to_run + " > " + driver_log_file + " 2>&1" + " &"
 
             mininet_host.cmd(cmd_to_run)
-            n_drivers = n_drivers + 1
+            n_drivers += 1
 
         pid_list = get_pids_with_cmd(cmd="python " + str(driver_py_script), expected_no_of_pids=n_drivers)
         assert len(pid_list) == n_drivers

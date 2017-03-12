@@ -23,15 +23,15 @@ class ReplayDriver(object):
 
         # Setup the channel with the orchestrator
         self.sharedBufferArray = shared_buffer_array()
-        self.init_shared_buffers(self.driver_id, self.run_time)
+        self.init_shared_buffers(self.run_time)
 
         # Load the relevant pcap files and load them up in a dict keyed by the name of pcap file.
         self.loaded_pcaps = dict()
         self.load_pcaps()
 
-    def init_shared_buffers(self, driver_id, run_time):
+    def init_shared_buffers(self, run_time):
 
-        result = self.sharedBufferArray.open(bufName=str(driver_id) + "main-cmd-channel-buffer", isProxy=True)
+        result = self.sharedBufferArray.open(bufName=str(self.node_id) + "main-cmd-channel-buffer", isProxy=True)
 
         if result == BUF_NOT_INITIALIZED or result == FAILURE:
             print "Cmd channel buffer open failed !"
@@ -53,11 +53,11 @@ class ReplayDriver(object):
     def send_command_message(self, msg):
         ret = 0
         while ret <= 0:
-            ret = self.sharedBufferArray.write(self.driver_id + "main-cmd-channel-buffer", msg, 0)
+            ret = self.sharedBufferArray.write(self.node_id + "main-cmd-channel-buffer", msg, 0)
 
     def recv_command_message(self):
         msg = ''
-        dummy_id, msg = self.sharedBufferArray.read(str(self.driver_id) + "main-cmd-channel-buffer")
+        dummy_id, msg = self.sharedBufferArray.read(str(self.node_id) + "main-cmd-channel-buffer")
         return msg
     
     def load_pcap(self, pcap_file_path):
@@ -107,7 +107,7 @@ class ReplayDriver(object):
             if stage_dict["type"] == "emulation":
                 if self.node_id in stage_dict["involved_nodes"]:
                     self.loaded_pcaps[stage_dict["pcap_file_path"]] = self.load_pcap(stage_dict["pcap_file_path"])
-    
+
         self.send_command_message("LOADED")
 
     def trigger_replay(self, pcap_file_path):
@@ -183,7 +183,7 @@ class ReplayDriver(object):
         while "EXIT" not in recv_msg:
             recv_msg = self.recv_command_message()
             
-            # If the received msg is a pcap file path, then run the pcap
+            # If the received msg is a pcap file path, then replay the pcap
             if recv_msg in self.loaded_pcaps:
                 self.trigger_replay(recv_msg)
             else:

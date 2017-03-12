@@ -1,4 +1,5 @@
 import sys
+import json
 import os
 from pcapfile import savefile
 import fnmatch
@@ -30,6 +31,7 @@ def usage():
     print "-p or --proxy-ip=     IP Address of proxy <optional - default 127.0.0.1>"
 
     sys.exit(0)
+
 
 def parseOpts():
     netcfgFile = None
@@ -65,7 +67,6 @@ def parseOpts():
 
 class attack_orchestrator():
 
-
     def __init__(self, attkPlanDirPath, netCfgFile, runTime, proxyIP):
         self.attkPlanDirPath = attkPlanDirPath
         self.netCfgFile = netcfgFile
@@ -75,9 +76,8 @@ class attack_orchestrator():
         self.init_shared_buffers()
         self.involved_replay_nodes = {}
 
-
-
     def extractIPMapping(self):
+        self.mininet_node_ids = []
         self.IPMapping = {}
         self.PowerSimIdMapping = {}
         self.IPToHostMapping = {}
@@ -101,6 +101,8 @@ class attack_orchestrator():
                     self.PowerSimIdMapping[hostID] = []
                 self.PowerSimIdMapping[hostID].append(PowerSimId)
 
+            self.mininet_node_ids.append(splitLs[0])
+
     def init_shared_buffers(self):
         self.shared_bufs = {}
         hostIDS = self.PowerSimIdMapping.keys()
@@ -118,10 +120,16 @@ class attack_orchestrator():
             print "Cmd channel buffer open failed! "
             sys.exit(0)
 
+        for node_id in self.mininet_node_ids:
+            result = self.sharedBufferArray.open(bufName=node_id + "main-cmd-channel-buffer", isProxy=False)
+            if result == BUF_NOT_INITIALIZED or result == FAILURE:
+                print "Cmd channel buffer open failed! "
+                sys.exit(0)
+
     def signal_end_of_replay_phase(self):
 
         ret = 0
-        while ret <= 0 :
+        while ret <= 0:
             ret = self.sharedBufferArray.write("cmd-channel-buffer","END",0)
 
         print "Signalled end of replay phase ..."
@@ -129,10 +137,24 @@ class attack_orchestrator():
     def signal_start_of_replay_phase(self):
 
         ret = 0
-        while ret <= 0 :
+        while ret <= 0:
             ret = self.sharedBufferArray.write("cmd-channel-buffer","START",0)
         print "Signalled start of replay phase ..."
 
+    def signal_start_of_replay_phase_2(self, node_id, pcap_file_path):
+
+        ret = 0
+        while ret <= 0:
+            ret = self.sharedBufferArray.write(node_id + "main-cmd-channel-buffer", pcap_file_path, 0)
+        print "Signalled start of replay phase ..."
+
+    def signal_end_of_replay_phase_2(self, node_id):
+
+        ret = 0
+        while ret <= 0:
+            ret = self.sharedBufferArray.write(node_id, "main-cmd-channel-buffer", "END", 0)
+
+        print "Signalled end of replay phase ..."
 
     def extract_involved_replay_nodes(self,replay_pcap_f_name):
         assert os.path.isfile(self.attkPlanDirPath + "/" + replay_pcap_f_name)
@@ -140,7 +162,6 @@ class attack_orchestrator():
 
         pcapFilePath = self.attkPlanDirPath + "/" + replay_pcap_f_name
         replay_pcap_reader = dpkt.pcap.Reader(open(pcapFilePath, 'rb'))
-
 
         l2_type = replay_pcap_reader.datalink()
 
@@ -166,11 +187,7 @@ class attack_orchestrator():
             except:
                 pass
 
-
-
-
     def run_replay_phase(self,replay_pcap_f_name):
-
 
         print "Loading Replay Phase for Pcap File = ", replay_pcap_f_name
         return_val = FINISH
@@ -180,8 +197,6 @@ class attack_orchestrator():
             ret = 0
             while ret <= 0 :
                 ret = self.sharedBufferArray.write(str(nodeID) + "attk-channel-buffer", "REPLAY:" + str(self.attkPlanDirPath + "/" + replay_pcap_f_name), 0)
-
-
 
         for nodeID in self.involved_replay_nodes[replay_pcap_f_name] :
 
@@ -196,14 +211,12 @@ class attack_orchestrator():
                     break
                 dummy_id, recv_msg = self.sharedBufferArray.read(str(nodeID) + "attk-channel-buffer")
 
-
         print "Loaded pcap for the current stage ..."
         for nodeID in self.involved_replay_nodes[replay_pcap_f_name] :
             ret = 0
             while ret <= 0 :
                 ret = self.sharedBufferArray.write(str(nodeID) + "attk-channel-buffer", "START", 0)
                 time.sleep(0.1)
-
 
         print "Waiting for Replay Phase to Complete ..."
         for nodeID in self.involved_replay_nodes[replay_pcap_f_name] :
@@ -220,10 +233,10 @@ class attack_orchestrator():
 
         return return_val
 
-
     def run_emulation_phase(self,emulation_phase_id):
 
         hostIDs = self.PowerSimIdMapping.keys()
+
         return_val = FINISH
 
         print "Starting Emulation Phase with ID = ", emulation_phase_id
@@ -245,6 +258,34 @@ class attack_orchestrator():
                 dummy_id, recv_msg = self.sharedBufferArray.read(str(host) + "attk-channel-buffer")
 
         return return_val
+
+    def wait_for_loaded_pcap_msg(self):
+        outstanding_node_ids = self.mininet_node_ids[:]
+        print "outstanding_node_ids:", outstanding_node_ids
+
+        while outstanding_node_ids:
+            for node_id in outstanding_node_ids:
+                msg = ''
+                dummy_id, msg = self.sharedBufferArray.read(str(node_id) + "main-cmd-channel-buffer")
+                if msg == "LOADED":
+                    outstanding_node_ids.remove(node_id)
+                    print "Got a message from node:", node_id, "outstanding_node_ids now:", outstanding_node_ids
+
+    def run2(self):
+
+        self.wait_for_loaded_pcap_msg()
+
+        with open(self.attkPlanDirPath + "/attack_plan.json", "r") as f:
+            self.attack_plan = json.load(f)
+
+        print "Attack plan:", self.attack_plan
+
+        for stage_dict in self.attack_plan:
+            if stage_dict["type"] == "emulation":
+                for node_id in stage_dict["involved_nodes"]:
+                    self.signal_start_of_replay_phase_2(node_id, stage_dict["pcap_file_path"])
+
+        sys.exit(0)
 
     def run(self):
 
@@ -283,11 +324,8 @@ class attack_orchestrator():
         sys.exit(0)
 
 
-
-
-
 if __name__ == "__main__":
     attkPlanDirPath, netcfgFile, runTime, proxyIP = parseOpts()
     attk_orchestrator = attack_orchestrator(attkPlanDirPath, netcfgFile, runTime, proxyIP)
     assert attk_orchestrator != None
-    sys.exit(attk_orchestrator.run())
+    sys.exit(attk_orchestrator.run2())
