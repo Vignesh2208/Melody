@@ -1,5 +1,6 @@
 import argparse
 import json
+
 from utils.sleep_functions import sleep
 
 import datetime
@@ -100,6 +101,7 @@ class ReplayDriver(object):
         return send_events, recv_events
 
     def load_pcaps(self):
+
         for stage_dict in self.attack_plan:
             if stage_dict["type"] == "emulation":
                 if self.node_id in stage_dict["involved_nodes"]:
@@ -113,8 +115,9 @@ class ReplayDriver(object):
         sys.stdout.flush()
         
         send_events, recv_events = self.loaded_pcaps[pcap_file_path]
-        raw_sock = socket.socket(socket.PF_PACKET, socket.SOCK_RAW, socket.htons(0x0800))
-        
+        raw_rx_sock = socket.socket(socket.PF_PACKET, socket.SOCK_RAW, socket.htons(0x0800))
+        raw_tx_sock = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_RAW)
+
         curr_send_idx = 0
         curr_send_event = None
         payload = None
@@ -129,20 +132,20 @@ class ReplayDriver(object):
                     dst_ip = curr_send_event[1]
                     n_required_recv_events = curr_send_event[2]
 
-                    print "Sending Replay Event: Dst = ", dst_ip, " N Req Recv events = ", n_required_recv_events
-                    sys.stdout.flush()
+                    # print "Sending Replay Event: Dst = ", dst_ip, " N Req Recv events = ", n_required_recv_events
+                    # sys.stdout.flush()
 
-            if curr_send_event == None :
+            if curr_send_event == None:
                 break
 
-            if n_required_recv_events == 0 :
-                raw_sock.sendto(payload, (dst_ip, 0))
+            if n_required_recv_events == 0:
+                raw_tx_sock.sendto(payload, (dst_ip, 0))
                 curr_send_event = None
                 curr_send_idx = curr_send_idx + 1
 
             else:
                 try:
-                    raw_pkt = raw_sock.recv(MAXPKTSIZE)
+                    raw_pkt = raw_rx_sock.recv(MAXPKTSIZE)
                 except socket.error as e:
                     raw_pkt = None
                     continue
@@ -168,8 +171,9 @@ class ReplayDriver(object):
 
                 except KeyError as e:
                     pass
-        
-        raw_sock.close()
+
+        raw_rx_sock.close()
+        raw_tx_sock.close()
         print "Closed socket, signalling End of Replay Stage ..."
         sys.stdout.flush()
         self.send_command_message("DONE")
@@ -206,7 +210,6 @@ def main():
         input_params = json.load(f)
 
     d = ReplayDriver(input_params)
-    d.load_pcaps()
     d.wait_for_commands()
 
 

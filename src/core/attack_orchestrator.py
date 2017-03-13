@@ -127,7 +127,6 @@ class attack_orchestrator():
                 sys.exit(0)
 
     def signal_end_of_replay_phase(self):
-
         ret = 0
         while ret <= 0:
             ret = self.sharedBufferArray.write("cmd-channel-buffer","END",0)
@@ -135,21 +134,18 @@ class attack_orchestrator():
         print "Signalled end of replay phase ..."
 
     def signal_start_of_replay_phase(self):
-
         ret = 0
         while ret <= 0:
             ret = self.sharedBufferArray.write("cmd-channel-buffer","START",0)
         print "Signalled start of replay phase ..."
 
     def signal_start_of_replay_phase_2(self, node_id, pcap_file_path):
-
         ret = 0
         while ret <= 0:
             ret = self.sharedBufferArray.write(node_id + "-replay" + "main-cmd-channel-buffer", pcap_file_path, 0)
         print "Signalled start of replay phase ..."
 
     def signal_end_of_replay_phase_2(self, node_id):
-
         ret = 0
         while ret <= 0:
             ret = self.sharedBufferArray.write(node_id + "-replay" + "main-cmd-channel-buffer", "END", 0)
