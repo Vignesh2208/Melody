@@ -215,7 +215,7 @@ class attack_orchestrator():
 
         return return_val
 
-    def run_emulation_phase(self,emulation_phase_id):
+    def run_emulation_phase(self, emulation_phase_id):
 
         hostIDs = self.PowerSimIdMapping.keys()
 
@@ -254,6 +254,7 @@ class attack_orchestrator():
                     print "Got a message from node:", node_id, "outstanding_node_ids now:", outstanding_node_ids
 
     def run2(self):
+        self.start_time = get_current_virtual_time()
 
         self.wait_for_loaded_pcap_msg()
         self.send_to_main_process("PCAPS-LOADED")
@@ -277,6 +278,10 @@ class attack_orchestrator():
 
                 self.send_to_main_process("END")
 
+            if stage_dict["type"] == "emulation":
+                result = self.run_emulation_phase(stage_dict["emulation_phase_id"])
+
+        print "Finished Executing Attack Plan. Stopping Attack Orchestrator..."
         sys.exit(0)
 
     def run(self):

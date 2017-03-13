@@ -1,52 +1,57 @@
 Host 5 Attack Layer Thread >> INFO >> Attk playback buffer open suceeded !
 Waiting for start command ... buf =  h5main-cmd-channel-buffer
-Host 5 Network Layer Thread >> INFO >> Started listening on IP: 10.0.0.5 PORT: 5100 at 2017-03-13 13:08:41.749169
-Host 5 Attack Layer Thread >> INFO >> Started at 2017-03-13 13:08:41.775005
-Host 5 Attack Layer Thread >> INFO >> Starting Attack playback thread 2017-03-13 13:08:41.775087
-Signalled Start threads at  2017-03-13 13:08:41.791450
+Host 5 Network Layer Thread >> INFO >> Started listening on IP: 10.0.0.5 PORT: 5100 at 2017-03-13 15:08:31.905288
+Host 5 Attack Layer Thread >> INFO >> Started at 2017-03-13 15:08:31.924136
+Host 5 Attack Layer Thread >> INFO >> Starting Attack playback thread 2017-03-13 15:08:31.924136
+Signalled Start threads at  2017-03-13 15:08:31.943107
 Waiting for exit command ...
-Checking for EXIT for the  1  time at:  2017-03-13 13:08:41.791496
-Host 5 IPC Thread >> INFO >> Started at 2017-03-13 13:08:41.791537
+Checking for EXIT for the  1  time at:  2017-03-13 15:08:31.943152
+Host 5 IPC Thread >> INFO >> Started at 2017-03-13 15:08:31.943248
 Host 5 IPC Thread >> INFO >> power sim id to host id map = {'34;1': 5, '35;1': 5, '36;1': 5, '32;1': 5, '25': 2, '20': 4, '37;1': 5, '23': 3, 'vpn-gateway;1': 6, '29': 2, '2': 2, '6': 4, '9': 4, '38;1': 5, '39;1': 5, '10': 4, '22': 3, '19': 3, 'attacker;1': 7, 'control;1': 1, '30;1': 5, '33;1': 5, '31;1': 5}
 Host 5 IPC Thread >> INFO >> host id to powersim id map = {1: ['control;1'], 2: ['2', '25', '29'], 3: ['22', '23', '19'], 4: ['20', '10', '6', '9'], 5: ['30;1', '31;1', '32;1', '33;1', '34;1', '35;1', '36;1', '37;1', '38;1', '39;1'], 6: ['vpn-gateway;1'], 7: ['attacker;1']}
-Running Attack Playback Thread at  2017-03-13 13:08:41.884642
-Checking for EXIT for the  2  time at:  2017-03-13 13:08:43.054113
-Checking for EXIT for the  3  time at:  2017-03-13 13:08:44.336029
-Checking for EXIT for the  4  time at:  2017-03-13 13:08:45.358912
-Checking for EXIT for the  5  time at:  2017-03-13 13:08:46.530571
-Checking for EXIT for the  6  time at:  2017-03-13 13:08:47.617460
-Checking for EXIT for the  7  time at:  2017-03-13 13:08:48.750516
-Checking for EXIT for the  8  time at:  2017-03-13 13:08:49.893836
-Checking for EXIT for the  9  time at:  2017-03-13 13:08:51.022955
-Checking for EXIT for the  10  time at:  2017-03-13 13:08:52.084237
-Checking for EXIT for the  11  time at:  2017-03-13 13:08:53.139510
-Checking for EXIT for the  12  time at:  2017-03-13 13:08:54.404529
-Checking for EXIT for the  13  time at:  2017-03-13 13:08:55.594204
-Checking for EXIT for the  14  time at:  2017-03-13 13:08:56.743483
-Checking for EXIT for the  15  time at:  2017-03-13 13:08:57.813902
-Checking for EXIT for the  16  time at:  2017-03-13 13:08:59.056476
-Checking for EXIT for the  17  time at:  2017-03-13 13:09:00.107452
-Checking for EXIT for the  18  time at:  2017-03-13 13:09:01.243622
-Checking for EXIT for the  19  time at:  2017-03-13 13:09:02.343489
-Checking for EXIT for the  20  time at:  2017-03-13 13:09:03.437602
-Checking for EXIT for the  21  time at:  2017-03-13 13:09:04.455382
-Checking for EXIT for the  22  time at:  2017-03-13 13:09:05.547544
-Checking for EXIT for the  23  time at:  2017-03-13 13:09:06.775390
-Checking for EXIT for the  24  time at:  2017-03-13 13:09:07.904195
-Checking for EXIT for the  25  time at:  2017-03-13 13:09:08.952923
-Checking for EXIT for the  26  time at:  2017-03-13 13:09:10.055399
-Checking for EXIT for the  27  time at:  2017-03-13 13:09:11.324241
-Checking for EXIT for the  28  time at:  2017-03-13 13:09:12.324406
-Checking for EXIT for the  29  time at:  2017-03-13 13:09:13.363747
-Checking for EXIT for the  30  time at:  2017-03-13 13:09:14.375517
-Checking for EXIT for the  31  time at:  2017-03-13 13:09:15.459028
-Checking for EXIT for the  32  time at:  2017-03-13 13:09:16.724641
-Checking for EXIT for the  33  time at:  2017-03-13 13:09:17.884791
-Checking for EXIT for the  34  time at:  2017-03-13 13:09:19.063481
-Checking for EXIT for the  35  time at:  2017-03-13 13:09:20.235877
-Checking for EXIT for the  36  time at:  2017-03-13 13:09:21.467569
-Host 5 IPC Thread >> INFO >> Stopping at 2017-03-13 13:09:22.513904
+Running Attack Playback Thread at  2017-03-13 15:08:31.983250
+STARTING NEW EMULATION STAGE WITH ID =  emulation-stage-nmap-from-1-to-2-duration-20
+Inside emulation-stage-nmap 5
+Checking for EXIT for the  2  time at:  2017-03-13 15:08:32.978479
+Checking for EXIT for the  3  time at:  2017-03-13 15:08:34.087391
+Checking for EXIT for the  4  time at:  2017-03-13 15:08:35.100487
+Checking for EXIT for the  5  time at:  2017-03-13 15:08:36.148538
+Checking for EXIT for the  6  time at:  2017-03-13 15:08:37.272091
+Checking for EXIT for the  7  time at:  2017-03-13 15:08:38.443533
+Checking for EXIT for the  8  time at:  2017-03-13 15:08:39.447163
+Checking for EXIT for the  9  time at:  2017-03-13 15:08:40.480526
+Checking for EXIT for the  10  time at:  2017-03-13 15:08:41.543486
+Checking for EXIT for the  11  time at:  2017-03-13 15:08:42.600579
+Checking for EXIT for the  12  time at:  2017-03-13 15:08:43.623528
+Checking for EXIT for the  13  time at:  2017-03-13 15:08:44.739501
+Checking for EXIT for the  14  time at:  2017-03-13 15:08:45.761932
+Checking for EXIT for the  15  time at:  2017-03-13 15:08:46.762597
+Checking for EXIT for the  16  time at:  2017-03-13 15:08:47.820232
+Checking for EXIT for the  17  time at:  2017-03-13 15:08:48.825397
+Checking for EXIT for the  18  time at:  2017-03-13 15:08:50.023419
+Checking for EXIT for the  19  time at:  2017-03-13 15:08:51.089766
+Checking for EXIT for the  20  time at:  2017-03-13 15:08:52.143127
+ENDING EMULATION STAGE:  emulation-stage-nmap-from-1-to-2-duration-20
+Checking for EXIT for the  21  time at:  2017-03-13 15:08:53.238440
+Checking for EXIT for the  22  time at:  2017-03-13 15:08:54.266735
+Checking for EXIT for the  23  time at:  2017-03-13 15:08:55.286309
+Checking for EXIT for the  24  time at:  2017-03-13 15:08:56.286908
+Checking for EXIT for the  25  time at:  2017-03-13 15:08:57.366786
+Checking for EXIT for the  26  time at:  2017-03-13 15:08:58.458608
+Checking for EXIT for the  27  time at:  2017-03-13 15:08:59.562179
+Checking for EXIT for the  28  time at:  2017-03-13 15:09:00.672192
+Checking for EXIT for the  29  time at:  2017-03-13 15:09:01.739456
+Checking for EXIT for the  30  time at:  2017-03-13 15:09:02.751590
+Checking for EXIT for the  31  time at:  2017-03-13 15:09:03.827589
+Checking for EXIT for the  32  time at:  2017-03-13 15:09:04.850767
+Checking for EXIT for the  33  time at:  2017-03-13 15:09:05.963404
+Checking for EXIT for the  34  time at:  2017-03-13 15:09:06.967571
+Checking for EXIT for the  35  time at:  2017-03-13 15:09:07.970338
+Checking for EXIT for the  36  time at:  2017-03-13 15:09:09.052224
+Checking for EXIT for the  37  time at:  2017-03-13 15:09:10.054249
+Checking for EXIT for the  38  time at:  2017-03-13 15:09:11.099997
 Shutting Down Host  5
-Host 5 Attack Layer Thread >> INFO >> Stopping 2017-03-13 13:09:22.520276
-Stopped Attack playback thread at  2017-03-13 13:09:22.595458
-Host 5 Network Layer Thread >> INFO >> Stopping at 2017-03-13 13:09:22.618728
+Host 5 Attack Layer Thread >> INFO >> Stopping 2017-03-13 15:09:12.344746
+Stopped Attack playback thread at  2017-03-13 15:09:12.344848
+Host 5 IPC Thread >> INFO >> Stopping at 2017-03-13 15:09:12.345018
+Host 5 Network Layer Thread >> INFO >> Stopping at 2017-03-13 15:09:12.379979
