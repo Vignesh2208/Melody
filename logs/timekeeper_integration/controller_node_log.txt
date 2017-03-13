@@ -1,50 +1,51 @@
 Host 1 Attack Layer Thread >> INFO >> Attk playback buffer open suceeded !
 Waiting for start command ... buf =  h1main-cmd-channel-buffer
-Host 1 Network Layer Thread >> INFO >> Started listening on IP: 10.0.0.1 PORT: 5100 at 2017-03-13 11:44:36.516706
-Host 1 Attack Layer Thread >> INFO >> Started at 2017-03-13 11:44:36.534003
-Host 1 Attack Layer Thread >> INFO >> Starting Attack playback thread 2017-03-13 11:44:36.534076
-Signalled Start threads at  2017-03-13 11:44:36.547788
+Host 1 Network Layer Thread >> INFO >> Started listening on IP: 10.0.0.1 PORT: 5100 at 2017-03-13 13:08:41.708674
+Host 1 Attack Layer Thread >> INFO >> Started at 2017-03-13 13:08:41.721952
+Host 1 Attack Layer Thread >> INFO >> Starting Attack playback thread 2017-03-13 13:08:41.722082
+Signalled Start threads at  2017-03-13 13:08:41.723823
 Waiting for exit command ...
-Checking for EXIT for the  1  time at:  2017-03-13 11:44:36.547833
+Checking for EXIT for the  1  time at:  2017-03-13 13:08:41.723879
 Host 1 IPC Thread >> INFO >> Started control layer run
-Running Attack Playback Thread at  2017-03-13 11:44:36.548133
-Checking for EXIT for the  2  time at:  2017-03-13 11:44:37.573538
-Checking for EXIT for the  3  time at:  2017-03-13 11:44:38.587542
-Checking for EXIT for the  4  time at:  2017-03-13 11:44:39.833224
-Checking for EXIT for the  5  time at:  2017-03-13 11:44:40.943092
-Checking for EXIT for the  6  time at:  2017-03-13 11:44:42.010401
-Checking for EXIT for the  7  time at:  2017-03-13 11:44:43.018476
-Checking for EXIT for the  8  time at:  2017-03-13 11:44:44.169775
-Checking for EXIT for the  9  time at:  2017-03-13 11:44:45.187616
-Checking for EXIT for the  10  time at:  2017-03-13 11:44:46.397515
-Checking for EXIT for the  11  time at:  2017-03-13 11:44:47.512948
-Checking for EXIT for the  12  time at:  2017-03-13 11:44:48.623102
-Checking for EXIT for the  13  time at:  2017-03-13 11:44:49.822869
-Checking for EXIT for the  14  time at:  2017-03-13 11:44:50.933592
-Checking for EXIT for the  15  time at:  2017-03-13 11:44:52.047681
-Checking for EXIT for the  16  time at:  2017-03-13 11:44:53.187582
-Checking for EXIT for the  17  time at:  2017-03-13 11:44:54.422884
-Checking for EXIT for the  18  time at:  2017-03-13 11:44:55.437035
-Checking for EXIT for the  19  time at:  2017-03-13 11:44:56.457702
-Checking for EXIT for the  20  time at:  2017-03-13 11:44:57.588380
-Checking for EXIT for the  21  time at:  2017-03-13 11:44:58.815554
-Checking for EXIT for the  22  time at:  2017-03-13 11:44:59.827446
-Checking for EXIT for the  23  time at:  2017-03-13 11:45:00.997986
-Checking for EXIT for the  24  time at:  2017-03-13 11:45:02.326716
-Checking for EXIT for the  25  time at:  2017-03-13 11:45:03.602783
-Checking for EXIT for the  26  time at:  2017-03-13 11:45:04.722685
-Checking for EXIT for the  27  time at:  2017-03-13 11:45:05.727155
-Checking for EXIT for the  28  time at:  2017-03-13 11:45:06.782991
-Checking for EXIT for the  29  time at:  2017-03-13 11:45:07.923720
-Checking for EXIT for the  30  time at:  2017-03-13 11:45:09.018139
-Checking for EXIT for the  31  time at:  2017-03-13 11:45:10.082310
-Checking for EXIT for the  32  time at:  2017-03-13 11:45:11.445399
-Checking for EXIT for the  33  time at:  2017-03-13 11:45:12.644064
-Checking for EXIT for the  34  time at:  2017-03-13 11:45:13.751056
-Checking for EXIT for the  35  time at:  2017-03-13 11:45:14.778526
-Checking for EXIT for the  36  time at:  2017-03-13 11:45:15.893096
+Running Attack Playback Thread at  2017-03-13 13:08:41.727899
+Checking for EXIT for the  2  time at:  2017-03-13 13:08:43.025613
+Checking for EXIT for the  3  time at:  2017-03-13 13:08:44.185710
+Checking for EXIT for the  4  time at:  2017-03-13 13:08:45.217416
+Checking for EXIT for the  5  time at:  2017-03-13 13:08:46.244364
+Checking for EXIT for the  6  time at:  2017-03-13 13:08:47.446893
+Checking for EXIT for the  7  time at:  2017-03-13 13:08:48.644326
+Checking for EXIT for the  8  time at:  2017-03-13 13:08:49.657437
+Checking for EXIT for the  9  time at:  2017-03-13 13:08:50.950006
+Checking for EXIT for the  10  time at:  2017-03-13 13:08:52.050183
+Checking for EXIT for the  11  time at:  2017-03-13 13:08:53.174248
+Checking for EXIT for the  12  time at:  2017-03-13 13:08:54.446395
+Checking for EXIT for the  13  time at:  2017-03-13 13:08:55.729733
+Checking for EXIT for the  14  time at:  2017-03-13 13:08:56.769620
+Checking for EXIT for the  15  time at:  2017-03-13 13:08:57.803145
+Checking for EXIT for the  16  time at:  2017-03-13 13:08:59.127572
+Checking for EXIT for the  17  time at:  2017-03-13 13:09:00.256022
+Checking for EXIT for the  18  time at:  2017-03-13 13:09:01.393869
+Checking for EXIT for the  19  time at:  2017-03-13 13:09:02.428745
+Checking for EXIT for the  20  time at:  2017-03-13 13:09:03.563695
+Checking for EXIT for the  21  time at:  2017-03-13 13:09:04.574298
+Checking for EXIT for the  22  time at:  2017-03-13 13:09:05.685163
+Checking for EXIT for the  23  time at:  2017-03-13 13:09:06.785545
+Checking for EXIT for the  24  time at:  2017-03-13 13:09:07.975511
+Checking for EXIT for the  25  time at:  2017-03-13 13:09:08.991474
+Checking for EXIT for the  26  time at:  2017-03-13 13:09:10.042882
+Checking for EXIT for the  27  time at:  2017-03-13 13:09:11.044605
+Checking for EXIT for the  28  time at:  2017-03-13 13:09:12.130017
+Checking for EXIT for the  29  time at:  2017-03-13 13:09:13.143401
+Checking for EXIT for the  30  time at:  2017-03-13 13:09:14.166797
+Checking for EXIT for the  31  time at:  2017-03-13 13:09:15.198739
+Checking for EXIT for the  32  time at:  2017-03-13 13:09:16.362867
+Checking for EXIT for the  33  time at:  2017-03-13 13:09:17.476077
+Checking for EXIT for the  34  time at:  2017-03-13 13:09:18.537519
+Checking for EXIT for the  35  time at:  2017-03-13 13:09:19.739115
+Checking for EXIT for the  36  time at:  2017-03-13 13:09:20.860994
+Checking for EXIT for the  37  time at:  2017-03-13 13:09:21.895579
 Shutting Down Host  1
-Host 1 Attack Layer Thread >> INFO >> Stopping 2017-03-13 11:45:16.984391
-Stopped Attack playback thread at  2017-03-13 11:45:17.050276
+Host 1 Attack Layer Thread >> INFO >> Stopping 2017-03-13 13:09:23.084340
+Stopped Attack playback thread at  2017-03-13 13:09:23.084578
 Host 1 IPC Thread >> INFO >> Stopping ...
-Host 1 Network Layer Thread >> INFO >> Stopping at 2017-03-13 11:45:17.648267
+Host 1 Network Layer Thread >> INFO >> Stopping at 2017-03-13 13:09:27.543189

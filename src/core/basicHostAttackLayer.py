@@ -14,13 +14,10 @@ import socket
 import time
 
 
-
 class attackPlaybackThread(threading.Thread) :
     def __init__(self, attackLayer):
         self.attackLayer = attackLayer
         threading.Thread.__init__(self)
-
-
 
     def post_playback(self):
         pass

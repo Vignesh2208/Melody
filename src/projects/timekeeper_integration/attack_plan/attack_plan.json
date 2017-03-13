@@ -1,4 +1,4 @@
-[{"type": "replay", "involved_nodes": ["h6", "h7"], "pcap_file_path": "/home/rakesh/NetPower_TestBed/src/projects/timekeeper_integration/attack_plan/vpn_access-mapped.pcap", "active": "false"},
+[{"type": "replay", "involved_nodes": ["h6", "h7"], "pcap_file_path": "/home/rakesh/NetPower_TestBed/src/projects/timekeeper_integration/attack_plan/vpn_access-mapped.pcap", "active": "true"},
   {"type": "replay", "involved_nodes": ["h2", "h7"], "pcap_file_path": "/home/rakesh/NetPower_TestBed/src/projects/timekeeper_integration/attack_plan/fuzzing_attack-mapped.pcap", "active": "false"},
   {"type": "replay", "involved_nodes": ["h2", "h7"], "pcap_file_path": "/home/rakesh/NetPower_TestBed/src/projects/timekeeper_integration/attack_plan/pmu_access-mapped.pcap", "active": "false"},
   {"type": "emulation", "involved_nodes": ["h6", "h7"], "duration": 20, "active": "false"},

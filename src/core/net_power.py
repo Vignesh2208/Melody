@@ -422,6 +422,11 @@ class NetPower(object):
 
         print "Triggered hosts and drivers with cmd = ", trigger_cmd
 
+    def recv_from_attack_orchestrator(self):
+        recv_msg = ''
+        dummy_id, recv_msg = self.sharedBufferArray.read("cmd-channel-buffer")
+        return recv_msg
+
     def run(self):
 
         if self.run_time > 0:
@@ -430,6 +435,13 @@ class NetPower(object):
             print "             Starting Experiment. Run time = ", self.run_time
             print ""
             print "########################################################################"
+
+            # Before starting
+            while True:
+                recv_msg = self.recv_from_attack_orchestrator()
+                if recv_msg == "PCAPS-LOADED":
+                    break
+                sleep(0.2)
 
             self.trigger_all_processes("START")
             sys.stdout.flush()
@@ -442,7 +454,7 @@ class NetPower(object):
             run_time   = self.run_time
 
             k = 0		
-            while True :
+            while True:
 
                 if self.enable_timekeeper == 1 :
                      curr_time = get_current_virtual_time_pid(self.switch_pids[0])
@@ -463,13 +475,11 @@ class NetPower(object):
                     # sleep until runtime expires	
                     time.sleep(0.5)
 
-                recv_msg = ''
-                dummy_id, recv_msg = self.sharedBufferArray.read("cmd-channel-buffer")
-                if len(recv_msg) != 0:
-                    if recv_msg == "START":
-                        self.disable_TCP_RST()
-                    if recv_msg == "END":
-                        self.enable_TCP_RST()
+                recv_msg = self.recv_from_attack_orchestrator()
+                if recv_msg == "START":
+                    self.disable_TCP_RST()
+                if recv_msg == "END":
+                    self.enable_TCP_RST()
                 time.sleep(0.5)
 
     def print_topo_info(self):

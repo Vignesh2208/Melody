@@ -126,30 +126,17 @@ class attack_orchestrator():
                 print "Cmd channel buffer open failed! "
                 sys.exit(0)
 
-    def signal_end_of_replay_phase(self):
+    def send_to_main_process(self, msg):
         ret = 0
         while ret <= 0:
-            ret = self.sharedBufferArray.write("cmd-channel-buffer","END",0)
-
-        print "Signalled end of replay phase ..."
-
-    def signal_start_of_replay_phase(self):
-        ret = 0
-        while ret <= 0:
-            ret = self.sharedBufferArray.write("cmd-channel-buffer","START",0)
+            ret = self.sharedBufferArray.write("cmd-channel-buffer", msg, 0)
         print "Signalled start of replay phase ..."
 
-    def signal_start_of_replay_phase_2(self, node_id, pcap_file_path):
+    def signal_pcap_replay_trigger(self, node_id, pcap_file_path):
         ret = 0
         while ret <= 0:
             ret = self.sharedBufferArray.write(node_id + "-replay" + "main-cmd-channel-buffer", pcap_file_path, 0)
         print "Signalled start of replay phase to node:", node_id
-
-    def signal_end_of_replay_phase_2(self, node_id):
-        ret = 0
-        while ret <= 0:
-            ret = self.sharedBufferArray.write(node_id + "-replay" + "main-cmd-channel-buffer", "END", 0)
-        print "Signalled end of replay phase to node:", node_id
 
     def extract_involved_replay_nodes(self,replay_pcap_f_name):
         assert os.path.isfile(self.attkPlanDirPath + "/" + replay_pcap_f_name)
@@ -269,6 +256,7 @@ class attack_orchestrator():
     def run2(self):
 
         self.wait_for_loaded_pcap_msg()
+        self.send_to_main_process("PCAPS-LOADED")
 
         with open(self.attkPlanDirPath + "/attack_plan.json", "r") as f:
             self.attack_plan = json.load(f)
@@ -281,8 +269,13 @@ class attack_orchestrator():
                 continue
 
             if stage_dict["type"] == "replay":
+                
+                self.send_to_main_process("START")
+                
                 for node_id in stage_dict["involved_nodes"]:
-                    self.signal_start_of_replay_phase_2(node_id, stage_dict["pcap_file_path"])
+                    self.signal_pcap_replay_trigger(node_id, stage_dict["pcap_file_path"])
+
+                self.send_to_main_process("END")
 
         sys.exit(0)
 
@@ -305,9 +298,9 @@ class attack_orchestrator():
             elif curr_stage.endswith(".pcap") :
                 replay_pcap_f_name = curr_stage
                 self.extract_involved_replay_nodes(replay_pcap_f_name)
-                self.signal_start_of_replay_phase()
+                self.send_to_main_process("START")
                 result = self.run_replay_phase(replay_pcap_f_name)
-                self.signal_end_of_replay_phase()
+                self.send_to_main_process("END")
             else:
 
                 print "curr_stage:", curr_stage
