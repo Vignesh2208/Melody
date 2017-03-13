@@ -276,10 +276,13 @@ class attack_orchestrator():
         print "Attack plan:", self.attack_plan
 
         for stage_dict in self.attack_plan:
-            if stage_dict["type"] == "emulation":
+
+            if stage_dict["active"] == "false":
+                continue
+
+            if stage_dict["type"] == "replay":
                 for node_id in stage_dict["involved_nodes"]:
                     self.signal_start_of_replay_phase_2(node_id, stage_dict["pcap_file_path"])
-                    #time.sleep(0.2)
 
         sys.exit(0)
 

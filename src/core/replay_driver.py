@@ -107,7 +107,11 @@ class ReplayDriver(object):
     def load_pcaps(self):
 
         for stage_dict in self.attack_plan:
-            if stage_dict["type"] == "emulation":
+
+            if stage_dict["active"] == "false":
+                continue
+
+            if stage_dict["type"] == "replay":
                 if self.node_id in stage_dict["involved_nodes"]:
                     self.loaded_pcaps[stage_dict["pcap_file_path"]] = self.load_pcap(stage_dict["pcap_file_path"])
 
@@ -159,8 +163,6 @@ class ReplayDriver(object):
                 try:
                     if len(recv_events[ip_payload]) > 0:
                         first_send_window = recv_events[ip_payload][0]
-                        print "Received Replay Event ..."
-                        sys.stdout.flush()
 
                         assert (first_send_window >= curr_send_idx)
                         if first_send_window == curr_send_idx :

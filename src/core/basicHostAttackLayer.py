@@ -14,10 +14,13 @@ import socket
 import time
 
 
+
 class attackPlaybackThread(threading.Thread) :
     def __init__(self, attackLayer):
         self.attackLayer = attackLayer
         threading.Thread.__init__(self)
+
+
 
     def post_playback(self):
         pass
@@ -32,6 +35,7 @@ class attackPlaybackThread(threading.Thread) :
         self.attackLayer.accessLock.release()
 
         print "Signalling End of Replay Stage ..."
+
 
     def run(self):
         start_time = time.time()
@@ -62,7 +66,9 @@ class attackPlaybackThread(threading.Thread) :
                 self.attackLayer.accessLock.release()
                 continue
 
+
             if curr_send_event == None :
+
 
                 if curr_send_idx < len(self.attackLayer.send_events) :
                     curr_send_event = self.attackLayer.send_events[curr_send_idx]
@@ -79,6 +85,8 @@ class attackPlaybackThread(threading.Thread) :
                 self.signal_end_of_replay_stage()
                 continue
 
+
+
             if n_required_recv_events == 0 :
                 self.attackLayer.raw_tx_sock.sendto(payload, (dst_ip, 0))
                 curr_send_event = None
@@ -90,6 +98,7 @@ class attackPlaybackThread(threading.Thread) :
                 except socket.error as e :
                     raw_pkt = None
                     continue
+
 
                 assert len(raw_pkt) != 0
                 raw_ip_pkt = get_raw_ip_pkt(raw_pkt)
@@ -117,7 +126,6 @@ class attackPlaybackThread(threading.Thread) :
                 self.attackLayer.accessLock.release()
 
         self.post_playback()
-
 
 class basicHostAttackLayer(threading.Thread):
     def __init__(self, hostID, logFile, IPCLayer, NetworkServiceLayer,sharedBufferArray):
@@ -343,7 +351,7 @@ class basicHostAttackLayer(threading.Thread):
                 self.stopping = True
                 self.stoppingLock.release()
                 self.attack_playback_thread.join()
-                
+
                 break
 
             callbackFns = []

@@ -1,20 +1,20 @@
 Started emulation driver ...
 Cmd channel buffer open succeeded !
 Waiting for START command ... buf =  h3OneShotmain-cmd-channel-buffer
-Triggered emulation driver at  2017-03-10 19:48:03.213066
-Started command at  2017-03-10 19:48:04.214050
+Triggered emulation driver at  2017-03-13 10:05:52.747717
+Started command at  2017-03-13 10:05:53.748692
 Waiting for exit command ...
-Checking for EXIT for the  1  time at:  2017-03-10 19:48:04.215062
-Running the Slave. Pid =  11803
-The stack state has changed: COMMS_DOWN
-Checking for EXIT for the  2  time at:  2017-03-10 19:48:05.217055
-The stack state has changed: COMMS_UP
-Checking for EXIT for the  3  time at:  2017-03-10 19:48:06.221053
-Binaries: 0
-Analogs: 0
-Counters: 0
-ControlStatus: 0
-Setpointstatus: 0
-Checking for EXIT for the  4  time at:  2017-03-10 19:48:07.225052
-Checking for EXIT for the  5  time at:  2017-03-10 19:48:08.227054
-The stack state has changed: COMMS_DOWN
+Checking for EXIT for the  1  time at:  2017-03-13 10:05:53.778122
+Traceback (most recent call last):
+  File "/home/rakesh/NetPower_TestBed/src/cyber_network/slave.py", line 10, in <module>
+    import opendnp3
+ImportError: No module named opendnp3
+Checking for EXIT for the  2  time at:  2017-03-13 10:05:54.782642
+Checking for EXIT for the  3  time at:  2017-03-13 10:05:55.786502
+Checking for EXIT for the  4  time at:  2017-03-13 10:05:56.791655
+Checking for EXIT for the  5  time at:  2017-03-13 10:05:57.801040
+Checking for EXIT for the  6  time at:  2017-03-13 10:05:58.804960
+Checking for EXIT for the  7  time at:  2017-03-13 10:05:59.805186
+Checking for EXIT for the  8  time at:  2017-03-13 10:06:00.809530
+Checking for EXIT for the  9  time at:  2017-03-13 10:06:01.818316
+Shutting down driver ...

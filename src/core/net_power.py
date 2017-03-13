@@ -472,21 +472,6 @@ class NetPower(object):
                         self.enable_TCP_RST()
                 time.sleep(0.5)
 
-        else:
-            print "Running Project forever. Press Ctrl-C to quit ..."
-            try:
-                while 1:
-                    recv_msg = ''
-                    dummy_id, recv_msg = self.sharedBufferArray.read("cmd-channel-buffer")
-                    if len(recv_msg) != 0:
-                        if recv_msg == "START" :
-                            self.disable_TCP_RST()
-                        if recv_msg == "END" :
-                            self.enable_TCP_RST()
-                    sleep(0.05)
-            except KeyboardInterrupt:
-                print "Interrupted ..."
-
     def print_topo_info(self):
 
         print "########################################################################"
@@ -682,7 +667,6 @@ class NetPower(object):
         self.start_switch_link_pkt_captures()
         self.start_proxy_process()
         self.start_attack_orchestrator()
-        #self.disable_TCP_RST()
 
         self.start_emulation_drivers()
         self.start_replay_drivers()
