@@ -143,14 +143,13 @@ class attack_orchestrator():
         ret = 0
         while ret <= 0:
             ret = self.sharedBufferArray.write(node_id + "-replay" + "main-cmd-channel-buffer", pcap_file_path, 0)
-        print "Signalled start of replay phase ..."
+        print "Signalled start of replay phase to node:", node_id
 
     def signal_end_of_replay_phase_2(self, node_id):
         ret = 0
         while ret <= 0:
             ret = self.sharedBufferArray.write(node_id + "-replay" + "main-cmd-channel-buffer", "END", 0)
-
-        print "Signalled end of replay phase ..."
+        print "Signalled end of replay phase to node:", node_id
 
     def extract_involved_replay_nodes(self,replay_pcap_f_name):
         assert os.path.isfile(self.attkPlanDirPath + "/" + replay_pcap_f_name)
@@ -280,6 +279,7 @@ class attack_orchestrator():
             if stage_dict["type"] == "emulation":
                 for node_id in stage_dict["involved_nodes"]:
                     self.signal_start_of_replay_phase_2(node_id, stage_dict["pcap_file_path"])
+                    time.sleep(0.2)
 
         sys.exit(0)
 

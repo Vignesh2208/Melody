@@ -1,23 +1,23 @@
 Host 1 Attack Layer Thread >> INFO >> Attk playback buffer open suceeded !
 Waiting for start command ... buf =  h1main-cmd-channel-buffer
-Host 1 Network Layer Thread >> INFO >> Started listening on IP: 10.0.0.1 PORT: 5100 at 2017-03-12 20:38:57.392027
-Host 1 Attack Layer Thread >> INFO >> Started at 2017-03-12 20:38:57.404894
-Host 1 Attack Layer Thread >> INFO >> Starting Attack playback thread 2017-03-12 20:38:57.405014
-Signalled Start threads at  2017-03-12 20:38:57.423885
+Host 1 Network Layer Thread >> INFO >> Started listening on IP: 10.0.0.1 PORT: 5100 at 2017-03-12 22:10:02.856806
+Host 1 Attack Layer Thread >> INFO >> Started at 2017-03-12 22:10:02.868788
+Host 1 Attack Layer Thread >> INFO >> Starting Attack playback thread 2017-03-12 22:10:02.868894
+Signalled Start threads at  2017-03-12 22:10:02.888378
 Waiting for exit command ...
-Checking for EXIT for the  1  time at:  2017-03-12 20:38:57.423939
+Checking for EXIT for the  1  time at:  2017-03-12 22:10:02.888422
 Host 1 IPC Thread >> INFO >> Started control layer run
-Running Attack Playback Thread at  2017-03-12 20:38:57.436454
-Checking for EXIT for the  2  time at:  2017-03-12 20:38:58.504352
-Checking for EXIT for the  3  time at:  2017-03-12 20:38:59.774827
-Checking for EXIT for the  4  time at:  2017-03-12 20:39:01.030703
-Checking for EXIT for the  5  time at:  2017-03-12 20:39:02.118641
-Checking for EXIT for the  6  time at:  2017-03-12 20:39:03.227131
-Checking for EXIT for the  7  time at:  2017-03-12 20:39:04.333721
-Checking for EXIT for the  8  time at:  2017-03-12 20:39:05.347322
-Checking for EXIT for the  9  time at:  2017-03-12 20:39:06.478695
+Running Attack Playback Thread at  2017-03-12 22:10:02.888733
+Checking for EXIT for the  2  time at:  2017-03-12 22:10:03.914013
+Checking for EXIT for the  3  time at:  2017-03-12 22:10:05.086526
+Checking for EXIT for the  4  time at:  2017-03-12 22:10:06.257064
+Checking for EXIT for the  5  time at:  2017-03-12 22:10:07.486681
+Checking for EXIT for the  6  time at:  2017-03-12 22:10:08.642825
+Checking for EXIT for the  7  time at:  2017-03-12 22:10:09.667262
+Checking for EXIT for the  8  time at:  2017-03-12 22:10:10.702142
+Checking for EXIT for the  9  time at:  2017-03-12 22:10:11.876791
 Shutting Down Host  1
-Host 1 Attack Layer Thread >> INFO >> Stopping 2017-03-12 20:39:07.531893
-Stopped Attack playback thread at  2017-03-12 20:39:07.534110
+Host 1 Attack Layer Thread >> INFO >> Stopping 2017-03-12 22:10:13.030784
+Stopped Attack playback thread at  2017-03-12 22:10:13.030904
 Host 1 IPC Thread >> INFO >> Stopping ...
-Host 1 Network Layer Thread >> INFO >> Stopping at 2017-03-12 20:39:12.545254
+Host 1 Network Layer Thread >> INFO >> Stopping at 2017-03-12 22:10:13.156803

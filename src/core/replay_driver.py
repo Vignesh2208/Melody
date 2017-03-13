@@ -132,8 +132,8 @@ class ReplayDriver(object):
                     dst_ip = curr_send_event[1]
                     n_required_recv_events = curr_send_event[2]
 
-                    # print "Sending Replay Event: Dst = ", dst_ip, " N Req Recv events = ", n_required_recv_events
-                    # sys.stdout.flush()
+                    print "Sending Replay Event: Dst = ", dst_ip, " N Req Recv events = ", n_required_recv_events
+                    sys.stdout.flush()
 
             if curr_send_event == None:
                 break
@@ -155,7 +155,7 @@ class ReplayDriver(object):
                 ip_payload = binascii.hexlify(raw_ip_pkt.__str__( ))
 
                 try:
-                    if len(recv_events[ip_payload]) > 0 :
+                    if len(recv_events[ip_payload]) > 0:
                         first_send_window = recv_events[ip_payload][0]
                         print "Received Replay Event ..."
                         sys.stdout.flush()
@@ -163,7 +163,7 @@ class ReplayDriver(object):
                         assert (first_send_window >= curr_send_idx)
                         if first_send_window == curr_send_idx :
                             n_required_recv_events = n_required_recv_events - 1
-                        else :
+                        else:
                             recv_events[ip_payload].pop(0)
                             send_events[first_send_window] = [send_events[first_send_window][0], send_events[first_send_window][1], send_events[first_send_window][2] - 1]
                     else:
@@ -174,6 +174,7 @@ class ReplayDriver(object):
 
         raw_rx_sock.close()
         raw_tx_sock.close()
+        print "curr_send_idx:", curr_send_idx
         print "Closed socket, signalling End of Replay Stage ..."
         sys.stdout.flush()
         self.send_command_message("DONE")
