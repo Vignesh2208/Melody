@@ -84,7 +84,7 @@ def get_network_configuration():
 
 def main():
 
-    run_time = 40
+    run_time = 60
 
     emulated_flow_definitions = {'dnp3': [('h1','h2','h3','h4','h5'),
                                           ('h1','h2','h3','h4','h5')],

@@ -1,17 +1,4 @@
-import sys
-
-#print sys.path
-
-
 import subprocess
-import os
-import time
-import threading
-import core
-from core.shared_buffer import *
-import core.logger
-from core.logger import Logger
-from core.defines import *
 from timeit import default_timer as timer
 from core.basicHostAttackLayer import basicHostAttackLayer
 

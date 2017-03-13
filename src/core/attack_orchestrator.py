@@ -1,19 +1,10 @@
-import sys
 import json
-import os
-from pcapfile import savefile
-import fnmatch
-import shared_buffer
 from shared_buffer import *
 from logger import *
-import time
 import getopt
-import socket
 from defines import *
 import dpkt
 
-from dpkt.loopback import Loopback
-from dpkt.ethernet import Ethernet
 from timekeeper_functions import *
 
 DUMMY_ID = 0
@@ -65,7 +56,7 @@ def parseOpts():
     return (attkPlanDirPath, netcfgFile, runTime, proxyIP)
 
 
-class attack_orchestrator():
+class AttackOrchestrator:
 
     def __init__(self, attkPlanDirPath, netCfgFile, runTime, proxyIP):
         self.attkPlanDirPath = attkPlanDirPath
@@ -138,7 +129,7 @@ class attack_orchestrator():
             ret = self.sharedBufferArray.write(node_id + "-replay" + "main-cmd-channel-buffer", pcap_file_path, 0)
         print "Signalled start of replay phase to node:", node_id
 
-    def extract_involved_replay_nodes(self,replay_pcap_f_name):
+    def extract_involved_replay_nodes(self, replay_pcap_f_name):
         assert os.path.isfile(self.attkPlanDirPath + "/" + replay_pcap_f_name)
         self.involved_replay_nodes[replay_pcap_f_name] = []
 
@@ -168,52 +159,6 @@ class attack_orchestrator():
 
             except:
                 pass
-
-    def run_replay_phase(self,replay_pcap_f_name):
-
-        print "Loading Replay Phase for Pcap File = ", replay_pcap_f_name
-        return_val = FINISH
-
-        print "Involved Nodes = ", self.involved_replay_nodes[replay_pcap_f_name]
-        for nodeID in self.involved_replay_nodes[replay_pcap_f_name] :
-            ret = 0
-            while ret <= 0 :
-                ret = self.sharedBufferArray.write(str(nodeID) + "attk-channel-buffer", "REPLAY:" + str(self.attkPlanDirPath + "/" + replay_pcap_f_name), 0)
-
-        for nodeID in self.involved_replay_nodes[replay_pcap_f_name] :
-
-            if return_val == STOP:
-                break
-
-            recv_msg = ''
-            while "LOADED" not in recv_msg:
-                if get_current_virtual_time() - self.start_time >= self.runTime:
-                    print "Run time Expired. Stopping ..."
-                    return_val = STOP
-                    break
-                dummy_id, recv_msg = self.sharedBufferArray.read(str(nodeID) + "attk-channel-buffer")
-
-        print "Loaded pcap for the current stage ..."
-        for nodeID in self.involved_replay_nodes[replay_pcap_f_name] :
-            ret = 0
-            while ret <= 0 :
-                ret = self.sharedBufferArray.write(str(nodeID) + "attk-channel-buffer", "START", 0)
-                time.sleep(0.1)
-
-        print "Waiting for Replay Phase to Complete ..."
-        for nodeID in self.involved_replay_nodes[replay_pcap_f_name] :
-
-            if return_val == STOP:
-                break
-            recv_msg = ''
-            while "DONE" not in recv_msg:
-                if get_current_virtual_time() - self.start_time >= self.runTime:
-                    print "Run time Expired. Stopping ..."
-                    return_val = STOP
-                    break
-                dummy_id, recv_msg = self.sharedBufferArray.read(str(nodeID) + "attk-channel-buffer")
-
-        return return_val
 
     def run_emulation_phase(self, emulation_phase_id):
 
@@ -253,7 +198,7 @@ class attack_orchestrator():
                     outstanding_node_ids.remove(node_id)
                     print "Got a message from node:", node_id, "outstanding_node_ids now:", outstanding_node_ids
 
-    def run2(self):
+    def run(self):
         self.start_time = get_current_virtual_time()
 
         self.wait_for_loaded_pcap_msg()
@@ -284,45 +229,9 @@ class attack_orchestrator():
         print "Finished Executing Attack Plan. Stopping Attack Orchestrator..."
         sys.exit(0)
 
-    def run(self):
-
-        time.sleep(5)
-        assert os.path.exists(self.attkPlanDirPath)
-        assert os.path.isfile(self.attkPlanDirPath + "/attack_plan.txt")
-
-        with open(self.attkPlanDirPath + "/attack_plan.txt", "r") as f:
-            stages = f.readlines()
-
-        self.start_time = get_current_virtual_time()
-
-        for stage in stages :
-            curr_stage = stage.rstrip('\r\n')
-
-            if curr_stage.startswith("#"):
-                continue
-            elif curr_stage.endswith(".pcap") :
-                replay_pcap_f_name = curr_stage
-                self.extract_involved_replay_nodes(replay_pcap_f_name)
-                self.send_to_main_process("START")
-                result = self.run_replay_phase(replay_pcap_f_name)
-                self.send_to_main_process("END")
-            else:
-
-                print "curr_stage:", curr_stage
-
-                emulation_phase_id = curr_stage
-                result = self.run_emulation_phase(emulation_phase_id)
-
-            if result == STOP:
-                print "Stopping Attack Orchestrator at: ", curr_stage, " stage due to Run time Expiry"
-                sys.exit(0)
-
-        print "Finished Executing Attack Plan. Stopping Attack Orchestrator..."
-        sys.exit(0)
-
 
 if __name__ == "__main__":
     attkPlanDirPath, netcfgFile, runTime, proxyIP = parseOpts()
-    attk_orchestrator = attack_orchestrator(attkPlanDirPath, netcfgFile, runTime, proxyIP)
+    attk_orchestrator = AttackOrchestrator(attkPlanDirPath, netcfgFile, runTime, proxyIP)
     assert attk_orchestrator != None
-    sys.exit(attk_orchestrator.run2())
+    sys.exit(attk_orchestrator.run())
