@@ -279,7 +279,7 @@ class attack_orchestrator():
             if stage_dict["type"] == "emulation":
                 for node_id in stage_dict["involved_nodes"]:
                     self.signal_start_of_replay_phase_2(node_id, stage_dict["pcap_file_path"])
-                    time.sleep(0.2)
+                    #time.sleep(0.2)
 
         sys.exit(0)
 

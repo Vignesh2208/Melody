@@ -1,25 +1,24 @@
 Host 6 Attack Layer Thread >> INFO >> Attk playback buffer open suceeded !
 Waiting for start command ... buf =  h6main-cmd-channel-buffer
-Host 6 Network Layer Thread >> INFO >> Started listening on IP: 10.0.0.6 PORT: 5100 at 2017-03-12 22:10:02.887714
-Host 6 Attack Layer Thread >> INFO >> Started at 2017-03-12 22:10:02.907043
-Host 6 Attack Layer Thread >> INFO >> Starting Attack playback thread 2017-03-12 22:10:02.907107
-Signalled Start threads at  2017-03-12 22:10:02.936628
+Host 6 Network Layer Thread >> INFO >> Started listening on IP: 10.0.0.6 PORT: 5100 at 2017-03-13 10:02:21.653519
+Host 6 Attack Layer Thread >> INFO >> Started at 2017-03-13 10:02:21.659365
+Host 6 Attack Layer Thread >> INFO >> Starting Attack playback thread 2017-03-13 10:02:21.659419
+Signalled Start threads at  2017-03-13 10:02:21.670868
 Waiting for exit command ...
-Checking for EXIT for the  1  time at:  2017-03-12 22:10:02.936628
-Host 6 IPC Thread >> INFO >> Started at 2017-03-12 22:10:02.936684
+Checking for EXIT for the  1  time at:  2017-03-13 10:02:21.670912
+Host 6 IPC Thread >> INFO >> Started at 2017-03-13 10:02:21.670955
 Host 6 IPC Thread >> INFO >> power sim id to host id map = {'34;1': 5, '35;1': 5, '36;1': 5, '32;1': 5, '25': 2, '20': 4, '37;1': 5, '23': 3, 'vpn-gateway;1': 6, '29': 2, '2': 2, '6': 4, '9': 4, '38;1': 5, '39;1': 5, '10': 4, '22': 3, '19': 3, 'attacker;1': 7, 'control;1': 1, '30;1': 5, '33;1': 5, '31;1': 5}
 Host 6 IPC Thread >> INFO >> host id to powersim id map = {1: ['control;1'], 2: ['2', '25', '29'], 3: ['22', '23', '19'], 4: ['20', '10', '6', '9'], 5: ['30;1', '31;1', '32;1', '33;1', '34;1', '35;1', '36;1', '37;1', '38;1', '39;1'], 6: ['vpn-gateway;1'], 7: ['attacker;1']}
-Running Attack Playback Thread at  2017-03-12 22:10:03.147426
-Checking for EXIT for the  2  time at:  2017-03-12 22:10:04.074863
-Checking for EXIT for the  3  time at:  2017-03-12 22:10:05.117511
-Checking for EXIT for the  4  time at:  2017-03-12 22:10:06.384544
-Checking for EXIT for the  5  time at:  2017-03-12 22:10:07.550971
-Checking for EXIT for the  6  time at:  2017-03-12 22:10:08.714804
-Checking for EXIT for the  7  time at:  2017-03-12 22:10:09.858877
-Checking for EXIT for the  8  time at:  2017-03-12 22:10:10.891123
-Checking for EXIT for the  9  time at:  2017-03-12 22:10:12.058063
+Running Attack Playback Thread at  2017-03-13 10:02:21.730651
+Checking for EXIT for the  2  time at:  2017-03-13 10:02:22.798957
+Checking for EXIT for the  3  time at:  2017-03-13 10:02:24.014421
+Checking for EXIT for the  4  time at:  2017-03-13 10:02:25.287143
+Checking for EXIT for the  5  time at:  2017-03-13 10:02:26.422426
+Checking for EXIT for the  6  time at:  2017-03-13 10:02:27.466713
+Checking for EXIT for the  7  time at:  2017-03-13 10:02:28.479867
+Checking for EXIT for the  8  time at:  2017-03-13 10:02:29.615408
+Checking for EXIT for the  9  time at:  2017-03-13 10:02:30.787458
 Shutting Down Host  6
-Host 6 Attack Layer Thread >> INFO >> Stopping 2017-03-12 22:10:13.132393
-Stopped Attack playback thread at  2017-03-12 22:10:13.132574
-Host 6 IPC Thread >> INFO >> Stopping at 2017-03-12 22:10:13.132797
-Host 6 Network Layer Thread >> INFO >> Stopping at 2017-03-12 22:10:17.986744
+Host 6 IPC Thread >> INFO >> Stopping at 2017-03-13 10:02:32.189749
+Host 6 Attack Layer Thread >> INFO >> Stopping 2017-03-13 10:02:32.233606
+Stopped Attack playback thread at  2017-03-13 10:02:32.233877

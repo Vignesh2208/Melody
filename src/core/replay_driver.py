@@ -30,6 +30,10 @@ class ReplayDriver(object):
         self.loaded_pcaps = dict()
         self.load_pcaps()
 
+        # Prepare sockets for replay later
+        self.raw_rx_sock = socket.socket(socket.PF_PACKET, socket.SOCK_RAW, socket.htons(0x0800))
+        self.raw_tx_sock = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_RAW)
+
     def init_shared_buffers(self, run_time):
 
         result = self.sharedBufferArray.open(bufName=str(self.driver_id) + "main-cmd-channel-buffer", isProxy=False)
@@ -115,8 +119,6 @@ class ReplayDriver(object):
         sys.stdout.flush()
         
         send_events, recv_events = self.loaded_pcaps[pcap_file_path]
-        raw_rx_sock = socket.socket(socket.PF_PACKET, socket.SOCK_RAW, socket.htons(0x0800))
-        raw_tx_sock = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_RAW)
 
         curr_send_idx = 0
         curr_send_event = None
@@ -132,20 +134,20 @@ class ReplayDriver(object):
                     dst_ip = curr_send_event[1]
                     n_required_recv_events = curr_send_event[2]
 
-                    print "Sending Replay Event: Dst = ", dst_ip, " N Req Recv events = ", n_required_recv_events
-                    sys.stdout.flush()
+                    # print "Sending Replay Event: Dst = ", dst_ip, " N Req Recv events = ", n_required_recv_events
+                    # sys.stdout.flush()
 
             if curr_send_event == None:
                 break
 
             if n_required_recv_events == 0:
-                raw_tx_sock.sendto(payload, (dst_ip, 0))
+                self.raw_tx_sock.sendto(payload, (dst_ip, 0))
                 curr_send_event = None
                 curr_send_idx = curr_send_idx + 1
 
             else:
                 try:
-                    raw_pkt = raw_rx_sock.recv(MAXPKTSIZE)
+                    raw_pkt = self.raw_rx_sock.recv(MAXPKTSIZE)
                 except socket.error as e:
                     raw_pkt = None
                     continue
@@ -172,8 +174,8 @@ class ReplayDriver(object):
                 except KeyError as e:
                     pass
 
-        raw_rx_sock.close()
-        raw_tx_sock.close()
+        self.raw_rx_sock.close()
+        self.raw_tx_sock.close()
         print "curr_send_idx:", curr_send_idx
         print "Closed socket, signalling End of Replay Stage ..."
         sys.stdout.flush()
