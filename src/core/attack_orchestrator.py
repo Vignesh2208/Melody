@@ -1,11 +1,11 @@
 import json
+import getopt
+import dpkt
+from timekeeper_functions import *
 from shared_buffer import *
 from logger import *
-import getopt
 from defines import *
-import dpkt
 
-from timekeeper_functions import *
 
 DUMMY_ID = 0
 FINISH = 1

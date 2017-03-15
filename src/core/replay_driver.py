@@ -1,12 +1,11 @@
 import argparse
 import json
+import datetime
+import time
 
 from utils.sleep_functions import sleep
-
-import datetime
 from datetime import datetime
 from shared_buffer import *
-import time
 
 
 class ReplayDriver(object):

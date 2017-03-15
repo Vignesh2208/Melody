@@ -1,7 +1,6 @@
 import sys
 sys.path.append("./")
 
-
 from cyber_network.network_configuration import NetworkConfiguration
 from cyber_network.traffic_flow import EmulatedTrafficFlow
 from cyber_network.traffic_flow import TRAFFIC_FLOW_PERIODIC, TRAFFIC_FLOW_EXPONENTIAL, TRAFFIC_FLOW_ONE_SHOT
@@ -9,6 +8,7 @@ from cyber_network.network_scan_event import NetworkScanEvent
 from cyber_network.network_scan_event import NETWORK_SCAN_NMAP_PORT
 from core.net_power import NetPower
 from core.shared_buffer import *
+from utils.dnp3_pcap_post_processing import DNP3PCAPPostProcessing
 
 ENABLE_TIMEKEEPER = 0
 TDF = 1
@@ -82,18 +82,32 @@ def get_network_configuration():
     return network_configuration
 
 
+def measure_dnp3_latencies(pcap_file_name):
+    script_dir = os.path.dirname(os.path.realpath(__file__))
+    idx = script_dir.index('NetPower_TestBed')
+    base_dir = script_dir[0:idx] + "NetPower_TestBed"
+    bro_dnp3_parser_dir = base_dir + "/src/utils/dnp3_timing/dnp3_parser_bro/"
+    bro_json_log_conf = "/home/rakesh/bro/scripts/policy/tuning/json-logs.bro"
+    bro_cmd = "/usr/bin/bro"
+    project_name = "timekeeper_integration"
+
+    p = DNP3PCAPPostProcessing(base_dir, bro_dnp3_parser_dir, bro_cmd, bro_json_log_conf, project_name)
+    p.collect_data(pcap_file_name)
+    print p.data
+
+
 def main():
 
-    run_time = 60
+    run_time = 10
 
-    emulated_flow_definitions = {'dnp3': [('h1','h2','h3','h4','h5'),
-                                          ('h1','h2','h3','h4','h5')],
-                                 'ping':[('h1','h6','h7'),
-                                         ('h1','h2','h3','h4','h5','h6')],
-                                 'http':[('h1','h7'),('h1','h7')],
-                                 'ssh':[('h7',),('h1',)],
-                                 'telnet':[('h1',),('h2','h3','h4','h5')],
-                                 'nmap': [('h1','h6','h7'), ('h1','h2','h3','h4','h5','h6')]}
+    emulated_flow_definitions = {'dnp3': [('h1', 'h2', 'h3', 'h4', 'h5'),
+                                          ('h1', 'h2', 'h3', 'h4', 'h5')],
+                                 'ping': [('h1', 'h6', 'h7'),
+                                          ('h1', 'h2', 'h3', 'h4', 'h5', 'h6')],
+                                 'http': [('h1', 'h7'), ('h1', 'h7')],
+                                 'ssh': [('h7',), ('h1',)],
+                                 'telnet': [('h1',), ('h2', 'h3', 'h4', 'h5')],
+                                 'nmap': [('h1', 'h6', 'h7'), ('h1', 'h2', 'h3', 'h4', 'h5', 'h6')]}
 
     background_flows = ['ssh', 'telnet', 'http', 'ping']
     scans = ['nmap']
@@ -113,18 +127,18 @@ def main():
 
     bg_flows = [
 
-                #EmulatedTrafficFlow(type=TRAFFIC_FLOW_ONE_SHOT,
-                #                    offset=1,
-                #                    inter_flow_period=0,
-                #                    run_time=run_time,
-                #                    src_mn_node=network_configuration.mininet_obj.get("h1"),
-                #                    dst_mn_node=network_configuration.mininet_obj.get("h2"),
-                #                    root_user_name="ubuntu",
-                #                    root_password="ubuntu",
-                #                    server_process_start_cmd="",
-                #                    client_expect_file='ping -c8 10.0.0.2'),
+        #EmulatedTrafficFlow(type=TRAFFIC_FLOW_ONE_SHOT,
+        #                    offset=1,
+        #                    inter_flow_period=0,
+        #                    run_time=run_time,
+        #                    src_mn_node=network_configuration.mininet_obj.get("h1"),
+        #                    dst_mn_node=network_configuration.mininet_obj.get("h2"),
+        #                    root_user_name="ubuntu",
+        #                    root_password="ubuntu",
+        #                    server_process_start_cmd="",
+        #                    client_expect_file='ping -c8 10.0.0.2'),
 
-                EmulatedTrafficFlow(type=TRAFFIC_FLOW_ONE_SHOT,
+        EmulatedTrafficFlow(type=TRAFFIC_FLOW_ONE_SHOT,
                             offset=1,
                             inter_flow_period=0,
                             run_time=run_time,
@@ -136,30 +150,30 @@ def main():
                             client_expect_file='python ' + base_dir + "/src/cyber_network/master.py --slave_ip " + mn_h3.IP(),
                             long_running=True)
 
-                #EmulatedTrafficFlow(type=TRAFFIC_FLOW_ONE_SHOT,
-                #            offset=1,
-                #            inter_flow_period=0,
-                #            run_time=run_time,
-                #            src_mn_node=mn_h1,
-                #            dst_mn_node=mn_h3,
-                #            root_user_name="ubuntu",
-                #            root_password="ubuntu",
-                #            server_process_start_cmd='python ' + base_dir + "/src/cyber_network/simple_echo_server.py",
-                #            client_expect_file='python ' + base_dir + "/src/cyber_network/simple_udp_client.py",
-                #            long_running=True)
+        #EmulatedTrafficFlow(type=TRAFFIC_FLOW_ONE_SHOT,
+        #            offset=1,
+        #            inter_flow_period=0,
+        #            run_time=run_time,
+        #            src_mn_node=mn_h1,
+        #            dst_mn_node=mn_h3,
+        #            root_user_name="ubuntu",
+        #            root_password="ubuntu",
+        #            server_process_start_cmd='python ' + base_dir + "/src/cyber_network/simple_echo_server.py",
+        #            client_expect_file='python ' + base_dir + "/src/cyber_network/simple_udp_client.py",
+        #            long_running=True)
 
 
-                #EmulatedTrafficFlow(type=TRAFFIC_FLOW_ONE_SHOT,
-                #                    offset=1,
-                #                    inter_flow_period=0,
-                #                    run_time=run_time,
-                #                    src_mn_node=network_configuration.mininet_obj.get("h1"),
-                #                    dst_mn_node=network_configuration.mininet_obj.get("h2"),
-                #                    root_user_name="ubuntu",
-                #                    root_password="ubuntu",
-                #                    server_process_start_cmd="",
-                #                    client_expect_file=base_dir + "/src/core/bin/timerfd_test &"),
-                ]
+        #EmulatedTrafficFlow(type=TRAFFIC_FLOW_ONE_SHOT,
+        #                    offset=1,
+        #                    inter_flow_period=0,
+        #                    run_time=run_time,
+        #                    src_mn_node=network_configuration.mininet_obj.get("h1"),
+        #                    dst_mn_node=network_configuration.mininet_obj.get("h2"),
+        #                    root_user_name="ubuntu",
+        #                    root_password="ubuntu",
+        #                    server_process_start_cmd="",
+        #                    client_expect_file=base_dir + "/src/core/bin/timerfd_test &"),
+    ]
 
     exp = TimeKeeperIntegration(run_time,
                                 network_configuration,
@@ -167,11 +181,15 @@ def main():
                                 base_dir,
                                 replay_pcaps_dir,
                                 log_dir,
-                                [],#bg_flows,
+                                bg_flows,
                                 [],
                                 [])
 
     exp.start_project()
+
+    measure_dnp3_latencies("s1-eth2-s2-eth2.pcap")
+
+
 
 if __name__ == "__main__":
     main()
