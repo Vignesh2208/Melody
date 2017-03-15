@@ -91,7 +91,7 @@ class NetPower(object):
                                                      "root_user_name": bg_flow.root_user_name,
                                                      "root_password": bg_flow.root_password,
                                                      "node_id": bg_flow.src_mn_node.name,
-                                                     "driver_id": str(uuid.uuid1())})
+                                                     "driver_id":  bg_flow.src_mn_node.name + "-emulation-" + str(uuid.uuid1())})
 
 
             if bg_flow.server_process_start_cmd:
@@ -104,7 +104,7 @@ class NetPower(object):
                                                      "root_user_name": bg_flow.root_user_name,
                                                      "root_password": bg_flow.root_password,
                                                      "node_id": bg_flow.dst_mn_node.name,
-                                                     "driver_id": str(uuid.uuid1())})
+                                                     "driver_id": bg_flow.src_mn_node.name + "-emulation-" + str(uuid.uuid1())})
 
 
 
@@ -691,7 +691,7 @@ class NetPower(object):
         #self.start_emulated_traffic_threads()
         self.run()
         self.cleanup()
-        
-        
 
-        
+
+
+

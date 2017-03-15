@@ -1,4 +1,5 @@
 import sys
+import numpy
 sys.path.append("./")
 
 from cyber_network.network_configuration import NetworkConfiguration
@@ -53,7 +54,7 @@ def get_network_configuration():
                                                  {"num_switches": 5,
                                                   "per_switch_links": 2,
                                                   "num_hosts_per_switch": 1,
-                                                  "switch_switch_link_latency_range": (0, 0),
+                                                  "switch_switch_link_latency_range": (0,0),
                                                   "host_switch_link_latency_range": (0, 0)
                                                   },
                                                  conf_root="configurations/",
@@ -82,18 +83,22 @@ def get_network_configuration():
     return network_configuration
 
 
-def measure_dnp3_latencies(pcap_file_name):
+def measure_dnp3_latencies(project_name, pcap_file_name):
     script_dir = os.path.dirname(os.path.realpath(__file__))
     idx = script_dir.index('NetPower_TestBed')
     base_dir = script_dir[0:idx] + "NetPower_TestBed"
     bro_dnp3_parser_dir = base_dir + "/src/utils/dnp3_timing/dnp3_parser_bro/"
     bro_json_log_conf = "/home/rakesh/bro/scripts/policy/tuning/json-logs.bro"
     bro_cmd = "/usr/bin/bro"
-    project_name = "timekeeper_integration"
 
     p = DNP3PCAPPostProcessing(base_dir, bro_dnp3_parser_dir, bro_cmd, bro_json_log_conf, project_name)
     p.collect_data(pcap_file_name)
     print p.data
+
+    print "mean:", numpy.mean(p.data[5:])
+    print "std:", numpy.std(p.data[5:])
+    print "min:", min(p.data[5:])
+    print "max:", max(p.data[5:])
 
 
 def main():
@@ -187,8 +192,8 @@ def main():
 
     exp.start_project()
 
-    measure_dnp3_latencies("s1-eth2-s2-eth2.pcap")
-
+    project_name = "timekeeper_integration"
+    measure_dnp3_latencies(project_name, "s1-eth2-s2-eth2.pcap")
 
 
 if __name__ == "__main__":
