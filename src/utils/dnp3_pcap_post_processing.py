@@ -1,0 +1,66 @@
+import os
+import json
+
+
+class DNP3PCAPPostProcessing:
+    
+    def __init__(self, base_dir, bro_dnp3_parser_dir, bro_cmd, bro_json_log_conf, project_name):
+
+        self.base_dir = base_dir
+        self.bro_dnp3_parser_dir = bro_dnp3_parser_dir
+        self.bro_cmd = bro_cmd
+        self.bro_json_log_conf = bro_json_log_conf
+        self.project_name = project_name
+        
+        self.data = []
+        
+    def parse_latency_timing_using_bro(self, pcap_file_path):
+        cmd = self.bro_cmd + " -b -C -r " + pcap_file_path + " " + self.bro_dnp3_parser_dir + " " + self.bro_json_log_conf
+
+        # Run bro parser
+        os.system(cmd)
+
+        # Move the file to pcap directory
+        bro_log_file_path = pcap_file_path + ".log"
+        os.system("mv dnp3.log " + bro_log_file_path)
+
+        return bro_log_file_path
+
+    def collect_bro_data_points(self, bro_log_file_path):
+        with open(bro_log_file_path, "r") as infile:
+            for l in infile.readlines():
+                bro_dict = json.loads(l)
+                if "latency" in bro_dict:
+                    self.data.append(bro_dict['latency'] * 1000)
+                else:
+                    print "Missing latency entry in:", bro_log_file_path
+
+    def collect_data(self, pcap_file_name, output_file_path=None):
+
+        dir = self.base_dir + "/logs/" + self.project_name
+        pcap_file_path = dir + "/" + pcap_file_name
+
+        print "Processing:", pcap_file_path
+
+        bro_log_file_path = self.parse_latency_timing_using_bro(pcap_file_path)
+        self.collect_bro_data_points(bro_log_file_path)
+
+
+def main():
+
+    script_dir = os.path.dirname(os.path.realpath(__file__))
+    idx = script_dir.index('NetPower_TestBed')
+    base_dir = script_dir[0:idx] + "NetPower_TestBed"
+    bro_dnp3_parser_dir = base_dir + "/src/utils/dnp3_timing/dnp3_parser_bro/"
+    bro_json_log_conf = "/home/rakesh/bro/scripts/policy/tuning/json-logs.bro"
+    bro_cmd = "/usr/bin/bro"
+    project_name = "timekeeper_integration"
+
+    p = DNP3PCAPPostProcessing(base_dir, bro_dnp3_parser_dir, bro_cmd, bro_json_log_conf, project_name)
+    p.collect_data("s1-eth2-s2-eth2.pcap")
+    print p.data
+
+
+if __name__ == "__main__":
+    main()
+

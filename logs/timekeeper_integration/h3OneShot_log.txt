@@ -1,25 +1,25 @@
 Started emulation driver ...
 Cmd channel buffer open succeeded !
 Waiting for START command ... buf =  h3OneShotmain-cmd-channel-buffer
-Triggered emulation driver at  2017-03-14 22:49:36.431577
-Started command at  2017-03-14 22:49:37.436202
+Triggered emulation driver at  2017-03-14 22:54:08.307483
+Started command at  2017-03-14 22:54:09.307675
 Waiting for exit command ...
-Checking for EXIT for the  1  time at:  2017-03-14 22:49:37.478227
-Running the Slave. Pid =  12232
+Checking for EXIT for the  1  time at:  2017-03-14 22:54:09.338026
+Running the Slave. Pid =  13966
 The stack state has changed: COMMS_DOWN
-Checking for EXIT for the  2  time at:  2017-03-14 22:49:38.480823
+Checking for EXIT for the  2  time at:  2017-03-14 22:54:10.346700
 The stack state has changed: COMMS_UP
-Checking for EXIT for the  3  time at:  2017-03-14 22:49:39.481132
+Checking for EXIT for the  3  time at:  2017-03-14 22:54:11.356791
 Binaries: 0
 Analogs: 0
 Counters: 0
 ControlStatus: 0
 Setpointstatus: 0
-Checking for EXIT for the  4  time at:  2017-03-14 22:49:40.484092
-Checking for EXIT for the  5  time at:  2017-03-14 22:49:41.487473
-Checking for EXIT for the  6  time at:  2017-03-14 22:49:42.488000
-Checking for EXIT for the  7  time at:  2017-03-14 22:49:43.495448
-Checking for EXIT for the  8  time at:  2017-03-14 22:49:44.496304
-Checking for EXIT for the  9  time at:  2017-03-14 22:49:45.501849
+Checking for EXIT for the  4  time at:  2017-03-14 22:54:12.361107
+Checking for EXIT for the  5  time at:  2017-03-14 22:54:13.366849
+Checking for EXIT for the  6  time at:  2017-03-14 22:54:14.372819
+Checking for EXIT for the  7  time at:  2017-03-14 22:54:15.376893
+Checking for EXIT for the  8  time at:  2017-03-14 22:54:16.377197
+Checking for EXIT for the  9  time at:  2017-03-14 22:54:17.377690
 Shutting down driver ...
 The stack state has changed: COMMS_DOWN
