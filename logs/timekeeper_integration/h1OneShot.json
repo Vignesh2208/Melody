@@ -1,1 +1,0 @@
-{"driver_id": "h1OneShot", "root_user_name": "ubuntu", "node_id": "h1", "run_time": 10, "inter_flow_period": 0, "offset": 2, "long_running": true, "cmd": "python /home/rakesh/NetPower_TestBed/src/cyber_network/master.py --slave_ip 10.0.0.3", "type": "OneShot", "root_password": "ubuntu"}

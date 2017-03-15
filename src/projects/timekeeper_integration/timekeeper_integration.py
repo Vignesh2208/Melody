@@ -192,8 +192,7 @@ def main():
 
     exp.start_project()
 
-    project_name = "timekeeper_integration"
-    measure_dnp3_latencies(project_name, "s1-eth2-s2-eth2.pcap")
+    measure_dnp3_latencies(exp.project_name, "s1-eth2-s2-eth2.pcap")
 
 
 if __name__ == "__main__":

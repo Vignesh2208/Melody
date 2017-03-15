@@ -1,5 +1,6 @@
 import datetime
 import json
+import os
 import uuid
 from datetime import datetime
 from shared_buffer import *
@@ -24,9 +25,8 @@ class NetPower(object):
                  emulated_background_traffic_flows,
                  emulated_network_scan_events,
                  emulated_dnp3_traffic_flows,
-				 ENABLE_TIMEKEEPER,
-				 TDF
-		):
+                 ENABLE_TIMEKEEPER,
+                 TDF):
 
         self.network_configuration = network_configuration
 
@@ -59,6 +59,10 @@ class NetPower(object):
 
         self.node_mappings_file_path = self.script_dir + "/node_mappings.txt"
         self.log_dir = log_dir
+        
+        # Clean up logs from previous run(s)
+        os.system("rm -rf " + self.log_dir + "/*")
+
         self.proxy_dir = self.base_dir + "/src/core"
         self.sharedBufferArray = shared_buffer_array()
         self.tcpdump_procs = []
@@ -93,7 +97,6 @@ class NetPower(object):
                                                      "node_id": bg_flow.src_mn_node.name,
                                                      "driver_id":  bg_flow.src_mn_node.name + "-emulation-" + str(uuid.uuid1())})
 
-
             if bg_flow.server_process_start_cmd:
                 self.emulation_driver_params.append({"type": TRAFFIC_FLOW_ONE_SHOT,
                                                      "cmd": bg_flow.server_process_start_cmd,
@@ -105,8 +108,6 @@ class NetPower(object):
                                                      "root_password": bg_flow.root_password,
                                                      "node_id": bg_flow.dst_mn_node.name,
                                                      "driver_id": bg_flow.src_mn_node.name + "-emulation-" + str(uuid.uuid1())})
-
-
 
     def load_timekeeper(self) :
         if self.enable_timekeeper:

@@ -1,1 +1,0 @@
-{"driver_id": "h2OneShot", "root_user_name": "ubuntu", "node_id": "h2", "run_time": 10, "inter_flow_period": 0, "offset": 1, "long_running": true, "cmd": "python /home/user/Desktop/NetPower_TestBed/src/cyber_network/slave.py", "type": "OneShot", "root_password": "ubuntu"}
