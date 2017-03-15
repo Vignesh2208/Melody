@@ -1,5 +1,6 @@
 import datetime
 import json
+import uuid
 from datetime import datetime
 from shared_buffer import *
 from utils.sleep_functions import sleep
@@ -48,7 +49,6 @@ class NetPower(object):
         self.switch_pids = []
         self.emulation_driver_pids = []
         self.replay_driver_pids = []
-        self.driver_ids = []
 
         self.emulated_background_traffic_flows = emulated_background_traffic_flows
         self.emulated_network_scan_events = emulated_network_scan_events
@@ -56,9 +56,6 @@ class NetPower(object):
 
         self.emulation_driver_params = []
         self.get_emulation_driver_params()
-
-        for edp in self.emulation_driver_params :
-            self.driver_ids.append(edp["driver_id"])
 
         self.node_mappings_file_path = self.script_dir + "/node_mappings.txt"
         self.log_dir = log_dir
@@ -94,7 +91,7 @@ class NetPower(object):
                                                      "root_user_name": bg_flow.root_user_name,
                                                      "root_password": bg_flow.root_password,
                                                      "node_id": bg_flow.src_mn_node.name,
-                                                     "driver_id": bg_flow.src_mn_node.name + bg_flow.type})
+                                                     "driver_id": str(uuid.uuid1())})
 
 
             if bg_flow.server_process_start_cmd:
@@ -107,7 +104,7 @@ class NetPower(object):
                                                      "root_user_name": bg_flow.root_user_name,
                                                      "root_password": bg_flow.root_password,
                                                      "node_id": bg_flow.dst_mn_node.name,
-                                                     "driver_id": bg_flow.dst_mn_node.name + bg_flow.type})
+                                                     "driver_id": str(uuid.uuid1())})
 
 
 
@@ -400,25 +397,25 @@ class NetPower(object):
                 print "Shared Buffer open failed! Buffer not initialized for host: " + str(mininet_host.name)
                 sys.exit(0)
 
-        for driver_id in self.driver_ids:
-            result = self.sharedBufferArray.open(bufName=str(driver_id) + "main-cmd-channel-buffer", isProxy=True)
+        for edp in self.emulation_driver_params:
+            result = self.sharedBufferArray.open(bufName=edp["driver_id"] + "main-cmd-channel-buffer", isProxy=True)
             if result == BUF_NOT_INITIALIZED or result == FAILURE:
-                print "Shared Buffer open failed! Buffer not initialized for driver: " + str(driver_id)
+                print "Shared Buffer open failed! Buffer not initialized for driver: " + edp["driver_id"]
                 sys.exit(0)
 
         print "Opened Main channel buffers "
 
-    def trigger_all_processes(self,trigger_cmd):
+    def trigger_all_processes(self, trigger_cmd):
         for i in xrange(len(self.network_configuration.roles)):
             mininet_host = self.network_configuration.mininet_obj.hosts[i]
             ret = 0
             while ret <= 0:
                 ret = self.sharedBufferArray.write(str(mininet_host.name) + "main-cmd-channel-buffer", trigger_cmd, 0)
 
-        for driver_id in self.driver_ids:
+        for edp in self.emulation_driver_params:
             ret = 0
             while ret <= 0 :
-                ret = self.sharedBufferArray.write(str(driver_id) + "main-cmd-channel-buffer", trigger_cmd, 0)
+                ret = self.sharedBufferArray.write(edp["driver_id"] + "main-cmd-channel-buffer", trigger_cmd, 0)
 
         print "Triggered hosts and drivers with cmd = ", trigger_cmd
 
