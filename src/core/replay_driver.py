@@ -137,8 +137,8 @@ class ReplayDriver(object):
                     dst_ip = curr_send_event[1]
                     n_required_recv_events = curr_send_event[2]
 
-                    # print "Sending Replay Event: Dst = ", dst_ip, " N Req Recv events = ", n_required_recv_events
-                    # sys.stdout.flush()
+                    print "Sending Replay Event: Dst = ", dst_ip, " N Req Recv events = ", n_required_recv_events
+                    sys.stdout.flush()
 
             if curr_send_event == None:
                 break
@@ -178,7 +178,7 @@ class ReplayDriver(object):
         self.raw_rx_sock.close()
         self.raw_tx_sock.close()
         print "curr_send_idx:", curr_send_idx
-        print "Closed socket, signalling End of Replay Stage ..."
+        print "Closed socket, signalling End of Replay Stage at ", str(datetime.now())
         sys.stdout.flush()
         self.send_command_message("DONE")
         
@@ -206,7 +206,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--input_params_file_path", dest="input_params_file_path")
 
-    print "Started emulation driver ..."
+    print "Started Replay driver ..."
     sys.stdout.flush()
     args = parser.parse_args()
 

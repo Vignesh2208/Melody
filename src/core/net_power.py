@@ -151,8 +151,7 @@ class NetPower(object):
             print "########################################################################"
             print ""
             print "Number of dilated processes         = ", len(self.pid_list)
-            print "Number of dilated tcpdump processes = ", self.n_dilated_tcpdump_procs
-            print "Actual number of tcpdump processes  = ", self.n_actual_tcpdump_procs
+            print "Number of tcpdump processes         = ", self.n_actual_tcpdump_procs
             print "Number of hosts                     = ", len(self.network_configuration.roles)
             print "Number of switches                  = ", len(self.network_configuration.mininet_obj.switches)
             print ""
@@ -168,8 +167,13 @@ class NetPower(object):
             print ""
             print "########################################################################"
             print ""
-            print "                        Driver pids"
+            print "                     Emulated Driver pids"
             print  self.emulation_driver_pids
+            print ""
+            print "########################################################################"
+            print ""
+            print "                     Replay Driver pids"
+            print  self.replay_driver_pids
             print ""
             print "########################################################################"
 
@@ -327,15 +331,15 @@ class NetPower(object):
                 pid_master = mininet_switch.pid
             for name in mininet_switch.intfNames():
                 if name != "lo" :
-                    set_netdevice_owner(mininet_switch.pid,name)
-                    #set_netdevice_owner(pid_master,name)
+                    #set_netdevice_owner(mininet_switch.pid,name)
+                    set_netdevice_owner(pid_master,name)
 
         for pid, host_name in self.host_pids:
             mininet_host = self.network_configuration.mininet_obj.get(host_name)
             for name in mininet_host.intfNames():
                 if name != "lo" :
-                    set_netdevice_owner(pid, name)
-                    #set_netdevice_owner(pid_master,name)
+                    #set_netdevice_owner(pid, name)
+                    set_netdevice_owner(pid_master,name)
 
     def start_proxy_process(self):
 
@@ -379,15 +383,16 @@ class NetPower(object):
         
         for i in xrange(len(self.network_configuration.roles)):
             mininet_host = self.network_configuration.mininet_obj.hosts[i]
-            self.send_cmd_to_node(mininet_host.name,"sudo iptables -I OUTPUT -p tcp --tcp-flags RST RST -j DROP &")
-        print "DISABLED TCP RST"
+            self.send_cmd_to_node(mininet_host.name,"sudo iptables -I OUTPUT -p tcp --tcp-flags RST RST -j DROP")
+        sleep(1)            
+        print "Attack Orchestrator: DISABLED TCP RST"
 
     def enable_TCP_RST(self):
         
         for i in xrange(len(self.network_configuration.roles)):
             mininet_host = self.network_configuration.mininet_obj.hosts[i]
-            self.send_cmd_to_node(mininet_host.name,"sudo iptables -I OUTPUT -p tcp --tcp-flags RST RST -j ACCEPT &")
-        print "ENABLED TCP RST"
+            self.send_cmd_to_node(mininet_host.name,"sudo iptables -I OUTPUT -p tcp --tcp-flags RST RST -j ACCEPT")
+        print "Attack Orchestrator: ENABLED TCP RST"
 
     def open_main_cmd_channel_buffers(self):
 
@@ -418,7 +423,14 @@ class NetPower(object):
             while ret <= 0 :
                 ret = self.sharedBufferArray.write(edp["driver_id"] + "main-cmd-channel-buffer", trigger_cmd, 0)
 
-        print "Triggered hosts and drivers with cmd = ", trigger_cmd
+        self.send_to_attack_orchestrator("START")
+
+        print "NetPower: Triggered hosts, drivers and attack orchestrator with Command: ", trigger_cmd
+
+    def send_to_attack_orchestrator(self, msg):
+        ret = 0
+        while ret <= 0:
+            ret = self.sharedBufferArray.write("cmd-channel-buffer", msg, 0)
 
     def recv_from_attack_orchestrator(self):
         recv_msg = ''
@@ -439,14 +451,15 @@ class NetPower(object):
                 recv_msg = self.recv_from_attack_orchestrator()
                 if recv_msg == "PCAPS-LOADED":
                     break
-                sleep(0.2)
-
-            self.trigger_all_processes("START")
-            sys.stdout.flush()
+                sleep(0.5)
+            print "Attack Orchestrator: LOADED ALL PCAPS"
+            
             if self.enable_timekeeper == 1 :
                 start_time = get_current_virtual_time_pid(self.switch_pids[0])
             else:
                 start_time = time.time()
+            self.trigger_all_processes("START")
+            sys.stdout.flush()
                 
             prev_time  = start_time
             run_time   = self.run_time
@@ -474,10 +487,12 @@ class NetPower(object):
                     time.sleep(0.5)
 
                 recv_msg = self.recv_from_attack_orchestrator()
-                if recv_msg == "START":
+                if recv_msg == "START-REPLAY":
                     self.disable_TCP_RST()
-                if recv_msg == "END":
+                    self.send_to_attack_orchestrator("ACK")
+                if recv_msg == "END-REPLAY":
                     self.enable_TCP_RST()
+                    self.send_to_attack_orchestrator("ACK")
                 time.sleep(0.5)
 
     def print_topo_info(self):
@@ -575,56 +590,6 @@ class NetPower(object):
                 os.system("sudo kill " + str(pid))
             except:
                 pass     
-    
-    def start_emulated_traffic_threads(self):
-
-        print "########################################################################"
-        print ""
-        print "                        Starting Background threads"
-        print ""
-        print "########################################################################"
-
-        for tf in self.emulated_network_scan_events:
-            tf.start_time = self.start_time
-            tf.start()
-
-        print "Network scan event threads started..."
-
-        for tf in self.emulated_dnp3_traffic_flows:
-            tf.start_time = self.start_time
-            tf.start()
-
-        print "DNP3 traffic threads started..."
-
-        for tf in self.emulated_background_traffic_flows:
-            tf.start_time = self.start_time
-            tf.start()
-
-        print "Background traffic threads started..."
-
-    def stop_emulated_traffic_threads(self):
-
-        print "########################################################################"
-        print ""
-        print "                        Stopping Background threads"
-        print ""
-        print "########################################################################"
-
-        # Join the threads for background processes to wait on them
-        for tf in self.emulated_background_traffic_flows:
-            tf.join()
-
-        print "Network scan event threads stopped..."
-
-        for tf in self.emulated_dnp3_traffic_flows:
-            tf.join()
-
-        print "DNP3 traffic threads stopped..."
-
-        for tf in self.emulated_network_scan_events:
-            tf.join()
-
-        print "Background traffic threads stopped..."
 
     def cleanup(self):
 
@@ -634,8 +599,7 @@ class NetPower(object):
         else:
             self.trigger_all_processes("EXIT")
             time.sleep(10)
-        #self.stop_emulated_traffic_threads()
-
+       
         self.stop_emulation_drivers()
 
         print "Cleaning up ..."
@@ -652,11 +616,11 @@ class NetPower(object):
             pass
             
         for pid, host_name in self.host_pids:
-            os.system("sudo kill " + str(pid))
+            os.system("sudo kill -9 " + str(pid))
         for pid in self.emulation_driver_pids:
-            os.system("sudo kill " + str(pid))
+            os.system("sudo kill -9 " + str(pid))
         for pid in self.replay_driver_pids:
-            os.system("sudo kill " + str(pid))
+            os.system("sudo kill -9 " + str(pid))
 
         try:
             os.system("sudo killall reader")
@@ -664,6 +628,7 @@ class NetPower(object):
             pass
             
         self.network_configuration.cleanup_mininet()
+        #os.system("sudo killall -9 python")
 
     def start_project(self):
         print "Starting project ..."
@@ -676,11 +641,13 @@ class NetPower(object):
         self.start_proxy_process()
         self.start_attack_orchestrator()
 
+        #Background related
         self.start_emulation_drivers()
         self.start_replay_drivers()
 
+        #TimeKeeper related
         if self.enable_timekeeper:
-            #TimeKeeper related ...
+
             self.set_switch_netdevice_owners()
             self.dilate_nodes()
             self.start_synchronized_experiment()
@@ -688,8 +655,6 @@ class NetPower(object):
         else:
             self.start_time = time.time()
 
-        #Background related ...
-        #self.start_emulated_traffic_threads()
         self.run()
         self.cleanup()
 

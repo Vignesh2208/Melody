@@ -456,7 +456,7 @@ class NetworkConfiguration(object):
 
         if self.mininet_obj:
             print "Mininet cleanup..."
-            self.mininet_obj.stop()
+            #self.mininet_obj.stop()
 
         os.system("sudo mn -c")
 

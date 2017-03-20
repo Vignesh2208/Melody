@@ -8,9 +8,6 @@ from proxyIPCLayer import proxyIPCLayer
 import time
 import getopt
 import socket
-print sys.path
-#sys.path.insert(0, '/home/user/Desktop/NetPower_TestBed/src')
-#print sys.path
 from utils.sleep_functions import sleep
 
 

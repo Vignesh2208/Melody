@@ -1,6 +1,7 @@
 import json
 import getopt
 import dpkt
+from utils.sleep_functions import *
 from timekeeper_functions import *
 from shared_buffer import *
 from logger import *
@@ -121,13 +122,17 @@ class AttackOrchestrator:
         ret = 0
         while ret <= 0:
             ret = self.sharedBufferArray.write("cmd-channel-buffer", msg, 0)
-        print "Signalled start of replay phase ..."
+
+    def recv_from_main_process(self):
+        recv_msg = ''
+        dummy_id, recv_msg = self.sharedBufferArray.read("cmd-channel-buffer")
+        return recv_msg
 
     def signal_pcap_replay_trigger(self, node_id, pcap_file_path):
         ret = 0
         while ret <= 0:
             ret = self.sharedBufferArray.write(node_id + "-replay" + "main-cmd-channel-buffer", pcap_file_path, 0)
-        print "Signalled start of replay phase to node:", node_id
+        #print "Signalled start of replay phase to node:", node_id
 
     def extract_involved_replay_nodes(self, replay_pcap_f_name):
         assert os.path.isfile(self.attkPlanDirPath + "/" + replay_pcap_f_name)
@@ -166,13 +171,13 @@ class AttackOrchestrator:
 
         return_val = FINISH
 
-        print "Starting Emulation Phase with ID = ", emulation_phase_id
+        print "Attack Orchestrator: Starting Emulation Phase with ID = ", emulation_phase_id
         for host in hostIDs :
             ret = 0
             while ret <= 0:
                 ret = self.sharedBufferArray.write(str(host) + "attk-channel-buffer","EMULATE:" + str(emulation_phase_id), 0)
 
-        print "Waiting for Emulation Phase to Complete ..."
+        print "Attack Orchestrator: Waiting for Emulation Phase to Complete ..."
         for host in hostIDs :
             if return_val == STOP:
                 break
@@ -183,6 +188,7 @@ class AttackOrchestrator:
                     return_val = STOP
                     break
                 dummy_id, recv_msg = self.sharedBufferArray.read(str(host) + "attk-channel-buffer")
+                sleep(0.5)
 
         return return_val
 
@@ -200,14 +206,20 @@ class AttackOrchestrator:
 
     def run(self):
         self.start_time = get_current_virtual_time()
-
         self.wait_for_loaded_pcap_msg()
         self.send_to_main_process("PCAPS-LOADED")
+
+        while True:
+            recv_msg = self.recv_from_main_process()
+            if recv_msg == "START":
+                break
+            sleep(0.5)
+
 
         with open(self.attkPlanDirPath + "/attack_plan.json", "r") as f:
             self.attack_plan = json.load(f)
 
-        print "Attack plan:", self.attack_plan
+        #print "Attack plan:", self.attack_plan
 
         for stage_dict in self.attack_plan:
 
@@ -216,17 +228,39 @@ class AttackOrchestrator:
 
             if stage_dict["type"] == "replay":
                 
-                self.send_to_main_process("START")
+                self.send_to_main_process("START-REPLAY")
+                print "Attack Orchestrator: Signalled Start of Next Replay Phase: Pcap = ", stage_dict["pcap_file_path"]
+                while True:
+                    recv_msg = self.recv_from_main_process()
+                    if recv_msg == "ACK":
+                        break
+                    sleep(0.5)
                 
                 for node_id in stage_dict["involved_nodes"]:
                     self.signal_pcap_replay_trigger(node_id, stage_dict["pcap_file_path"])
+                    
+                print "Attack Orchestrator: Waiting for Replay Phase to complete ..."
+                for node_id in stage_dict["involved_nodes"]:
+                    recv_msg = ''
+                    while recv_msg != "DONE":
+                        if get_current_virtual_time() - self.start_time >= self.runTime:
+                            print "Attack Orchestrator: Run time Expired. Stopping ..."
+                            sys.exit(0)                    
+                        dummy_id, recv_msg = self.sharedBufferArray.read(node_id + "-replay" + "main-cmd-channel-buffer")
+                        sleep(0.5)
 
-                self.send_to_main_process("END")
+                self.send_to_main_process("END-REPLAY")
+                print "Attack Orchestrator: Signalled End of Last Replay Phase"
+                while True:
+                    recv_msg = self.recv_from_main_process()
+                    if recv_msg == "ACK":
+                        break
+                    sleep(0.5)
 
             if stage_dict["type"] == "emulation":
                 result = self.run_emulation_phase(stage_dict["emulation_phase_id"])
 
-        print "Finished Executing Attack Plan. Stopping Attack Orchestrator..."
+        print "Attack Orchestrator: Finished Executing Attack Plan. Stopping Attack Orchestrator..."
         sys.exit(0)
 
 
