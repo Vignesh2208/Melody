@@ -26,7 +26,8 @@ class NetPower(object):
                  emulated_network_scan_events,
                  emulated_dnp3_traffic_flows,
                  ENABLE_TIMEKEEPER,
-                 TDF):
+                 TDF,
+		 CPUS_SUBSET):	# *NEW*
 
         self.network_configuration = network_configuration
 
@@ -43,6 +44,7 @@ class NetPower(object):
         self.timekeeper_dir = self.base_dir + "/src/core/dilation-code"
         self.enable_timekeeper = ENABLE_TIMEKEEPER
         self.tdf = TDF
+	self.cpus_subset = CPUS_SUBSET 	# *NEW*
         self.attack_plan_dir = attack_plan_dir
         self.pid_list = []
         self.host_pids = []
@@ -59,7 +61,9 @@ class NetPower(object):
 
         self.node_mappings_file_path = self.script_dir + "/node_mappings.txt"
         self.log_dir = log_dir
-        
+
+	self.flag_debug = True 	# flag for debug printing       
+ 
         # Clean up logs from previous run(s)
         os.system("rm -rf " + self.log_dir + "/*")
 
@@ -79,8 +83,8 @@ class NetPower(object):
 
         self.open_main_cmd_channel_buffers()
         self.load_timekeeper()
-        if self.enable_timekeeper == 1 :
-            set_cpu_affinity(int(os.getpid()))
+
+        set_cpu_affinity(int(os.getpid()))
             
     def get_emulation_driver_params(self):
         for bg_flow in self.emulated_background_traffic_flows:
@@ -237,6 +241,7 @@ class NetPower(object):
             os.system("echo '' > " + self.log_dir + "/" + mininet_host.name)
             reader_cmd =  self.base_dir + "/src/core/bin/reader " + str(mininet_host.name)  + " " + self.log_dir + " >> " + self.log_dir + "/" + mininet_host.name + " 2>&1 &"
 
+            #
             mininet_host.cmd(reader_cmd)
 
 
@@ -270,8 +275,8 @@ class NetPower(object):
             self.host_pids.append((pid, mininet_host.name))
             self.pid_list.append(pid)
             
-            if self.enable_timekeeper == 1:
-                set_cpu_affinity(mininet_host.pid)
+            #if self.enable_timekeeper == 1:
+            set_cpu_affinity(mininet_host.pid)
             
             #if mininet_host.name == "h3" :
             #    mininet_host.cmd("sudo tcpdump -i h3-eth0 -w /home/user/Desktop/host.pcap &")
@@ -304,7 +309,7 @@ class NetPower(object):
 
                 proc = subprocess.Popen(capture_cmd, shell=True)
                 self.tcpdump_procs.append(proc)
-                set_cpu_affinity(int(proc.pid))	
+                set_cpu_affinity(int(proc.pid))   # *NEW* ??? not dependent on timekeeper running?	
 
             capture_cmd = "sudo " + core_cmd
         
@@ -654,6 +659,19 @@ class NetPower(object):
             self.start_time = get_current_virtual_time_pid(self.switch_pids[0])
         else:
             self.start_time = time.time()
+	    # if timekeeper is not enabled, restrict emulation/replay operations to cpu subset
+            for pid in self.emulation_driver_pids: # *NEW*
+		#if self.flag_debug:
+		#    print "DEBUG: Original cpu affinity: "
+		#    os.system("taskset -cp " + str(pid))
+		set_def_cpu_affinity(pid,self.cpus_subset)
+		#if self.flag_debug:
+		#    # verify update of cpu affinity
+		#    print "DEBUG: New cpu affinity for pid %s" % pid
+		#    os.system("taskset -cp " + str(pid))
+            for pid in self.replay_driver_pids:
+		set_def_cpu_affinity(pid,self.cpus_subset)
+	    
 
         self.run()
         self.cleanup()

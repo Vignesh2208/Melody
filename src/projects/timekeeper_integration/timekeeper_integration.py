@@ -11,9 +11,9 @@ from core.net_power import NetPower
 from core.shared_buffer import *
 from utils.dnp3_pcap_post_processing import DNP3PCAPPostProcessing
 
-ENABLE_TIMEKEEPER = 1
+ENABLE_TIMEKEEPER = 0
 TDF = 1
-
+CPUS_SUBSET = "2-5"	# set of CPUs to run emulation/replay processes on when timekeeper is not enabled
 
 class TimeKeeperIntegration(NetPower):
 
@@ -38,7 +38,8 @@ class TimeKeeperIntegration(NetPower):
                                                     emulated_network_scan_events,
                                                     emulated_dnp3_traffic_flows,
                                                     ENABLE_TIMEKEEPER,
-                                                    TDF
+                                                    TDF,
+						    CPUS_SUBSET
                                                     )
 
 
@@ -144,7 +145,7 @@ def main():
         #                    client_expect_file='ping -c8 10.0.0.2'),
 
         #EmulatedTrafficFlow(type=TRAFFIC_FLOW_ONE_SHOT,
-        #                    offset=1,
+       	#                    offset=1,
         #                    inter_flow_period=0,
         #                    run_time=run_time,
         #                    src_mn_node=mn_h1,
