@@ -11,9 +11,9 @@ from core.net_power import NetPower
 from core.shared_buffer import *
 from utils.dnp3_pcap_post_processing import DNP3PCAPPostProcessing
 
-ENABLE_TIMEKEEPER = 0
-TDF = 1
-CPUS_SUBSET = "2-5"	# set of CPUs to run emulation/replay processes on when timekeeper is not enabled
+ENABLE_TIMEKEEPER = 1
+TDF = 10
+CPUS_SUBSET = "2-24"	# set of CPUs to run emulation/replay processes on when timekeeper is not enabled
 
 class TimeKeeperIntegration(NetPower):
 
@@ -89,13 +89,13 @@ def measure_dnp3_latencies(project_name, pcap_file_name):
     idx = script_dir.index('NetPower_TestBed')
     base_dir = script_dir[0:idx] + "NetPower_TestBed"
     bro_dnp3_parser_dir = base_dir + "/src/utils/dnp3_timing/dnp3_parser_bro/"
-    bro_json_log_conf = "/home/rakesh/bro/scripts/policy/tuning/json-logs.bro"
-    bro_cmd = "/usr/bin/bro"
+    bro_json_log_conf = "/home/moses/bro/scripts/policy/tuning/json-logs.bro"
+    bro_cmd = "/usr/local/bro/bin/bro"
 
     p = DNP3PCAPPostProcessing(base_dir, bro_dnp3_parser_dir, bro_cmd, bro_json_log_conf, project_name)
     p.collect_data(pcap_file_name)
     print p.data
-
+    print "Num samples:", len(p.data[5:])
     print "mean:", numpy.mean(p.data[5:])
     print "std:", numpy.std(p.data[5:])
     print "min:", min(p.data[5:])
@@ -144,29 +144,29 @@ def main():
         #                    server_process_start_cmd="",
         #                    client_expect_file='ping -c8 10.0.0.2'),
 
-        #EmulatedTrafficFlow(type=TRAFFIC_FLOW_ONE_SHOT,
-       	#                    offset=1,
-        #                    inter_flow_period=0,
-        #                    run_time=run_time,
-        #                    src_mn_node=mn_h1,
-        #                    dst_mn_node=mn_h3,
-        #                    root_user_name="ubuntu",
-        #                    root_password="ubuntu",
-        #                    server_process_start_cmd='python ' + base_dir + "/src/cyber_network/slave.py --slave_ip " + mn_h3.IP(),
-        #                    client_expect_file='python ' + base_dir + "/src/cyber_network/master.py --slave_ip " + mn_h3.IP(),
-        #                    long_running=True)
-
         EmulatedTrafficFlow(type=TRAFFIC_FLOW_ONE_SHOT,
-                    offset=1,
-                    inter_flow_period=0,
-                    run_time=run_time,
-                    src_mn_node=mn_h1,
-                    dst_mn_node=mn_h3,
-                    root_user_name="ubuntu",
-                    root_password="ubuntu",
-                    server_process_start_cmd='python ' + base_dir + "/src/cyber_network/simple_echo_server.py",
-                    client_expect_file='python ' + base_dir + "/src/cyber_network/simple_udp_client.py",
-                    long_running=True)
+       	                    offset=1,
+                            inter_flow_period=0,
+                            run_time=run_time,
+                            src_mn_node=mn_h1,
+                            dst_mn_node=mn_h3,
+                            root_user_name="ubuntu",
+                            root_password="ubuntu",
+                            server_process_start_cmd='python ' + base_dir + "/src/cyber_network/slave.py --slave_ip " + mn_h3.IP(),
+                            client_expect_file='python ' + base_dir + "/src/cyber_network/master.py --slave_ip " + mn_h3.IP(),
+                            long_running=True)
+
+        #EmulatedTrafficFlow(type=TRAFFIC_FLOW_ONE_SHOT,
+        #            offset=1,
+        #            inter_flow_period=0,
+        #            run_time=run_time,
+        #            src_mn_node=mn_h1,
+        #            dst_mn_node=mn_h3,
+        #            root_user_name="ubuntu",
+        #            root_password="ubuntu",
+        #            server_process_start_cmd='python ' + base_dir + "/src/cyber_network/simple_echo_server.py",
+        #            client_expect_file='python ' + base_dir + "/src/cyber_network/simple_udp_client.py",
+        #            long_running=True)
 
 
         #EmulatedTrafficFlow(type=TRAFFIC_FLOW_ONE_SHOT,
@@ -193,7 +193,7 @@ def main():
 
     exp.start_project()
 
-    #measure_dnp3_latencies(exp.project_name, "s1-eth2-s2-eth2.pcap")
+    measure_dnp3_latencies(exp.project_name, "s1-eth2-s2-eth2.pcap")
 
 
 if __name__ == "__main__":

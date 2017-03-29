@@ -131,9 +131,9 @@ class NetPower(object):
     def set_freeze_quantum(self):
 
         if self.tdf > 1 :
-            timeslice = 1000000
+            timeslice = 200000
         else:
-            timeslice = 1000000
+            timeslice = 200000
         set_cbe_experiment_timeslice(timeslice*self.tdf)
 		
 
@@ -334,17 +334,20 @@ class NetPower(object):
             mininet_switch = self.network_configuration.mininet_obj.switches[i]
             if i == 0:
                 pid_master = mininet_switch.pid
+
+            pid_master = int(self.pid_list[0])
+
             for name in mininet_switch.intfNames():
                 if name != "lo" :
-                    #set_netdevice_owner(mininet_switch.pid,name)
-                    set_netdevice_owner(pid_master,name)
+                    set_netdevice_owner(mininet_switch.pid,name)
+                    #set_netdevice_owner(pid_master,name)
 
         for pid, host_name in self.host_pids:
             mininet_host = self.network_configuration.mininet_obj.get(host_name)
             for name in mininet_host.intfNames():
                 if name != "lo" :
-                    #set_netdevice_owner(pid, name)
-                    set_netdevice_owner(pid_master,name)
+                    set_netdevice_owner(pid, name)
+                    #set_netdevice_owner(pid_master,name)
 
     def start_proxy_process(self):
 
