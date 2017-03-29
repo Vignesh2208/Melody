@@ -113,6 +113,7 @@ target/
 
 #logs
 logs/microgrid_with_background_traffic/
+logs/
 
 #configuration
 src/Projects/microgrid_with_background_traffic/configurations/
