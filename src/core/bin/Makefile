@@ -5,7 +5,7 @@ reader_process: reader.c
 
 
 gettime: gettimepid.c
-	gcc -o gettimepid gettimepid.c
+	gcc -o gettimepid gettimepid.c -I/usr/include/python2.7 -lpython2.7 
 
 thread_spawn: thread_spawner.c
 	gcc -o thread_spawner thread_spawner.c -lpthread

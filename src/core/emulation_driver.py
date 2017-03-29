@@ -51,12 +51,15 @@ class EmulationDriver(object):
     def trigger(self):
 
         if self.type == TRAFFIC_FLOW_ONE_SHOT:
-            sleep(self.offset)
+            sleep(int(self.offset))
             print "Started command at ", str(datetime.now())
             sys.stdout.flush()
             #os.system(self.cmd + " &")
             try:
                 cmd_list = self.cmd.split(' ')
+		print cmd_list
+		print self.cmd
+		sys.stdout.flush()
                 p = subprocess.Popen(cmd_list,shell=False)
             except:
                 print "Error running command: ", sys.exec_info()[0]

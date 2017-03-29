@@ -42,7 +42,8 @@ def sleep(duration):
 
     # Check if the provided input value is integer by using float().is_integer()
     
-    usleep(int(duration*1000000))   
+    #usleep(int(duration*1000000))   
+    time.sleep(float(duration))
 
     #if float(duration).is_integer():
         #libc.sleep(int(duration))

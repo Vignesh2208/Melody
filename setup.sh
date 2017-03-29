@@ -83,4 +83,4 @@ echo "##########################################################################
 echo "Setting up TimeKeeper"
 echo "#############################################################################"
 
-sudo ln -s $HOME/Desktop/TimeKeeper/dilation-code $HOME/Desktop/NetPower_TestBed/src/core/
+sudo ln -s $HOME/TimeKeeper/dilation-code $HOME/NetPower_TestBed/src/core/
