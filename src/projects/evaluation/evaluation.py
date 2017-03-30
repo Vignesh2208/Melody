@@ -52,7 +52,7 @@ class Evaluation:
                                     dst_mn_node=network_configuration.mininet_obj.get("h2"),
                                     root_user_name="ubuntu",
                                     root_password="ubuntu",
-                                    server_process_start_cmd='sudo python ' + base_dir + "/src/cyber_network/slave.py",
+                                    server_process_start_cmd='sudo python ' + base_dir + "/src/cyber_network/dnp3_slave.py",
                                     client_expect_file=base_dir + '/src/cyber_network/dnp3_master.expect',
                                     long_running=True)]
 

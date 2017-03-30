@@ -27,6 +27,10 @@ class DNP3PCAPPostProcessing:
         return bro_log_file_path
 
     def collect_bro_data_points(self, bro_log_file_path):
+        if not os.path.exists(bro_log_file_path):
+            print "Nothing to collect dnp3 data from. "
+            return
+
         with open(bro_log_file_path, "r") as infile:
             for l in infile.readlines():
                 bro_dict = json.loads(l)

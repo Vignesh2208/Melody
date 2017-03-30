@@ -126,7 +126,7 @@ def get_emulated_dnp3_traffic_flows(network_configuration, run_time, base_dir):
                             dst_mn_node=network_configuration.mininet_obj.get("h2"),
                             root_user_name="ubuntu",
                             root_password="ubuntu",
-                            server_process_start_cmd='sudo python ' + base_dir + "/src/cyber_network/slave.py",
+                            server_process_start_cmd='sudo python ' + base_dir + "/src/cyber_network/dnp3_slave.py",
                             client_expect_file=base_dir + '/src/cyber_network/dnp3_master.expect',
                             long_running=True)
     ]
@@ -235,7 +235,7 @@ def get_emulated_control_flow(flow_type, src, dst, network_configuration, run_ti
                             dst_mn_node=network_configuration.mininet_obj.get(dst),
                             root_user_name="ubuntu",
                             root_password="ubuntu",
-                            server_process_start_cmd='sudo python ' + base_dir + "/src/cyber_network/slave.py",
+                            server_process_start_cmd='sudo python ' + base_dir + "/src/cyber_network/dnp3_slave.py",
                             client_expect_file=base_dir + '/src/cyber_network/dnp3_master.expect',
                             long_running=True)
                         }

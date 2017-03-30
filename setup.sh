@@ -7,6 +7,7 @@ echo "##########################################################################
 sudo apt-get -y install python-pip
 sudo apt-get -y install libpcap-dev
 sudo apt-get -y install python-httplib2
+sudo apt-get -y install python-paramiko
 sudo pip install ryu==4.0
 sudo pip install numpy
 sudo pip install pypcapfile

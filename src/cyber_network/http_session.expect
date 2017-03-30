@@ -1,7 +1,0 @@
-#!/usr/bin/expect -f
-
-set username [lindex $argv 0];
-set password [lindex $argv 1];
-set host [lindex $argv 2];
-
-exec curl $host:8000
