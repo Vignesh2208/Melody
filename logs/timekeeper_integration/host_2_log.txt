@@ -1,22 +1,14 @@
 Host 2 Attack Layer Thread >> INFO >> Attk playback buffer open suceeded !
 Waiting for start command ... buf =  h2main-cmd-channel-buffer
-Host 2 Network Layer Thread >> INFO >> Started listening on IP: 10.0.0.2 PORT: 5100 at 2017-03-15 12:54:26.197443
-Host 2 Attack Layer Thread >> INFO >> Started at 2017-03-15 12:54:26.202507
-Host 2 IPC Thread >> INFO >> Started at 2017-03-15 12:54:26.279112
+Host 2 Network Layer Thread >> INFO >> Started listening on IP: 10.0.0.2 PORT: 5100 at 2017-03-29 18:40:27.587865
+Host 2 Attack Layer Thread >> INFO >> Started at 2017-03-29 18:40:27.588075
+Host 2 IPC Thread >> INFO >> Started at 2017-03-29 18:40:27.617712
 Host 2 IPC Thread >> INFO >> power sim id to host id map = {'34;1': 5, '35;1': 5, '36;1': 5, '32;1': 5, '25': 2, '20': 4, '37;1': 5, '23': 3, 'vpn-gateway;1': 6, '29': 2, '2': 2, '6': 4, '9': 4, '38;1': 5, '39;1': 5, '10': 4, '22': 3, '19': 3, 'attacker;1': 7, 'control;1': 1, '30;1': 5, '33;1': 5, '31;1': 5}
 Host 2 IPC Thread >> INFO >> host id to powersim id map = {1: ['control;1'], 2: ['2', '25', '29'], 3: ['22', '23', '19'], 4: ['20', '10', '6', '9'], 5: ['30;1', '31;1', '32;1', '33;1', '34;1', '35;1', '36;1', '37;1', '38;1', '39;1'], 6: ['vpn-gateway;1'], 7: ['attacker;1']}
-Signalled Start threads at  2017-03-15 12:54:26.325584
+Signalled Start threads at  2017-03-29 18:40:27.620941
 Waiting for exit command ...
-Checking for EXIT for the  1  time at:  2017-03-15 12:54:26.325683
-Checking for EXIT for the  2  time at:  2017-03-15 12:54:27.466732
-Checking for EXIT for the  3  time at:  2017-03-15 12:54:28.467472
-Checking for EXIT for the  4  time at:  2017-03-15 12:54:29.590694
-Checking for EXIT for the  5  time at:  2017-03-15 12:54:30.818565
-Checking for EXIT for the  6  time at:  2017-03-15 12:54:31.828692
-Checking for EXIT for the  7  time at:  2017-03-15 12:54:32.912626
-Checking for EXIT for the  8  time at:  2017-03-15 12:54:33.940164
-Checking for EXIT for the  9  time at:  2017-03-15 12:54:35.061153
-Shutting Down Host  2
-Host 2 IPC Thread >> INFO >> Stopping at 2017-03-15 12:54:36.364727
-Host 2 Attack Layer Thread >> INFO >> Stopping 2017-03-15 12:54:36.364839
-Host 2 Network Layer Thread >> INFO >> Stopping at 2017-03-15 12:54:36.421649
+Checking for EXIT for the  1  time at:  2017-03-29 18:40:27.620986
+Checking for EXIT for the  2  time at:  2017-03-29 18:40:28.666755
+Checking for EXIT for the  3  time at:  2017-03-29 18:40:29.814755
+Checking for EXIT for the  4  time at:  2017-03-29 18:40:30.861712
+Checking for EXIT for the  5  time at:  2017-03-29 18:40:32.124755

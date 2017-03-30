@@ -111,7 +111,7 @@ def main():
 	master_stack_config.master.mpObserver = stack_observer
 	
 	# the integrity rate is the # of milliseconds between integrity scans
-	master_stack_config.master.IntegrityRate = 1000
+	master_stack_config.master.IntegrityRate = 100
 	#master_stack_config.master.TaskRetryRate = 10
 	print master_stack_config.master.IntegrityRate
 	sys.stdout.flush()

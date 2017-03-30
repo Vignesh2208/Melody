@@ -1,22 +1,14 @@
 Host 7 Attack Layer Thread >> INFO >> Attk playback buffer open suceeded !
 Waiting for start command ... buf =  h7main-cmd-channel-buffer
-Host 7 Network Layer Thread >> INFO >> Started listening on IP: 10.0.0.7 PORT: 5100 at 2017-03-15 12:54:26.310650
-Host 7 Attack Layer Thread >> INFO >> Started at 2017-03-15 12:54:26.315560
-Signalled Start threads at  2017-03-15 12:54:26.406237
-Waiting for exit command ...
-Checking for EXIT for the  1  time at:  2017-03-15 12:54:26.406296
-Host 7 IPC Thread >> INFO >> Started at 2017-03-15 12:54:26.406386
+Host 7 Network Layer Thread >> INFO >> Started listening on IP: 10.0.0.7 PORT: 5100 at 2017-03-29 18:40:27.587874
+Host 7 Attack Layer Thread >> INFO >> Started at 2017-03-29 18:40:27.588071
+Host 7 IPC Thread >> INFO >> Started at 2017-03-29 18:40:27.655612
 Host 7 IPC Thread >> INFO >> power sim id to host id map = {'34;1': 5, '35;1': 5, '36;1': 5, '32;1': 5, '25': 2, '20': 4, '37;1': 5, '23': 3, 'vpn-gateway;1': 6, '29': 2, '2': 2, '6': 4, '9': 4, '38;1': 5, '39;1': 5, '10': 4, '22': 3, '19': 3, 'attacker;1': 7, 'control;1': 1, '30;1': 5, '33;1': 5, '31;1': 5}
 Host 7 IPC Thread >> INFO >> host id to powersim id map = {1: ['control;1'], 2: ['2', '25', '29'], 3: ['22', '23', '19'], 4: ['20', '10', '6', '9'], 5: ['30;1', '31;1', '32;1', '33;1', '34;1', '35;1', '36;1', '37;1', '38;1', '39;1'], 6: ['vpn-gateway;1'], 7: ['attacker;1']}
-Checking for EXIT for the  2  time at:  2017-03-15 12:54:27.542740
-Checking for EXIT for the  3  time at:  2017-03-15 12:54:28.778684
-Checking for EXIT for the  4  time at:  2017-03-15 12:54:29.980685
-Checking for EXIT for the  5  time at:  2017-03-15 12:54:31.206610
-Checking for EXIT for the  6  time at:  2017-03-15 12:54:32.269528
-Checking for EXIT for the  7  time at:  2017-03-15 12:54:33.412679
-Checking for EXIT for the  8  time at:  2017-03-15 12:54:34.416004
-Checking for EXIT for the  9  time at:  2017-03-15 12:54:35.453514
-Shutting Down Host  7
-Host 7 Attack Layer Thread >> INFO >> Stopping 2017-03-15 12:54:36.501987
-Host 7 IPC Thread >> INFO >> Stopping at 2017-03-15 12:54:36.502488
-Host 7 Network Layer Thread >> INFO >> Stopping at 2017-03-15 12:54:41.381912
+Signalled Start threads at  2017-03-29 18:40:27.678942
+Waiting for exit command ...
+Checking for EXIT for the  1  time at:  2017-03-29 18:40:27.678988
+Checking for EXIT for the  2  time at:  2017-03-29 18:40:28.753469
+Checking for EXIT for the  3  time at:  2017-03-29 18:40:29.848512
+Checking for EXIT for the  4  time at:  2017-03-29 18:40:30.924712
+Checking for EXIT for the  5  time at:  2017-03-29 18:40:32.046012
