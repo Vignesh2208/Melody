@@ -1,7 +1,7 @@
 import argparse
 
 from utils.sleep_functions import sleep
-
+from utils.util_functions import *
 # import opendnp3 instead of from opendnp3 import *
 # In DataObserver._Update, there is a serious of ifs
 # which check the type of a point (if (t == opendnp3.Binary)).
@@ -86,7 +86,10 @@ def main():
 
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--slave_ip', dest="slave_ip", help='IP Address of the slave node.', required=True)
+	parser.add_argument('--life_time', dest="life_time", help='Time after which slave must die!', required=True)
+	parser.add_argument('--vt', dest="vt", help='Is virtual time enabled', required=True)
 	args = parser.parse_args()
+
 	# 1. Extend IDataObserver and IStackObserver
 	# 2. Add a Physical Layer (TCP Client) to the StackManager
 	# 3. Create a MasterConfig.
@@ -105,13 +108,13 @@ def main():
 
 	# master_stack_config = opendnp3.MasterStackConfig()
 	slave_stack_config = opendnp3.SlaveStackConfig()
-#	master_stack_config.master.DoUnsolOnStartup = True
+	#	master_stack_config.master.DoUnsolOnStartup = True
 
 	# master_stack_config.link.LocalAddr = 100
 	# master_stack_config.link.RemoteAddr = 1
 	slave_stack_config.link.LocalAddr = 1
 	slave_stack_config.link.RemoteAddr = 100
-#	master_stack_config.link.useConfirms = True
+	#	master_stack_config.link.useConfirms = True
 
 	# set the stack observer callback to our Python-extended class
 	# master_stack_config.master.mpObserver = stack_observer
@@ -138,8 +141,12 @@ def main():
 	print('Setpointstatus: %d' % (len(setpointstatus_list)))
 	sys.stdout.flush()
 
+	if int(args.vt) == 0:
+		for tid in get_thread_ids(os.getpid()):
+			set_def_cpu_affinity(tid,"2-3")
+
 	while (True):
-		sleep(10)
+		sleep(int(args.life_time))
 		break
 
 if __name__ == '__main__':

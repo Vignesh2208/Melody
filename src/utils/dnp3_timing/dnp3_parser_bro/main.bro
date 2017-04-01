@@ -14,6 +14,8 @@ export {
 		response_ts:time           &log &optional;
 		## duration latency of the request-response transaction
 		latency:    interval       &log &optional;
+		## duration latency of the request-response transaction
+		periodicity: interval      &log &optional;
 		## Unique identifier for the connection.
 		uid:        string         &log;
 		## Identifier for the connection.
@@ -38,6 +40,7 @@ redef record connection += {
 const ports = { 20000/tcp , 20000/udp };
 redef likely_server_ports += { ports };
 global watching_dnp3: table[string] of time &create_expire=10secs;
+global last_dnp3_resp: table[string] of time &create_expire=10secs;
 
 event bro_init() &priority=5
 	{
@@ -53,6 +56,13 @@ event dnp3_application_request_header(c: connection, is_orig: bool, application_
 	c$dnp3$request_ts = network_time();
 	c$dnp3$fc_request = function_codes[fc];
     watching_dnp3[c$uid] = network_time();
+
+	if (c$uid in last_dnp3_resp)
+		{
+		c$dnp3$periodicity = network_time() - last_dnp3_resp[c$uid];
+		Log::write(LOG, c$dnp3);
+		delete c$dnp3;
+		}
 	}
 
 event dnp3_application_response_header(c: connection, is_orig: bool, application_control: count, fc: count, iin: count)
@@ -64,6 +74,7 @@ event dnp3_application_response_header(c: connection, is_orig: bool, application
 	c$dnp3$iin = iin;
 
     c$dnp3$response_ts = network_time();
+    last_dnp3_resp[c$uid] = network_time();
 
     if (c$uid in watching_dnp3) 
       {

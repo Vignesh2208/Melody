@@ -2,7 +2,7 @@ from utils.sleep_functions import sleep
 import sys
 import argparse
 import os
-
+from utils.util_functions import *
 # import opendnp3 instead of from opendnp3 import *
 # In DataObserver._Update, there is a serious of ifs
 # which check the type of a point (if (t == opendnp3.Binary)).
@@ -80,24 +80,26 @@ def main():
 
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--slave_ip', dest="slave_ip", help='IP Address of the slave node.', required=True)
+	parser.add_argument('--life_time', dest="life_time", help='Time after which master must be slain', required=True)
+	parser.add_argument('--vt', dest="vt", help='Is virtual time enabled', required=True)
 	args = parser.parse_args()
-    
+
 	# 1. Extend IDataObserver and IStackObserver
 	# 2. Add a Physical Layer (TCP Client) to the StackManager
 	# 3. Create a MasterConfig.
 	# 4. Add a Master Stack to the StackManager
 	# 5. Let the process run
-	
+
 	print "Running the Master. Pid = ", os.getpid()
 	sys.stdout.flush()
-	
+
 	stack_observer = StackObserver()
 	observer = DataObserver()
 
 	phys_layer_settings = opendnp3.PhysLayerSettings()
-	
+
 	#opendnp3.ClassMask.class1 = True
-	
+
 	stack_manager = opendnp3.StackManager()
 	stack_manager.AddTCPClient('tcpclient', phys_layer_settings, args.slave_ip, 20000)
 	master_stack_config = opendnp3.MasterStackConfig()
@@ -105,19 +107,19 @@ def main():
 
 	master_stack_config.link.LocalAddr = 100
 	master_stack_config.link.RemoteAddr = 1
-    #master_stack_config.link.useConfirms = True
+	#master_stack_config.link.useConfirms = True
 
 	# set the stack observer callback to our Python-extended class
 	master_stack_config.master.mpObserver = stack_observer
-	
+
 	# the integrity rate is the # of milliseconds between integrity scans
-	master_stack_config.master.IntegrityRate = 100
+	master_stack_config.master.IntegrityRate = 10
 	#master_stack_config.master.TaskRetryRate = 10
 	print master_stack_config.master.IntegrityRate
 	sys.stdout.flush()
-	
+
 	#master_stack_config.master.UnsolClassMask = opendnp3.IntToPointClass(1)
-	#print master_stack_config.master.TaskRetryRate 
+	#print master_stack_config.master.TaskRetryRate
 	# The third argument needs to be a log FilterLevel.  The Python
 	# API does not have access to this enum, but it can be "fed" to
 	# the AddMaster method because the PhysLayerSettings LogLevel
@@ -135,8 +137,12 @@ def main():
 	print('Setpointstatus: %d' % (len(setpointstatus_list)))
 	sys.stdout.flush()
 
+	if int(args.vt) == 0:
+		for tid in get_thread_ids(os.getpid()):
+			set_def_cpu_affinity(tid,"2-3")
+
 	while (True):
-		sleep(10)
+		sleep(int(args.life_time))
 		break
 
 if __name__ == '__main__':

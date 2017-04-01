@@ -8,9 +8,9 @@ def set_cpu_affinity(pid) :
     subprocess.Popen(taskset_cmd, shell=True)
 
 def set_def_cpu_affinity(pid,cpu_subset_str) :
-    taskset_cmd = "sudo taskset -cp " + cpu_subset_str + " " + str(pid) + " > /dev/null"
-    os.system("sudo taskset -cp " + cpu_subset_str + " " + str(pid) + " > /dev/null")
-
+    taskset_cmd = "sudo taskset -cp " + cpu_subset_str + " " + str(pid)
+    #os.system("sudo taskset -cp " + cpu_subset_str + " " + str(pid) + " > /dev/null")
+    subprocess.Popen(taskset_cmd, shell=True)
 def set_cpu_affinity_pid_list(pid_list) :
     for pid in pid_list :
         set_cpu_affinity(pid)
@@ -23,7 +23,7 @@ def procStatus(pid):
 
 def get_pids_with_cmd(cmd, expected_no_of_pids=1) :
     pid_list = []
-    
+
     while  len(pid_list) < expected_no_of_pids :
         time.sleep(0.5)
         pid_list = []
@@ -40,7 +40,23 @@ def get_pids_with_cmd(cmd, expected_no_of_pids=1) :
                 pid = int(p_tokens[len(p_tokens)-1])
                 if procStatus(pid) != 'D' :
                     pid_list.append(pid)
-        
-        
+
+
 
     return pid_list
+
+def get_thread_ids(pid):
+    cmd = "ps -e -T | grep " + str(pid)
+    output = subprocess.check_output(cmd, shell=True)
+    output = output.split("\n")
+    threads = []
+    for line in output:
+        line = line.split(" ")
+        #print line
+        if len(line) > 3 and int(line[3]) == pid:
+            pass
+        elif len(line) > 3:
+            threads.append(int(line[3]))
+    return threads
+
+

@@ -54,10 +54,9 @@ class basicNetworkServiceLayer(threading.Thread) :
 	def onRxPktFromNetwork(self,pkt):
 		self.attackLayer.runOnThread(self.attackLayer.onRxPktFromNetworkLayer,extractPowerSimIdFromPkt(pkt),pkt)
 
-
-	def run(self) :
-
+	def run(self):
 		self.log.info("Started listening on IP: " + self.hostIP + " PORT: " + str(self.listenPort) + " at " + str(datetime.now()))
+		os.system("taskset -cp " + str(os.getpid()))
 		sys.stdout.flush()
 		#assert(self.attackLayer != None)
 		sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP
@@ -71,27 +70,12 @@ class basicNetworkServiceLayer(threading.Thread) :
 				sys.stdout.flush()
 				sock.close()
 				break
-
-
 			try:
 				data, addr = sock.recvfrom(MAXPKTSIZE)
 			except socket.timeout:
 				data = None
-
-				 
-
 			if data != None :
 				self.log.info("%s  RECV_FROM=%s:%s  PKT=%s"%(datetime.now(), str(addr[0]), str(addr[1]), str(data)))
 				# self.log.info("<RECV> TO: " + str(self.hostID) + " FROM: " + str(addr) + " PKT: " + str(data))
 				self.onRxPktFromNetwork(str(data))
-
-
-
-
-
-
-
-
-
-
 

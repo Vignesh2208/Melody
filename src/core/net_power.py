@@ -62,8 +62,8 @@ class NetPower(object):
         self.node_mappings_file_path = self.script_dir + "/node_mappings.txt"
         self.log_dir = log_dir
 
-	self.flag_debug = True 	# flag for debug printing       
- 
+	self.flag_debug = True 	# flag for debug printing
+
         # Clean up logs from previous run(s)
         os.system("rm -rf " + self.log_dir + "/*")
 
@@ -85,7 +85,7 @@ class NetPower(object):
         self.load_timekeeper()
 
         set_cpu_affinity(int(os.getpid()))
-            
+
     def get_emulation_driver_params(self):
         for bg_flow in self.emulated_background_traffic_flows:
 
@@ -125,7 +125,7 @@ class NetPower(object):
     def dilate_node(self,pid,tdf) :
         if pid != -1 and self.enable_timekeeper == 1 :
             dilate_all(pid,tdf)
-            addToExp(pid) 
+            addToExp(pid)
             sys.stdout.flush()
 
     def set_freeze_quantum(self):
@@ -135,7 +135,7 @@ class NetPower(object):
         else:
             timeslice = 200000
         set_cbe_experiment_timeslice(timeslice*self.tdf)
-		
+
 
     def dilate_nodes(self) :
 
@@ -164,7 +164,7 @@ class NetPower(object):
             print "                        Host pids"
             print self.host_pids
             print ""
-            print "########################################################################" 
+            print "########################################################################"
             print ""
             print "                        Switch pids"
             print  self.switch_pids
@@ -196,7 +196,7 @@ class NetPower(object):
             sys.stdout.flush()
             synchronizeAndFreeze()
             print "Sync and Freeze completed. Starting Exp ... "
-            sys.stdout.flush()          
+            sys.stdout.flush()
             startExp()
             print "Experiment started: TDF = ", self.tdf, " local Time = " + str(datetime.now())
 
@@ -213,7 +213,7 @@ class NetPower(object):
             time.sleep(10)
             self.trigger_all_processes("EXIT")
             print "Stopped synchronized experiment"
-        else: 
+        else:
             print "Stopping synchronized experiment at local time = ", str(datetime.now())
         print "########################################################################"
 
@@ -249,7 +249,7 @@ class NetPower(object):
         print "Starting all Host Commands ..."
 
         pid_list= []
-        
+
         for i in xrange(len(self.network_configuration.roles)):
             mininet_host = self.network_configuration.mininet_obj.hosts[i]
             host_id = int(mininet_host.name[1:])
@@ -274,10 +274,10 @@ class NetPower(object):
 
             self.host_pids.append((pid, mininet_host.name))
             self.pid_list.append(pid)
-            
+
             #if self.enable_timekeeper == 1:
             set_cpu_affinity(mininet_host.pid)
-            
+
             #if mininet_host.name == "h3" :
             #    mininet_host.cmd("sudo tcpdump -i h3-eth0 -w /home/user/Desktop/host.pcap &")
 
@@ -295,32 +295,32 @@ class NetPower(object):
             mininet_link = self.network_configuration.mininet_obj.links[i]
             switchIntfs = mininet_link.intf1
             core_cmd = "tcpdump"
-            capture_cmd = "sudo " + core_cmd 
+            capture_cmd = "sudo " + core_cmd
 
             if mininet_link.intf1.name.startswith("s") and mininet_link.intf2.name.startswith("s") :
 
                 capture_log_file = self.log_dir  + "/" + mininet_link.intf1.name + "-" + mininet_link.intf2.name + ".pcap"
                 with open(capture_log_file , "w") as f :
                     pass
-				
+
                 capture_cmd = capture_cmd + " -i "  + str(switchIntfs.name)
                 capture_cmd = capture_cmd + " -w " + capture_log_file + " -B 20000 ip & > /dev/null"
                 self.n_actual_tcpdump_procs = self.n_actual_tcpdump_procs + 1
 
                 proc = subprocess.Popen(capture_cmd, shell=True)
                 self.tcpdump_procs.append(proc)
-                set_cpu_affinity(int(proc.pid))   # *NEW* ??? not dependent on timekeeper running?	
+                set_cpu_affinity(int(proc.pid))   # *NEW* ??? not dependent on timekeeper running?
 
             capture_cmd = "sudo " + core_cmd
-        
+
         # Get all the pids of actual tcpdump processes
         actual_tcpdump_pids = get_pids_with_cmd(cmd=core_cmd, expected_no_of_pids=self.n_actual_tcpdump_procs)
-        set_cpu_affinity_pid_list(actual_tcpdump_pids) 
-        
+        set_cpu_affinity_pid_list(actual_tcpdump_pids)
+
         # Get all the pids of sudo tcpdump parents
         sudo_tcpdump_parent_pids = get_pids_with_cmd(cmd="sudo " + core_cmd,expected_no_of_pids=self.n_actual_tcpdump_procs)
-        set_cpu_affinity_pid_list(sudo_tcpdump_parent_pids) 
-        
+        set_cpu_affinity_pid_list(sudo_tcpdump_parent_pids)
+
 
         for i in xrange(0,len(self.network_configuration.mininet_obj.switches)) :
             mininet_switch = self.network_configuration.mininet_obj.switches[i]
@@ -357,7 +357,7 @@ class NetPower(object):
         core_proxy_start_cmd = "python " + str(proxy_py_script)
         proxy_start_cmd = core_proxy_start_cmd  + " -c " + self.node_mappings_file_path + " -l " + proxy_log_file + " -r " + str(self.run_time) + " -p " + self.power_simulator_ip + " -d " + str(self.control_node_id) + " &"
         os.system(proxy_start_cmd)
-        
+
     def start_attack_orchestrator(self):
         print "Starting Attack orchestrator at " + str(datetime.now())
 
@@ -366,12 +366,12 @@ class NetPower(object):
             core_attk_orchestrator_cmd = "python " + str(attack_orchestrator_script)
             attk_orchestrator_start_cmd = core_attk_orchestrator_cmd + " -c " + self.attack_plan_dir + " -l " + self.node_mappings_file_path + " -r " + str(self.run_time + 2) + " &"
             proc = subprocess.Popen(attk_orchestrator_start_cmd, shell=True)
-            
+
             print "Setting Attack orchestrator affinity to cores 0,1 ..."
             set_cpu_affinity(int(proc.pid))
             actual_attk_orchestrator_pids = get_pids_with_cmd(cmd=core_attk_orchestrator_cmd, expected_no_of_pids=1)
             set_cpu_affinity_pid_list(actual_attk_orchestrator_pids)
-            
+
     def send_cmd_to_node(self,node_name,cmd) :
         mininet_host = self.network_configuration.mininet_obj.get(node_name)
         if mininet_host != None:
@@ -386,17 +386,17 @@ class NetPower(object):
         for i in xrange(len(self.network_configuration.roles)):
             mininet_host = self.network_configuration.mininet_obj.hosts[i]
             self.send_cmd_to_node(mininet_host.name,"sudo iptables -I INPUT -p icmp -j ACCEPT &")
-        
+
     def disable_TCP_RST(self):
-        
+
         for i in xrange(len(self.network_configuration.roles)):
             mininet_host = self.network_configuration.mininet_obj.hosts[i]
             self.send_cmd_to_node(mininet_host.name,"sudo iptables -I OUTPUT -p tcp --tcp-flags RST RST -j DROP")
-        sleep(1)            
+        sleep(1)
         print "Attack Orchestrator: DISABLED TCP RST"
 
     def enable_TCP_RST(self):
-        
+
         for i in xrange(len(self.network_configuration.roles)):
             mininet_host = self.network_configuration.mininet_obj.hosts[i]
             self.send_cmd_to_node(mininet_host.name,"sudo iptables -I OUTPUT -p tcp --tcp-flags RST RST -j ACCEPT")
@@ -461,18 +461,18 @@ class NetPower(object):
                     break
                 sleep(0.5)
             print "Attack Orchestrator: LOADED ALL PCAPS"
-            
+
             if self.enable_timekeeper == 1 :
                 start_time = get_current_virtual_time_pid(self.switch_pids[0])
             else:
                 start_time = time.time()
             self.trigger_all_processes("START")
             sys.stdout.flush()
-                
+
             prev_time  = start_time
             run_time   = self.run_time
 
-            k = 0		
+            k = 0
             while True:
 
                 if self.enable_timekeeper == 1 :
@@ -491,7 +491,7 @@ class NetPower(object):
                          break
                     k= k + 1
                     print k," secs of real time elapsed"
-                    # sleep until runtime expires	
+                    # sleep until runtime expires
                     time.sleep(0.5)
 
                 recv_msg = self.recv_from_attack_orchestrator()
@@ -550,17 +550,19 @@ class NetPower(object):
             mininet_host.cmd(cmd_to_run)
             n_drivers = n_drivers + 1
 
+        print "Waiting for emulation drivers to start. Number of drivers = ", n_drivers
         pid_list = get_pids_with_cmd(cmd="python " + str(driver_py_script), expected_no_of_pids=n_drivers)
         assert len(pid_list) == n_drivers
         self.emulation_driver_pids.extend(pid_list)
         self.pid_list.extend(pid_list)
+        print "All emulation drivers started"
 
     def stop_emulation_drivers(self):
         for pid in self.emulation_driver_pids:
             try:
                 os.system("sudo kill " + str(pid))
             except:
-                pass 
+                pass
 
     def start_replay_drivers(self):
 
@@ -569,7 +571,7 @@ class NetPower(object):
 
         for i in xrange(len(self.network_configuration.roles)):
             mininet_host = self.network_configuration.mininet_obj.hosts[i]
-            
+
             rdp = {"driver_id": mininet_host.name + "-replay",
                    "run_time": self.run_time,
                    "node_id": mininet_host.name,
@@ -597,7 +599,7 @@ class NetPower(object):
             try:
                 os.system("sudo kill " + str(pid))
             except:
-                pass     
+                pass
 
     def cleanup(self):
 
@@ -607,7 +609,7 @@ class NetPower(object):
         else:
             self.trigger_all_processes("EXIT")
             time.sleep(10)
-       
+
         self.stop_emulation_drivers()
 
         print "Cleaning up ..."
@@ -622,7 +624,7 @@ class NetPower(object):
 
         except:
             pass
-            
+
         for pid, host_name in self.host_pids:
             os.system("sudo kill -9 " + str(pid))
         for pid in self.emulation_driver_pids:
@@ -634,14 +636,14 @@ class NetPower(object):
             os.system("sudo killall reader")
         except:
             pass
-            
+
         self.network_configuration.cleanup_mininet()
         #os.system("sudo killall -9 python")
 
     def start_project(self):
         print "Starting project ..."
         self.print_topo_info()
-        
+
         #General Startup ...
         self.generate_node_mappings(self.network_configuration.roles)
         self.start_host_processes()
@@ -662,19 +664,23 @@ class NetPower(object):
             self.start_time = get_current_virtual_time_pid(self.switch_pids[0])
         else:
             self.start_time = time.time()
-	    # if timekeeper is not enabled, restrict emulation/replay operations to cpu subset
+            # if timekeeper is not enabled, restrict emulation/replay operations to cpu subset
             for pid in self.emulation_driver_pids: # *NEW*
-		#if self.flag_debug:
-		#    print "DEBUG: Original cpu affinity: "
-		#    os.system("taskset -cp " + str(pid))
-		set_def_cpu_affinity(pid,self.cpus_subset)
-		#if self.flag_debug:
-		#    # verify update of cpu affinity
-		#    print "DEBUG: New cpu affinity for pid %s" % pid
-		#    os.system("taskset -cp " + str(pid))
+                #if self.flag_debug:
+                #    print "DEBUG: Original cpu affinity: "
+                #    os.system("taskset -cp " + str(pid))
+                set_def_cpu_affinity(pid,self.cpus_subset)
+                #if self.flag_debug:
+                #    # verify update of cpu affinity
+                #    print "DEBUG: New cpu affinity for pid %s" % pid
+                #    os.system("taskset -cp " + str(pid))
             for pid in self.replay_driver_pids:
-		set_def_cpu_affinity(pid,self.cpus_subset)
-	    
+                set_def_cpu_affinity(pid,self.cpus_subset)
+            for (pid,hostname) in self.host_pids:
+                set_def_cpu_affinity(pid,self.cpus_subset)
+            for pid in self.switch_pids:
+                set_def_cpu_affinity(pid,self.cpus_subset)
+
 
         self.run()
         self.cleanup()

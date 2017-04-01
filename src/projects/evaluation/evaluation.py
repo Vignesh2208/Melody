@@ -97,7 +97,7 @@ class Evaluation:
 
                 exp.start_project()
 
-                
+
 def get_network_configurations(link_latencies):
 
     network_configurations = []
