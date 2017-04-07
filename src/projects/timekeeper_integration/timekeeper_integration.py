@@ -13,6 +13,7 @@ from utils.dnp3_pcap_post_processing import DNP3PCAPPostProcessing
 
 ENABLE_TIMEKEEPER = 0
 TDF = 10
+
 # set of CPUs to run emulation/replay processes on when timekeeper is not
 # enabled
 CPUS_SUBSET = "2-3"
@@ -60,8 +61,8 @@ def get_network_configuration():
                                                  {"num_switches": 5,
                                                   "per_switch_links": 2,
                                                   "num_hosts_per_switch": 1,
-                                                  "switch_switch_link_latency_range": (5, 5),
-                                                  "host_switch_link_latency_range": (5, 5)
+                                                  "switch_switch_link_latency_range": (1, 1),
+                                                  "host_switch_link_latency_range": (1, 1)
                                                   },
                                                  conf_root="configurations/",
                                                  synthesis_name="SimpleMACSynthesis",
@@ -116,38 +117,42 @@ def measure_dnp3_latencies(project_name, pcap_file_name):
     bro_json_log_conf = "/home/moses/bro/scripts/policy/tuning/json-logs.bro"
     bro_cmd = "/usr/local/bro/bin/bro"
 
-    p = DNP3PCAPPostProcessing(
-        base_dir,
-        bro_dnp3_parser_dir,
-        bro_cmd,
-        bro_json_log_conf,
-     project_name)
-    p.collect_data(pcap_file_name)
+    try:
+        p = DNP3PCAPPostProcessing(
+            base_dir,
+            bro_dnp3_parser_dir,
+            bro_cmd,
+            bro_json_log_conf,
+         project_name)
+        p.collect_data(pcap_file_name)
 
-    if p.data:
-        print "------------------------"
-        print " DNP3 Latency Data:"
-        print "------------------------"
-        print p.data
-        if (p.data[5:]): # print stats if there are more than 5 samples
-            print "Num samples:", len(p.data[5:])
-            print "mean:", numpy.mean(p.data[5:])
-            print "std:", numpy.std(p.data[5:])
-            print "min:", min(p.data[5:])
-            print "max:", max(p.data[5:])
+        if p.data:
+            print "------------------------"
+            print " DNP3 Latency Data:"
+            print "------------------------"
+            print p.data
+            if (p.data[5:]): # print stats if there are more than 5 samples
+                print "Num samples:", len(p.data[5:])
+                print "mean:", numpy.mean(p.data[5:])
+                print "std:", numpy.std(p.data[5:])
+                print "min:", min(p.data[5:])
+                print "max:", max(p.data[5:])
 
-    if p.periodicity_data:
-        print "------------------------"
-        print " DNP3 Periodicity Data:"
-        print "------------------------"
-        print p.periodicity_data
-        if (p.periodicity_data[5:]): # print stats if there are more than 5 samples
-            print "Num samples:", len(p.periodicity_data[5:])
-            print "mean:", numpy.mean(p.periodicity_data[5:])
-            print "std:", numpy.std(p.periodicity_data[5:])
-            print "min:", min(p.periodicity_data[5:])
-            print "max:", max(p.periodicity_data[5:])
-        print "------------------------"
+        if p.periodicity_data:
+            print "------------------------"
+            print " DNP3 Periodicity Data:"
+            print "------------------------"
+            print p.periodicity_data
+            if (p.periodicity_data[5:]): # print stats if there are more than 5 samples
+                print "Num samples:", len(p.periodicity_data[5:])
+                print "mean:", numpy.mean(p.periodicity_data[5:])
+                print "std:", numpy.std(p.periodicity_data[5:])
+                print "min:", min(p.periodicity_data[5:])
+                print "max:", max(p.periodicity_data[5:])
+            print "------------------------"
+
+    except:
+        print "No DNP3 packets were transmitted ..."
 
 
 def main():
@@ -272,8 +277,9 @@ def main():
                                 [])
 
     exp.start_project()
-
     measure_dnp3_latencies(exp.project_name, "s1-eth2-s2-eth2.pcap")
+    os.system("sudo killalll -9 python")
+    os.system("sudo killall -9 sudo")
 
 
 if __name__ == "__main__":

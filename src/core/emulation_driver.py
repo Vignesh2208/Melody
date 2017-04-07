@@ -57,9 +57,9 @@ class EmulationDriver(object):
             #os.system(self.cmd + " &")
             try:
                 cmd_list = self.cmd.split(' ')
-		print cmd_list
-		print self.cmd
-		sys.stdout.flush()
+                print cmd_list
+                print self.cmd
+                sys.stdout.flush()
                 p = subprocess.Popen(cmd_list,shell=False)
             except:
                 print "Error running command: ", sys.exec_info()[0]
@@ -95,7 +95,7 @@ def main():
     sys.stdout.flush()
     d.trigger()
 
-    print "Waiting for exit command ..."
+    print "Waiting for exit command at ", str(datetime.now())
     sys.stdout.flush()
     recv_msg = ''
     i = 1

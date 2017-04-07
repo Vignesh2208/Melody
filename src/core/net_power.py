@@ -131,9 +131,9 @@ class NetPower(object):
     def set_freeze_quantum(self):
 
         if self.tdf > 1 :
-            timeslice = 200000
+            timeslice = 80000
         else:
-            timeslice = 200000
+            timeslice = 80000
         set_cbe_experiment_timeslice(timeslice*self.tdf)
 
 
@@ -339,15 +339,15 @@ class NetPower(object):
 
             for name in mininet_switch.intfNames():
                 if name != "lo" :
-                    set_netdevice_owner(mininet_switch.pid,name)
-                    #set_netdevice_owner(pid_master,name)
+                    #set_netdevice_owner(mininet_switch.pid,name)
+                    set_netdevice_owner(pid_master,name)
 
         for pid, host_name in self.host_pids:
             mininet_host = self.network_configuration.mininet_obj.get(host_name)
             for name in mininet_host.intfNames():
                 if name != "lo" :
-                    set_netdevice_owner(pid, name)
-                    #set_netdevice_owner(pid_master,name)
+                    #set_netdevice_owner(pid, name)
+                    set_netdevice_owner(pid_master,name)
 
     def start_proxy_process(self):
 
@@ -576,7 +576,8 @@ class NetPower(object):
                    "run_time": self.run_time,
                    "node_id": mininet_host.name,
                    "node_ip": mininet_host.IP(),
-                   "attack_path_file_path": self.attack_plan_dir + "/attack_plan.json"}
+                   "attack_path_file_path": self.attack_plan_dir + "/attack_plan.json"
+                   }
 
             driver_log_file = self.log_dir + "/" + str(rdp["driver_id"]) + "_log.txt"
             input_params_file_path = self.log_dir + "/" + rdp["driver_id"] + ".json"

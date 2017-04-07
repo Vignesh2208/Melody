@@ -25,13 +25,13 @@ class CliqueEnterpriseTopo(Topo):
 
         if "switch_switch_link_latency_range" in params:
             switch_switch_link_opts = \
-                dict(delay=str(int(random.uniform(*params["switch_switch_link_latency_range"]))) + "ms")
+                dict(delay=str(float(random.uniform(*params["switch_switch_link_latency_range"]))) + "ms")
         else:
             switch_switch_link_opts = dict()
 
         if "host_switch_link_latency_range" in params:
             host_switch_link_opts = \
-                dict(delay=str(int(random.uniform(*params["host_switch_link_latency_range"]))) + "ms")
+                dict(delay=str(float(random.uniform(*params["host_switch_link_latency_range"]))) + "ms")
         else:
             host_switch_link_opts = dict()
 

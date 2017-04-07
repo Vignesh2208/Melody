@@ -45,6 +45,13 @@ def get_pids_with_cmd(cmd, expected_no_of_pids=1) :
 
     return pid_list
 
+def representsInt(s) :
+    try:
+        int(s)
+        return True
+    except ValueError:
+        return False
+
 def get_thread_ids(pid):
     cmd = "ps -e -T | grep " + str(pid)
     output = subprocess.check_output(cmd, shell=True)
@@ -52,11 +59,19 @@ def get_thread_ids(pid):
     threads = []
     for line in output:
         line = line.split(" ")
-        #print line
-        if len(line) > 3 and int(line[3]) == pid:
-            pass
-        elif len(line) > 3:
-            threads.append(int(line[3]))
+        
+        if len(line) > 0:
+            i = 0
+            for i in xrange(0,len(line)) :
+                if len(line[i]) > 0 and representsInt(line[i]) and int(line[i]) == pid:
+                    for j in xrange(i+1,len(line)) :
+                        if len(line[j]) > 0 :
+                            if representsInt(line[j]) and int(line[j]) != pid :
+                                threads.append(int(line[j]))
+                            break
+                    break
+                 
     return threads
 
+#print get_thread_ids(29307)
 
