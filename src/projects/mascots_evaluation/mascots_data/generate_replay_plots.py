@@ -91,8 +91,8 @@ def measure_dnp3_stats(project_name, pcap_file_path, stats_type):
 
             stats["header"] = ["samples", "mean", "std", "min", "max", "data"]
             stats[stats_type] = [len(p.periodicity_data[5:-1]), numpy.mean(p.periodicity_data[5:-1]),
-                                    numpy.std(p.periodicity_data[5:-1]), min(p.periodicity_data[5:-1]),
-                                    max(p.periodicity_data[5:-1]), p.periodicity_data]
+                                 numpy.std(p.periodicity_data[5:-1]), min(p.periodicity_data[5:-1]),
+                                 max(p.periodicity_data[5:-1]), p.periodicity_data]
 
     elif stats_type == "data_rate":
         p.collect_data_rates(pcap_file_path, 1)
@@ -100,95 +100,22 @@ def measure_dnp3_stats(project_name, pcap_file_path, stats_type):
         if p.data_rate_data:
             stats["header"] = ["samples", "mean", "std", "min", "max", "data"]
             stats[stats_type] = [len(p.data_rate_data[1:-2]), numpy.mean(p.data_rate_data[1:-2]),
-                                    numpy.std(p.data_rate_data[1:-2]), min(p.data_rate_data[1:-2]),
-                                    max(p.data_rate_data[1:-2]), p.data_rate_data]
+                                 numpy.std(p.data_rate_data[1:-2]), min(p.data_rate_data[1:-2]),
+                                 max(p.data_rate_data[1:-2]), p.data_rate_data]
     return stats
 
 
-def plot_periodicity():
-
-    stats = get_stats(data_dir, "periodicity")
-
-    nodes = stats["nodes"]
-    periodicities = stats["periods"]
-    labels = []
-    for period in periodicities:
-        labels.append("Periodicity " + str(period) + " ms")
-
-    fig = plt.figure()
-    ax = plt.subplot(111)
-    line_styles = ['-.', '--', '-', ':']
-    marker = ['o', '<', '^', '+', '>']
-    # matplotlib.rcParams.update({'font.size':15})
-    plt.rc('legend', **{'fontsize': 15})
-    xtics = [0]
-    xtics.extend(nodes)
-
-    for i in xrange(0, len(labels)):
-
-        period = periodicities[i]
-        stats[period]["mu"] = []
-        stats[period]["std"] = []
-        for j in xrange(0, len(nodes)):
-            n_nodes = nodes[j]
-
-            stats[period]["mu"].append(stats[period][n_nodes][0])
-            stats[period]["std"].append(stats[period][n_nodes][1])
-
-        # print stats[period]["std"]
-        style = line_styles[i % len(line_styles)]
-        mark = marker[i % len(marker)]
-        ax.errorbar(x=nodes, y=stats[period]["mu"], xerr=0.0, yerr=stats[period]["std"], label=labels[i], linestyle=style,
-                    marker=mark, linewidth=2)
-
-        for j in xrange(0, len(nodes)):
-            n_nodes = nodes[j]
-            xy = (n_nodes, stats[period]["mu"][j])
-
-            x_disp = -10
-            y_disp = 2
-            if period == 100:
-                x_disp = x_disp + 5
-            if period == 1000:
-                x_disp = x_disp + 10
-
-            ax.annotate("," + str(round(stats[period]["std"][j], 2)) + ")", xy=xy, xytext=(x_disp, 10),
-                        textcoords='offset points')
-            ax.annotate('(' + str(round(stats[period]["mu"][j], 2)), xy=xy, xytext=(-45, 10), textcoords='offset points')
-        ax.set_xticks(xtics)
-
-    ax.set_title("Periodicity in Replay Mechanism vs Number of Nodes")
-    ax.set_yscale('log', nonposy='clip')
-    # Shrink current axis by 20%
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width * 0.8, box.height * 1.1])
-    # Put a legend to the right of the current axis
-    leg = ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
-
-    # leg = ax.legend(loc=0,bbox_to_anchor=(0.5, 1))
-    # leg.get_frame().set_alpha(0.5)
-    ax.set_xlabel("Number of Nodes")
-    ax.set_ylabel("Periodicity (ms)")
-
-    for item in ([ax.title, ax.xaxis.label, ax.yaxis.label] + ax.get_xticklabels() + ax.get_yticklabels()):
-        item.set_fontsize(15)
-    plt.show()
-
-
-def plot_date_rate():
-    stats = get_stats(data_dir, "data_rate")
+def plot_line_with_error_bar(ax, stats_type, xlabel, ylabel, xmin, xmax, ymin, ymax):
+    stats = get_stats(data_dir, stats_type)
 
     nodes = stats["nodes"]
     periodicities = stats["periods"]
     labels = []
     for period in periodicities:
-        labels.append("Periodicity " + str(period) + " ms")
+        labels.append("DNP3 Polling Rate " + str(period) + " ms")
 
-    #fig = plt.figure()
-    fig, ax = plt.subplots(1, 1, sharex=False, sharey=False, figsize=(15, 8.0))
     line_styles = ['-.', '--', '-', ':']
     marker = ['o', '<', '^', '+', '>']
-    # matplotlib.rcParams.update({'font.size':15})
     plt.rc('legend', **{'fontsize': 15})
     xtics = [0]
     xtics.extend(nodes)
@@ -216,7 +143,7 @@ def plot_date_rate():
                     marker=mark,
                     linewidth=2)
 
-        for j in xrange(0, len(nodes)):
+        for j in xrange(0, len(nodes[0:1])):
             n_nodes = nodes[j]
             xy = (n_nodes, stats[period]["mu"][j])
 
@@ -227,38 +154,29 @@ def plot_date_rate():
             if period == 1000:
                 x_disp = x_disp + 10
 
-            ax.annotate("       ," + str(round(stats[period]["std"][j], 2)) + ")",
+            ax.annotate('(' + str(round(stats[period]["mu"][j], 2)) + ", " + str(round(stats[period]["std"][j], 2)) + ")",
                         xy=xy,
-                        xytext=(x_disp, 10),
-                        textcoords='offset points')
-            ax.annotate('(' + str(round(stats[period]["mu"][j], 2)),
-                        xy=xy,
-                        xytext=(-45, 10),
+                        xytext=(-8, 8),
                         textcoords='offset points')
 
         ax.set_xticks(xtics)
 
-    ax.set_title("Data Rate in Replay Mechanism vs Number of Nodes")
     ax.set_yscale('log', nonposy='clip')
 
     box = ax.get_position()
-    ax.set_position([box.x0, box.y0 * 1.3, box.width * 1.0, box.height * 1.0])
+    ax.set_position([box.x0, box.y0 * 2.0, box.width * 1.0, box.height * 0.9])
 
     # Put a legend to the right of the current axis
-    leg = ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.07), ncol=3)
+    #leg = ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.07), ncol=3)
 
-    ax.set_xlabel("Number of Nodes")
-    ax.set_ylabel("Data Rate (Bytes per second)")
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
 
-    ax.set_xlim(xmin=4)
-    ax.set_xlim(xmax=26)
-
-    ax.set_ylim(ymin=100)
-    ax.set_ylim(ymax=20000)
+    ax.set_xlim(xmin=xmin, xmax=xmax)
+    ax.set_ylim(ymin=ymin, ymax=ymax)
 
     for item in ([ax.title, ax.xaxis.label, ax.yaxis.label] + ax.get_xticklabels() + ax.get_yticklabels()):
-        item.set_fontsize(15)
-    plt.show()
+        item.set_fontsize(12)
 
 
 def display_parsed_pcaps(pcap_file_path_list):
@@ -273,5 +191,31 @@ def display_parsed_pcaps(pcap_file_path_list):
 
 
 #display_parsed_pcaps(["original/dnp3_rate_10.pcap", "original/dnp3_rate_100.pcap", "original/dnp3_rate_1000.pcap"])
-#plot_periodicity()
-plot_date_rate()
+
+# fig, ax = plt.subplots(1, 1, sharex=False, sharey=False, figsize=(15, 8.0))
+# plot_periodicity(ax)
+
+fig, (ax1, ax2) = plt.subplots(1, 2, sharex=False, sharey=False, figsize=(10.5, 6.0))
+plot_line_with_error_bar(ax1,
+                         "data_rate",
+                         "Number of Nodes",
+                         "Data Rate (Bytes per second)",
+                         4,
+                         26,
+                         100,
+                         20000)
+
+plot_line_with_error_bar(ax2,
+                         "periodicity",
+                         "Number of Nodes",
+                         "Periodicity (ms)",
+                         4,
+                         26,
+                         5,
+                         2000)
+
+leg = ax1.legend(loc='upper center', bbox_to_anchor=(1.1, -0.12), ncol=3, columnspacing=1.0, fontsize=13)
+
+plt.show()
+
+#plot_periodicity_data_rate()
