@@ -142,7 +142,7 @@ def main():
 			set_def_cpu_affinity(tid,"2-3")
 
 	while (True):
-		sleep(int(args.life_time))
+		sleep(int(args.life_time) - 2)
 		break
 
 if __name__ == '__main__':

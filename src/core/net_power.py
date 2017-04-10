@@ -297,14 +297,17 @@ class NetPower(object):
             core_cmd = "tcpdump"
             capture_cmd = "sudo " + core_cmd
 
+            # 1. to capture all pcaps:
             if mininet_link.intf1.name.startswith("s") and mininet_link.intf2.name.startswith("s") :
+            # 2. to capture only DNP3 traffic pcap:
+            #if mininet_link.intf1.name.startswith("s1") and mininet_link.intf2.name.startswith("s2") :
 
                 capture_log_file = self.log_dir  + "/" + mininet_link.intf1.name + "-" + mininet_link.intf2.name + ".pcap"
                 with open(capture_log_file , "w") as f :
                     pass
 
                 capture_cmd = capture_cmd + " -i "  + str(switchIntfs.name)
-                capture_cmd = capture_cmd + " -w " + capture_log_file + " -B 20000 ip & > /dev/null"
+                capture_cmd = capture_cmd + " -w " + capture_log_file + " -B 40000 ip & > /dev/null"
                 self.n_actual_tcpdump_procs = self.n_actual_tcpdump_procs + 1
 
                 proc = subprocess.Popen(capture_cmd, shell=True)
@@ -339,15 +342,15 @@ class NetPower(object):
 
             for name in mininet_switch.intfNames():
                 if name != "lo" :
-                    set_netdevice_owner(mininet_switch.pid,name)
-                    #set_netdevice_owner(pid_master,name)
+                    #set_netdevice_owner(mininet_switch.pid,name)
+                    set_netdevice_owner(pid_master,name)
 
         for pid, host_name in self.host_pids:
             mininet_host = self.network_configuration.mininet_obj.get(host_name)
             for name in mininet_host.intfNames():
                 if name != "lo" :
-                    set_netdevice_owner(pid, name)
-                    #set_netdevice_owner(pid_master,name)
+                    #set_netdevice_owner(pid, name)
+                    set_netdevice_owner(pid_master,name)
 
     def start_proxy_process(self):
 

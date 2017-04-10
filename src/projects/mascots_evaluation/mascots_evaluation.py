@@ -13,10 +13,11 @@ from utils.dnp3_pcap_post_processing import DNP3PCAPPostProcessing
 import argparse
 
 ENABLE_TIMEKEEPER = 0
-TDF = 10
+TDF = 1
 # set of CPUs to run emulation/replay processes on when timekeeper is not
 # enabled
 CPUS_SUBSET = "2-3"
+#CPUS_SUBSET = "2-50"
 
 
 class TimeKeeperIntegration(NetPower):
@@ -58,11 +59,15 @@ def get_network_configuration():
                                                  "admin",
                                                  "admin",
                                                  "clique_enterprise",
-                                                 {"num_switches": 5,
-                                                  "per_switch_links": 2,
+                                                 # [5,4], [10,9]
+                                                 # ok for [6,2],[6,3]; fails on [6,4]
+                                                 # ok for [9,2]
+                                                 # fails on [10,2]
+                                                 {"num_switches": 10, # 5
+                                                  "per_switch_links": 9, # 2
                                                   "num_hosts_per_switch": 1,
-                                                  "switch_switch_link_latency_range": (5, 5),
-                                                  "host_switch_link_latency_range": (5, 5)
+                                                  "switch_switch_link_latency_range": (1, 1),
+                                                  "host_switch_link_latency_range": (1, 1)
                                                   },
                                                  conf_root="configurations/",
                                                  synthesis_name="SimpleMACSynthesis",
@@ -83,6 +88,16 @@ def get_network_configuration():
                                                       ["22", "23", "19"]),
                                                      ("pilot_buses_set_3", [
                                                       "20", "10", "6", "9"]),
+                                                     ("pilot_buses_set_4",
+                                                      ["21", "15", "18", "1"]),
+                                                     ("pilot_buses_set_5",
+                                                      ["2", "25", "29"]),
+                                                     ("pilot_buses_set_6",
+                                                      ["2", "25", "29"]),
+                                                     ("pilot_buses_set_7",
+                                                      ["2", "25", "29"]),
+                                                     ("pilot_buses_set_8",
+                                                      ["2", "25", "29"]),
                                                      ("generator",
                                                       ["30;1", "31;1", "32;1",
                                                        "33;1", "34;1", "35;1",
@@ -148,6 +163,7 @@ def measure_dnp3_stats(project_name, pcap_file_name):
             print "std:", numpy.std(p.periodicity_data[5:])
             print "min:", min(p.periodicity_data[5:])
             print "max:", max(p.periodicity_data[5:])
+            print "sum:", sum(p.periodicity_data[5:])
         print "------------------------"
 
         stats = {}
@@ -158,7 +174,9 @@ def measure_dnp3_stats(project_name, pcap_file_name):
 
 def write_stats_to_file(project_name,pcap_file_name,write_file_name,base_dir):
     #dir_to_write = base_dir + "/src/projects/mascots_evaluation/experimental_results/"
-    dir_to_write = base_dir + "/src/projects/mascots_evaluation/experimental_results/4_cpus/"
+    #dir_to_write = base_dir + "/src/projects/mascots_evaluation/experimental_results/motivation-udp/"
+    dir_to_write = base_dir + "/src/projects/mascots_evaluation/experimental_results/motivation-blocker_only/"
+    #dir_to_write = base_dir + "/src/projects/mascots_evaluation/experimental_results/motivation-blocker_only-tk/"
     stats = measure_dnp3_stats(project_name, pcap_file_name)
     periodicity_data_file = dir_to_write + write_file_name + "periodicity.csv"
     latency_data_file = dir_to_write + write_file_name + "latency.csv"
@@ -211,32 +229,43 @@ def get_emulated_udp(network_configuration,src,dst,root_user_name,root_password,
                             dst_mn_node=network_configuration.mininet_obj.get(dst),
                             root_user_name=root_user_name,
                             root_password=root_password,
-                            server_process_start_cmd='sudo nice -20 python ' + base_dir + "/src/cyber_network/simple_udp_server.py --serv_ip " + network_configuration.mininet_obj.get(dst).IP() + " --port " + str(port),
-                            client_expect_file='sudo nice -20 python ' + base_dir + "/src/cyber_network/simple_udp_client.py --serv_ip " + network_configuration.mininet_obj.get(dst).IP() + " --port " + str(port) + " --freq " + str(interval),
+                            server_process_start_cmd='sudo nice --19 python ' + base_dir + "/src/cyber_network/simple_udp_server.py --serv_ip " + network_configuration.mininet_obj.get(dst).IP() + " --port " + str(port),
+                            #server_process_start_cmd='sudo python ' + base_dir + "/src/cyber_network/simple_udp_server.py --serv_ip " + network_configuration.mininet_obj.get(dst).IP() + " --port " + str(port),
+                            client_expect_file='sudo nice --19 python ' + base_dir + "/src/cyber_network/simple_udp_client.py --serv_ip " + network_configuration.mininet_obj.get(dst).IP() + " --port " + str(port) + " --freq " + str(interval),
+                            #client_expect_file='sudo python ' + base_dir + "/src/cyber_network/simple_udp_client.py --serv_ip " + network_configuration.mininet_obj.get(dst).IP() + " --port " + str(port) + " --freq " + str(interval),
                             long_running=True)
 
 def get_emulated_blocker(network_configuration,src,dst,root_user_name,root_password,run_time,base_dir):
         # blocker script
         return EmulatedTrafficFlow(type=TRAFFIC_FLOW_ONE_SHOT,
-                            offset=1,
+                            offset=5,
                             inter_flow_period=0,
                             run_time=run_time,
                             src_mn_node=network_configuration.mininet_obj.get(src),
                             dst_mn_node=network_configuration.mininet_obj.get(dst),
                             root_user_name=root_user_name,
                             root_password=root_password,
-                            server_process_start_cmd="sudo nice -20 python " + base_dir + "/src/cyber_network/blocker.py ",
-                            client_expect_file='python ' + base_dir + "/src/cyber_network/blocker.py ",
+                            #server_process_start_cmd="sudo nice --20 python " + base_dir + "/src/cyber_network/blocker.py ",
+                            server_process_start_cmd="sudo python " + base_dir + "/src/cyber_network/blocker.py ",
+                            client_expect_file='',
                             long_running=True)
 
 def main():
 
+    #measure_dnp3_stats("timekeeper_integration","s1-eth2-s2-eth2.pcap")
+    #sys.exit(0)
+
     parser = argparse.ArgumentParser()
     parser.add_argument("--flow_count", dest="flow_count", help="Number of UDP requests you want to emulate", required=True)
     parser.add_argument("--version", dest="version", help="Version Number for result file")
+    parser.add_argument("--runtime", dest="runtime", help="Run time in seconds")
     args = parser.parse_args()
 
-    run_time = 15
+    if (args.runtime):
+        run_time = int(args.runtime)
+    else:
+        run_time = 10
+
     root_user_name = "moses"
     root_password = "passwd"
 
@@ -251,7 +280,7 @@ def main():
     mn_h2 = network_configuration.mininet_obj.get("h2")
     mn_h3 = network_configuration.mininet_obj.get("h3")
 
-    bg_flows = [
+    bg_flows_1 = [
 
         # Ping 1->2
         EmulatedTrafficFlow(type=TRAFFIC_FLOW_ONE_SHOT,
@@ -331,37 +360,38 @@ def main():
                             client_expect_file='python ' + base_dir + "/src/cyber_network/telnet_session.py --dest_ip " + mn_h2.IP(),
                             long_running=True),
 
-        EmulatedTrafficFlow(type=TRAFFIC_FLOW_ONE_SHOT,
-                            offset=1,
-                            inter_flow_period=0,
-                            run_time=run_time,
-                            src_mn_node=network_configuration.mininet_obj.get(
-                                "h1"),
-                            dst_mn_node=network_configuration.mininet_obj.get(
-                                "h2"),
-                            root_user_name=root_user_name,
-                            root_password=root_password,
-                            server_process_start_cmd="sudo nice -20 python " + base_dir + "/src/cyber_network/blocker.py ",
-                            client_expect_file='python ' + base_dir + "/src/cyber_network/blocker.py ",
-                            long_running=True),
     ]
-    #bg_flows = []
+
+    host_names = []
+    for h in network_configuration.mininet_obj.hosts:
+        host_names.append(h.name)
+
+    bg_flows = []
+    interval = 0.5
+
+    for h in host_names:
+        for i in host_names:
+            if i != h:
+                bg_flows.append(get_emulated_ping(network_configuration,h,i,root_user_name,root_password,run_time,interval))
+        bg_flows.append(get_emulated_blocker(network_configuration,h,"h1",root_user_name,root_password,run_time,base_dir))
+
+    bg_flows.append(get_emulated_dnp3(network_configuration,"h1","h3",root_user_name,root_password,run_time,base_dir))
     #bg_flows.append(get_emulated_ping(network_configuration,"h1","h2",root_user_name,root_password,run_time,0.2))
-    src = "h5"
-    dst = "h4"
-    interval = 0.1
 
-    for i in range(0,int(args.flow_count)):
+    #for i in range(0,int(args.flow_count)):
         # add blocker traffic
-        bg_flows.append(get_emulated_blocker(network_configuration,src,dst,root_user_name,root_password,run_time,base_dir))
+        #port = 10000 + i
+        #bg_flows.append(get_emulated_udp(network_configuration,src,dst,root_user_name,root_password,run_time,base_dir,port,interval))
+        #bg_flows.append(get_emulated_blocker(network_configuration,src,dst,root_user_name,root_password,run_time,base_dir))
 
-        # add udp traffic
+    # add udp traffic
     #    port = 10000 + i
     #    bg_flows.append(get_emulated_udp(network_configuration,src,dst,root_user_name,root_password,run_time,base_dir,port,interval))
 
 
 
-    print len(bg_flows)
+    print "Number of background flows: ", len(bg_flows)
+
 
     exp = TimeKeeperIntegration(run_time,
                                 network_configuration,
@@ -375,10 +405,21 @@ def main():
 
     exp.start_project()
 
-    write_file_name = str(ENABLE_TIMEKEEPER) + "_" + str(len(bg_flows)*2) + "_" + str(src) + "_" + str(dst) + "_" + str(interval) + "_"
+    # original:
+    #write_file_name = str(ENABLE_TIMEKEEPER) + "_" + str(len(bg_flows)*2) + "_" + "h1" + "_" + "h3" + "_" + str(interval) + "_"
+    # scalability testing uses one ping per host pair, one blocker script per
+    # host, and 2 DNP3 flows.  Only add one to the number of flows for the DNP3
+    # flow pair.
+    write_file_name = str(ENABLE_TIMEKEEPER) + "_" + str(len(bg_flows)+1) + "_" + "h1" + "_" + "h3" + "_" + str(interval) + "_"
+
     if (args.version):
         write_file_name = write_file_name + "v" + str(args.version) + "_"
+
+    # Parse DNP3 packet results:
+    # original: for 2 switches per link:
     write_stats_to_file(exp.project_name, "s1-eth2-s2-eth2.pcap", write_file_name, base_dir)
+    # for 4 switches per link:
+    #write_stats_to_file(exp.project_name, "s1-eth3-s3-eth2.pcap", write_file_name, base_dir)
 
 
 if __name__ == "__main__":

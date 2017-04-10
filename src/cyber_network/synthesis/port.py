@@ -1,8 +1,10 @@
 __author__ = 'Rakesh Kumar'
 
+import string
+
 class Port(object):
 
-    def __init__(self, sw, port_json):
+    def __init__(self, sw, port_json, mininet_intf=None):
 
         self.sw = sw
         self.port_id = None
@@ -14,11 +16,15 @@ class Port(object):
         self.state = None
         self.attached_host = None
 
-        if self.sw.network_graph.controller == "ryu":
-            self.parse_ryu_port_json(port_json)
+        if not port_json and mininet_intf:
+            self.parse_mininet_intf(mininet_intf)
+        else:
 
-        elif self.sw.network_graph.controller == "onos":
-            self.parse_onos_port_json(port_json)
+            if self.sw.network_graph.controller == "ryu":
+                self.parse_ryu_port_json(port_json)
+
+            elif self.sw.network_graph.controller == "onos":
+                self.parse_onos_port_json(port_json)
 
     def parse_onos_port_json(self, port_json):
 
@@ -37,6 +43,14 @@ class Port(object):
             self.curr_speed = int(port_json["curr_speed"])
         if "max_speed" in port_json:
             self.max_speed = int(port_json["max_speed"])
+
+        self.state = "up"
+
+    def parse_mininet_intf(self, intf):
+
+        self.port_number = int(string.split(intf.name,"-")[1][3:])
+        self.mac_address = intf.MAC()
+        self.port_id = str(self.sw.node_id) + ":" + str(self.port_number)
 
         self.state = "up"
 

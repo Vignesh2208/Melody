@@ -403,6 +403,7 @@ class NetworkConfiguration(object):
                 self.cm = ControllerMan(controller=self.controller)
                 self.cm.start_controller()
 
+                #time.sleep(mininet_setup_gap)
                 self.start_mininet()
                 if mininet_setup_gap:
                     time.sleep(mininet_setup_gap)
@@ -649,6 +650,6 @@ class NetworkConfiguration(object):
         for i in xrange(0,len(self.mininet_obj.switches)):
             mininet_switch = self.mininet_obj.switches[i]
             # set netdevices owner
-            self.set_netdevice_owner_in_timekeeper(mininet_switch.intfNames(), mininet_switch.pid)    
+            self.set_netdevice_owner_in_timekeeper(mininet_switch.intfNames(), mininet_switch.pid)
 
 

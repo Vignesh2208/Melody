@@ -56,7 +56,7 @@ class basicNetworkServiceLayer(threading.Thread) :
 
 	def run(self):
 		self.log.info("Started listening on IP: " + self.hostIP + " PORT: " + str(self.listenPort) + " at " + str(datetime.now()))
-		os.system("taskset -cp " + str(os.getpid()))
+		#os.system("taskset -cp " + str(os.getpid()))
 		sys.stdout.flush()
 		#assert(self.attackLayer != None)
 		sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP

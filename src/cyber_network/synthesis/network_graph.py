@@ -101,22 +101,42 @@ class NetworkGraph(object):
         with open(self.network_configuration.conf_path + "mininet_port_links.json", "r") as in_file:
             mininet_port_links = json.loads(in_file.read())
 
-        # From all the switches
         for sw in mininet_host_nodes:
+
             # For every host
             for mininet_host_dict in mininet_host_nodes[sw]:
+
                 host_switch_obj = self.get_node_object(mininet_host_dict["host_switch_id"])
 
                 # Add the host to the graph
                 self.host_ids.add(mininet_host_dict["host_name"])
                 sw_obj = self.get_node_object(sw)
 
+                #try:
                 h_obj = Host(mininet_host_dict["host_name"],
                              self,
                              mininet_host_dict["host_IP"],
                              mininet_host_dict["host_MAC"],
                              host_switch_obj,
                              sw_obj.ports[mininet_port_links[mininet_host_dict["host_name"]]['0'][1]])
+
+                #except KeyError:
+                    #import pdb; pdb.set_trace()
+                #    h_obj = Host(mininet_host_dict["host_name"],
+                #             self,
+                #             mininet_host_dict["host_IP"],
+                #             mininet_host_dict["host_MAC"],
+                #             host_switch_obj,
+                #             None)
+
+                #print "sw_obj.ports:"
+                #print sw_obj.ports
+                #print "port index:"
+                #print mininet_port_links[mininet_host_dict["host_name"]]['0'][1]
+                #print "attached host:"
+                #print sw_obj.ports[mininet_port_links[mininet_host_dict["host_name"]]['0'][1]].attached_host
+                #print "attached host to append on switch side:"
+                #print h_obj
 
                 # Make the connections both on switch and host side
                 sw_obj.host_ports.append(mininet_port_links[mininet_host_dict["host_name"]]['0'][1])
@@ -282,6 +302,14 @@ class NetworkGraph(object):
                     continue
 
                 switch_ports[int(port["port_no"])] = Port(sw, port_json=port)
+
+            if (not ryu_switches[dpid]["ports"]):
+                #import pdb; pdb.set_trace()
+                ovs_sw = self.network_configuration.mininet_obj.get(switch_id)
+                for intf in ovs_sw.intfList():
+                    if intf.name != 'lo':
+                        new_port_obj = Port(sw, None, intf)
+                        switch_ports[new_port_obj.port_number] = new_port_obj
 
             sw.ports = switch_ports
 
