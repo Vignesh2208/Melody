@@ -1,0 +1,26 @@
+Host 1 Attack Layer Thread >> INFO >> Attk playback buffer open suceeded !
+Waiting for start command ... buf =  h1main-cmd-channel-buffer
+Host 1 Network Layer Thread >> INFO >> Started listening on IP: 10.0.0.1 PORT: 5100 at 2017-04-08 15:48:38.307635
+pid 32214's current affinity list: 4
+Host 1 Attack Layer Thread >> INFO >> Started at 2017-04-08 15:48:38.307978
+Host 1 IPC Thread >> INFO >> Started control layer run
+Signalled Start threads at  2017-04-08 15:48:38.309268
+Waiting for exit command ...
+Checking for EXIT for the  1  time at:  2017-04-08 15:48:38.309273
+Checking for EXIT for the  2  time at:  2017-04-08 15:48:39.309939
+Checking for EXIT for the  3  time at:  2017-04-08 15:48:40.310544
+Checking for EXIT for the  4  time at:  2017-04-08 15:48:41.316656
+Checking for EXIT for the  5  time at:  2017-04-08 15:48:42.318658
+Checking for EXIT for the  6  time at:  2017-04-08 15:48:43.321190
+Checking for EXIT for the  7  time at:  2017-04-08 15:48:44.323858
+Checking for EXIT for the  8  time at:  2017-04-08 15:48:45.327299
+Checking for EXIT for the  9  time at:  2017-04-08 15:48:46.328182
+Checking for EXIT for the  10  time at:  2017-04-08 15:48:47.328901
+Checking for EXIT for the  11  time at:  2017-04-08 15:48:48.332099
+Checking for EXIT for the  12  time at:  2017-04-08 15:48:49.332979
+Checking for EXIT for the  13  time at:  2017-04-08 15:48:50.337782
+Checking for EXIT for the  14  time at:  2017-04-08 15:48:51.338390
+Checking for EXIT for the  15  time at:  2017-04-08 15:48:52.340262
+Checking for EXIT for the  16  time at:  2017-04-08 15:48:53.340659
+Checking for EXIT for the  17  time at:  2017-04-08 15:48:54.341784
+Checking for EXIT for the  18  time at:  2017-04-08 15:48:55.008337

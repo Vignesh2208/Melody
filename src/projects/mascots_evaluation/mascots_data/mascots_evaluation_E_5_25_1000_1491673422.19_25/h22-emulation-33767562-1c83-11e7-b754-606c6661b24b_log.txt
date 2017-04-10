@@ -1,0 +1,22 @@
+Started emulation driver ...
+Cmd channel buffer open succeeded !
+Waiting for START command ... buf =  h22-emulation-33767562-1c83-11e7-b754-606c6661b24bmain-cmd-channel-buffer
+Triggered emulation driver at  2017-04-08 12:46:11.084750
+Started command at  2017-04-08 12:46:17.084941
+[u'python', u'/home/user/Desktop/NetPower_TestBed/src/cyber_network/blocker.py', u'']
+python /home/user/Desktop/NetPower_TestBed/src/cyber_network/blocker.py 
+Waiting for exit command at  2017-04-08 12:46:17.085400
+Checking for EXIT for the  1  time at:  2017-04-08 12:46:17.085407
+Started Blocker ...
+Checking for EXIT for the  2  time at:  2017-04-08 12:46:18.085652
+pid 23389's current affinity list: 4
+Checking for EXIT for the  3  time at:  2017-04-08 12:46:19.085730
+Checking for EXIT for the  4  time at:  2017-04-08 12:46:20.086176
+Checking for EXIT for the  5  time at:  2017-04-08 12:46:21.086454
+Checking for EXIT for the  6  time at:  2017-04-08 12:46:22.086936
+Checking for EXIT for the  7  time at:  2017-04-08 12:46:23.087384
+Checking for EXIT for the  8  time at:  2017-04-08 12:46:24.087658
+Checking for EXIT for the  9  time at:  2017-04-08 12:46:25.088133
+Checking for EXIT for the  10  time at:  2017-04-08 12:46:26.088578
+Checking for EXIT for the  11  time at:  2017-04-08 12:46:27.088862
+Checking for EXIT for the  12  time at:  2017-04-08 12:46:27.101731

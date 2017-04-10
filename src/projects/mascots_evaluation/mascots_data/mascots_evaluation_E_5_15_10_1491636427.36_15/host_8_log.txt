@@ -1,0 +1,21 @@
+Host 8 Attack Layer Thread >> INFO >> Attk playback buffer open suceeded !
+Waiting for start command ... buf =  h8main-cmd-channel-buffer
+Host 8 Network Layer Thread >> INFO >> Started listening on IP: 10.0.0.8 PORT: 5100 at 2017-04-08 02:28:09.735484
+pid 6181's current affinity list: 7
+Host 8 Attack Layer Thread >> INFO >> Started at 2017-04-08 02:28:09.735725
+Host 8 IPC Thread >> INFO >> Started at 2017-04-08 02:28:09.756988
+Host 8 IPC Thread >> INFO >> power sim id to host id map = {'id_2;1': 4, 'id_11;1': 13, 'id_9;1': 11, 'id_12;1': 14, 'id_1;1': 3, 'id_7;1': 9, 'id_4;1': 6, 'id_5;1': 7, 'control;1': 1, 'id_8;1': 10, 'id_6;1': 8, 'id_10;1': 12, 'id_3;1': 5, 'id_0;1': 2, 'id_13;1': 15}
+Host 8 IPC Thread >> INFO >> host id to powersim id map = {1: ['control;1'], 2: ['id_0;1'], 3: ['id_1;1'], 4: ['id_2;1'], 5: ['id_3;1'], 6: ['id_4;1'], 7: ['id_5;1'], 8: ['id_6;1'], 9: ['id_7;1'], 10: ['id_8;1'], 11: ['id_9;1'], 12: ['id_10;1'], 13: ['id_11;1'], 14: ['id_12;1'], 15: ['id_13;1']}
+Signalled Start threads at  2017-04-08 02:28:09.771464
+Waiting for exit command ...
+Checking for EXIT for the  1  time at:  2017-04-08 02:28:09.771475
+Checking for EXIT for the  2  time at:  2017-04-08 02:28:10.771791
+Checking for EXIT for the  3  time at:  2017-04-08 02:28:11.784027
+Checking for EXIT for the  4  time at:  2017-04-08 02:28:12.800346
+Checking for EXIT for the  5  time at:  2017-04-08 02:28:13.807706
+Checking for EXIT for the  6  time at:  2017-04-08 02:28:14.808666
+Checking for EXIT for the  7  time at:  2017-04-08 02:28:15.827150
+Checking for EXIT for the  8  time at:  2017-04-08 02:28:16.831713
+Checking for EXIT for the  9  time at:  2017-04-08 02:28:17.839711
+Checking for EXIT for the  10  time at:  2017-04-08 02:28:18.842832
+Checking for EXIT for the  11  time at:  2017-04-08 02:28:19.847953

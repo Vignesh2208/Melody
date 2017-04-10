@@ -1,0 +1,27 @@
+Started Replay driver ...
+Cmd channel buffer open succeeded !
+IP =  10.0.0.2
+LOADED PCAP: /home/user/Desktop/NetPower_TestBed/src/projects/mascots_evaluation/attack_plan/dnp3_rate_1000.pcap SEND EVENTS: 104 RECV EVENTS: 104
+Replaying PCAP file  /home/user/Desktop/NetPower_TestBed/src/projects/mascots_evaluation/attack_plan/dnp3_rate_1000.pcap at time: 2017-04-08 12:46:11.119950
+Sending Replay Event: Dst =  10.0.0.1  N Req Recv events =  1
+Sending Replay Event: Dst =  10.0.0.1  N Req Recv events =  1
+Sending Replay Event: Dst =  10.0.0.1  N Req Recv events =  1
+Sending Replay Event: Dst =  10.0.0.1  N Req Recv events =  1
+Sending Replay Event: Dst =  10.0.0.1  N Req Recv events =  1
+Sending Replay Event: Dst =  10.0.0.1  N Req Recv events =  1
+Sending Replay Event: Dst =  10.0.0.1  N Req Recv events =  1
+Sending Replay Event: Dst =  10.0.0.1  N Req Recv events =  1
+Sending Replay Event: Dst =  10.0.0.1  N Req Recv events =  1
+Sending Replay Event: Dst =  10.0.0.1  N Req Recv events =  1
+Sending Replay Event: Dst =  10.0.0.1  N Req Recv events =  1
+Sending Replay Event: Dst =  10.0.0.1  N Req Recv events =  1
+Sending Replay Event: Dst =  10.0.0.1  N Req Recv events =  1
+Sending Replay Event: Dst =  10.0.0.1  N Req Recv events =  1
+Sending Replay Event: Dst =  10.0.0.1  N Req Recv events =  1
+Sending Replay Event: Dst =  10.0.0.1  N Req Recv events =  1
+Sending Replay Event: Dst =  10.0.0.1  N Req Recv events =  1
+Sending Replay Event: Dst =  10.0.0.1  N Req Recv events =  1
+Sending Replay Event: Dst =  10.0.0.1  N Req Recv events =  1
+Sending Replay Event: Dst =  10.0.0.1  N Req Recv events =  1
+Sending Replay Event: Dst =  10.0.0.1  N Req Recv events =  1
+Sending Replay Event: Dst =  10.0.0.1  N Req Recv events =  1
