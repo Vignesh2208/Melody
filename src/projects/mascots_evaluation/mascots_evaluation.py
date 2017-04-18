@@ -63,8 +63,8 @@ def get_network_configuration():
                                                  # ok for [6,2],[6,3]; fails on [6,4]
                                                  # ok for [9,2]
                                                  # fails on [10,2]
-                                                 {"num_switches": 10, # 5
-                                                  "per_switch_links": 9, # 2
+                                                 {"num_switches": 6, # 5
+                                                  "per_switch_links": 5, # 2
                                                   "num_hosts_per_switch": 1,
                                                   "switch_switch_link_latency_range": (1, 1),
                                                   "host_switch_link_latency_range": (1, 1)
@@ -90,14 +90,14 @@ def get_network_configuration():
                                                       "20", "10", "6", "9"]),
                                                      ("pilot_buses_set_4",
                                                       ["21", "15", "18", "1"]),
-                                                     ("pilot_buses_set_5",
-                                                      ["2", "25", "29"]),
-                                                     ("pilot_buses_set_6",
-                                                      ["2", "25", "29"]),
-                                                     ("pilot_buses_set_7",
-                                                      ["2", "25", "29"]),
-                                                     ("pilot_buses_set_8",
-                                                      ["2", "25", "29"]),
+                                                     #("pilot_buses_set_5",
+                                                     # ["2", "25", "29"]),
+                                                     #("pilot_buses_set_6",
+                                                     # ["2", "25", "29"]),
+                                                     #("pilot_buses_set_7",
+                                                     # ["2", "25", "29"]),
+                                                     #("pilot_buses_set_8",
+                                                     # ["2", "25", "29"]),
                                                      ("generator",
                                                       ["30;1", "31;1", "32;1",
                                                        "33;1", "34;1", "35;1",
@@ -175,7 +175,8 @@ def measure_dnp3_stats(project_name, pcap_file_name):
 def write_stats_to_file(project_name,pcap_file_name,write_file_name,base_dir):
     #dir_to_write = base_dir + "/src/projects/mascots_evaluation/experimental_results/"
     #dir_to_write = base_dir + "/src/projects/mascots_evaluation/experimental_results/motivation-udp/"
-    dir_to_write = base_dir + "/src/projects/mascots_evaluation/experimental_results/motivation-blocker_only/"
+    #dir_to_write = base_dir + "/src/projects/mascots_evaluation/experimental_results/motivation-blocker_only/"
+    dir_to_write = base_dir + "/src/projects/mascots_evaluation/experimental_results/test/"
     #dir_to_write = base_dir + "/src/projects/mascots_evaluation/experimental_results/motivation-blocker_only-tk/"
     stats = measure_dnp3_stats(project_name, pcap_file_name)
     periodicity_data_file = dir_to_write + write_file_name + "periodicity.csv"

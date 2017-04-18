@@ -112,13 +112,16 @@ class NetworkGraph(object):
                 self.host_ids.add(mininet_host_dict["host_name"])
                 sw_obj = self.get_node_object(sw)
 
-                #try:
-                h_obj = Host(mininet_host_dict["host_name"],
+                try:
+                    h_obj = Host(mininet_host_dict["host_name"],
                              self,
                              mininet_host_dict["host_IP"],
                              mininet_host_dict["host_MAC"],
                              host_switch_obj,
                              sw_obj.ports[mininet_port_links[mininet_host_dict["host_name"]]['0'][1]])
+                except:
+                    import pdb; pdb.set_trace()
+                    print mininet_host_dict["host_name"]
 
                 #except KeyError:
                     #import pdb; pdb.set_trace()
@@ -259,7 +262,11 @@ class NetworkGraph(object):
             self.graph.node[node1_id]["sw"].ports[node1_port].state = "up"
 
         if self.graph.node[node2_id]["node_type"] == "switch":
-            self.graph.node[node2_id]["sw"].ports[node2_port].state = "up"
+            try:
+                self.graph.node[node2_id]["sw"].ports[node2_port].state = "up"
+            except KeyError:
+                import pdb; pdb.set_trace()
+                print node2_id, node2_port
 
     def remove_link(self, node1_id, node1_port, node2_id, node2_port):
 
@@ -294,22 +301,31 @@ class NetworkGraph(object):
 
             # Parse out the information about all the ports in the switch
             switch_ports = {}
-            for port in ryu_switches[dpid]["ports"]:
-                if port["port_no"] == 4294967294:
-                    continue
 
-                if port["port_no"] == "LOCAL":
-                    continue
+            # Original: get ports from ryu
+            #for port in ryu_switches[dpid]["ports"]:
+            #    if port["port_no"] == 4294967294:
+            #        continue
 
-                switch_ports[int(port["port_no"])] = Port(sw, port_json=port)
+            #    if port["port_no"] == "LOCAL":
+            #        continue
 
-            if (not ryu_switches[dpid]["ports"]):
+            #    switch_ports[int(port["port_no"])] = Port(sw, port_json=port)
+
+            # Modification: Get ports from mininet ALWAYS
+            #if (not ryu_switches[dpid]["ports"]):
                 #import pdb; pdb.set_trace()
-                ovs_sw = self.network_configuration.mininet_obj.get(switch_id)
-                for intf in ovs_sw.intfList():
-                    if intf.name != 'lo':
-                        new_port_obj = Port(sw, None, intf)
-                        switch_ports[new_port_obj.port_number] = new_port_obj
+            ovs_sw = self.network_configuration.mininet_obj.get(switch_id)
+            for intf in ovs_sw.intfList():
+                if intf.name != 'lo':
+                    new_port_obj = Port(sw, None, intf)
+                    switch_ports[new_port_obj.port_number] = new_port_obj
+                #import pdb; pdb.set_trace()
+
+            # temp test:
+            #if (switch_id == "s9"):
+            import pdb; pdb.set_trace()
+            print switch_id
 
             sw.ports = switch_ports
 
@@ -322,6 +338,54 @@ class NetworkGraph(object):
             for table_id in ryu_switches[dpid]["flow_tables"]:
                 switch_flow_tables.append(FlowTable(sw, table_id, ryu_switches[dpid]["flow_tables"][table_id]))
                 sw.flow_tables = sorted(switch_flow_tables, key=lambda flow_table: flow_table.table_id)
+
+    def parse_mininet_switches(self):
+
+        mininet_switches = self.network_configuration.mininet_obj.switches
+
+        #ryu_switches = None
+        #with open(self.network_configuration.conf_path + "ryu_switches.json", "r") as in_file:
+        #    ryu_switches = json.loads(in_file.read())
+
+        #  Go through each node and grab the ryu_switches and the corresponding hosts associated with the switch
+        for mn_sw in mininet_switches:
+
+            dpid = int(mn_sw.dpid,16)
+
+            #  prepare a switch id
+            switch_id = "s" + str(dpid)
+
+            print switch_id
+
+            # Check to see if a switch with this id already exists in the graph,
+            # if so grab it, otherwise create it
+            sw = self.get_node_object(switch_id)
+            if not sw:
+                sw = Switch(switch_id, self)
+                self.graph.add_node(switch_id, node_type="switch", sw=sw)
+                self.switch_ids.append(switch_id)
+
+            # Parse out the information about all the ports in the switch
+            switch_ports = {}
+
+            # Modification: Get ports from mininet ALWAYS
+            #if (not ryu_switches[dpid]["ports"]):
+                #import pdb; pdb.set_trace()
+            ovs_sw = self.network_configuration.mininet_obj.get(switch_id)
+            for intf in ovs_sw.intfList():
+                if intf.name != 'lo':
+                    new_port_obj = Port(sw, None, intf)
+                    switch_ports[new_port_obj.port_number] = new_port_obj
+                #import pdb; pdb.set_trace()
+
+            sw.ports = switch_ports
+
+            # Parse all the flow tables and sort them by table_id in the list
+            sw.flow_tables = []
+            #switch_flow_tables = []
+            #for table_id in ryu_switches[dpid]["flow_tables"]:
+            #    switch_flow_tables.append(FlowTable(sw, table_id, ryu_switches[dpid]["flow_tables"][table_id]))
+            #    sw.flow_tables = sorted(switch_flow_tables, key=lambda flow_table: flow_table.table_id)
 
     def parse_onos_switches(self):
 
@@ -448,7 +512,10 @@ class NetworkGraph(object):
         self.total_flow_rules = 0
 
         if self.network_configuration.controller == "ryu":
-            self.parse_ryu_switches()
+            #self.parse_ryu_switches()
+            # instead of parsing ryu_switches, parse the mininet switches by
+            # default
+            self.parse_mininet_switches()
         elif self.network_configuration.controller == "onos":
             self.parse_onos_switches()
         elif self.network_configuration.controller == "sel":
@@ -520,6 +587,8 @@ class NetworkGraph(object):
     def get_num_rules(self):
 
         num_rules = 0
+
+        import pdb; pdb.set_trace()
 
         for sw in self.get_switches():
             for flow_table in sw.flow_tables:

@@ -209,21 +209,30 @@ class NetworkConfiguration(object):
 
 
     def get_ryu_switches(self):
+        #import pdb; pdb.set_trace()
         ryu_switches = {}
 
         # Get all the ryu_switches from the inventory API
         remaining_url = 'stats/switches'
+
         resp, content = self.h.request(self.controller_api_base_url + remaining_url, "GET")
 
         #CLI(self.mininet_obj)
 
-        #import pdb; pdb.set_trace()
-
-
-
         ryu_switch_numbers = json.loads(content)
 
+        #import pdb; pdb.set_trace()
+        print "ryu_switch_numbers: ", ryu_switch_numbers
+
+        # testing; try looping over mininet switch numbers
+        #mininet_switch_numbers = []
+        #for m_sw in self.mininet_obj.switches:
+        #    mininet_switch_numbers.append(int(m_sw.name[1:]))
+        #print "mininet_switch_numbers: ", mininet_switch_numbers
+        # NOTE: Cannot extract ports/rules from RYU here.
+
         for dpid in ryu_switch_numbers:
+        #for dpid in mininet_switch_numbers:
 
             this_ryu_switch = {}
 
@@ -416,15 +425,21 @@ class NetworkConfiguration(object):
             self.ng = NetworkGraph(network_configuration=self)
             self.ng.parse_network_graph()
 
+            #import pdb; pdb.set_trace()
+
             if self.synthesis_name:
 
                 # Now the synthesis...
                 self.trigger_synthesis(synthesis_setup_gap)
 
+                #pdb.set_trace()
+
                 # Refresh just the switches in the network graph, post synthesis
                 self.get_switches()
                 self.ng.parse_network_graph()
                 #self.ng.parse_switches()
+
+                #pdb.set_trace()
 
         else:
             self.ng = NetworkGraph(network_configuration=self)
@@ -433,6 +448,7 @@ class NetworkConfiguration(object):
         print "total_flow_rules:", self.ng.total_flow_rules
 
         return self.ng
+
 
     def start_mininet(self):
 
@@ -446,12 +462,14 @@ class NetworkConfiguration(object):
                                        controller=lambda name: RemoteController(name,
                                                                                 ip=self.controller_ip,
                                                                                 port=self.controller_port),
-                                       switch=partial(OVSSwitch, protocols='OpenFlow13'))
+                                       switch=partial(OVSSwitch, protocols='OpenFlow14'))
 
 
             #self.set_switch_netdevice_owners()
 
             self.mininet_obj.start()
+
+            #CLI(self.mininet_obj)
 
     def cleanup_mininet(self):
 

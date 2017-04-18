@@ -56,9 +56,9 @@ sudo apt-get -y purge openvswitch-common
 
 pushd ~/Downloads
 
-wget http://openvswitch.org/releases/openvswitch-2.3.0.tar.gz
-tar -xzvf openvswitch-2.3.0.tar.gz
-pushd openvswitch-2.3.0
+wget http://openvswitch.org/releases/openvswitch-2.4.0.tar.gz
+tar -xzvf openvswitch-2.4.0.tar.gz
+pushd openvswitch-2.4.0
 sudo ./configure
 sudo make
 sudo make install
@@ -71,8 +71,8 @@ echo "##########################################################################
 echo "Setting up openvswitch"
 echo "#############################################################################"
 
-sudo cp -v start-ovs.sh ~/Downloads/openvswitch-2.3.0/
-#sudo chmod +x ~/Downloads/openvswitch-2.3.0/start-ovs.sh
+sudo cp -v start-ovs.sh ~/Downloads/openvswitch-2.4.0/
+#sudo chmod +x ~/Downloads/openvswitch-2.4.0/start-ovs.sh
 sudo sed "s/@HOME@/${HOME//\//\\/}/g" start_ovs.sh.template > start_ovs.sh
 sudo cp -v start_ovs.sh /etc/init.d/
 sudo rm start_ovs.sh

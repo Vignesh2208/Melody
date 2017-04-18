@@ -39,12 +39,18 @@ class Port(object):
         self.port_number = port_json["port_no"]
         self.mac_address = port_json["hw_addr"]
 
+        # test:
+        #if (str(self.sw.node_id) == 's8'):
+        #    import pdb; pdb.set_trace()
+        #    print self.port_id, self.port_number, self.mac_address
+
         if "curr_speed" in port_json:
             self.curr_speed = int(port_json["curr_speed"])
         if "max_speed" in port_json:
             self.max_speed = int(port_json["max_speed"])
 
         self.state = "up"
+
 
     def parse_mininet_intf(self, intf):
 

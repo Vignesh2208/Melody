@@ -125,6 +125,8 @@ class SynthesisLib(object):
 
         time.sleep(0.2)
 
+        #print "url:", url
+
         if self.network_graph.controller == "ryu":
 
             resp, content = self.h.request(url, "POST",

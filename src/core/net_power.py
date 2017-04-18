@@ -408,6 +408,7 @@ class NetPower(object):
     def open_main_cmd_channel_buffers(self):
 
         for i in xrange(len(self.network_configuration.roles)):
+            #import pdb; pdb.set_trace()
             mininet_host = self.network_configuration.mininet_obj.hosts[i]
             result = self.sharedBufferArray.open(bufName=str(mininet_host.name) + "main-cmd-channel-buffer", isProxy=True)
             if result == BUF_NOT_INITIALIZED or result == FAILURE:
