@@ -1,0 +1,442 @@
+
+*** Removing excess controllers/ofprotocols/ofdatapaths/pings/noxes
+killall controller ofprotocol ofdatapath ping nox_core lt-nox_core ovs-openflowd ovs-controller udpbwtest mnexec ivs 2> /dev/null
+loading app ryu.app.ofctl_rest
+loading app ryu.app.rest_topology
+loading app ryu.controller.ofp_handler
+loading app ryu.topology.switches
+loading app ryu.controller.ofp_handler
+instantiating app None of DPSet
+creating context dpset
+creating context wsgi
+instantiating app ryu.app.ofctl_rest of RestStatsApi
+instantiating app ryu.topology.switches of Switches
+instantiating app ryu.app.rest_topology of TopologyAPI
+instantiating app ryu.controller.ofp_handler of OFPHandler
+(174161) wsgi starting up on http://0.0.0.0:8080
+killall -9 controller ofprotocol ofdatapath ping nox_core lt-nox_core ovs-openflowd ovs-controller udpbwtest mnexec ivs 2> /dev/null
+pkill -9 -f "sudo mnexec"
+*** Removing junk from /tmp
+rm -f /tmp/vconn* /tmp/vlogs* /tmp/*.out /tmp/*.log
+*** Removing old X11 tunnels
+*** Removing excess kernel datapaths
+ps ax | egrep -o 'dp[0-9]+' | sed 's/dp/nl:/'
+***  Removing OVS datapaths
+ovs-vsctl --timeout=1 list-br
+ovs-vsctl --timeout=1 list-br
+*** Removing all links of the pattern foo-ethX
+ip link show | egrep -o '([-_.[:alnum:]]+-eth[[:digit:]]+)'
+ip link show
+*** Killing stale mininet node processes
+pkill -9 -f mininet:
+*** Shutting down stale tunnels
+pkill -9 -f Tunnel=Ethernet
+pkill -9 -f .ssh/mn
+rm -f ~/.ssh/mn/*
+*** Cleanup complete.
+/usr/local/lib/python2.7/dist-packages/ryu/topology/switches.py:550: UserWarning: Datapath#ports is kept for compatibility with the previous openflow versions (< 1.3). This is not updated by the EventOFPPortStatus message. If you want to be updated, you should use 'ryu.controller.dpset' or 'ryu.topology.switches'.
+  for port in dp.ports.values():
+(174161) accepted ('127.0.0.1', 53001)
+127.0.0.1 - - [02/Apr/2017 00:26:11] "GET /stats/switches HTTP/1.1" 200 129 0.013002
+127.0.0.1 - - [02/Apr/2017 00:26:11] "GET /stats/flow/1 HTTP/1.1" 200 533 0.003766
+127.0.0.1 - - [02/Apr/2017 00:26:11] "GET /stats/portdesc/1 HTTP/1.1" 200 1135 0.004742
+127.0.0.1 - - [02/Apr/2017 00:26:11] "GET /stats/groupdesc/1 HTTP/1.1" 200 116 0.001330
+127.0.0.1 - - [02/Apr/2017 00:26:11] "GET /stats/flow/2 HTTP/1.1" 200 532 0.003073
+127.0.0.1 - - [02/Apr/2017 00:26:11] "GET /stats/portdesc/2 HTTP/1.1" 200 1135 0.004475
+127.0.0.1 - - [02/Apr/2017 00:26:11] "GET /stats/groupdesc/2 HTTP/1.1" 200 116 0.001155
+127.0.0.1 - - [02/Apr/2017 00:26:11] "GET /stats/flow/3 HTTP/1.1" 200 532 0.003060
+127.0.0.1 - - [02/Apr/2017 00:26:11] "GET /stats/portdesc/3 HTTP/1.1" 200 1135 0.004626
+127.0.0.1 - - [02/Apr/2017 00:26:11] "GET /stats/groupdesc/3 HTTP/1.1" 200 116 0.001121
+127.0.0.1 - - [02/Apr/2017 00:26:11] "GET /stats/flow/4 HTTP/1.1" 200 532 0.003047
+127.0.0.1 - - [02/Apr/2017 00:26:11] "GET /stats/portdesc/4 HTTP/1.1" 200 1135 0.004673
+127.0.0.1 - - [02/Apr/2017 00:26:11] "GET /stats/groupdesc/4 HTTP/1.1" 200 116 0.001123
+127.0.0.1 - - [02/Apr/2017 00:26:11] "GET /stats/flow/5 HTTP/1.1" 200 533 0.003036
+127.0.0.1 - - [02/Apr/2017 00:26:11] "GET /stats/portdesc/5 HTTP/1.1" 200 1391 0.007028
+127.0.0.1 - - [02/Apr/2017 00:26:11] "GET /stats/groupdesc/5 HTTP/1.1" 200 116 0.002597
+127.0.0.1 - - [02/Apr/2017 00:26:11] "GET /stats/flow/6 HTTP/1.1" 200 532 0.003468
+127.0.0.1 - - [02/Apr/2017 00:26:11] "GET /stats/portdesc/6 HTTP/1.1" 200 1135 0.004582
+127.0.0.1 - - [02/Apr/2017 00:26:11] "GET /stats/groupdesc/6 HTTP/1.1" 200 116 0.001177
+127.0.0.1 - - [02/Apr/2017 00:26:11] "GET /stats/flow/7 HTTP/1.1" 200 531 0.003189
+127.0.0.1 - - [02/Apr/2017 00:26:11] "GET /stats/portdesc/7 HTTP/1.1" 200 878 0.004058
+127.0.0.1 - - [02/Apr/2017 00:26:11] "GET /stats/groupdesc/7 HTTP/1.1" 200 116 0.001122
+127.0.0.1 - - [02/Apr/2017 00:26:12] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001744
+127.0.0.1 - - [02/Apr/2017 00:26:12] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001533
+127.0.0.1 - - [02/Apr/2017 00:26:12] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001501
+127.0.0.1 - - [02/Apr/2017 00:26:12] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001593
+127.0.0.1 - - [02/Apr/2017 00:26:12] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001581
+127.0.0.1 - - [02/Apr/2017 00:26:13] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001536
+127.0.0.1 - - [02/Apr/2017 00:26:13] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001505
+127.0.0.1 - - [02/Apr/2017 00:26:13] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001586
+127.0.0.1 - - [02/Apr/2017 00:26:13] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001541
+127.0.0.1 - - [02/Apr/2017 00:26:13] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.002826
+127.0.0.1 - - [02/Apr/2017 00:26:14] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.002133
+127.0.0.1 - - [02/Apr/2017 00:26:14] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001541
+127.0.0.1 - - [02/Apr/2017 00:26:14] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001550
+127.0.0.1 - - [02/Apr/2017 00:26:14] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001617
+127.0.0.1 - - [02/Apr/2017 00:26:14] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001520
+127.0.0.1 - - [02/Apr/2017 00:26:15] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001555
+127.0.0.1 - - [02/Apr/2017 00:26:15] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001483
+127.0.0.1 - - [02/Apr/2017 00:26:15] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001492
+127.0.0.1 - - [02/Apr/2017 00:26:15] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001533
+127.0.0.1 - - [02/Apr/2017 00:26:15] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.002981
+127.0.0.1 - - [02/Apr/2017 00:26:16] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001520
+127.0.0.1 - - [02/Apr/2017 00:26:16] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001595
+127.0.0.1 - - [02/Apr/2017 00:26:16] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001563
+127.0.0.1 - - [02/Apr/2017 00:26:16] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001545
+127.0.0.1 - - [02/Apr/2017 00:26:16] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001569
+127.0.0.1 - - [02/Apr/2017 00:26:17] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001606
+127.0.0.1 - - [02/Apr/2017 00:26:17] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001507
+127.0.0.1 - - [02/Apr/2017 00:26:17] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001595
+127.0.0.1 - - [02/Apr/2017 00:26:17] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001565
+127.0.0.1 - - [02/Apr/2017 00:26:17] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001540
+127.0.0.1 - - [02/Apr/2017 00:26:18] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001514
+127.0.0.1 - - [02/Apr/2017 00:26:18] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001487
+127.0.0.1 - - [02/Apr/2017 00:26:18] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001552
+127.0.0.1 - - [02/Apr/2017 00:26:18] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001556
+127.0.0.1 - - [02/Apr/2017 00:26:18] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001502
+127.0.0.1 - - [02/Apr/2017 00:26:19] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.003000
+127.0.0.1 - - [02/Apr/2017 00:26:19] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001493
+127.0.0.1 - - [02/Apr/2017 00:26:19] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001499
+127.0.0.1 - - [02/Apr/2017 00:26:19] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001503
+127.0.0.1 - - [02/Apr/2017 00:26:20] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001564
+127.0.0.1 - - [02/Apr/2017 00:26:20] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001543
+127.0.0.1 - - [02/Apr/2017 00:26:20] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001519
+127.0.0.1 - - [02/Apr/2017 00:26:20] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001484
+127.0.0.1 - - [02/Apr/2017 00:26:20] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001510
+127.0.0.1 - - [02/Apr/2017 00:26:21] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001501
+127.0.0.1 - - [02/Apr/2017 00:26:21] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001538
+127.0.0.1 - - [02/Apr/2017 00:26:21] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001529
+127.0.0.1 - - [02/Apr/2017 00:26:21] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001514
+127.0.0.1 - - [02/Apr/2017 00:26:21] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001527
+127.0.0.1 - - [02/Apr/2017 00:26:22] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001587
+127.0.0.1 - - [02/Apr/2017 00:26:22] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001544
+127.0.0.1 - - [02/Apr/2017 00:26:22] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001548
+127.0.0.1 - - [02/Apr/2017 00:26:22] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001487
+127.0.0.1 - - [02/Apr/2017 00:26:22] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001479
+127.0.0.1 - - [02/Apr/2017 00:26:23] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001874
+127.0.0.1 - - [02/Apr/2017 00:26:23] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001546
+127.0.0.1 - - [02/Apr/2017 00:26:23] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001567
+127.0.0.1 - - [02/Apr/2017 00:26:23] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001524
+127.0.0.1 - - [02/Apr/2017 00:26:23] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.002325
+127.0.0.1 - - [02/Apr/2017 00:26:24] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001552
+127.0.0.1 - - [02/Apr/2017 00:26:24] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001544
+127.0.0.1 - - [02/Apr/2017 00:26:24] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001560
+127.0.0.1 - - [02/Apr/2017 00:26:24] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001579
+127.0.0.1 - - [02/Apr/2017 00:26:24] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001587
+127.0.0.1 - - [02/Apr/2017 00:26:25] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001585
+127.0.0.1 - - [02/Apr/2017 00:26:25] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001544
+127.0.0.1 - - [02/Apr/2017 00:26:25] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001583
+127.0.0.1 - - [02/Apr/2017 00:26:25] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001563
+127.0.0.1 - - [02/Apr/2017 00:26:25] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001512
+127.0.0.1 - - [02/Apr/2017 00:26:26] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001510
+127.0.0.1 - - [02/Apr/2017 00:26:26] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001538
+127.0.0.1 - - [02/Apr/2017 00:26:26] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001535
+127.0.0.1 - - [02/Apr/2017 00:26:26] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001488
+127.0.0.1 - - [02/Apr/2017 00:26:26] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001520
+127.0.0.1 - - [02/Apr/2017 00:26:27] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001496
+127.0.0.1 - - [02/Apr/2017 00:26:27] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001454
+127.0.0.1 - - [02/Apr/2017 00:26:27] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001494
+127.0.0.1 - - [02/Apr/2017 00:26:27] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001516
+127.0.0.1 - - [02/Apr/2017 00:26:27] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001563
+127.0.0.1 - - [02/Apr/2017 00:26:28] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001511
+127.0.0.1 - - [02/Apr/2017 00:26:28] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001504
+127.0.0.1 - - [02/Apr/2017 00:26:28] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001533
+127.0.0.1 - - [02/Apr/2017 00:26:28] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001500
+127.0.0.1 - - [02/Apr/2017 00:26:28] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001492
+127.0.0.1 - - [02/Apr/2017 00:26:29] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001567
+127.0.0.1 - - [02/Apr/2017 00:26:29] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001569
+127.0.0.1 - - [02/Apr/2017 00:26:29] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001508
+127.0.0.1 - - [02/Apr/2017 00:26:29] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001490
+127.0.0.1 - - [02/Apr/2017 00:26:29] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001861
+127.0.0.1 - - [02/Apr/2017 00:26:30] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001480
+127.0.0.1 - - [02/Apr/2017 00:26:30] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001501
+127.0.0.1 - - [02/Apr/2017 00:26:30] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001564
+127.0.0.1 - - [02/Apr/2017 00:26:30] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001566
+127.0.0.1 - - [02/Apr/2017 00:26:30] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.002548
+127.0.0.1 - - [02/Apr/2017 00:26:31] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.002051
+127.0.0.1 - - [02/Apr/2017 00:26:31] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001537
+127.0.0.1 - - [02/Apr/2017 00:26:31] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001497
+127.0.0.1 - - [02/Apr/2017 00:26:31] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001550
+127.0.0.1 - - [02/Apr/2017 00:26:32] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001494
+127.0.0.1 - - [02/Apr/2017 00:26:32] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001479
+127.0.0.1 - - [02/Apr/2017 00:26:32] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001537
+127.0.0.1 - - [02/Apr/2017 00:26:32] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001535
+127.0.0.1 - - [02/Apr/2017 00:26:32] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001536
+127.0.0.1 - - [02/Apr/2017 00:26:33] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001526
+127.0.0.1 - - [02/Apr/2017 00:26:33] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001489
+127.0.0.1 - - [02/Apr/2017 00:26:33] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001517
+127.0.0.1 - - [02/Apr/2017 00:26:33] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001490
+127.0.0.1 - - [02/Apr/2017 00:26:33] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001561
+127.0.0.1 - - [02/Apr/2017 00:26:34] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001569
+127.0.0.1 - - [02/Apr/2017 00:26:34] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001549
+127.0.0.1 - - [02/Apr/2017 00:26:34] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001565
+127.0.0.1 - - [02/Apr/2017 00:26:34] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001637
+127.0.0.1 - - [02/Apr/2017 00:26:34] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001664
+127.0.0.1 - - [02/Apr/2017 00:26:35] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001549
+127.0.0.1 - - [02/Apr/2017 00:26:35] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001702
+127.0.0.1 - - [02/Apr/2017 00:26:35] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001619
+127.0.0.1 - - [02/Apr/2017 00:26:35] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001589
+127.0.0.1 - - [02/Apr/2017 00:26:35] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001602
+127.0.0.1 - - [02/Apr/2017 00:26:36] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001532
+127.0.0.1 - - [02/Apr/2017 00:26:36] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001521
+Synthesizing rules in the switches...
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Succe127.0.0.1 - - [02/Apr/2017 00:26:36] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001508
+127.0.0.1 - - [02/Apr/2017 00:26:36] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001506
+127.0.0.1 - - [02/Apr/2017 00:26:36] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001521
+127.0.0.1 - - [02/Apr/2017 00:26:37] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001541
+127.0.0.1 - - [02/Apr/2017 00:26:37] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001515
+127.0.0.1 - - [02/Apr/2017 00:26:37] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001483
+127.0.0.1 - - [02/Apr/2017 00:26:37] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001494
+127.0.0.1 - - [02/Apr/2017 00:26:37] "POST /stats/flowentry/add HTTP/1.1" 200 115 0.001487
+127.0.0.1 - - [02/Apr/2017 00:26:38] "GET /stats/switches HTTP/1.1" 200 129 0.000467
+127.0.0.1 - - [02/Apr/2017 00:26:38] "GET /stats/flow/1 HTTP/1.1" 200 8035 0.066595
+127.0.0.1 - - [02/Apr/2017 00:26:38] "GET /stats/portdesc/1 HTTP/1.1" 200 1135 0.005386
+127.0.0.1 - - [02/Apr/2017 00:26:38] "GET /stats/groupdesc/1 HTTP/1.1" 200 116 0.001179
+127.0.0.1 - - [02/Apr/2017 00:26:39] "GET /stats/flow/2 HTTP/1.1" 200 6368 0.026248
+127.0.0.1 - - [02/Apr/2017 00:26:39] "GET /stats/portdesc/2 HTTP/1.1" 200 1135 0.004763
+127.0.0.1 - - [02/Apr/2017 00:26:39] "GET /stats/groupdesc/2 HTTP/1.1" 200 116 0.001345
+127.0.0.1 - - [02/Apr/2017 00:26:39] "GET /stats/flow/3 HTTP/1.1" 200 6369 0.036509
+127.0.0.1 - - [02/Apr/2017 00:26:39] "GET /stats/portdesc/3 HTTP/1.1" 200 1135 0.006804
+127.0.0.1 - - [02/Apr/2017 00:26:39] "GET /stats/groupdesc/3 HTTP/1.1" 200 116 0.001526
+127.0.0.1 - - [02/Apr/2017 00:26:39] "GET /stats/flow/4 HTTP/1.1" 200 8038 0.034597
+127.0.0.1 - - [02/Apr/2017 00:26:39] "GET /stats/portdesc/4 HTTP/1.1" 200 1135 0.004521
+127.0.0.1 - - [02/Apr/2017 00:26:39] "GET /stats/groupdesc/4 HTTP/1.1" 200 116 0.001113
+127.0.0.1 - - [02/Apr/2017 00:26:39] "GET /stats/flow/5 HTTP/1.1" 200 13035 0.066347
+127.0.0.1 - - [02/Apr/2017 00:26:39] "GET /stats/portdesc/5 HTTP/1.1" 200 1391 0.005444
+127.0.0.1 - - [02/Apr/2017 00:26:39] "GET /stats/groupdesc/5 HTTP/1.1" 200 116 0.001110
+127.0.0.1 - - [02/Apr/2017 00:26:39] "GET /stats/flow/6 HTTP/1.1" 200 9699 0.042348
+127.0.0.1 - - [02/Apr/2017 00:26:39] "GET /stats/portdesc/6 HTTP/1.1" 200 1135 0.005251
+127.0.0.1 - - [02/Apr/2017 00:26:39] "GET /stats/groupdesc/6 HTTP/1.1" 200 116 0.001202
+127.0.0.1 - - [02/Apr/2017 00:26:39] "GET /stats/flow/7 HTTP/1.1" 200 5535 0.026823
+127.0.0.1 - - [02/Apr/2017 00:26:39] "GET /stats/portdesc/7 HTTP/1.1" 200 878 0.003779
+127.0.0.1 - - [02/Apr/2017 00:26:39] "GET /stats/groupdesc/7 HTTP/1.1" 200 116 0.001121
+rmmod: ERROR: Module TimeKeeper is not currently loaded
+tcpdump: listening on s1-eth2, link-type EN10MB (Ethernet), capture size 262144 bytes
+ssfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+Pushed Successfully: hard_timeout
+total_flow_rules: 135
+15
+Opened Main channel buffers 
+Removing Timekeeper module
+Inserting Timekeeper module
+Starting project ...
+########################################################################
+
+                        Topology Information
+
+########################################################################
+
+Links in the network topology:
+('s3', 's2')
+('s4', 's3')
+('s1', 's2')
+('s5', 's1')
+('s6', 's7')
+('s5', 's6')
+('s4', 's5')
+All the hosts in the topology:
+Hosts at switch: s1
+Name: h1 IP: 10.0.0.1 Port: s1:1
+Name: h1 IP: 10.0.0.1 Port: s1:1
+Hosts at switch: s3
+Name: h3 IP: 10.0.0.3 Port: s3:1
+Name: h3 IP: 10.0.0.3 Port: s3:1
+Hosts at switch: s2
+Name: h2 IP: 10.0.0.2 Port: s2:1
+Name: h2 IP: 10.0.0.2 Port: s2:1
+Hosts at switch: s5
+Name: h5 IP: 10.0.0.5 Port: s5:1
+Name: h5 IP: 10.0.0.5 Port: s5:1
+Hosts at switch: s4
+Name: h4 IP: 10.0.0.4 Port: s4:1
+Name: h4 IP: 10.0.0.4 Port: s4:1
+Hosts at switch: s7
+Name: h7 IP: 10.0.0.7 Port: s7:1
+Name: h7 IP: 10.0.0.7 Port: s7:1
+Hosts at switch: s6
+Name: h6 IP: 10.0.0.6 Port: s6:1
+Name: h6 IP: 10.0.0.6 Port: s6:1
+Roles assigned to the hosts:
+h1 : ('controller_node', ['control;1'])
+h2 : ('pilot_buses_set_1', ['2', '25', '29'])
+h3 : ('pilot_buses_set_2', ['22', '23', '19'])
+h4 : ('pilot_buses_set_3', ['20', '10', '6', '9'])
+h5 : ('generator', ['30;1', '31;1', '32;1', '33;1', '34;1', '35;1', '36;1', '37;1', '38;1', '39;1'])
+h6 : ('enterprise-1', ['vpn-gateway;1'])
+h7 : ('enterprise-2', ['attacker;1'])
+
+########################################################################
+Starting all Host Commands ...
+Starting tcpdump capture on switches ...
+Starting Proxy Process at 2017-04-02 00:26:47.427118
+Starting Attack orchestrator at 2017-04-02 00:26:47.430357
+Setting Attack orchestrator affinity to cores 0,1 ...
+Waiting for emulation drivers to start. Number of drivers =  29
+All emulation drivers started
+Setting switch interface owner pids ...
+Dilating all processes ... 
+33 packets captured
+33 packets received by filter
+0 packets dropped by kernel
+Traceback (most recent call last):
+  File "mascots_evaluation.py", line 382, in <module>
+    main()
+  File "mascots_evaluation.py", line 373, in main
+    exp.start_project()
+  File "/home/moses/NetPower_TestBed/src/core/net_power.py", line 663, in start_project
+    self.dilate_nodes()
+  File "/home/moses/NetPower_TestBed/src/core/net_power.py", line 147, in dilate_nodes
+    self.dilate_node(self.pid_list[i],self.tdf)
+  File "/home/moses/NetPower_TestBed/src/core/net_power.py", line 128, in dilate_node
+    addToExp(pid)
+  File "/home/moses/NetPower_TestBed/src/core/timekeeper_functions.py", line 156, in addToExp
+Traceback (most recent call last):
+  File "/usr/local/bin/ryu-manager", line 9, in <module>
+    load_entry_point('ryu==4.0', 'console_scripts', 'ryu-manager')()
+  File "/usr/local/lib/python2.7/dist-packages/ryu/cmd/manager.py", line 99, in main
+    hub.joinall(services)
+  File "/usr/local/lib/python2.7/dist-packages/ryu/lib/hub.py", line 89, in joinall
+    t.wait()
+  File "/usr/local/lib/python2.7/dist-packages/eventlet/greenthread.py", line 175, in wait
+    return self._exit_event.wait()
+  File "/usr/local/lib/python2.7/dist-packages/eventlet/event.py", line 121, in wait
+    return hubs.get_hub().switch()
+  File "/usr/local/lib/python2.7/dist-packages/eventlet/hubs/hub.py", line 294, in switch
+    return self.greenlet.switch()
+  File "/usr/local/lib/python2.7/dist-packages/eventlet/hubs/hub.py", line 346, in run
+    self.wait(sleep_time)
+  File "/usr/local/lib/python2.7/dist-packages/eventlet/hubs/poll.py", line 85, in wait
+    presult = self.do_poll(seconds)
+  File "/usr/local/lib/python2.7/dist-packages/eventlet/hubs/epolls.py", line 62, in do_poll
+    return self.poll.poll(seconds)
+KeyboardInterrupt
+    return send_to_timekeeper(cmd)
+  File "/home/moses/NetPower_TestBed/src/core/timekeeper_functions.py", line 130, in send_to_timekeeper
+    f.write(cmd)
+KeyboardInterrupt
