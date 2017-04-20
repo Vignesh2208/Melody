@@ -205,7 +205,7 @@ class AttackOrchestrator:
                     print "Got a message from node:", node_id, "outstanding_node_ids now:", outstanding_node_ids
 
     def run(self):
-        self.start_time = get_current_virtual_time()
+        
         self.wait_for_loaded_pcap_msg()
         self.send_to_main_process("PCAPS-LOADED")
 
@@ -220,6 +220,7 @@ class AttackOrchestrator:
             self.attack_plan = json.load(f)
 
         #print "Attack plan:", self.attack_plan
+        self.start_time = get_current_virtual_time()
 
         for stage_dict in self.attack_plan:
 

@@ -11,6 +11,12 @@ from timekeeper_functions import *
 import subprocess
 import sys
 import os
+from fractions import gcd
+import threading
+from progress_timelines import *
+
+NS_PER_MS = 1000000
+
 
 
 class NetPower(object):
@@ -30,6 +36,8 @@ class NetPower(object):
 		 CPUS_SUBSET):	# *NEW*
 
         self.network_configuration = network_configuration
+        self.switch_2_switch_latency = self.network_configuration.topo_params["switch_switch_link_latency_range"][0]
+        self.host_2_switch_latency = self.network_configuration.topo_params["host_switch_link_latency_range"][0]
 
         # Dictionary containing mappings, keyed by the id of the mininet host
         # Value is a tuple -- (IP Address, Role)
@@ -44,13 +52,15 @@ class NetPower(object):
         self.timekeeper_dir = self.base_dir + "/src/core/dilation-code"
         self.enable_timekeeper = ENABLE_TIMEKEEPER
         self.tdf = TDF
-	self.cpus_subset = CPUS_SUBSET 	# *NEW*
+        self.cpus_subset = CPUS_SUBSET 	# *NEW*
+
         self.attack_plan_dir = attack_plan_dir
         self.pid_list = []
         self.host_pids = []
         self.switch_pids = []
         self.emulation_driver_pids = []
         self.replay_driver_pids = []
+        self.timeslice = self.get_timeslice()
 
         self.emulated_background_traffic_flows = emulated_background_traffic_flows
         self.emulated_network_scan_events = emulated_network_scan_events
@@ -61,8 +71,7 @@ class NetPower(object):
 
         self.node_mappings_file_path = self.script_dir + "/node_mappings.txt"
         self.log_dir = log_dir
-
-	self.flag_debug = True 	# flag for debug printing
+        self.flag_debug = True 	# flag for debug printing
 
         # Clean up logs from previous run(s)
         os.system("rm -rf " + self.log_dir + "/*")
@@ -72,6 +81,7 @@ class NetPower(object):
         self.tcpdump_procs = []
         self.n_actual_tcpdump_procs = 0
         self.n_dilated_tcpdump_procs = 0
+
 
         result = self.sharedBufferArray.open(bufName="cmd-channel-buffer",isProxy=False)
         if result == BUF_NOT_INITIALIZED or result == FAILURE:
@@ -85,6 +95,21 @@ class NetPower(object):
         self.load_timekeeper()
 
         set_cpu_affinity(int(os.getpid()))
+
+
+    def get_timeslice(self):
+        if self.switch_2_switch_latency == 0 and self.host_2_switch_latency == 0:
+            return NS_PER_MS # 1ms
+
+        if self.switch_2_switch_latency == 0 :
+            return self.host_2_switch_latency*NS_PER_MS
+
+        if self.host_2_switch_latency == 0 :
+            return self.switch_2_switch_latency*NS_PER_MS
+
+        gcd_val = gcd(self.host_2_switch_latency*NS_PER_MS, self.switch_2_switch_latency*NS_PER_MS)
+        return gcd_val
+
 
     def get_emulation_driver_params(self):
         for bg_flow in self.emulated_background_traffic_flows:
@@ -122,19 +147,14 @@ class NetPower(object):
             os.system("insmod " + self.timekeeper_dir + "/build/TimeKeeper.ko")
             time.sleep(1)
 
-    def dilate_node(self,pid,tdf) :
+    def dilate_node(self,pid,tdf,timeline=-1) :
         if pid != -1 and self.enable_timekeeper == 1 :
             dilate_all(pid,tdf)
             addToExp(pid)
             sys.stdout.flush()
 
     def set_freeze_quantum(self):
-
-        if self.tdf > 1 :
-            timeslice = 80000
-        else:
-            timeslice = 80000
-        set_cbe_experiment_timeslice(timeslice*self.tdf)
+        set_cbe_experiment_timeslice(self.timeslice*self.tdf)
 
 
     def dilate_nodes(self) :
@@ -142,10 +162,10 @@ class NetPower(object):
         print "Dilating all processes ... "
         time.sleep(1)
         mininet_obj = self.network_configuration.mininet_obj
+
         if self.enable_timekeeper == 1:
             for i in xrange(0,len(self.pid_list)):
                 self.dilate_node(self.pid_list[i],self.tdf)
-                pass
 
             print "########################################################################"
             print ""
@@ -180,6 +200,10 @@ class NetPower(object):
             print  self.replay_driver_pids
             print ""
             print "########################################################################"
+            print ""
+            print "Timeslice = ", self.timeslice
+            print ""
+            print "########################################################################"
 
 
             script_dir = os.path.dirname(os.path.realpath(__file__))
@@ -208,9 +232,10 @@ class NetPower(object):
 
         print "########################################################################"
         if self.enable_timekeeper == 1 :
+            os.system("sudo killall -9 tcpdump")
             stopExp()
             print "Stopping synchronized experiment at local time = ", str(datetime.now())
-            time.sleep(10)
+            #time.sleep(10)
             self.trigger_all_processes("EXIT")
             print "Stopped synchronized experiment"
         else:
@@ -287,8 +312,30 @@ class NetPower(object):
         # self.host_pids.extend(pid_list)
         # self.pid_list.extend(pid_list)
 
+    def start_host_capture(self, host_obj):
+        core_cmd = "tcpdump"
+        capture_cmd = "sudo " + core_cmd
+        capture_log_file = self.log_dir  + "/" + host_obj.name + ".pcap"
+        with open(capture_log_file , "w") as f :
+            pass
 
-    def start_switch_link_pkt_captures(self):
+        capture_cmd = capture_cmd + " -i "  + str(host_obj.name + "-eth0")
+        capture_cmd = capture_cmd + " -w " + capture_log_file + " -U -B 20000 ip & > /dev/null"
+        self.n_actual_tcpdump_procs = self.n_actual_tcpdump_procs + 1
+
+        host_obj.cmd(capture_cmd)
+    
+
+    def start_all_host_captures(self):
+        print "Starting tcpdump capture on hosts ..."
+        for h in self.network_configuration.get_mininet_hosts_obj():
+            if h.name != "h1":
+                continue
+            self.start_host_capture(h)
+
+    def start_pkt_captures(self):
+        self.start_all_host_captures()
+    
         print "Starting tcpdump capture on switches ..."
 
         for i in range(len(self.network_configuration.mininet_obj.links)):
@@ -472,18 +519,33 @@ class NetPower(object):
             prev_time  = start_time
             run_time   = self.run_time
 
+            n_rounds_progressed = 0
+            #progress for 20ms which is the smallest timestep in powerworld
+            if self.timeslice > 20*NS_PER_MS :
+                n_rounds = 1
+            else:
+                n_rounds = int(20*NS_PER_MS/self.timeslice)
+
+
             k = 0
             while True:
 
                 if self.enable_timekeeper == 1 :
                      curr_time = get_current_virtual_time_pid(self.switch_pids[0])
+                     #print "N rounds progressed = ", n_rounds_progressed, " Time =", curr_time
+                     sys.stdout.flush()
+                     progress_exp_cbe(n_rounds)
+                     n_rounds_progressed += n_rounds
+
+
+
                      if k >= run_time :
                          sys.stdout.flush()
                          break
                      else :
                          if curr_time - prev_time >= 1.0 :
                              k = k + int(curr_time - prev_time)
-                             print k," secs of virtual time elapsed"
+                             print k," secs of virtual time elapsed. Local time = ", datetime.now()
                              sys.stdout.flush()
                              prev_time = curr_time
                 else :
@@ -606,6 +668,7 @@ class NetPower(object):
 
         #Clean up ...
         if self.enable_timekeeper:
+            resume_exp_cbe()
             self.stop_synchronized_experiment()
         else:
             self.trigger_all_processes("EXIT")
@@ -648,7 +711,7 @@ class NetPower(object):
         #General Startup ...
         self.generate_node_mappings(self.network_configuration.roles)
         self.start_host_processes()
-        self.start_switch_link_pkt_captures()
+        self.start_pkt_captures()
         self.start_proxy_process()
         self.start_attack_orchestrator()
 
@@ -667,14 +730,7 @@ class NetPower(object):
             self.start_time = time.time()
             # if timekeeper is not enabled, restrict emulation/replay operations to cpu subset
             for pid in self.emulation_driver_pids: # *NEW*
-                #if self.flag_debug:
-                #    print "DEBUG: Original cpu affinity: "
-                #    os.system("taskset -cp " + str(pid))
                 set_def_cpu_affinity(pid,self.cpus_subset)
-                #if self.flag_debug:
-                #    # verify update of cpu affinity
-                #    print "DEBUG: New cpu affinity for pid %s" % pid
-                #    os.system("taskset -cp " + str(pid))
             for pid in self.replay_driver_pids:
                 set_def_cpu_affinity(pid,self.cpus_subset)
             for (pid,hostname) in self.host_pids:
