@@ -1,0 +1,10 @@
+[{"type": "replay", "involved_nodes": ["h6", "h7"], "pcap_file_path": "/home/user/Desktop/NetPower_TestBed/src/projects/mascots_replay_evaluation/attack_plan/vpn_access-mapped.pcap", "active": "false"},
+  {"type": "replay", "involved_nodes": ["h2", "h7"], "pcap_file_path": "/home/user/Desktop/NetPower_TestBed/src/projects/mascots_replay_evaluation/attack_plan/fuzzing_attack-mapped.pcap", "active": "false"},
+  {"type": "replay", "involved_nodes": ["h2", "h7"], "pcap_file_path": "/home/user/Desktop/NetPower_TestBed/src/projects/mascots_replay_evaluation/attack_plan/pmu_access-mapped.pcap", "active": "false"},
+  {"type": "emulation", "src_node": "h1", "dst_node": "h2", "emulation_phase_id": "emulation-stage-nmap-from-1-to-2-duration-20", "duration": 20, "active": "false"},
+  {"type": "replay", "involved_nodes": ["h1", "h2"], "pcap_file_path": "/home/user/Desktop/NetPower_TestBed/src/projects/mascots_replay_evaluation/attack_plan/dnp3.pcap", "active": "false"},
+  {"type": "replay", "involved_nodes": ["h1", "h2"], "pcap_file_path": "/home/user/Desktop/NetPower_TestBed/src/projects/mascots_replay_evaluation/attack_plan/icmp.pcap", "active": "false"},
+  {"type": "replay", "rtt": {"h1": 0, "h2": 0.320}, "involved_nodes": ["h1", "h2"], "pcap_file_path": "/home/user/Desktop/NetPower_TestBed/src/projects/mascots_replay_evaluation/attack_plan/dnp3_rate_10.pcap", "active": "true"},
+  {"type": "replay", "rtt": {"h1": 0, "h2": 0.320}, "involved_nodes": ["h1", "h2"], "pcap_file_path": "/home/user/Desktop/NetPower_TestBed/src/projects/mascots_replay_evaluation/attack_plan/dnp3_rate_100.pcap", "active": "false"},
+  {"type": "replay", "rtt": {"h1": 0, "h2": 0.320}, "involved_nodes": ["h1", "h2"], "pcap_file_path": "/home/user/Desktop/NetPower_TestBed/src/projects/mascots_replay_evaluation/attack_plan/dnp3_rate_1000.pcap", "active": "false"}
+]
