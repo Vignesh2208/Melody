@@ -28,6 +28,7 @@ Pre-Run Steps:
 - Setup the environment
     - cd NetPower_TestBed
     - sudo ./setup.sh
+    - sudo ./install_opendnp3.sh
 
 - Settin up the python path
     - Add the following to ~/.bashrc
