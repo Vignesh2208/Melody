@@ -477,6 +477,11 @@ class NetworkConfiguration(object):
                 if dst_node.startswith("h"):
                     yield self.mininet_obj.get(dst_node)
 
+    def get_mininet_hosts_obj(self):
+        for sw in self.topo.switches():
+            for h in self.get_all_switch_hosts(sw):
+                yield h
+
     def is_host_pair_pingable(self, src_host, dst_host):
         hosts = [src_host, dst_host]
         ping_loss_rate = self.mininet_obj.ping(hosts, '1')

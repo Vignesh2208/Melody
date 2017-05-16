@@ -37,6 +37,10 @@ POWERSIM_ID_HDR_LEN = 10      # 10 characters for holding the length of power si
 
 ETH_TYPE_FRAME=1 # Ethernet
 
+N_TIMEKEEPER_CPUS = 2
+VT_EXPERIMENT_TYPE = 'CS'
+
+
 
 def extractPowerSimIdFromPkt(pkt):
 

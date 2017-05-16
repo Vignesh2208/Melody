@@ -15,7 +15,7 @@ class ReplayDriver(object):
         self.run_time = input_params["run_time"]
         self.node_id = input_params["node_id"]
         self.node_ip = input_params["node_ip"]
-
+        self.rtt = {}
         # Load up the attack plan
         self.attack_plan_file_path = input_params["attack_path_file_path"]
         with open(self.attack_plan_file_path, "r") as f:
@@ -71,6 +71,8 @@ class ReplayDriver(object):
 
         curr_send_idx = 0
         curr_send_n_recv_events = 0
+        prev_recv_time = 0.0
+        prev_send_time = 0.0
 
         for ts, curr_pkt in replay_pcap_reader:
 
@@ -86,12 +88,23 @@ class ReplayDriver(object):
 
             if src_ip == self.node_ip:
                 ip_payload = binascii.hexlify(raw_ip_pkt.__str__())
-                send_events.append([ip_payload, dst_ip, curr_send_n_recv_events])
+                if prev_recv_time == 0.0 :
+                    if prev_send_time == 0.0:
+                        delta_t = self.rtt[pcap_file_path]
+                    else:
+                        delta_t = ts - prev_send_time + self.rtt[pcap_file_path]
+                else :
+                    delta_t = ts - prev_recv_time 
+                    prev_recv_time = 0.0
+                
+                prev_send_time = ts
+                send_events.append([ip_payload, dst_ip, curr_send_n_recv_events,delta_t])
                 curr_send_n_recv_events = 0
                 curr_send_idx = curr_send_idx + 1
-            else:
+            elif dst_ip == self.node_ip:
                 curr_send_n_recv_events = curr_send_n_recv_events + 1
                 ip_payload = binascii.hexlify(raw_ip_pkt.__str__())
+                prev_recv_time = ts
                 try:
                     recv_events[ip_payload].append(curr_send_idx)
                 except:
@@ -111,8 +124,17 @@ class ReplayDriver(object):
                 continue
 
             if stage_dict["type"] == "replay":
+            
+                try:    
+                    if self.node_id in stage_dict["rtt"].keys() :
+                        self.rtt[stage_dict["pcap_file_path"]] = float(stage_dict["rtt"][self.node_id])
+                except KeyError:
+                    self.rtt[stage_dict["pcap_file_path"]] = 0.0
                 if self.node_id in stage_dict["involved_nodes"]:
                     self.loaded_pcaps[stage_dict["pcap_file_path"]] = self.load_pcap(stage_dict["pcap_file_path"])
+                
+                    
+                
 
         self.send_command_message("LOADED")
 
@@ -127,6 +149,8 @@ class ReplayDriver(object):
         curr_send_event = None
         payload = None
         dst_ip = None
+        send_sleep_time = 0.0
+        curr_rtt = self.rtt[pcap_file_path]
 
         while True:
             if curr_send_event == None :
@@ -136,7 +160,7 @@ class ReplayDriver(object):
                     payload = binascii.unhexlify(str(curr_send_event[0]))
                     dst_ip = curr_send_event[1]
                     n_required_recv_events = curr_send_event[2]
-
+                    send_sleep_time = float(curr_send_event[3]) - curr_rtt
                     print "Sending Replay Event: Dst = ", dst_ip, " N Req Recv events = ", n_required_recv_events
                     sys.stdout.flush()
 
@@ -144,6 +168,8 @@ class ReplayDriver(object):
                 break
 
             if n_required_recv_events == 0:
+                if send_sleep_time > 0 :
+                    sleep(send_sleep_time)
                 self.raw_tx_sock.sendto(payload, (dst_ip, 0))
                 curr_send_event = None
                 curr_send_idx = curr_send_idx + 1

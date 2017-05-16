@@ -18,6 +18,8 @@ class DNP3PCAPPostProcessing:
     def parse_latency_timing_using_bro(self, pcap_file_path):
         cmd = self.bro_cmd + " -b -C -r " + pcap_file_path + " " + self.bro_dnp3_parser_dir + " " + self.bro_json_log_conf
 
+	print "Bro Command: ", cmd
+
         # Run bro parser
         os.system(cmd)
 
@@ -53,6 +55,8 @@ class DNP3PCAPPostProcessing:
         bro_log_file_path = self.parse_latency_timing_using_bro(pcap_file_path)
         self.collect_bro_data_points(bro_log_file_path)
 
+	print "Bro_Log_File_Path: ",bro_log_file_path
+
 def main():
 
     script_dir = os.path.dirname(os.path.realpath(__file__))
@@ -64,7 +68,8 @@ def main():
     project_name = "timekeeper_integration"
 
     p = DNP3PCAPPostProcessing(base_dir, bro_dnp3_parser_dir, bro_cmd, bro_json_log_conf, project_name)
-    p.collect_data("s1-eth2-s2-eth2.pcap")
+    #p.collect_data("s1-eth2-s2-eth2.pcap")
+    p.collect_data("s1-eth5-s2-eth5.pcap")
     print p.data
 
 

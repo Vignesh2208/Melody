@@ -97,8 +97,11 @@ class PCAPIPTool(object):
 
 
 def main():
-    t = PCAPIPTool("pmu_access-orig.pcap")
-    t.generate_mapped_pcap({"10.1.0.40": "10.0.0.7", "10.0.50.10": "10.0.0.2"}, "pmu_access-orig-mapped.pcap")
+    in_filepath = "dnp3_rate_10.pcap"
+    out_filepath = "dnp3_rate_10-mapped.pcap"
+
+    t = PCAPIPTool(in_filepath)
+    t.generate_mapped_pcap({"192.17.101.110": "10.0.0.1", "192.17.103.223": "10.0.0.2"}, out_filepath)
 
 if __name__ == "__main__":
     main()

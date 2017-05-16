@@ -32,6 +32,9 @@ RESET = 'M'
 STOP_EXP = 'N'
 SET_CBE_EXP_TIMESLICE = 'T'
 SET_NETDEVICE_OWNER  = 'U'
+PROGRESS_EXP_CBE = 'V'
+RESUME_CBE = 'W'
+
 
 
 
@@ -75,7 +78,7 @@ def fixDilation(dilation) :
 	dil = 0
 
 	if dilation < 0 :
-		printf("Negative dilation does not make sense\n");
+		print "Negative dilation does not make sense";
 		return -1
         
 	if dilation < 1.0 and dilation > 0.0 :
@@ -84,9 +87,8 @@ def fixDilation(dilation) :
         
 	elif dilation == 1.0 or dilation == -1.0 :
                 dil = 0
-        
-        else :
-                dil = (int)(dilation*1000.0)
+	else:
+		dil = (int)(dilation*1000.0)
         
         return dil;
 
@@ -315,6 +317,69 @@ def get_current_virtual_time() :
     except:
         return time.time()
 
-    
-		
+## CS Experiment Fuctions
+
+
+def add_To_CS_Exp(pid,timeline) :
+	if is_root() and is_Module_Loaded() and timeline >= 0 :
+		cmd = ADD_TO_EXP_CS + "," + str(pid) + "," + str(timeline)
+		return send_to_timekeeper(cmd)
+	else:
+		return -1
+
+
+def leap(pid,interval) :
+	if is_root() and is_Module_Loaded() and interval > 0 :
+		cmd = LEAP + "," + str(pid) + "," + str(interval)
+		return send_to_timekeeper(cmd)
+	else:
+		return -1
+
+
+def set_interval(pid, interval, timeline) :
+	if is_root() and is_Module_Loaded() and interval > 0:
+		cmd = SET_INTERVAL + "," + str(pid) + "," + str(interval) + "," + str(timeline)
+		return send_to_timekeeper(cmd)
+	else:
+		return -1
+
+
+def fix_timeline(timeline) :
+	if is_root() and is_Module_Loaded() and timeline >= 0:
+		cmd = FIX_TIMELINE + "," + str(timeline)
+		return send_to_timekeeper(cmd)
+	else:
+		return -1
+
+
+def reset_timeline(timeline) :
+	if is_root() and is_Module_Loaded() and timeline >= 0:
+		cmd = RESET + "," + str(timeline)
+		return send_to_timekeeper(cmd)
+	else:
+		return -1
+
+
+
+def progress(timeline,mypid, force) :
+	if is_root() and is_Module_Loaded() and timeline >= 0:
+		cmd = PROGRESS + "," + str(timeline) + "," + str(mypid) + "," + str(force)
+		return send_to_timekeeper(cmd)
+	else:
+		return -1
+
+def progress_exp_cbe(n_rounds) :
+	if is_root() and is_Module_Loaded() and n_rounds > 0 :
+		cmd = PROGRESS_EXP_CBE + "," + str(n_rounds)
+		return send_to_timekeeper(cmd)
+	else:
+		return -1
+
+def resume_exp_cbe() :
+	if is_root() and is_Module_Loaded() :
+		cmd = RESUME_CBE
+		return send_to_timekeeper(cmd)
+	else:
+		return -1
+
 

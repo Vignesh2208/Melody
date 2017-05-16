@@ -82,6 +82,7 @@ def main():
 	parser.add_argument('--slave_ip', dest="slave_ip", help='IP Address of the slave node.', required=True)
 	parser.add_argument('--life_time', dest="life_time", help='Time after which master must be slain', required=True)
 	parser.add_argument('--vt', dest="vt", help='Is virtual time enabled', required=True)
+	parser.add_argument('--interval', dest="interval", help='Time interval for polling in milliseconds.')
 	args = parser.parse_args()
 
 	# 1. Extend IDataObserver and IStackObserver
@@ -113,7 +114,10 @@ def main():
 	master_stack_config.master.mpObserver = stack_observer
 
 	# the integrity rate is the # of milliseconds between integrity scans
-	master_stack_config.master.IntegrityRate = 10
+	if (args.interval):
+		master_stack_config.master.IntegrityRate = int(args.interval)
+	else:
+		master_stack_config.master.IntegrityRate = 10
 	#master_stack_config.master.TaskRetryRate = 10
 	print master_stack_config.master.IntegrityRate
 	sys.stdout.flush()
