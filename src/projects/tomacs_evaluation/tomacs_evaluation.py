@@ -81,6 +81,7 @@ def get_network_configuration(params):
                                                  "http://localhost:8080/",
                                                  "admin",
                                                  "admin",
+                                                 "linear",
                                                  params,
                                                  conf_root="configurations/",
                                                  synthesis_name="SimpleMACSynthesis",
@@ -168,7 +169,8 @@ def get_emulated_ping(network_configuration,src,dst,root_user_name,root_password
                                root_user_name=root_user_name,
                                root_password=root_password,
                                server_process_start_cmd="",
-                               client_expect_file="ping -w " + str(run_time) + " -i "+ str(interval) +" " + network_configuration.mininet_obj.get(dst).IP(),
+                               #client_expect_file="ping -w " + str(run_time) + " -i "+ str(interval) +" " + network_configuration.mininet_obj.get(dst).IP(),
+                               client_expect_file="ping -c " + str(int(run_time/interval)) + " -i "+ str(interval) +" " + network_configuration.mininet_obj.get(dst).IP(),
                                long_running=True)
 
 
@@ -229,7 +231,11 @@ def main():
     
     project_name = project_name + "_" + str(args.flow_count)
 
-    run_time = 10
+    if (args.runtime):
+        run_time = int(args.runtime)
+    else:
+        run_time = 10
+
     root_user_name = "moses"
     root_password = "passwd"
 
@@ -250,8 +256,6 @@ def main():
     num_hosts = params["num_switches"]*params["num_hosts_per_switch"]
     iperf_client_node = network_configuration.mininet_obj.get("h1")
     iperf_server_node = network_configuration.mininet_obj.get("h" + str(num_hosts))
-
-
 
     bg_flows = [
 
@@ -276,10 +280,6 @@ def main():
     #add stressor background processes
     for i in range(0,int(args.flow_count)):
         bg_flows.append(get_emulated_blocker(network_configuration,src,dst,root_user_name,root_password,run_time,base_dir))
-        #add udp traffic
-        #port = 10000 + i
-        #bg_flows.append(get_emulated_udp(network_configuration,src,dst,root_user_name,root_password,run_time,base_dir,port,interval))
-
 
     print "Number of background flows: ", len(bg_flows)
 
@@ -307,6 +307,7 @@ def main():
         print "No DNP3 Packets were transmitted ..."
 
     res = os.system("sudo cat " + log_dir + "/iperf_client.txt")
+
     os.system("sudo killall -9 python")
 
 

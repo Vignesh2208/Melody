@@ -235,7 +235,7 @@ class NetPower(object):
             os.system("sudo killall -9 tcpdump")
             stopExp()
             print "Stopping synchronized experiment at local time = ", str(datetime.now())
-            time.sleep(10)
+            #time.sleep(10)
             self.trigger_all_processes("EXIT")
             print "Stopped synchronized experiment"
         else:
@@ -537,7 +537,7 @@ class NetPower(object):
                      curr_time = get_current_virtual_time_pid(self.switch_pids[0])
                      #print "N rounds progressed = ", n_rounds_progressed, " Time =", curr_time
                      sys.stdout.flush()
-                     #progress_exp_cbe(n_rounds)
+                     progress_exp_cbe(n_rounds)
                      n_rounds_progressed += n_rounds
 
 
