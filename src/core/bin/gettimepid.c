@@ -22,9 +22,9 @@ int gettimepid(int pid, struct timeval *tv, struct timezone *tz) {
 
     long double res;
 	#ifdef __x86_64
-	return syscall(315, pid, tv, tz);
+	return syscall(327, pid, tv, tz);
 	#endif
-	return syscall(352, pid, tv , tz);
+	return syscall(378, pid, tv , tz);
 	
 }
 

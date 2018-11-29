@@ -23,14 +23,15 @@ Dependencies:
 ```
 Pre-Run Steps:
 
-- Install TimeKeeper. Compile the New TimeKeeper Kernel
+- Install Kronos.
 
 - Setup the environment
     - cd NetPower_TestBed
-    - sudo ./setup.sh
+    - sudo ./install_deps.sh
     - sudo ./install_opendnp3.sh
+    - sudo make install
 
-- Settin up the python path
+- Setting up the python path
     - Add the following to ~/.bashrc
       export PYTHONPATH=$PYTHONPATH:<path-to-netpower-testbed>/src
 

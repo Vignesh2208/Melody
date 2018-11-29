@@ -22,3 +22,6 @@ avl_test : avl_test.cc avl.cc tree.cc graph.cc hashmap.c linkedlist.c graph.h li
 
 bstmap_test : bstmap_test.cc bstmap.cc bstmap.h bst.cc tree.cc graph.cc hashmap.c linkedlist.c graph.h linkedlist.h tree.h bst.h
 		g++ -fpermissive bstmap_test.cc bstmap.cc bst.cc tree.cc graph.cc hashmap.c linkedlist.c -o bstmap_test
+
+clean:
+	@rm -f hmap_test llist_test avl_test bstmap_test graph_test tree_test bst_test
