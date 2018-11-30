@@ -1,5 +1,6 @@
 import sys
 import numpy
+import argparse
 sys.path.append("./")
 
 from cyber_network.network_configuration import NetworkConfiguration
@@ -11,15 +12,13 @@ from core.net_power import NetPower
 from core.shared_buffer import *
 from utils.dnp3_pcap_post_processing import DNP3PCAPPostProcessing
 
-ENABLE_TIMEKEEPER = 0
-TDF = 10
 
-# set of CPUs to run emulation/replay processes on when timekeeper is not
+# set of CPUs to run emulation/replay processes on when Kronos is not
 # enabled
-CPUS_SUBSET = "2-3"
+CPUS_SUBSET = "1-12"
 
 
-class TimeKeeperIntegration(NetPower):
+class KronosIntegration(NetPower):
 
     def __init__(self,
                  run_time,
@@ -29,11 +28,11 @@ class TimeKeeperIntegration(NetPower):
                  replay_pcaps_dir,
                  log_dir,
                  emulated_background_traffic_flows,
-                 emulated_network_scan_events,
-                 emulated_dnp3_traffic_flows):
+                 enable_kronos,
+		 relative_cpu_speed):
 
         super(
-            TimeKeeperIntegration,
+            KronosIntegration,
             self).__init__(
             run_time,
             network_configuration,
@@ -42,23 +41,22 @@ class TimeKeeperIntegration(NetPower):
             replay_pcaps_dir,
             log_dir,
             emulated_background_traffic_flows,
-            emulated_network_scan_events,
-            emulated_dnp3_traffic_flows,
-            ENABLE_TIMEKEEPER,
-            TDF,
+            enable_kronos,
+            relative_cpu_speed,
             CPUS_SUBSET)
 
 
-def get_network_configuration():
+def get_network_configuration(project_name):
 
-    network_configuration = NetworkConfiguration("ryu",
-                                                 "127.0.0.1",
-                                                 6633,
-                                                 "http://localhost:8080/",
-                                                 "admin",
-                                                 "admin",
-                                                 "clique_enterprise",
-                                                 {"num_switches": 5,
+    network_configuration = NetworkConfiguration(
+                                                 controller="ryu",
+                                                 controller_ip="127.0.0.1",
+                                                 controller_port=6633,
+                                                 controller_api_base_url="http://localhost:8080/",
+                                                 controller_api_user_name="admin",
+                                                 controller_api_password="admin",
+                                                 topo_name="clique_enterprise",
+                                                 topo_params={"num_switches": 5,
                                                   "per_switch_links": 2,
                                                   "num_hosts_per_switch": 1,
                                                   "switch_switch_link_latency_range": (1, 1),
@@ -99,7 +97,7 @@ def get_network_configuration():
                                                       ["attacker;1"])
 
                                                  ],
-                                                 project_name="timekeeper_integration",
+                                                 project_name=project_name,
                                                  power_simulator_ip="127.0.0.1"
                                                  )
 
@@ -157,29 +155,24 @@ def measure_dnp3_latencies(project_name, pcap_file_name):
 
 def main():
 
-    run_time = 15
-    root_user_name = "moses"
-    root_password = "passwd"
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--run_time', dest="run_time", type=int, default=10, help = "Running time for the experiment (in virtual time)")
+    parser.add_argument('--root_user_name', dest="root_user_name", default="moses", help = "Root User Name")
+    parser.add_argument('--root_password', dest="root_password", default="davidmnicol", help = "Root Password")
+    parser.add_argument('--project_name', dest="project_name", default="kronos_integration", help = "Name of the project. Logs will be created under this")
+    parser.add_argument('--enable_kronos', dest="enable_kronos", default=0, type=int, help = "Enable Kronos ?")
+    parser.add_argument('--rel_cpu_speed', dest="rel_cpu_speed", default=1, type=int, help = "Relatice cpu speed of processes if kronos is enabled")
 
-    emulated_flow_definitions = {
-        'dnp3': [
-            ('h1', 'h2', 'h3', 'h4', 'h5'), ('h1', 'h2', 'h3', 'h4', 'h5')], 'ping': [
-            ('h1', 'h6', 'h7'), ('h1', 'h2', 'h3', 'h4', 'h5', 'h6')], 'http': [
-                ('h1', 'h7'), ('h1', 'h7')], 'ssh': [
-                    ('h7',), ('h1',)], 'telnet': [
-                        ('h1',), ('h2', 'h3', 'h4', 'h5')], 'nmap': [
-                            ('h1', 'h6', 'h7'), ('h1', 'h2', 'h3', 'h4', 'h5', 'h6')]}
-
-    background_flows = ['ssh', 'telnet', 'http', 'ping']
-    scans = ['nmap']
-    control_flows = ['dnp3']
+    run_time = args.run_time
+    root_user_name = args.root_user_name
+    root_password = args.root_password
 
     script_dir = os.path.dirname(os.path.realpath(__file__))
     idx = script_dir.index('NetPower_TestBed')
     base_dir = script_dir[0:idx] + "NetPower_TestBed"
     replay_pcaps_dir = script_dir + "/attack_plan"
 
-    network_configuration = get_network_configuration()
+    network_configuration = get_network_configuration(args.project_name)
     log_dir = base_dir + "/logs/" + str(network_configuration.project_name)
     mn_h1 = network_configuration.mininet_obj.get("h1")
     mn_h2 = network_configuration.mininet_obj.get("h2")
@@ -192,10 +185,8 @@ def main():
                             offset=1,
                             inter_flow_period=0,
                             run_time=run_time,
-                            src_mn_node=network_configuration.mininet_obj.get(
-                                "h1"),
-                            dst_mn_node=network_configuration.mininet_obj.get(
-                                "h2"),
+                            src_mn_node=mn_h1,
+                            dst_mn_node=mn_h2,
                             root_user_name=root_user_name,
                             root_password=root_password,
                             server_process_start_cmd="",
@@ -208,10 +199,8 @@ def main():
                             offset=1,
                             inter_flow_period=0,
                             run_time=run_time,
-                            src_mn_node=network_configuration.mininet_obj.get(
-                                "h1"),
-                            dst_mn_node=network_configuration.mininet_obj.get(
-                                "h3"),
+                            src_mn_node=mn_h1,
+                            dst_mn_node=mn_h3,
                             root_user_name=root_user_name,
                             root_password=root_password,
                             server_process_start_cmd='python ' + base_dir + "/src/cyber_network/dnp3_slave.py --slave_ip " + \
@@ -238,10 +227,8 @@ def main():
                             offset=1,
                             inter_flow_period=0,
                             run_time=run_time,
-                            src_mn_node=network_configuration.mininet_obj.get(
-                                "h1"),
-                            dst_mn_node=network_configuration.mininet_obj.get(
-                                "h2"),
+                            src_mn_node=mn_h1,
+                            dst_mn_node=mn_h2,
                             root_user_name=root_user_name,
                             root_password=root_password,
                             server_process_start_cmd="/usr/sbin/sshd -D -p 22 -o ListenAddress=" + \
@@ -255,10 +242,8 @@ def main():
                             offset=1,
                             inter_flow_period=0,
                             run_time=run_time,
-                            src_mn_node=network_configuration.mininet_obj.get(
-                                "h1"),
-                            dst_mn_node=network_configuration.mininet_obj.get(
-                                "h2"),
+                            src_mn_node=mn_h1,
+                            dst_mn_node=mn_h2,
                             root_user_name=root_user_name,
                             root_password=root_password,
                             server_process_start_cmd="sudo socat tcp-l:23,reuseaddr,fork exec:/bin/login,pty,setsid,setpgid,stderr,ctty",
@@ -266,20 +251,19 @@ def main():
                             long_running=True),
     ]
 
-    exp = TimeKeeperIntegration(run_time,
-                                network_configuration,
-                                script_dir,
-                                base_dir,
-                                replay_pcaps_dir,
-                                log_dir,
-                                bg_flows,
-                                [],
-                                [])
+    exp = KronosIntegration(run_time=run_time,
+                            network_configuration=network_configuration,
+                            script_dir=script_dir,
+                            base_dir=base_dir,
+                            replay_pcaps_dir=replay_pcaps_dir,
+                            log_dir=log_dir,
+                            emulated_background_traffic_flows=bg_flows,
+                            enable_kronos=args.enable_kronos,
+		            relative_cpu_speed=args.rel_cpu_speed)
 
     exp.start_project()
-    measure_dnp3_latencies(exp.project_name, "s1-eth2-s2-eth2.pcap")
+    #measure_dnp3_latencies(args.project_name, "s1-eth2-s2-eth2.pcap")
     os.system("sudo killalll -9 python")
-    os.system("sudo killall -9 sudo")
 
 
 if __name__ == "__main__":

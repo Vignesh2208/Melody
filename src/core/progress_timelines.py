@@ -7,7 +7,7 @@ from shared_buffer import *
 from utils.sleep_functions import sleep
 from utils.util_functions import *
 from defines import *
-from timekeeper_functions import *
+from kronos_functions import *
 import subprocess
 import sys
 import os

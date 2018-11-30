@@ -65,7 +65,7 @@ def main():
     bro_dnp3_parser_dir = base_dir + "/src/utils/dnp3_timing/dnp3_parser_bro/"
     bro_json_log_conf = "/home/rakesh/bro/scripts/policy/tuning/json-logs.bro"
     bro_cmd = "/usr/bin/bro"
-    project_name = "timekeeper_integration"
+    project_name = "kronos_integration"
 
     p = DNP3PCAPPostProcessing(base_dir, bro_dnp3_parser_dir, bro_cmd, bro_json_log_conf, project_name)
     #p.collect_data("s1-eth2-s2-eth2.pcap")

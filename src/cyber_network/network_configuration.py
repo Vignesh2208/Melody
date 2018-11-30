@@ -448,9 +448,6 @@ class NetworkConfiguration(object):
                                                                                 port=self.controller_port),
                                        switch=partial(OVSSwitch, protocols='OpenFlow13'))
 
-
-            #self.set_switch_netdevice_owners()
-
             self.mininet_obj.start()
 
     def cleanup_mininet(self):
@@ -644,17 +641,5 @@ class NetworkConfiguration(object):
         print 'Max Delay:', data_tokens[2]
 
 
-    def set_netdevice_owner_in_timekeeper(self, intfNames, pid) :
-        for name in intfNames :
-            if name != "lo" :
-                print "Setting net-device owner for ", name
-                set_netdevice_owner(pid,name)
-
-    def set_switch_netdevice_owners(self) :
-        import pdb; pdb.set_trace()
-        for i in xrange(0,len(self.mininet_obj.switches)):
-            mininet_switch = self.mininet_obj.switches[i]
-            # set netdevices owner
-            self.set_netdevice_owner_in_timekeeper(mininet_switch.intfNames(), mininet_switch.pid)
 
 

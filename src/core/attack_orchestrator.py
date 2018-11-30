@@ -2,7 +2,7 @@ import json
 import getopt
 import dpkt
 from utils.sleep_functions import *
-from timekeeper_functions import *
+from kronos_helper_functions import *
 from shared_buffer import *
 from logger import *
 from defines import *
@@ -202,7 +202,7 @@ class AttackOrchestrator:
                 dummy_id, msg = self.sharedBufferArray.read(str(node_id) + "-replay" + "main-cmd-channel-buffer")
                 if msg == "LOADED":
                     outstanding_node_ids.remove(node_id)
-                    print "Got a message from node:", node_id, "outstanding_node_ids now:", outstanding_node_ids
+                    print "Got a PCAP-Loaded message from driver:", node_id, "outstanding_node_ids now:", outstanding_node_ids
 
     def run(self):
         

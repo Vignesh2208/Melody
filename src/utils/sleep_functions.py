@@ -8,7 +8,7 @@ from ctypes import *
 #sys.path.append(script_dir + "/../core")
 
 #import core
-from core.timekeeper_functions import *
+from core.kronos_helper_functions import *
 libc = CDLL("libc.so.6")
 
 class Timespec(ctypes.Structure):

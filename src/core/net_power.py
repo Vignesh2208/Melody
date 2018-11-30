@@ -7,13 +7,14 @@ from shared_buffer import *
 from utils.sleep_functions import sleep
 from utils.util_functions import *
 from defines import *
-from timekeeper_functions import *
+from kronos_functions import *
+from kronos_helper_functions import *
 import subprocess
 import sys
 import os
 from fractions import gcd
 import threading
-from progress_timelines import *
+import tempfile
 
 NS_PER_MS = 1000000
 
@@ -29,10 +30,8 @@ class NetPower(object):
                  attack_plan_dir,
                  log_dir,
                  emulated_background_traffic_flows,
-                 emulated_network_scan_events,
-                 emulated_dnp3_traffic_flows,
-                 ENABLE_TIMEKEEPER,
-                 TDF,
+                 enable_kronos,
+                 rel_cpu_speed,
 		 CPUS_SUBSET):	# *NEW*
 
         self.network_configuration = network_configuration
@@ -50,21 +49,19 @@ class NetPower(object):
         self.script_dir = script_dir
         self.base_dir = base_dir
         self.timekeeper_dir = self.base_dir + "/src/core/dilation-code"
-        self.enable_timekeeper = ENABLE_TIMEKEEPER
-        self.tdf = TDF
+        self.enable_kronos = enable_kronos
+        self.rel_cpu_speed = rel_cpu_speed
         self.cpus_subset = CPUS_SUBSET 	# *NEW*
 
         self.attack_plan_dir = attack_plan_dir
         self.pid_list = []
-        self.host_pids = []
-        self.switch_pids = []
+        self.host_pids = {}
+        self.switch_pids = {}
         self.emulation_driver_pids = []
         self.replay_driver_pids = []
         self.timeslice = self.get_timeslice()
 
         self.emulated_background_traffic_flows = emulated_background_traffic_flows
-        self.emulated_network_scan_events = emulated_network_scan_events
-        self.emulated_dnp3_traffic_flows = emulated_dnp3_traffic_flows
 
         self.emulation_driver_params = []
         self.get_emulation_driver_params()
@@ -92,7 +89,7 @@ class NetPower(object):
             os.makedirs(self.log_dir)
 
         self.open_main_cmd_channel_buffers()
-        self.load_timekeeper()
+        self.check_kronos_loaded()
 
         set_cpu_affinity(int(os.getpid()))
 
@@ -138,104 +135,39 @@ class NetPower(object):
                                                      "node_id": bg_flow.dst_mn_node.name,
                                                      "driver_id": bg_flow.src_mn_node.name + "-emulation-" + str(uuid.uuid1())})
 
-    def load_timekeeper(self) :
-        if self.enable_timekeeper:
-            print "Removing Timekeeper module"
-            os.system("rmmod " + self.timekeeper_dir + "/build/TimeKeeper.ko")
-            time.sleep(1)
-            print"Inserting Timekeeper module"
-            os.system("insmod " + self.timekeeper_dir + "/build/TimeKeeper.ko")
-            time.sleep(1)
+    def check_kronos_loaded(self) :
+        if self.enable_kronos == 1 and is_module_loaded() == 0:
+            print "Kronos is not loaded. Pls load and try again!"
+            sys.exit(0)
 
-    def dilate_node(self,pid,tdf,timeline=-1) :
-        if pid != -1 and self.enable_timekeeper == 1 :
-            dilate_all(pid,tdf)
-            addToExp(pid)
-            sys.stdout.flush()
-
-    def set_freeze_quantum(self):
-        set_cbe_experiment_timeslice(self.timeslice*self.tdf)
-
-
-    def dilate_nodes(self) :
-
-        print "Dilating all processes ... "
-        time.sleep(1)
-        mininet_obj = self.network_configuration.mininet_obj
-
-        if self.enable_timekeeper == 1:
-            for i in xrange(0,len(self.pid_list)):
-                self.dilate_node(self.pid_list[i],self.tdf)
-
-            print "########################################################################"
-            print ""
-            print "                        List of dilated pids"
-            print  self.pid_list
-            print ""
-            print "########################################################################"
-            print ""
-            print "Number of dilated processes         = ", len(self.pid_list)
-            print "Number of tcpdump processes         = ", self.n_actual_tcpdump_procs
-            print "Number of hosts                     = ", len(self.network_configuration.roles)
-            print "Number of switches                  = ", len(self.network_configuration.mininet_obj.switches)
-            print ""
-            print "########################################################################"
-            print ""
-            print "                        Host pids"
-            print self.host_pids
-            print ""
-            print "########################################################################"
-            print ""
-            print "                        Switch pids"
-            print  self.switch_pids
-            print ""
-            print "########################################################################"
-            print ""
-            print "                     Emulated Driver pids"
-            print  self.emulation_driver_pids
-            print ""
-            print "########################################################################"
-            print ""
-            print "                     Replay Driver pids"
-            print  self.replay_driver_pids
-            print ""
-            print "########################################################################"
-            print ""
-            print "Timeslice = ", self.timeslice
-            print ""
-            print "########################################################################"
-
-
-            script_dir = os.path.dirname(os.path.realpath(__file__))
-            with open(script_dir + "/dilate_pids.txt","w") as f :
-                for i in xrange(0,len(self.pid_list)) :
-                    f.write(str(self.pid_list[i]) + "\n")
-            sys.stdout.flush()
-
+    def initialize_kronos_exp(self) :
+        ret = initializeExp(1);
+        if ret < 0 :
+            print "Kronos Initialization Failed. Exiting ..."
+            sys.exit(0)
+            
     def start_synchronized_experiment(self) :
 
-        if self.enable_timekeeper == 1 :
-            print "Timekeeper synchronizing and freezing ..."
-            self.set_freeze_quantum()
-            sys.stdout.flush()
-            synchronizeAndFreeze()
-            print "Sync and Freeze completed. Starting Exp ... "
-            sys.stdout.flush()
-            startExp()
-            print "Experiment started: TDF = ", self.tdf, " local Time = " + str(datetime.now())
+        if self.enable_kronos == 1 :
+            print "Kronos synchronizing and freezing ..."
+            n_tracers = len(self.host_pids.keys()) + len(self.switch_pids.keys()) +  len(emulation_driver_pids) + len(replay_driver_pids)
+            while synchronizeAndFreeze(n_tracers) <= 0 :
+                print "Sync and Freeze Failed. Retrying in 1 sec"
+                time.sleep(1)
+            print "Synchronize and Freeze succeeded !"
+            print "Experiment started: rel_cpu_speed = ", self.rel_cpu_speed, " local Time = " + str(datetime.now())
 
         else:
             self.start_time = time.time()
-            print "Experiment started with TimeKeeper Disabled. Ignoring TDF settings ... "
+            print "Experiment started with Kronos Disabled ... "
 
     def stop_synchronized_experiment(self) :
 
         print "########################################################################"
-        if self.enable_timekeeper == 1 :
+        if self.enable_kronos == 1 :
             os.system("sudo killall -9 tcpdump")
             stopExp()
             print "Stopping synchronized experiment at local time = ", str(datetime.now())
-            #time.sleep(10)
             self.trigger_all_processes("EXIT")
             print "Stopped synchronized experiment"
         else:
@@ -257,18 +189,18 @@ class NetPower(object):
 
                 outfile.write(lineTowrite)
 
-    def start_host_reader_processes(self) :
+    def cmd_to_start_process_under_tracer(cmd_to_run, tracer_id) :
 
-        for i in xrange(len(self.network_configuration.roles)):
-            mininet_host = self.network_configuration.mininet_obj.hosts[i]
-            host_id = int(mininet_host.name[1:])
-            host_role = self.node_mappings[mininet_host.name][1][0]
-            os.system("echo '' > " + self.log_dir + "/" + mininet_host.name)
-            reader_cmd =  self.base_dir + "/src/core/bin/reader " + str(mininet_host.name)  + " " + self.log_dir + " >> " + self.log_dir + "/" + mininet_host.name + " 2>&1 &"
+                tracer_path = "/usr/bin/tracer"
+                tracer_args = [tracer_path]
+                tracer_args.extend(["-i", str(tracer_id)])
+                tracer_args.extend(["-r", str(self.rel_cpu_speed)])
+                tracer_args.extend(["-n", str(self.timeslice)])
+                tracer_args.extend(["-c", "\"" + cmd_to_run + "\""])
+                tracer_args.append("-s")
+                return ' '.join(tracer_args)
 
-            #
-            mininet_host.cmd(reader_cmd)
-
+        
 
     def start_host_processes(self):
         print "Starting all Host Commands ..."
@@ -291,26 +223,105 @@ class NetPower(object):
             if "controller" in host_role :
                 cmd_to_run = cmd_to_run + " -i"
                 self.control_node_id = host_id
+            if self.enable_kronos == 1 :
+                cmd_to_run = cmd_to_start_process_under_tracer(cmd_to_run, host_id)
+            cmd_to_run += ' > ' + host_log_file + ' 2>&1 & echo $! '
+  
+            with tempfile.NamedTemporaryFile() as f:
+                mininet_host.cmd(cmd_to_run + '>> ' + f.name)
+                pid = int(f.read())
+                self.host_pids[mininet_host.name] = pid
+                self.pid_list.append(pid)
 
-            cmd_to_run = cmd_to_run + " >> " + host_log_file + " 2>&1" + " &"
-            mininet_host.cmd(cmd_to_run)
-
-            pid = get_pids_with_cmd(cmd="python " + str(host_py_script) + " -l " + host_log_file, expected_no_of_pids=1)[0]
-
-            self.host_pids.append((pid, mininet_host.name))
-            self.pid_list.append(pid)
-
-            #if self.enable_timekeeper == 1:
             set_cpu_affinity(mininet_host.pid)
 
-            #if mininet_host.name == "h3" :
-            #    mininet_host.cmd("sudo tcpdump -i h3-eth0 -w /home/user/Desktop/host.pcap &")
 
-        #pid_list = get_pids_with_cmd(cmd="python " + str(host_py_script),expected_no_of_pids=len(self.network_configuration.roles))
-        #assert len(pid_list)  == len(self.network_configuration.roles)
+    def start_switch_processes(self) :
+        pid = 0
+        print "Starting dummy switch processes ..."
+        n_hosts = len(self.host_pids.keys())
+        for i in xrange(0,len(self.network_configuration.mininet_obj.switches)) :
+            mininet_switch = self.network_configuration.mininet_obj.switches[i]
+            sw_id = int(mininet_host.name[1:]) + n_hosts
+            cmd_to_run = "python " + self.base_dir + "/src/utils/dummy_nop_process.py"
+            sw_log_file = self.log_dir + "/sw_" + str(sw_id) + "_log.txt"
+            if self.enable_kronos == 1 :
+                cmd_to_run = cmd_to_start_process_under_tracer(cmd_to_run, sw_id)
+            cmd_to_run += ' > ' + sw_log_file + ' 2>&1 & echo $! '
+            with tempfile.NamedTemporaryFile() as f:
+                mininet_switch.cmd(cmd_to_run + '>> ' + f.name)
+                pid = int(f.read())
+                self.switch_pids[mininet_switch.name] = pid
+                self.pid_list.append(pid)
 
-        # self.host_pids.extend(pid_list)
-        # self.pid_list.extend(pid_list)
+            set_cpu_affinity(mininet_switch.pid)
+
+
+    def start_emulation_drivers(self):
+
+        
+        driver_py_script = self.proxy_dir + "/emulation_driver.py"
+        tracer_id = len(self.host_pids.keys()) + len(self.switch_pids.keys())
+
+        for edp in self.emulation_driver_params:
+
+            mininet_host = self.network_configuration.mininet_obj.get(edp["node_id"])
+            driver_log_file = self.log_dir + "/" + str(edp["driver_id"]) + "_log.txt"  
+            tracer_id = += 1
+
+            input_params_file_path = self.log_dir + "/" + edp["driver_id"] + ".json"
+            with open(input_params_file_path, "w") as f:
+                json.dump(edp, f)
+
+            cmd_to_run = "python " + str(driver_py_script) + " --input_params_file_path " + input_params_file_path
+            if self.enable_kronos == 1:
+                cmd_to_run = cmd_to_start_process_under_tracer(cmd_to_run, tracer_id)
+            cmd_to_run += ' > ' + driver_log_file + ' 2>&1 & echo $! '
+  
+            with tempfile.NamedTemporaryFile() as f:
+                mininet_host.cmd(cmd_to_run + '>> ' + f.name)
+                pid = int(f.read())
+                self.emulation_driver_pids.append(pid)
+                self.pid_list.append(pid)
+        print "All emulation drivers started !"
+
+
+    def start_replay_drivers(self):
+
+        n_drivers = 0
+        driver_py_script = self.proxy_dir + "/replay_driver.py"
+        tracer_id = len(self.host_pids.keys()) + len(self.switch_pids.keys()) + len(self.emulation_driver_pids)
+
+        for i in xrange(len(self.network_configuration.roles)):
+            mininet_host = self.network_configuration.mininet_obj.hosts[i]
+
+            rdp = {"driver_id": mininet_host.name + "-replay",
+                   "run_time": self.run_time,
+                   "node_id": mininet_host.name,
+                   "node_ip": mininet_host.IP(),
+                   "attack_path_file_path": self.attack_plan_dir + "/attack_plan.json"
+                   }
+
+            driver_log_file = self.log_dir + "/" + str(rdp["driver_id"]) + "_log.txt"
+            input_params_file_path = self.log_dir + "/" + rdp["driver_id"] + ".json"
+            with open(input_params_file_path, "w") as f:
+                json.dump(rdp, f)
+            tracer_id = += 1
+
+            cmd_to_run = "python " + str(driver_py_script) + " --input_params_file_path " + input_params_file_path
+            if self.enable_kronos == 1:
+                cmd_to_run = cmd_to_start_process_under_tracer(cmd_to_run, tracer_id)
+            cmd_to_run += ' > ' + driver_log_file + ' 2>&1 & echo $! '
+
+            with tempfile.NamedTemporaryFile() as f:
+                mininet_host.cmd(cmd_to_run + '>> ' + f.name)
+                pid = int(f.read())
+                self.replay_driver_pids.append(pid)
+                self.pid_list.append(pid)
+
+        print "All replay drivers started !"
+
+        
 
     def start_host_capture(self, host_obj):
         core_cmd = "tcpdump"
@@ -346,9 +357,6 @@ class NetPower(object):
 
             # 1. to capture all pcaps:
             if mininet_link.intf1.name.startswith("s") and mininet_link.intf2.name.startswith("s") :
-            # 2. to capture only DNP3 traffic pcap:
-            #if mininet_link.intf1.name.startswith("s1") and mininet_link.intf2.name.startswith("s2") :
-
                 capture_log_file = self.log_dir  + "/" + mininet_link.intf1.name + "-" + mininet_link.intf2.name + ".pcap"
                 with open(capture_log_file , "w") as f :
                     pass
@@ -371,33 +379,24 @@ class NetPower(object):
         sudo_tcpdump_parent_pids = get_pids_with_cmd(cmd="sudo " + core_cmd,expected_no_of_pids=self.n_actual_tcpdump_procs)
         set_cpu_affinity_pid_list(sudo_tcpdump_parent_pids)
 
-
+    def set_netdevice_owners(self) :
+        print "Setting interface owners ..."
         for i in xrange(0,len(self.network_configuration.mininet_obj.switches)) :
             mininet_switch = self.network_configuration.mininet_obj.switches[i]
-            self.switch_pids.append(int(mininet_switch.pid))
-            self.pid_list.append(int(mininet_switch.pid))
-
-    def set_switch_netdevice_owners(self) :
-        pid = 0
-        print "Setting switch interface owner pids ..."
-        for i in xrange(0,len(self.network_configuration.mininet_obj.switches)) :
-            mininet_switch = self.network_configuration.mininet_obj.switches[i]
-            if i == 0:
-                pid_master = mininet_switch.pid
-
-            pid_master = int(self.pid_list[0])
+            assert mininet_switch.name in self.switch_pids
+            tracer_pid = self.switch_pids[mininet_switch.name]
 
             for name in mininet_switch.intfNames():
                 if name != "lo" :
-                    #set_netdevice_owner(mininet_switch.pid,name)
-                    set_netdevice_owner(pid_master,name)
+                    set_netdevice_owner(tracer_pid,name)
 
         for pid, host_name in self.host_pids:
             mininet_host = self.network_configuration.mininet_obj.get(host_name)
+            assert mininet_host.name in self.host_pids
+            tracer_pid = self.host_pids[mininet_host.name]
             for name in mininet_host.intfNames():
                 if name != "lo" :
-                    #set_netdevice_owner(pid, name)
-                    set_netdevice_owner(pid_master,name)
+                    set_netdevice_owner(tracer_pid,name)
 
     def start_proxy_process(self):
 
@@ -482,7 +481,6 @@ class NetPower(object):
                 ret = self.sharedBufferArray.write(edp["driver_id"] + "main-cmd-channel-buffer", trigger_cmd, 0)
 
         self.send_to_attack_orchestrator("START")
-
         print "NetPower: Triggered hosts, drivers and attack orchestrator with Command: ", trigger_cmd
 
     def send_to_attack_orchestrator(self, msg):
@@ -505,15 +503,20 @@ class NetPower(object):
             print "########################################################################"
 
             # Before starting
+            print "In Warm up phase waiting for pcaps to be loaded by all replay drivers ... "
             while True:
                 recv_msg = self.recv_from_attack_orchestrator()
                 if recv_msg == "PCAPS-LOADED":
                     break
-                sleep(0.5)
+                if self.enable_kronos == 1 :
+                    progress_n_rounds(100)
+                    n_rounds_progressed += 100
+                else :
+                    sleep(0.5)
             print "Attack Orchestrator: LOADED ALL PCAPS"
 
-            if self.enable_timekeeper == 1 :
-                start_time = get_current_virtual_time_pid(self.switch_pids[0])
+            if self.enable_kronos == 1 :
+                start_time = get_current_virtual_time()
             else:
                 start_time = time.time()
             self.trigger_all_processes("START")
@@ -522,7 +525,6 @@ class NetPower(object):
             prev_time  = start_time
             run_time   = self.run_time
 
-            n_rounds_progressed = 0
             #progress for 20ms which is the smallest timestep in powerworld
             if self.timeslice > 20*NS_PER_MS :
                 n_rounds = 1
@@ -533,14 +535,12 @@ class NetPower(object):
             k = 0
             while True:
 
-                if self.enable_timekeeper == 1 :
+                if self.enable_kronos == 1 :
                      curr_time = get_current_virtual_time_pid(self.switch_pids[0])
-                     #print "N rounds progressed = ", n_rounds_progressed, " Time =", curr_time
+                     print "N rounds progressed = ", n_rounds_progressed, " Curr Virtual Time =", curr_time
                      sys.stdout.flush()
-                     progress_exp_cbe(n_rounds)
+                     progress_n_rounds(n_rounds)
                      n_rounds_progressed += n_rounds
-
-
 
                      if k >= run_time :
                          sys.stdout.flush()
@@ -548,7 +548,7 @@ class NetPower(object):
                      else :
                          if curr_time - prev_time >= 1.0 :
                              k = k + int(curr_time - prev_time)
-                             print k," secs of virtual time elapsed. Local time = ", datetime.now()
+                             print k," secs of virtual time elapsed. Real time = ", datetime.now()
                              sys.stdout.flush()
                              prev_time = curr_time
                 else :
@@ -556,7 +556,7 @@ class NetPower(object):
                          break
                     k= k + 1
                     print k," secs of real time elapsed"
-                    # sleep until runtime expires
+                    #sleep until runtime expires
                     time.sleep(0.5)
 
                 recv_msg = self.recv_from_attack_orchestrator()
@@ -566,7 +566,9 @@ class NetPower(object):
                 if recv_msg == "END-REPLAY":
                     self.enable_TCP_RST()
                     self.send_to_attack_orchestrator("ACK")
-                time.sleep(0.5)
+
+                if self.enable_kronos == 0 :
+                    time.sleep(0.5)
 
     def print_topo_info(self):
 
@@ -595,117 +597,21 @@ class NetPower(object):
         print ""
         print "########################################################################"
 
-    def start_emulation_drivers(self):
+    
 
-        n_drivers = 0
-        driver_py_script = self.proxy_dir + "/emulation_driver.py"
-
-        for edp in self.emulation_driver_params:
-
-            mininet_host = self.network_configuration.mininet_obj.get(edp["node_id"])
-            driver_log_file = self.log_dir + "/" + str(edp["driver_id"]) + "_log.txt"
-
-            input_params_file_path = self.log_dir + "/" + edp["driver_id"] + ".json"
-            with open(input_params_file_path, "w") as f:
-                json.dump(edp, f)
-
-            cmd_to_run = "python " + str(driver_py_script) + " --input_params_file_path " + input_params_file_path
-            cmd_to_run = cmd_to_run + " > " + driver_log_file + " 2>&1" + " &"
-
-            mininet_host.cmd(cmd_to_run)
-            n_drivers = n_drivers + 1
-
-        print "Waiting for emulation drivers to start. Number of drivers = ", n_drivers
-        pid_list = get_pids_with_cmd(cmd="python " + str(driver_py_script), expected_no_of_pids=n_drivers)
-        assert len(pid_list) == n_drivers
-        self.emulation_driver_pids.extend(pid_list)
-        self.pid_list.extend(pid_list)
-        print "All emulation drivers started"
-
-    def stop_emulation_drivers(self):
-        for pid in self.emulation_driver_pids:
-            try:
-                os.system("sudo kill " + str(pid))
-            except:
-                pass
-
-    def start_replay_drivers(self):
-
-        n_drivers = 0
-        driver_py_script = self.proxy_dir + "/replay_driver.py"
-
-        for i in xrange(len(self.network_configuration.roles)):
-            mininet_host = self.network_configuration.mininet_obj.hosts[i]
-
-            rdp = {"driver_id": mininet_host.name + "-replay",
-                   "run_time": self.run_time,
-                   "node_id": mininet_host.name,
-                   "node_ip": mininet_host.IP(),
-                   "attack_path_file_path": self.attack_plan_dir + "/attack_plan.json"
-                   }
-
-            driver_log_file = self.log_dir + "/" + str(rdp["driver_id"]) + "_log.txt"
-            input_params_file_path = self.log_dir + "/" + rdp["driver_id"] + ".json"
-            with open(input_params_file_path, "w") as f:
-                json.dump(rdp, f)
-
-            cmd_to_run = "python " + str(driver_py_script) + " --input_params_file_path " + input_params_file_path
-            cmd_to_run = cmd_to_run + " > " + driver_log_file + " 2>&1" + " &"
-
-            mininet_host.cmd(cmd_to_run)
-            n_drivers += 1
-
-        pid_list = get_pids_with_cmd(cmd="python " + str(driver_py_script), expected_no_of_pids=n_drivers)
-        assert len(pid_list) == n_drivers
-        self.replay_driver_pids.extend(pid_list)
-        self.pid_list.extend(pid_list)
-
-    def stop_replay_drivers(self):
-        for pid in self.replay_driver_pids:
-            try:
-                os.system("sudo kill " + str(pid))
-            except:
-                pass
 
     def cleanup(self):
 
         #Clean up ...
-        if self.enable_timekeeper:
-            resume_exp_cbe()
+        if self.enable_kronos == 1:
             self.stop_synchronized_experiment()
         else:
             self.trigger_all_processes("EXIT")
             time.sleep(10)
 
-        self.stop_emulation_drivers()
-
         print "Cleaning up ..."
         self.enable_TCP_RST()
-        script_dir = os.path.dirname(os.path.realpath(__file__))
-        with open(script_dir + "/dilate_pids.txt","w") as f :
-            pass
-        try:
-            for proc in self.tcpdump_procs :
-                print "terminating tcpdump proc ", proc.pid
-                proc.terminate()
-
-        except:
-            pass
-
-        for pid, host_name in self.host_pids:
-            os.system("sudo kill -9 " + str(pid))
-        for pid in self.emulation_driver_pids:
-            os.system("sudo kill -9 " + str(pid))
-        for pid in self.replay_driver_pids:
-            os.system("sudo kill -9 " + str(pid))
-
-        try:
-            os.system("sudo killall reader")
-        except:
-            pass
-
         self.network_configuration.cleanup_mininet()
-        #os.system("sudo killall -9 python")
 
     def start_project(self):
         print "Starting project ..."
@@ -714,6 +620,7 @@ class NetPower(object):
         #General Startup ...
         self.generate_node_mappings(self.network_configuration.roles)
         self.start_host_processes()
+        self.start_switch_processes()
         self.start_pkt_captures()
         self.start_proxy_process()
         self.start_attack_orchestrator()
@@ -722,13 +629,12 @@ class NetPower(object):
         self.start_emulation_drivers()
         self.start_replay_drivers()
 
-        #TimeKeeper related
-        if self.enable_timekeeper:
+        #Kronos related
+        if self.enable_kronos:
 
-            self.set_switch_netdevice_owners()
-            self.dilate_nodes()
+            self.set_netdevice_owners()
             self.start_synchronized_experiment()
-            self.start_time = get_current_virtual_time_pid(self.switch_pids[0])
+            self.start_time = get_current_virtual_time()
         else:
             self.start_time = time.time()
             # if timekeeper is not enabled, restrict emulation/replay operations to cpu subset
