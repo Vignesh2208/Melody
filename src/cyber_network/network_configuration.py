@@ -35,7 +35,7 @@ from cyber_network.synthesis.synthesis_lib import SynthesisLib
 from cyber_network.synthesis.flow_specification import FlowSpecification
 import subprocess
 
-from core.timekeeper_functions import *
+from core.kronos_helper_functions import *
 
 class NetworkConfiguration(object):
 

@@ -10,6 +10,7 @@ import getopt
 import traceback
 import signal
 from utils.sleep_functions import sleep
+import time
 import datetime
 from datetime import datetime
 
@@ -144,6 +145,8 @@ def main(hostID,netCfgFile,logFile,runTime,projectName,isControlHost) :
     while "START" not in recv_msg:
         recv_msg = ''
         dummy_id, recv_msg = sharedBufferArray.read("h" + str(hostID) + "main-cmd-channel-buffer")
+        print "Finished 1 iter ... "
+        time.sleep(0.1)
 
 
     NetLayer.start()
@@ -161,8 +164,9 @@ def main(hostID,netCfgFile,logFile,runTime,projectName,isControlHost) :
         print "Checking for EXIT for the ", i ," time at: ", str(datetime.now())
         i = i + 1
         sys.stdout.flush()
-        sleep(1)
         dummy_id, recv_msg = sharedBufferArray.read("h" + str(hostID) + "main-cmd-channel-buffer")
+        print "Finished 1 iter ... "
+        time.sleep(0.1)
 
 
     IPCLayer.cancelThread()

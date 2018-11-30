@@ -1,7 +1,7 @@
 import ctypes
 import sys
 import os
-
+import time
 from libs import shared_buf as sb
 from defines import *
 
@@ -27,7 +27,9 @@ class shared_buffer(object) :
 		self.shared_buf.close()
 
 	def read(self) :
-		return self.shared_buf.read(self.sharedBufName,self.isProxy)
+		ret =  self.shared_buf.read(self.sharedBufName,self.isProxy)
+		time.sleep(0.1)
+		return ret
 
 	def write(self,msg,dstID=PROXY_NODE_ID) :
 		return self.shared_buf.write(self.sharedBufName,str(msg),len(str(msg)),self.isProxy,dstID)

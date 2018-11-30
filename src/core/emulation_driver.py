@@ -89,6 +89,7 @@ def main():
     while "START" not in recv_msg:
         recv_msg = ''
         dummy_id, recv_msg = d.sharedBufferArray.read(str(d.driver_id) + "main-cmd-channel-buffer")
+        time.sleep(0.01)
 
 
     print "Triggered emulation driver at ", str(datetime.now())
@@ -104,8 +105,8 @@ def main():
         print "Checking for EXIT for the ", i ," time at: ", str(datetime.now())
         sys.stdout.flush()
         i = i + 1
-        sleep(1)
         dummy_id, recv_msg = d.sharedBufferArray.read(str(d.driver_id) + "main-cmd-channel-buffer")
+        time.sleep(0.01)
 
     print "Shutting down driver ..."
     sys.stdout.flush()

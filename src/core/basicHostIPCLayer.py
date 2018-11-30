@@ -179,6 +179,7 @@ class basicHostIPCLayer(threading.Thread):
     def idle(self):
         recvPkt = ""
         dstCyberNodeID, recvPkt = self.sharedBufferArray.read(self.sharedBufName)
+        time.sleep(0.01)
 
         if len(recvPkt) != 0:
             self.log.info("Received pkt: " + str(recvPkt) + " from core for Dst Node Id =  " + str(dstCyberNodeID))

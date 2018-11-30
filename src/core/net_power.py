@@ -15,6 +15,7 @@ import os
 from fractions import gcd
 import threading
 import tempfile
+from sys import stdout
 
 NS_PER_MS = 1000000
 
@@ -59,7 +60,8 @@ class NetPower(object):
         self.switch_pids = {}
         self.emulation_driver_pids = []
         self.replay_driver_pids = []
-        self.timeslice = self.get_timeslice()
+        #self.timeslice = self.get_timeslice()
+        self.timeslice = 100000
 
         self.emulated_background_traffic_flows = emulated_background_traffic_flows
 
@@ -139,6 +141,8 @@ class NetPower(object):
         if self.enable_kronos == 1 and is_module_loaded() == 0:
             print "Kronos is not loaded. Pls load and try again!"
             sys.exit(0)
+        elif self.enable_kronos == 1 :
+            self.initialize_kronos_exp()
 
     def initialize_kronos_exp(self) :
         ret = initializeExp(1);
@@ -150,7 +154,7 @@ class NetPower(object):
 
         if self.enable_kronos == 1 :
             print "Kronos synchronizing and freezing ..."
-            n_tracers = len(self.host_pids.keys()) + len(self.switch_pids.keys()) +  len(emulation_driver_pids) + len(replay_driver_pids)
+            n_tracers = len(self.host_pids.keys()) + len(self.switch_pids.keys()) +  len(self.emulation_driver_pids) + len(self.replay_driver_pids)
             while synchronizeAndFreeze(n_tracers) <= 0 :
                 print "Sync and Freeze Failed. Retrying in 1 sec"
                 time.sleep(1)
@@ -189,7 +193,7 @@ class NetPower(object):
 
                 outfile.write(lineTowrite)
 
-    def cmd_to_start_process_under_tracer(cmd_to_run, tracer_id) :
+    def cmd_to_start_process_under_tracer(self, cmd_to_run, tracer_id) :
 
                 tracer_path = "/usr/bin/tracer"
                 tracer_args = [tracer_path]
@@ -224,7 +228,7 @@ class NetPower(object):
                 cmd_to_run = cmd_to_run + " -i"
                 self.control_node_id = host_id
             if self.enable_kronos == 1 :
-                cmd_to_run = cmd_to_start_process_under_tracer(cmd_to_run, host_id)
+                cmd_to_run = self.cmd_to_start_process_under_tracer(cmd_to_run, host_id)
             cmd_to_run += ' > ' + host_log_file + ' 2>&1 & echo $! '
   
             with tempfile.NamedTemporaryFile() as f:
@@ -242,11 +246,11 @@ class NetPower(object):
         n_hosts = len(self.host_pids.keys())
         for i in xrange(0,len(self.network_configuration.mininet_obj.switches)) :
             mininet_switch = self.network_configuration.mininet_obj.switches[i]
-            sw_id = int(mininet_host.name[1:]) + n_hosts
+            sw_id = int(mininet_switch.name[1:]) + n_hosts
             cmd_to_run = "python " + self.base_dir + "/src/utils/dummy_nop_process.py"
             sw_log_file = self.log_dir + "/sw_" + str(sw_id) + "_log.txt"
             if self.enable_kronos == 1 :
-                cmd_to_run = cmd_to_start_process_under_tracer(cmd_to_run, sw_id)
+                cmd_to_run = self.cmd_to_start_process_under_tracer(cmd_to_run, sw_id)
             cmd_to_run += ' > ' + sw_log_file + ' 2>&1 & echo $! '
             with tempfile.NamedTemporaryFile() as f:
                 mininet_switch.cmd(cmd_to_run + '>> ' + f.name)
@@ -267,15 +271,15 @@ class NetPower(object):
 
             mininet_host = self.network_configuration.mininet_obj.get(edp["node_id"])
             driver_log_file = self.log_dir + "/" + str(edp["driver_id"]) + "_log.txt"  
-            tracer_id = += 1
+            tracer_id += 1
 
             input_params_file_path = self.log_dir + "/" + edp["driver_id"] + ".json"
             with open(input_params_file_path, "w") as f:
                 json.dump(edp, f)
 
-            cmd_to_run = "python " + str(driver_py_script) + " --input_params_file_path " + input_params_file_path
+            cmd_to_run = "python " + str(driver_py_script) + " --input_params_file_path=" + input_params_file_path
             if self.enable_kronos == 1:
-                cmd_to_run = cmd_to_start_process_under_tracer(cmd_to_run, tracer_id)
+                cmd_to_run = self.cmd_to_start_process_under_tracer(cmd_to_run, tracer_id)
             cmd_to_run += ' > ' + driver_log_file + ' 2>&1 & echo $! '
   
             with tempfile.NamedTemporaryFile() as f:
@@ -306,11 +310,11 @@ class NetPower(object):
             input_params_file_path = self.log_dir + "/" + rdp["driver_id"] + ".json"
             with open(input_params_file_path, "w") as f:
                 json.dump(rdp, f)
-            tracer_id = += 1
+            tracer_id += 1
 
-            cmd_to_run = "python " + str(driver_py_script) + " --input_params_file_path " + input_params_file_path
+            cmd_to_run = "python " + str(driver_py_script) + " --input_params_file_path=" + input_params_file_path
             if self.enable_kronos == 1:
-                cmd_to_run = cmd_to_start_process_under_tracer(cmd_to_run, tracer_id)
+                cmd_to_run = self.cmd_to_start_process_under_tracer(cmd_to_run, tracer_id)
             cmd_to_run += ' > ' + driver_log_file + ' 2>&1 & echo $! '
 
             with tempfile.NamedTemporaryFile() as f:
@@ -390,7 +394,7 @@ class NetPower(object):
                 if name != "lo" :
                     set_netdevice_owner(tracer_pid,name)
 
-        for pid, host_name in self.host_pids:
+        for host_name in self.host_pids:
             mininet_host = self.network_configuration.mininet_obj.get(host_name)
             assert mininet_host.name in self.host_pids
             tracer_pid = self.host_pids[mininet_host.name]
@@ -494,7 +498,7 @@ class NetPower(object):
         return recv_msg
 
     def run(self):
-
+        
         if self.run_time > 0:
             print "########################################################################"
             print ""
@@ -504,16 +508,22 @@ class NetPower(object):
 
             # Before starting
             print "In Warm up phase waiting for pcaps to be loaded by all replay drivers ... "
+            if self.enable_kronos == 1 :
+                n_warmup_rounds = 0
             while True:
                 recv_msg = self.recv_from_attack_orchestrator()
                 if recv_msg == "PCAPS-LOADED":
                     break
                 if self.enable_kronos == 1 :
-                    progress_n_rounds(100)
-                    n_rounds_progressed += 100
+                    
+                    progress_n_rounds(1)
+                    n_warmup_rounds += 1
+                    stdout.write("\rNumber of Warmup Rounds Ran: %d" % n_warmup_rounds)
+                    stdout.flush()
+                    
                 else :
                     sleep(0.5)
-            print "Attack Orchestrator: LOADED ALL PCAPS"
+            print "\nAttack Orchestrator: LOADED ALL PCAPS"
 
             if self.enable_kronos == 1 :
                 start_time = get_current_virtual_time()
@@ -522,7 +532,6 @@ class NetPower(object):
             self.trigger_all_processes("START")
             sys.stdout.flush()
 
-            prev_time  = start_time
             run_time   = self.run_time
 
             #progress for 20ms which is the smallest timestep in powerworld
@@ -530,33 +539,29 @@ class NetPower(object):
                 n_rounds = 1
             else:
                 n_rounds = int(20*NS_PER_MS/self.timeslice)
-
-
+            n_total_rounds = int((run_time*1000000000)/self.timeslice)
+            n_rounds_progressed = 0
+              
             k = 0
             while True:
 
                 if self.enable_kronos == 1 :
-                     curr_time = get_current_virtual_time_pid(self.switch_pids[0])
-                     print "N rounds progressed = ", n_rounds_progressed, " Curr Virtual Time =", curr_time
+                     curr_time = get_current_virtual_time()               
                      sys.stdout.flush()
                      progress_n_rounds(n_rounds)
                      n_rounds_progressed += n_rounds
+                     stdout.write("\rNumber of Rounds Progressed:  %d/%d" % (n_rounds_progressed, n_total_rounds))
+                     stdout.flush()
 
-                     if k >= run_time :
+                     if n_rounds_progressed >= n_total_rounds :
                          sys.stdout.flush()
                          break
-                     else :
-                         if curr_time - prev_time >= 1.0 :
-                             k = k + int(curr_time - prev_time)
-                             print k," secs of virtual time elapsed. Real time = ", datetime.now()
-                             sys.stdout.flush()
-                             prev_time = curr_time
                 else :
                     if k >= run_time :
                          break
                     k= k + 1
-                    print k," secs of real time elapsed"
-                    #sleep until runtime expires
+                    stdout.write("\rNumber of Seconds Run: %d/%d" % (k, run_time))
+                    stdout.flush()
                     time.sleep(0.5)
 
                 recv_msg = self.recv_from_attack_orchestrator()
@@ -569,6 +574,8 @@ class NetPower(object):
 
                 if self.enable_kronos == 0 :
                     time.sleep(0.5)
+
+            stdout.write("\n")
 
     def print_topo_info(self):
 
@@ -642,10 +649,10 @@ class NetPower(object):
                 set_def_cpu_affinity(pid,self.cpus_subset)
             for pid in self.replay_driver_pids:
                 set_def_cpu_affinity(pid,self.cpus_subset)
-            for (pid,hostname) in self.host_pids:
-                set_def_cpu_affinity(pid,self.cpus_subset)
-            for pid in self.switch_pids:
-                set_def_cpu_affinity(pid,self.cpus_subset)
+            for hostname in self.host_pids:
+                set_def_cpu_affinity(self.host_pids[hostname],self.cpus_subset)
+            for sw_name in self.switch_pids:
+                set_def_cpu_affinity(self.switch_pids[sw_name],self.cpus_subset)
 
 
         self.run()

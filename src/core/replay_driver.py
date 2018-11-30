@@ -41,12 +41,12 @@ class ReplayDriver(object):
             sys.stdout.flush()
             if run_time == 0:
                 while True:
-                    sleep(1)
+                    time.sleep(1.0)
 
             start_time = time.time()
             sleep(run_time + 2)
             while time.time() < start_time + float(run_time):
-                sleep(1)
+                time.sleep(1.0)
             sys.exit(0)
 
         print "Cmd channel buffer open succeeded !"
@@ -60,6 +60,7 @@ class ReplayDriver(object):
     def recv_command_message(self):
         msg = ''
         dummy_id, msg = self.sharedBufferArray.read(str(self.driver_id) + "main-cmd-channel-buffer")
+        time.sleep(0.01)
         return msg
     
     def load_pcap(self, pcap_file_path):
@@ -169,7 +170,7 @@ class ReplayDriver(object):
 
             if n_required_recv_events == 0:
                 if send_sleep_time > 0 :
-                    sleep(send_sleep_time)
+                    time.sleep(send_sleep_time)
                 self.raw_tx_sock.sendto(payload, (dst_ip, 0))
                 curr_send_event = None
                 curr_send_idx = curr_send_idx + 1
@@ -178,6 +179,7 @@ class ReplayDriver(object):
                 try:
                     raw_pkt = self.raw_rx_sock.recv(MAXPKTSIZE)
                 except socket.error as e:
+                    print "Socket Error: ", e
                     raw_pkt = None
                     continue
 

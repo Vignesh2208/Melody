@@ -24,7 +24,7 @@ def is_root() :
 	return 0
 
 
-def is_module_Loaded() :
+def is_module_loaded() :
 
 	if os.path.isfile(KRONOS_FILE_NAME) == True:
 		return 1

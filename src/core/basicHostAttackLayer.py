@@ -115,6 +115,7 @@ class basicHostAttackLayer(threading.Thread):
 
     def check_emulation_stage(self):
         dummy_id, recv_msg = self.sharedBufferArray.read(self.attk_channel_bufName)
+        time.sleep(0.01)
         if "EMULATE:" in recv_msg:
             self.running_emulate_stage = True
             self.emulate_stage_id = recv_msg.split(":")[1]

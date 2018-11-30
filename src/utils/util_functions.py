@@ -8,7 +8,7 @@ def set_cpu_affinity(pid) :
     subprocess.Popen(taskset_cmd, shell=True)
 
 def set_def_cpu_affinity(pid,cpu_subset_str) :
-    taskset_cmd = "sudo taskset -cp " + cpu_subset_str + " " + str(pid)
+    taskset_cmd = "sudo taskset -cp " + cpu_subset_str + " " + str(pid) + " > /dev/null"
     #os.system("sudo taskset -cp " + cpu_subset_str + " " + str(pid) + " > /dev/null")
     subprocess.Popen(taskset_cmd, shell=True)
 def set_cpu_affinity_pid_list(pid_list) :

@@ -163,6 +163,8 @@ def main():
     parser.add_argument('--enable_kronos', dest="enable_kronos", default=0, type=int, help = "Enable Kronos ?")
     parser.add_argument('--rel_cpu_speed', dest="rel_cpu_speed", default=1, type=int, help = "Relatice cpu speed of processes if kronos is enabled")
 
+    args = parser.parse_args()
+
     run_time = args.run_time
     root_user_name = args.root_user_name
     root_password = args.root_password
@@ -204,9 +206,9 @@ def main():
                             root_user_name=root_user_name,
                             root_password=root_password,
                             server_process_start_cmd='python ' + base_dir + "/src/cyber_network/dnp3_slave.py --slave_ip " + \
-                            network_configuration.mininet_obj.get("h3").IP() + " --life_time " + str(run_time),
+                            network_configuration.mininet_obj.get("h3").IP() + " --life_time " + str(run_time) + " --vt " + str(args.enable_kronos),
                             client_expect_file='python ' + base_dir + "/src/cyber_network/dnp3_master.py --slave_ip " + \
-                            network_configuration.mininet_obj.get("h3").IP() + " --life_time " + str(run_time),
+                            network_configuration.mininet_obj.get("h3").IP() + " --life_time " + str(run_time) + " --vt " + str(args.enable_kronos),
                             long_running=True),
 
         # UDP 1->3
@@ -262,7 +264,7 @@ def main():
 		            relative_cpu_speed=args.rel_cpu_speed)
 
     exp.start_project()
-    #measure_dnp3_latencies(args.project_name, "s1-eth2-s2-eth2.pcap")
+    measure_dnp3_latencies(args.project_name, "s1-eth2-s2-eth2.pcap")
     os.system("sudo killalll -9 python")
 
 

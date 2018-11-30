@@ -24,7 +24,7 @@ Returns the virtual time of an experiment, given it's pid. If pid == 0, it queri
 */
 int gettimepid(int pid, struct timeval *tv, struct timezone *tz) {
 
-        int res;
+        int res, fp;
 
 	if (pid == 0) {
 		fp = open("/proc/status", O_RDWR);
