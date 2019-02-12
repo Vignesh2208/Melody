@@ -26,16 +26,18 @@ Dependencies:
 Pre-Run Steps:
 
 - Install Kronos.
+- Install protobuf, protoc.
+- Install grpc.
 
 - Setup the environment
-    - cd NetPower_TestBed
+    - cd Melody
     - sudo ./install_deps.sh
     - sudo ./install_opendnp3.sh
     - sudo make install
 
 - Setting up the python path
     - Add the following to ~/.bashrc
-      export PYTHONPATH=$PYTHONPATH:<path-to-netpower-testbed>/src
+      export PYTHONPATH=$PYTHONPATH:<path-to-melody>/src
 
     - Do the following
       sudo visudo
