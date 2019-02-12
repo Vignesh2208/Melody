@@ -1,192 +1,179 @@
 import shared_buffer
 from shared_buffer import *
 import sys
-import os
-import socket
 import threading
 import logger
 import datetime
 from datetime import datetime
-from logger import Logger
 from defines import *
+from src.proto import pss_pb2
 import time
-import Queue
-from utils.sleep_functions import sleep
+from src.utils.sleep_functions import sleep
 
 
 class basicHostIPCLayer(threading.Thread):
-    def __init__(self, hostID, logFile,sharedBufferArray):
+    def __init__(self, host_id, log_file):
         threading.Thread.__init__(self)
 
-        self.threadCmdLock = threading.Lock()
-        self.threadCallbackQueue = {}
-        self.threadCallbackLock = threading.Lock()
-        self.nPendingCallbacks = 0
+        self.thread_cmd_lock = threading.Lock()
+        self.thread_callback_queue = {}
+        self.thread_callback_lock = threading.Lock()
+        self.n_pending_callbacks = 0
 
-        self.threadCmdQueue = []
-        self.hostID = hostID
-        self.sharedBufferArray = sharedBufferArray
-        self.log = logger.Logger(logFile, "Host " + str(hostID) + " IPC Thread")
-        self.hostIDtoPowerSimID = None
-        self.powerSimIDtohostID = None
-        self.attackLayer = None
+        self.thread_cmd_queue = []
+        self.host_id = host_id
+        self.log = logger.Logger(log_file, "Host " + str(host_id) + " IPC Thread")
+        self.host_id_to_powersim_id = None
+        self.powersim_id_to_host_id = None
+        self.attack_layer = None
         self.raw_sock = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_RAW)
-        self.init_shared_ipc_buffer()
 
-    # self.raw_sock.setsockopt(socket.IPPROTO_IP, socket.IP_HDRINCL, 1)
+    """ -- DO NOT OVERRIDE -- """
 
-    def setAttackLayer(self, attackLayer):
-        self.attackLayer = attackLayer
+    def set_attack_layer(self, attack_layer):
+        self.attack_layer = attack_layer
 
-    def getAttackLayer(self):
-        return self.attackLayer
+    """ -- DO NOT OVERRIDE -- """
 
-    def getcurrCmd(self):
-        currCmd = None
-        self.threadCmdLock.acquire()
-        try:
-            currCmd = self.threadCmdQueue.pop()
-        except:
-            currCmd = None
-        self.threadCmdLock.release()
-        return currCmd
+    def get_attack_layer(self):
+        return self.attack_layer
 
-    def cancelThread(self):
-        self.threadCmdLock.acquire()
-        self.threadCmdQueue.append(CMD_QUIT)
-        self.threadCmdLock.release()
+    """ -- DO NOT OVERRIDE -- """
 
-    def setPowerSimIdMap(self, powerSimIdMap):
-        self.hostIDtoPowerSimID = powerSimIdMap
-        self.powerSimIDtohostID = {}
-        for hostID in self.hostIDtoPowerSimID.keys():
-            powerSimIdSet = self.hostIDtoPowerSimID[hostID]
-            for powerSimId in powerSimIdSet:
-                self.powerSimIDtohostID[powerSimId] = hostID
+    def get_curr_cmd(self):
+        curr_cmd = None
+        self.thread_cmd_lock.acquire()
+        if len(self.thread_cmd_queue) > 0:
+            curr_cmd = self.thread_cmd_queue.pop()
+        self.thread_cmd_lock.release()
+        return curr_cmd
 
-    def getPowerSimIDsforNode(self, cyberNodeID):
-        if cyberNodeID in self.hostIDtoPowerSimID.keys():
-            return self.hostIDtoPowerSimID[cyberNodeID]
+    """ -- DO NOT OVERRIDE -- """
+
+    def cancel_thread(self):
+        self.thread_cmd_lock.acquire()
+        self.thread_cmd_queue.append(CMD_QUIT)
+        self.thread_cmd_lock.release()
+
+    """ -- DO NOT OVERRIDE -- """
+
+    def set_powersim_id_map(self, powersim_id_map):
+        self.host_id_to_powersim_id = powersim_id_map
+        self.powersim_id_to_host_id = {}
+        for host_id in self.host_id_to_powersim_id.keys():
+            powersim_id_set = self.host_id_to_powersim_id[host_id]
+            for powersim_entity_id in powersim_id_set:
+                self.powersim_id_to_host_id[powersim_entity_id] = host_id
+
+    """ -- DO NOT OVERRIDE -- """
+
+    def get_mapped_powersim_ids_for_node(self, cyber_entity_id):
+        if cyber_entity_id in self.host_id_to_powersim_id.keys():
+            return self.host_id_to_powersim_id[cyber_entity_id]
         else:
             return None
 
-    def getCyberNodeIDforNode(self, powerSimNodeID):
-        if powerSimNodeID in self.powerSimIDtohostID.keys():
-            return self.powerSimIDtohostID[powerSimNodeID]
+    """ -- DO NOT OVERRIDE -- """
+
+    def get_mapped_cyber_entity_for_node(self, powersim_entity_id):
+        if powersim_entity_id in self.powersim_id_to_host_id.keys():
+            return self.powersim_id_to_host_id[powersim_entity_id]
         else:
             return None
 
-    def onRxPktFromProxy(self, pkt, dstCyberNodeID):
+    """ -- DO NOT OVERRIDE -- """
 
-        if is_pkt_from_attack_dispatcher(pkt) == True:
-            payload = self.extractPayloadFromPkt(pkt)
-            try:
-                src_ip, dst_ip = decode_raw_ip_payload_src_dst(str(payload))
-                self.log.info("Sending attack dispatcher packet : " + str(payload) + " to: " + dst_ip)
-                self.raw_sock.sendto(binascii.unhexlify(payload), (dst_ip, 0))
-            except Exception as e:
-                pass
+    def tx_pkt_to_powersim_entity(self, pkt):
+        pkt_parsed = pss_pb2.PowerSimMessage()
+        pkt_parsed.ParseFromString(pkt)
+        if pkt_parsed.HasField("read_request"):
+            dst_powersim_entity_id = pkt_parsed.read_request.objid
+        elif pkt_parsed.HasField("write_request"):
+            dst_powersim_entity_id = pkt_parsed.write_request.objid
+        elif pkt_parsed.HasField("response"):
+            dst_powersim_entity_id = pkt_parsed.response.receiver_attributes.receiver_id
         else:
-            self.attackLayer.runOnThread(self.attackLayer.onRxPktFromIPCLayer, extractPowerSimIdFromPkt(pkt), pkt,
-                                         dstCyberNodeID)
+            dst_powersim_entity_id = None
 
-    def onRxPktFromAttackLayer(self, pkt):
-        ret = 0
-        self.log.info("Relaying pkt: " + str(pkt) + " to core")
-        while ret <= 0:
-            ret = self.sharedBufferArray.write(self.sharedBufName,pkt, PROXY_NODE_ID)
-            sleep(0.05)
-        # print "Return val = ", ret
+        cyber_entity_id = self.get_mapped_cyber_entity_for_node(dst_powersim_entity_id)
+        if cyber_entity_id is not None:
+            self.attack_layer.run_on_thread(self.attack_layer.on_rx_pkt_from_ipc_layer,
+                                            dst_powersim_entity_id, pkt, cyber_entity_id)
 
-        self.log.info("Relayed pkt: " + str(pkt) + " to core")
+    """ -- DO NOT OVERRIDE -- """
 
-    def txPktToPowerSim(self, powerSimNodeID, payload):
-        cyberNodeID = self.getCyberNodeIDforNode(powerSimNodeID)
-        powerSimNodeIDLen = str(len(powerSimNodeID))
-        txpkt = powerSimNodeIDLen.zfill(POWERSIM_ID_HDR_LEN) + powerSimNodeID + payload
-        self.attackLayer.runOnThread(self.attackLayer.onRxPktFromIPCLayer, powerSimNodeID, txpkt, cyberNodeID)
-
-    def extractPayloadFromPkt(self, pkt):
-        powerSimID = extractPowerSimIdFromPkt(pkt)
-        return pkt[POWERSIM_ID_HDR_LEN + len(powerSimID):]
-
-    def runOnThread(self, function, powerSimNodeID, *args):
-        self.threadCallbackLock.acquire()
-        if powerSimNodeID not in self.threadCallbackQueue.keys():
-            self.threadCallbackQueue[powerSimNodeID] = []
-            self.threadCallbackQueue[powerSimNodeID].append((function, args))
+    def run_on_thread(self, function, powersim_entity_id, *args):
+        self.thread_callback_lock.acquire()
+        if powersim_entity_id not in self.thread_callback_queue.keys():
+            self.thread_callback_queue[powersim_entity_id] = []
+            self.thread_callback_queue[powersim_entity_id].append((function, args))
         else:
-            if len(self.threadCallbackQueue[powerSimNodeID]) == 0:
-                self.threadCallbackQueue[powerSimNodeID].append((function, args))
+            if len(self.thread_callback_queue[powersim_entity_id]) == 0:
+                self.thread_callback_queue[powersim_entity_id].append((function, args))
             else:
-                self.threadCallbackQueue[powerSimNodeID][0] = (function, args)
-        self.nPendingCallbacks = self.nPendingCallbacks + 1
-        self.threadCallbackLock.release()
+                self.thread_callback_queue[powersim_entity_id][0] = (function, args)
+        self.n_pending_callbacks = self.n_pending_callbacks + 1
+        self.thread_callback_lock.release()
 
-    def init_shared_ipc_buffer(self):
-        self.sharedBufName = str(self.hostID) + "buffer"
-        #self.sharedBuffer = shared_buffer(bufName=self.sharedBufName, isProxy=False)
+    """ -- DO NOT OVERRIDE -- """
 
-        result = self.sharedBufferArray.open(self.sharedBufName,isProxy=False)
+    def run(self):
 
-        if result == BUF_NOT_INITIALIZED or result == FAILURE:
-            self.log.error("Shared Buffer open failed! Buffer not initialized")
-            return False
-        else:
-            self.log.info("Shared Buffer open succeeded")
-            return True
-
-    def run(self) :
-        #sleep(3)   
-        self.log.info("Started at " + str(datetime.now()))
-		
-
-        #init_res = self.init_shared_ipc_buffer()
-        #if init_res == False :
-        #    self.log.info("Shared Buffer initialization failed. Stopping Thread.")
-        #    return
-        self.log.info("power sim id to host id map = " + str(self.powerSimIDtohostID))
-        self.log.info("host id to powersim id map = " + str(self.hostIDtoPowerSimID))
+        self.log.info("Started underlying IPC layer ... ")
+        #self.log.info("Power sim id to cyber entity id map: " + str(self.powersim_id_to_host_id))
+        #self.log.info("Cyber entity id to powersim id map: " + str(self.host_id_to_powersim_id))
         sys.stdout.flush()
-        assert (self.attackLayer != None)
+        assert (self.attack_layer is not None)
+        self.on_start_up()
         while True:
 
-            currCmd = self.getcurrCmd()
-            if currCmd != None and currCmd == CMD_QUIT:
-                self.log.info("Stopping at " + str(datetime.now()))
+            curr_cmd = self.get_curr_cmd()
+            if curr_cmd is not None and curr_cmd == CMD_QUIT:
+                self.on_shutdown()
+                self.log.info("Stopping ... ")
                 sys.stdout.flush()
                 break
 
-            callbackFns = []
-            self.threadCallbackLock.acquire()
-            if self.nPendingCallbacks == 0:
-                self.threadCallbackLock.release()
+            callback_fns = []
+            self.thread_callback_lock.acquire()
+            if self.n_pending_callbacks == 0:
+                self.thread_callback_lock.release()
             else:
 
-                values = list(self.threadCallbackQueue.values())
+                values = list(self.thread_callback_queue.values())
                 for i in xrange(0, len(values)):
                     if len(values[i]) > 0:
-                        callbackFns.append(values[i].pop())
-                self.nPendingCallbacks = 0
-                self.threadCallbackLock.release()
+                        callback_fns.append(values[i].pop())
+                self.n_pending_callbacks = 0
+                self.thread_callback_lock.release()
 
-                for i in xrange(0, len(callbackFns)):
-                    function, args = callbackFns[i]
+                for i in xrange(0, len(callback_fns)):
+                    function, args = callback_fns[i]
                     function(*args)
 
-            self.idle()
 
-    def idle(self):
-        recvPkt = ""
-        dstCyberNodeID, recvPkt = self.sharedBufferArray.read(self.sharedBufName)
-        time.sleep(0.01)
+    """
+        This function gets called on reception of message from network.
+        It can be overriden by the IPC layer to selectively relay the pkt to proxy. The pkt needs to be
+        relayed to the proxy only if it is a REQUEST. It the pkt is a RESPONSE, it simply needs to be processed
+        by the IPC layer.
+        
+        pkt will be 
+    """
 
-        if len(recvPkt) != 0:
-            self.log.info("Received pkt: " + str(recvPkt) + " from core for Dst Node Id =  " + str(dstCyberNodeID))
-            self.onRxPktFromProxy(recvPkt, dstCyberNodeID)
+    def on_rx_pkt_from_network(self, pkt):
+        pass
 
-        #print "Before = ", str(datetime.now())
-        #sys.stdout.flush()
-        #sleep(1)
-        #print "After = ", str(datetime.now())
-        #sys.stdout.flush()
+    """
+        Called after initialization of IPC layer. It can be overridden to start essential services.
+    """
+
+    def on_start_up(self):
+        pass
+
+    """
+       Called before initiating shutdown of IPC. It can be overridden to stop essential services.
+    """
+
+    def on_shutdown(self):
+        pass

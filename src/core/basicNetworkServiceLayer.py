@@ -11,71 +11,62 @@ import Queue
 from datetime import datetime
 
 
-class basicNetworkServiceLayer(threading.Thread) :
+class basicNetworkServiceLayer(threading.Thread):
 
-	def __init__(self,hostID,logFile,hostID_To_IP) :
+    def __init__(self, host_id, log_file, host_id_to_ip):
+        threading.Thread.__init__(self)
 
-		threading.Thread.__init__(self)
+        self.thread_cmd_lock = threading.Lock()
+        self.thread_cmd_queue = []
+        self.host_id = host_id
+        self.ip_map = host_id_to_ip
+        self.host_ip, self.listen_port = self.ip_map[self.host_id]
+        self.log = logger.Logger(log_file, "Host " + str(self.host_id) + " Network Layer Thread")
+        self.host_id_to_powersim_entity_id = None
+        self.powersim_entity_id_To_host_id = None
+        self.attack_layer = None
 
-		self.threadCmdLock = threading.Lock()
-		self.threadCmdQueue = []
-		self.hostID = hostID
-		self.IPMap = hostID_To_IP
-		self.hostIP,self.listenPort = self.IPMap[self.hostID]
-		self.log = logger.Logger(logFile,"Host " + str(hostID) + " Network Layer Thread")
-		self.hostIDtoPowerSimID = None
-		self.powerSimIDtohostID = None
-		self.attackLayer = None
+    def set_attack_layer(self, attack_layer):
+        self.attack_layer = attack_layer
 
+    def get_attack_layer(self):
+        return self.attack_layer
 
+    def get_curr_cmd(self):
+        self.thread_cmd_lock.acquire()
+        curr_cmd = None
+        if len(self.thread_cmd_queue) > 0 :
+            curr_cmd = self.thread_cmd_queue.pop()
+        self.thread_cmd_lock.release()
+        return curr_cmd
 
-	def setAttackLayer(self,attackLayer):
-		self.attackLayer = attackLayer
+    def cancel_thread(self):
+        self.thread_cmd_lock.acquire()
+        self.thread_cmd_queue.append(CMD_QUIT)
+        self.thread_cmd_lock.release()
 
-	def getAttackLayer(self):
-		return self.attackLayer
+    def on_rx_pkt_from_network(self, pkt):
+        self.attack_layer.run_on_thread(self.attack_layer.on_rx_pkt_from_network_layer,
+                                        extract_powersim_entity_id_from_pkt(pkt), pkt)
 
+    def run(self):
+        self.log.info("Started listening on IP: " + self.host_ip + " PORT: " + str(self.listen_port))
+        sys.stdout.flush()
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP
+        sock.settimeout(SOCKET_TIMEOUT)
+        sock.bind((self.host_ip, self.listen_port))
 
-	def getcurrCmd(self) :
-		self.threadCmdLock.acquire()
-		try :
-			currCmd = self.threadCmdQueue.pop()
-		except:
-			currCmd = None
-		self.threadCmdLock.release()
-		return currCmd
-
-	def cancelThread(self):
-		self.threadCmdLock.acquire()
-		self.threadCmdQueue.append(CMD_QUIT)
-		self.threadCmdLock.release()
-
-
-	def onRxPktFromNetwork(self,pkt):
-		self.attackLayer.runOnThread(self.attackLayer.onRxPktFromNetworkLayer,extractPowerSimIdFromPkt(pkt),pkt)
-
-	def run(self):
-		self.log.info("Started listening on IP: " + self.hostIP + " PORT: " + str(self.listenPort) + " at " + str(datetime.now()))
-		#os.system("taskset -cp " + str(os.getpid()))
-		sys.stdout.flush()
-		#assert(self.attackLayer != None)
-		sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP
-		sock.settimeout(SOCKET_TIMEOUT)
-		sock.bind((self.hostIP, self.listenPort))
-
-		while True :
-			currCmd = self.getcurrCmd()
-			if currCmd != None and currCmd == CMD_QUIT :
-				self.log.info("Stopping at " + str(datetime.now()) )
-				sys.stdout.flush()
-				sock.close()
-				break
-			try:
-				data, addr = sock.recvfrom(MAXPKTSIZE)
-			except socket.timeout:
-				data = None
-			if data != None :
-				self.log.info("%s  RECV_FROM=%s:%s  PKT=%s"%(datetime.now(), str(addr[0]), str(addr[1]), str(data)))
-				# self.log.info("<RECV> TO: " + str(self.hostID) + " FROM: " + str(addr) + " PKT: " + str(data))
-				self.onRxPktFromNetwork(str(data))
-
+        while True:
+            curr_cmd = self.get_curr_cmd()
+            if curr_cmd is not None and curr_cmd == CMD_QUIT:
+                self.log.info("Stopping Network Layer Thread ...")
+                sys.stdout.flush()
+                sock.close()
+                break
+            try:
+                data, addr = sock.recvfrom(MAXPKTSIZE)
+            except socket.timeout:
+                data = None
+            if data is not None:
+                #self.log.info("%s  RECV_FROM=%s:%s  PKT=%s" % (datetime.now(), str(addr[0]), str(addr[1]), str(data)))
+                self.on_rx_pkt_from_network(str(data))

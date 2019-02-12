@@ -17,7 +17,9 @@ Dependencies:
 #expect 
 #mininet
 #openvswitch
-#TimeKeeper
+#protobuf version >= 3.7
+#grpc
+#Kronos
 ```
 
 ```

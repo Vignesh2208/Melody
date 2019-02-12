@@ -8,11 +8,8 @@
 
 
 import os
-from signal import SIGSTOP, SIGCONT
 import time
-import subprocess
-import libs.gettimepid as gpd
-from libs.gettimepid import gettimepid
+from src.core.libs.gettimepid import gettimepid
 
 KRONOS_FILE_NAME = "/proc/status"
 

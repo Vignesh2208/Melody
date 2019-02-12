@@ -1,0 +1,61 @@
+syntax = "proto2";
+package melody_configuration;
+
+
+message TopologyParameter {
+	required string parameter_name = 1;
+	optional string parameter_value_string = 2;
+	optional int32 parameter_value_int = 3;
+	optional double parameter_value_double = 4;
+	optional bool parameter_value_bool = 5;
+}
+
+message CyberEmulationSpecification {
+
+	required string topology_name = 1;
+	required int32 num_hosts = 2;
+	required int32 num_switches = 3;
+	required int32 inter_switch_link_latency_ms = 4;
+	required int32 host_switch_link_latency_ms = 5;
+	repeated TopologyParameter additional_topology_param = 6;
+}
+
+message PowerSimulationEntity {
+	required string entity_id = 1;
+	required string entity_description = 2;
+}
+
+message PowerSimulationSpecification {
+	repeated PowerSimulationEntity entities = 1;
+}
+
+message CyberPhysicalMap {
+	required string cyber_entity_id = 1;
+	repeated string mapped_powersim_entity_id = 2;
+	optional string description = 3;
+}
+
+message BackGroundFlow {
+	required string src_cyber_entity = 1;
+	required string dst_cyber_entity = 2;
+	required string cmd_to_run_at_src = 3;
+	required string cmd_to_run_at_dst = 4;
+	required int32 	flow_start_time = 5;
+	optional string description = 6;
+}
+
+message PcapReplayFlow {
+	repeated string involved_cyber_entity = 1;
+	required string pcap_file_path = 2;
+	optional string description = 3;
+}
+
+message ProjectConfiguration {
+	required string project_name = 1;
+	required CyberEmulationSpecification cyber_emulation_spec = 2;
+	required PowerSimulationSpecification powersim_spec = 3;
+	repeated CyberPhysicalMap cyber_physical_map = 4;
+	repeated BackGroundFlow bg_flow = 5;
+	repeated PcapReplayFlow replay_flow = 6;
+
+}

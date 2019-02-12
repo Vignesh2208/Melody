@@ -1,33 +1,35 @@
 import sys
 import os
+import datetime
 
 
-class Logger(object) :
+class Logger(object):
 
-	def __init__(self,logFile,tag) :
+    def __init__(self, log_file, tag):
 
-		if logFile != "stdout" :
-			with open(logFile,"w") as f :
-				pass
-			self.printable = False
-		else:
-			self.printable = True
+        if log_file != "stdout":
+            with open(log_file, "w") as f:
+                pass
+            self.printable = False
+        else:
+            self.printable = True
 
-		self.logFile = logFile
-		self.tag = tag
+        self.log_file = log_file
+        self.tag = tag
 
-	def logMsg(self,loglevel,tag,msg) :
-		if self.printable == True :
-			print str(tag) + " >> " + str(loglevel) + " >> " + str(msg) + "\n"
-		else :
-			with open(self.logFile,"a") as f :
-				f.write(str(tag) + " >> " + str(loglevel) + " >> " + str(msg) + "\n")
+    def log_msg(self, loglevel, tag, msg):
+        if self.printable:
+            print str(datetime.datetime.now()) + ": " + str(tag) + " >> " + str(loglevel) + " >> " + str(msg) + "\n"
+        else:
+            with open(self.log_file, "a") as f:
+                f.write(str(datetime.datetime.now()) + ": " + str(tag) + " >> " + str(loglevel)
+                        + " >> " + str(msg) + "\n")
 
-	def info(self,msg) :
-		self.logMsg("INFO",self.tag,msg) 
+    def info(self, msg):
+        self.log_msg("INFO", self.tag, msg)
 
-	def warn(self,msg) :
-		self.logMsg("WARN",self.tag,msg) 
+    def warn(self, msg):
+        self.log_msg("WARN", self.tag, msg)
 
-	def error(self,msg) :
-		self.logMsg("ERROR",self.tag,msg)
+    def error(self, msg):
+        self.log_msg("ERROR", self.tag, msg)

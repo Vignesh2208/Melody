@@ -1,6 +1,6 @@
 clean:
 	@sudo python setup.py clean
 
-build:	
-	@sudo python setup.py build_ext --inplace
+build_ext:	
+	sudo python setup.py build_ext --inplace
 

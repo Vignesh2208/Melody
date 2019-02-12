@@ -60,8 +60,8 @@ class DNP3PCAPPostProcessing:
 def main():
 
     script_dir = os.path.dirname(os.path.realpath(__file__))
-    idx = script_dir.index('NetPower_TestBed')
-    base_dir = script_dir[0:idx] + "NetPower_TestBed"
+    idx = script_dir.index('Melody')
+    base_dir = script_dir[0:idx] + "Melody"
     bro_dnp3_parser_dir = base_dir + "/src/utils/dnp3_timing/dnp3_parser_bro/"
     bro_json_log_conf = "/home/rakesh/bro/scripts/policy/tuning/json-logs.bro"
     bro_cmd = "/usr/bin/bro"

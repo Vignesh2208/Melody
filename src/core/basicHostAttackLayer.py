@@ -1,168 +1,146 @@
-import socket
 import sys
 import threading
 import logger
 from datetime import datetime
-
 from defines import *
 
 
 class basicHostAttackLayer(threading.Thread):
-    def __init__(self, hostID, logFile, IPCLayer, NetworkServiceLayer,sharedBufferArray):
+
+    def __init__(self, host_id, log_file, ipc_layer, network_service_layer):
 
         threading.Thread.__init__(self)
-        self.threadCmdLock = threading.Lock()
-        self.threadCallbackLock = threading.Lock()
+        self.thread_cmd_lock = threading.Lock()
+        self.thread_callback_lock = threading.Lock()
 
-        self.threadCmdQueue = []
-        self.threadCallbackQueue = {}
-        self.nPendingCallbacks = 0
-        self.sharedBufferArray = sharedBufferArray
-        self.hostID = hostID
-        self.log = logger.Logger(logFile, "Host " + str(hostID) + " Attack Layer Thread")
-        self.IPCLayer = IPCLayer
-        self.NetServiceLayer = NetworkServiceLayer
-        self.IPMapping = self.NetServiceLayer.IPMap
-        self.myIP = self.IPMapping[self.hostID][0]
-
+        self.thread_cmd_queue = []
+        self.thread_callback_queue = {}
+        self.n_pending_callbacks = 0
+        self.host_id = host_id
+        self.log = logger.Logger(log_file, "Host " + str(host_id) + " Attack Layer Thread")
+        self.ipc_layer = ipc_layer
+        self.net_service_layer = network_service_layer
+        self.ip_mapping = self.net_service_layer.ip_map
+        self.myIP = self.ip_mapping[self.host_id][0]
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP
-        self.rx_pkt_check = None
-        self.rx_pkt_check_updated = False
         self.stopping = False
 
-        self.attack_playback_thread_started = False
-        self.running_emulate_stage = False
-        self.running_replay_stage = False
-        self.emulate_stage_id = "None"
-        self.send_events = []
-        self.recv_events = {}
-        self.init_shared_attk_playback_buffer()
 
-    def getcurrCmd(self):
-        self.threadCmdLock.acquire()
-        try:
-            currCmd = self.threadCmdQueue.pop()
-        except:
-            currCmd = None
-        self.threadCmdLock.release()
-        return currCmd
+    """ -- DO NOT OVERRIDE -- """
 
-    def cancelThread(self):
-        self.threadCmdLock.acquire()
-        self.threadCmdQueue.append(CMD_QUIT)
-        self.threadCmdLock.release()
+    def get_curr_cmd(self):
+        self.thread_cmd_lock.acquire()
+        curr_cmd = None
+        if len(self.thread_cmd_queue) > 0:
+            curr_cmd = self.thread_cmd_queue.pop()
+        self.thread_cmd_lock.release()
+        return curr_cmd
 
-    def sendUDPMsg(self, pkt, IPAddr, Port):
-        UDP_IP = IPAddr
-        UDP_PORT = Port
-        MESSAGE = str(pkt)
-        self.log.info("%s  SEND_TO=%s:%s  PKT=%s" % (datetime.now(), str(UDP_IP), str(UDP_PORT), str(MESSAGE)))
-        # str(datetime.now()) + " <SEND PKT> TO=" + str(UDP_IP) + ":" + str(UDP_PORT) + " FROM: " + str(self.hostID) + " PKT= " + str(MESSAGE))
+    """ -- DO NOT OVERRIDE -- """
 
-        self.sock.sendto(MESSAGE, (UDP_IP, UDP_PORT))
+    def cancel_thread(self):
+        self.thread_cmd_lock.acquire()
+        self.thread_cmd_queue.append(CMD_QUIT)
+        self.thread_cmd_lock.release()
 
-    def txPkt(self, pkt, dstNodeID):
-        if dstNodeID in self.NetServiceLayer.IPMap.keys():
-            IPAddr, Port = self.NetServiceLayer.IPMap[dstNodeID]
-            self.sendUDPMsg(pkt, IPAddr, Port)
+    """ -- DO NOT OVERRIDE -- """
 
-    def txAsyncNetServiceLayer(self, pkt, dstNodeID):
-        self.txPkt(pkt, dstNodeID)
+    def send_udp_msg(self, pkt, ip_addr, port):
+        #self.log.info("%s  SEND_TO=%s:%s  PKT=%s" % (datetime.now(), str(ip_addr), str(port), str(pkt)))
+        self.sock.sendto(pkt, (ip_addr, port))
 
-    def txAsyncIPCLayer(self, pkt):
-        self.IPCLayer.runOnThread(self.IPCLayer.onRxPktFromAttackLayer, extractPowerSimIdFromPkt(pkt), pkt)
+    """ -- DO NOT OVERRIDE -- """
 
-    # default - benign Attack Layer
-    def onRxPktFromNetworkLayer(self, pkt):
-        self.IPCLayer.runOnThread(self.IPCLayer.onRxPktFromAttackLayer, extractPowerSimIdFromPkt(pkt), pkt)
+    def tx_pkt(self, pkt, dst_cyber_entity_id):
+        if dst_cyber_entity_id in self.net_service_layer.ip_map.keys():
+            ip_addr, port = self.net_service_layer.ip_map[dst_cyber_entity_id]
+            self.send_udp_msg(pkt, ip_addr, port)
 
-    # default - benign Attack Layer
-    def onRxPktFromIPCLayer(self, pkt, dstNodeID):
-        self.txAsyncNetServiceLayer(pkt, dstNodeID)
+    """ -- DO NOT OVERRIDE -- """
 
-    def runOnThread(self, function, powerSimNodeID, *args):
-        self.threadCallbackLock.acquire()
-        if powerSimNodeID not in self.threadCallbackQueue.keys():
-            self.threadCallbackQueue[powerSimNodeID] = []
-            self.threadCallbackQueue[powerSimNodeID].append((function, args))
+    def tx_async_net_service_layer(self, pkt, dst_cyber_entity_id):
+        self.tx_pkt(pkt, dst_cyber_entity_id)
+
+    """ -- DO NOT OVERRIDE -- """
+
+    def tx_async_ipc_layer(self, pkt):
+        self.ipc_layer.run_on_thread(self.ipc_layer.on_rx_pkt_from_network,
+                                     extract_powersim_entity_id_from_pkt(pkt), pkt)
+
+    """ -- DO NOT OVERRIDE -- """
+
+    def run_on_thread(self, function, powersim_entity_id, *args):
+        self.thread_callback_lock.acquire()
+        if powersim_entity_id not in self.thread_callback_queue.keys():
+            self.thread_callback_queue[powersim_entity_id] = []
+            self.thread_callback_queue[powersim_entity_id].append((function, args))
         else:
-            if len(self.threadCallbackQueue[powerSimNodeID]) == 0:
-                self.threadCallbackQueue[powerSimNodeID].append((function, args))
+            if len(self.thread_callback_queue[powersim_entity_id]) == 0:
+                self.thread_callback_queue[powersim_entity_id].append((function, args))
             else:
-                self.threadCallbackQueue[powerSimNodeID][0] = (function, args)
-        self.nPendingCallbacks = self.nPendingCallbacks + 1
-        self.threadCallbackLock.release()
+                self.thread_callback_queue[powersim_entity_id][0] = (function, args)
+        self.n_pending_callbacks = self.n_pending_callbacks + 1
+        self.thread_callback_lock.release()
 
-    def signal_end_of_emulate_stage(self):
-        self.running_emulate_stage = False
 
-        print "ENDING EMULATION STAGE: ", self.emulate_stage_id
-        self.emulate_stage_id = "None"
-        ret = 0
-        while ret <= 0:
-            ret = self.sharedBufferArray.write(self.attk_channel_bufName, "DONE", 0)
-
-    def init_shared_attk_playback_buffer(self):
-        self.attk_channel_bufName = str(self.hostID) + "attk-channel-buffer"
-        #self.attk_channel_buffer = shared_buffer(bufName=self.attk_channel_bufName, isProxy=False)
-
-        result = self.sharedBufferArray.open(self.attk_channel_bufName,isProxy=False)
-        if result == BUF_NOT_INITIALIZED or result == FAILURE:
-            print "Shared Buffer open failed! Buffer not initialized for host: " + str(self.hostID)
-            sys.exit(0)
-        else:
-            self.log.info("Attk playback buffer open suceeded !")
-
-    def check_emulation_stage(self):
-        dummy_id, recv_msg = self.sharedBufferArray.read(self.attk_channel_bufName)
-        time.sleep(0.01)
-        if "EMULATE:" in recv_msg:
-            self.running_emulate_stage = True
-            self.emulate_stage_id = recv_msg.split(":")[1]
-            print "STARTING NEW EMULATION STAGE WITH ID = ", self.emulate_stage_id
+    """ -- DO NOT OVERRIDE -- """
 
     def run(self):
 
-        pktToSend = None
-        self.log.info("Started at " + str(datetime.now()))
+        self.log.info("Started ...")
         sys.stdout.flush()
 
-        assert (self.NetServiceLayer != None)
-        assert (self.IPCLayer != None)
+        assert (self.net_service_layer is not None)
+        assert (self.ipc_layer is not None)
         while True:
 
-            currCmd = self.getcurrCmd()
-            if currCmd != None and currCmd == CMD_QUIT:
-                self.log.info("Stopping " + str(datetime.now()))
+            curr_cmd = self.get_curr_cmd()
+            if curr_cmd is not None and curr_cmd == CMD_QUIT:
+                self.log.info("Stopping ... ")
                 sys.stdout.flush()
                 self.stopping = True
                 break
 
-            callbackFns = []
-            self.threadCallbackLock.acquire()
-            if self.nPendingCallbacks == 0:
-                self.threadCallbackLock.release()
+            callback_fns = []
+            self.thread_callback_lock.acquire()
+            if self.n_pending_callbacks == 0:
+                self.thread_callback_lock.release()
             else:
 
-                values = list(self.threadCallbackQueue.values())
+                values = list(self.thread_callback_queue.values())
                 for i in xrange(0, len(values)):
                     if len(values[i]) > 0:
-                        callbackFns.append(values[i].pop())
-                self.nPendingCallbacks = 0
-                self.threadCallbackLock.release()
+                        callback_fns.append(values[i].pop())
+                self.n_pending_callbacks = 0
+                self.thread_callback_lock.release()
 
-                for i in xrange(0, len(callbackFns)):
-                    function, args = callbackFns[i]
+                for i in xrange(0, len(callback_fns)):
+                    function, args = callback_fns[i]
                     function(*args)
 
-            self.check_emulation_stage()
             self.idle()
 
-        # can use this to send async pkts to Net layer and IPC layer
+    """ can be overriden to send async messages to network and ipc layers
+        using tx_async_net_service_layer and tx_async_ipc_layer
+        functions
+    """
+
     def idle(self):
         pass
 
+    """
+        Default behaviour - do nothing and simply relay packet to ipc layer
+        Can be overridden to intercept/drop/change packets before being sent to powersim entities
+    """
 
+    def on_rx_pkt_from_network_layer(self, pkt):
+        self.ipc_layer.run_on_thread(self.ipc_layer.on_rx_pkt_from_network,
+                                     extract_powersim_entity_id_from_pkt(pkt), pkt)
 
+    """
+        Default behaviour - do nothing and simply relay packet to network Layer
+        Can be overridden to intercept/drop/change packets before transmission over the cyber network
+    """
 
-
+    def on_rx_pkt_from_ipc_layer(self, pkt, dst_node_id):
+        self.tx_async_net_service_layer(pkt, dst_node_id)
