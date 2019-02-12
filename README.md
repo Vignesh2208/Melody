@@ -26,13 +26,13 @@ Pre-Run Steps:
 - Install TimeKeeper. Compile the New TimeKeeper Kernel
 
 - Setup the environment
-    - cd NetPower_TestBed
+    - cd Melody
     - sudo ./setup.sh
     - sudo ./install_opendnp3.sh
 
 - Settin up the python path
     - Add the following to ~/.bashrc
-      export PYTHONPATH=$PYTHONPATH:<path-to-netpower-testbed>/src
+      export PYTHONPATH=$PYTHONPATH:<path-to-melody>/src
 
     - Do the following
       sudo visudo
