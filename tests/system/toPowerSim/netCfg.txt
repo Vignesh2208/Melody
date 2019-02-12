@@ -1,2 +1,0 @@
-h1,127.0.0.1,5005,powerworld1
-h2,127.0.0.1,5006,powerworld2

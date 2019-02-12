@@ -1,3 +1,0 @@
-
-msg received: msg =  Hello World!
-RECEIVER TEST SUCCEEDED

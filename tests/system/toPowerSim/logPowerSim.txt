@@ -1,3 +1,0 @@
-
-Waiting for data from Proxy ...
-POWERSIM TEST SUCCEEDED

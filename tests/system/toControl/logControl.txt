@@ -1,3 +1,0 @@
-
-Waiting for data from Host ...
-CONTROL TEST SUCCEEDED

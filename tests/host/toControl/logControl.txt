@@ -1,3 +1,0 @@
-
-Waiting for data from Proxy ...
-CONTROL TEST SUCCEEDED

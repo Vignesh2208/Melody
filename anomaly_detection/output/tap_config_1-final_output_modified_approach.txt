@@ -1,8 +1,0 @@
-first detection times net = {'delay': 39, 'delay-2': 31, 'random-2': 35, 'normal': 54, 'random': 28, 'normal-2': 88}
-last detection times power = {'delay': -1, 'delay-2': 35, 'random-2': 284, 'normal': 35, 'random': 304, 'normal-2': -1}
-ATTACK TYPE: delay NOT DETECTED
-ATTACK TYPE: delay-2 DETECTED
-ATTACK TYPE: random-2 DETECTED
-ATTACK TYPE: normal NOT DETECTED
-ATTACK TYPE: random DETECTED
-ATTACK TYPE: normal-2 NOT DETECTED
