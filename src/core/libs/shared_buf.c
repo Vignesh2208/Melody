@@ -149,36 +149,42 @@ int __bufRead(char * bufName, char * storeBuf, bool isProxy) {
 
 	if (isProxy == TRUE) {
 
-		sem_wait(&bufPtr->lock);
+		if (sem_trywait(&bufPtr->lock) == 0) {
 		
-		if(__PollProxyRead(bufPtr)) {
-			memcpy(storeBuf,bufPtr->pkt,MAXPKTSIZE);
-			nRead = bufPtr->dstID + 1;
-			bufPtr->ack = TRUE;
-			bufPtr->dirty = FALSE;
-			bufPtr->pktLen = 0;
-		}
-		else
+			if(__PollProxyRead(bufPtr)) {
+				memcpy(storeBuf,bufPtr->pkt,MAXPKTSIZE);
+				nRead = bufPtr->dstID + 1;
+				bufPtr->ack = TRUE;
+				bufPtr->dirty = FALSE;
+				bufPtr->pktLen = 0;
+			}
+			else
+				nRead = 0;
+		
+			sem_post(&bufPtr->lock);
+		} else {
 			nRead = 0;
-		
-		sem_post(&bufPtr->lock);
+		}
 
 	}
 	else{
 
-		sem_wait(&bufPtr->lock);
+		if (sem_trywait(&bufPtr->lock) == 0) {
 		
-		if(__PollHostRead(bufPtr)) {
-			memcpy(storeBuf,bufPtr->pkt,MAXPKTSIZE);
-			nRead = bufPtr->dstID + 1;
-			bufPtr->ack = TRUE;
-			bufPtr->dirty = FALSE;
-			bufPtr->pktLen = 0;
-		}
-		else {
+			if(__PollHostRead(bufPtr)) {
+				memcpy(storeBuf,bufPtr->pkt,MAXPKTSIZE);
+				nRead = bufPtr->dstID + 1;
+				bufPtr->ack = TRUE;
+				bufPtr->dirty = FALSE;
+				bufPtr->pktLen = 0;
+			}
+			else {
+				nRead = 0;
+			}
+			sem_post(&bufPtr->lock);
+		} else {
 			nRead = 0;
 		}
-		sem_post(&bufPtr->lock);
 
 	}
 

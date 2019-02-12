@@ -5,6 +5,7 @@ import logger
 from src.utils.sleep_functions import sleep
 from datetime import datetime
 from shared_buffer import *
+import time
 
 
 class ReplayDriver(object):
@@ -56,6 +57,7 @@ class ReplayDriver(object):
         ret = 0
         while ret <= 0:
             ret = self.shared_buf_array.write(self.driver_id + "-main-cmd-channel-buffer", msg, 0)
+            time.sleep(0.001)
 
     def recv_command_message(self):
         dummy_id, msg = self.shared_buf_array.read_until(str(self.driver_id) + "-main-cmd-channel-buffer")

@@ -166,6 +166,6 @@ bg_flow {
 replay_flow {
     involved_cyber_entity: "h1"
     involved_cyber_entity: "h2"
-    pcap_file_path: "/home/moses/Melody/src/projects/secondary_voltage_control/replay_pcaps/dnp3.pcap"
+    pcap_file_path: "/home/moses/Melody/src/projects/secondary_voltage_control/replay_pcaps/dnp3_small.pcap"
     description: "Replaying a DNP3 pcap gathered from a real network over the path between h1-h2"
 }
