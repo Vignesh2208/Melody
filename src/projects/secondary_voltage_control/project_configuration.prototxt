@@ -14,133 +14,52 @@ cyber_emulation_spec {
         parameter_value_int: 1
     }
 }
-powersim_spec {
-    entities {
-        entity_id		:	"2"
-        entity_description	:	"pilot_bus_2"
-    }
-    entities {
-        entity_id		:	"6"
-        entity_description	:	"pilot_bus_6"
-    }
-    entities {
-        entity_id		:	"9"
-        entity_description	:	"pilot_bus_9"
-    }
-    entities {
-        entity_id		:	"10"
-        entity_description	:	"pilot_bus_10"
-    }
-    entities {
-        entity_id		:	"19"
-        entity_description	:	"pilot_bus_19"
-    }
-    entities {
-        entity_id		:	"20"
-        entity_description	:	"pilot_bus_20"
-    }
-    entities {
-        entity_id		:	"22"
-        entity_description	:	"pilot_bus_22"
-    }
-    entities {
-        entity_id		:	"23"
-        entity_description :	"pilot_bus_23"
-    }
-    entities {
-        entity_id		:	"25"
-        entity_description	:	"pilot_bus_25"
-    }
-    entities {
-        entity_id		:	"29"
-        entity_description	:	"pilot_bus_29"
-    }
-    entities {
-        entity_id		:	"30"
-        entity_description	:	"generator_bus_30"
-    }
-    entities {
-        entity_id		:	"31"
-        entity_description	:	"generator_bus_31"
-    }
-    entities {
-        entity_id		:	"32"
-        entity_description	:	"generator_bus_32"
-    }
-    entities {
-        entity_id		:	"33"
-        entity_description	:	"generator_bus_33"
-    }
-    entities {
-        entity_id		:	"34"
-        entity_description	:	"generator_bus_34"
-    }
-    entities {
-        entity_id		:	"35"
-        entity_description	:	"generator_bus_35"
-    }
-    entities {
-        entity_id		:	"36"
-        entity_description	:	"generator_bus_36"
-    }
-    entities {
-        entity_id		:	"37"
-        entity_description	:	"generator_bus_37"
-    }
-    entities {
-        entity_id		:	"38"
-        entity_description	:	"generator_bus_38"
-    }
-    entities {
-        entity_id		:	"39"
-        entity_description	:	"generator_bus_39"
-    }
-
-}
 cyber_physical_map {
     cyber_entity_id	:	"h1"
-    mapped_powersim_entity_id: "PLC123"
-    description		:	"PLC controller which does nothing"
-}
-cyber_physical_map {
-    cyber_entity_id	:	"h2"
     description		:	"Workstation"
 }
 cyber_physical_map {
+    cyber_entity_id	:	"h2"
+    description		:	"HMI"
+}
+cyber_physical_map {
     cyber_entity_id	:	"h3"
-    mapped_powersim_entity_id	:	"2"
-    mapped_powersim_entity_id   :   "6"
-    mapped_powersim_entity_id   :   "9"
-    mapped_powersim_entity_id   :   "10"
-    mapped_powersim_entity_id   :   "19"
-    mapped_powersim_entity_id   :   "20"
-    mapped_powersim_entity_id   :   "22"
-    mapped_powersim_entity_id   :   "23"
-    mapped_powersim_entity_id   :   "25"
-    mapped_powersim_entity_id   :   "29"
-    description		            :	"PMU for reading pilot buses"
+    app_layer_src: "pmu.py"
+    mapped_powersim_entity_id	:	"PMU_Pilot_Bus_2"
+    mapped_powersim_entity_id   :   "PMU_Pilot_Bus_6"
+    mapped_powersim_entity_id   :   "PMU_Pilot_Bus_9"
+    mapped_powersim_entity_id   :   "PMU_Pilot_Bus_10"
+    mapped_powersim_entity_id   :   "PMU_Pilot_Bus_19"
+    mapped_powersim_entity_id   :   "PMU_Pilot_Bus_20"
+    mapped_powersim_entity_id   :   "PMU_Pilot_Bus_22"
+    mapped_powersim_entity_id   :   "PMU_Pilot_Bus_23"
+    mapped_powersim_entity_id   :   "PMU_Pilot_Bus_25"
+    mapped_powersim_entity_id   :   "PMU_Pilot_Bus_29"
+    description		            :	"PMUs for reading pilot buses"
 }
 cyber_physical_map {
     cyber_entity_id				:	"h4"
-    mapped_powersim_entity_id   :   "30"
-    mapped_powersim_entity_id	:	"31"
-    mapped_powersim_entity_id   :   "32"
-    mapped_powersim_entity_id   :   "33"
-    mapped_powersim_entity_id   :   "34"
-    mapped_powersim_entity_id   :   "35"
-    mapped_powersim_entity_id   :   "36"
-    mapped_powersim_entity_id   :   "37"
-    mapped_powersim_entity_id   :   "38"
-    mapped_powersim_entity_id   :   "39"
-    description		            :	"PLC for controlling generator bus voltages"
+    app_layer_src: "plc.py"
+    mapped_powersim_entity_id   :   "PLC_GenBus_30"
+    mapped_powersim_entity_id	:	"PLC_GenBus_31"
+    mapped_powersim_entity_id   :   "PLC_GenBus_32"
+    mapped_powersim_entity_id   :   "PLC_GenBus_33"
+    mapped_powersim_entity_id   :   "PLC_GenBus_34"
+    mapped_powersim_entity_id   :   "PLC_GenBus_35"
+    mapped_powersim_entity_id   :   "PLC_GenBus_36"
+    mapped_powersim_entity_id   :   "PLC_GenBus_37"
+    mapped_powersim_entity_id   :   "PLC_GenBus_38"
+    mapped_powersim_entity_id   :   "PLC_GenBus_39"
+    description		            :	"PLCs for controlling generator bus voltages"
 }
 cyber_physical_map {
     cyber_entity_id				:	"h5"
-    mapped_powersim_entity_id   :   "PMU123"
-    description		            :	"PMU which periodically sends requests/responses to PLC123"
+    app_layer_src: "scada.py"
+    mapped_powersim_entity_id   :   "SCADA_CONTROLLER"
+    description		            :	"Receives PMU data and sends commands to PLCs"
 }
 bg_flow {
-    src_cyber_entity	:	"h1"
+    src_cyber_entity	:	"h2"
     dst_cyber_entity	:	"h3"
     cmd_to_run_at_src	:	"ping -i 0.2 h3"
     cmd_to_run_at_dst	:	""
@@ -156,12 +75,12 @@ bg_flow {
     description		    :	"SSH connection between h2 and h5 starting at time 1.0 seconds"
 }
 bg_flow {
-    src_cyber_entity	:	"h2"
-    dst_cyber_entity	:	"h4"
-    cmd_to_run_at_src	:	"python  /home/moses/Melody/src/cyber_network/telnet_session.py --dest_ip h4"
+    src_cyber_entity	:	"h1"
+    dst_cyber_entity	:	"h3"
+    cmd_to_run_at_src	:	"python  /home/moses/Melody/src/cyber_network/telnet_session.py --dest_ip h3"
     cmd_to_run_at_dst	:	"sudo socat tcp-l:23,reuseaddr,fork exec:/bin/login,pty,setsid,setpgid,stderr,ctty"
     flow_start_time		:	1
-    description		    :	"Telnet connection between h2 and h4 starting at time 1.0 seconds"
+    description		    :	"Telnet connection between h1 and h3 starting at time 1.0 seconds"
 }
 replay_flow {
     involved_cyber_entity: "h1"

@@ -44,8 +44,8 @@ def main():
         if total_time_ran >= args.run_time*SEC:
             break
 
-        if total_time_ran == 1*SEC:
-            exp.trigger_nxt_replay()
+        #if total_time_ran == 1*SEC:
+        #    exp.trigger_nxt_replay()
 
     exp.close_project()
 
