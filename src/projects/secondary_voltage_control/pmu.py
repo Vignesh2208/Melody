@@ -8,18 +8,18 @@ import random
 
 
 class PMU(threading.Thread):
-    def __init__(self, host_control_layer, pmu_names):
+    def __init__(self, host_control_layer, pmu_name):
         threading.Thread.__init__(self)
         self.host_control_layer = host_control_layer
         self.stop = False
-        self.pmu_names = pmu_names
+        self.pmu_name = pmu_name
         self.raw_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 
     def tx_pkt_to_powersim_entity(self, pkt, dst_application_id):
-        mapped_cyber_entity = self.host_control_layer.powersim_id_to_host_id[dst_application_id]
-        ip_addr, port = self.host_control_layer.ip_map[mapped_cyber_entity]
-        print "Sending to IP,Port: ", ip_addr, port
+        ip_addr = self.host_control_layer.powersim_ids_mapping[dst_application_id]["mapped_host_ip"]
+        port = self.host_control_layer.powersim_ids_mapping[dst_application_id]["port"]
+        
         self.raw_sock.sendto(str(pkt), (ip_addr, port))
 
 
@@ -27,29 +27,28 @@ class PMU(threading.Thread):
         request_no = 0
         while not self.stop:
 
-            for pmu_name in self.pmu_names:
+            pkt = pss_pb2.CyberMessage()
+            pkt.src_application_id = self.pmu_name
+            pkt.dst_application_id = "SCADA_CONTROLLER"
+            pkt.msg_type = "PERIODIC_UPDATE"
+            data = pkt.content.add()
+            data.key = "VOLTAGE"
+            data.value = str(random.uniform(1, 10))
 
-                pkt = pss_pb2.CyberMessage()
-                pkt.src_application_id = pmu_name
-                pkt.dst_application_id = "SCADA_CONTROLLER"
-                pkt.msg_type = "PERIODIC_UPDATE"
-                data = pkt.content.add()
-                data.key = "VOLTAGE"
-                data.value = str(random.uniform(1, 10))
+            data = pkt.content.add()
+            data.key = "CURRENT"
+            data.value = str(random.uniform(1, 10))
 
-                data = pkt.content.add()
-                data.key = "CURRENT"
-                data.value = str(random.uniform(1, 10))
+            data = pkt.content.add()
+            data.key = "TIMESTAMP"
+            data.value = str(time.time())
 
-                data = pkt.content.add()
-                data.key = "TIMESTAMP"
-                data.value = str(time.time())
+            data = pkt.content.add()
+            data.key = "COUNTER"
+            data.value = str(request_no)
+            self.host_control_layer.log.info("Sending Reading: \n" + str(pkt))
 
-                data = pkt.content.add()
-                data.key = "COUNTER"
-                data.value = str(request_no)
-                dst_app_id = pkt.dst_application_id
-                self.tx_pkt_to_powersim_entity(pkt.SerializeToString(), dst_app_id)
+            self.tx_pkt_to_powersim_entity(pkt.SerializeToString(), pkt.dst_application_id)
 
             request_no += 1
             time.sleep(1)
@@ -57,14 +56,9 @@ class PMU(threading.Thread):
 
 class hostApplicationLayer(basicHostIPCLayer):
 
-    def __init__(self, host_id, log_file, host_id_powersim_id, host_id_to_ip):
-        basicHostIPCLayer.__init__(self, host_id, log_file, host_id_powersim_id, host_id_to_ip)
-        self.pmu_names = []
-
-        for pmu_name in self.host_id_to_powersim_id[self.host_id]:
-            self.pmu_names.append(pmu_name)
-
-        self.PMU = PMU(self, self.pmu_names)
+    def __init__(self, host_id, log_file, powersim_ids_mapping, managed_powersim_id):
+        basicHostIPCLayer.__init__(self, host_id, log_file, powersim_ids_mapping, managed_powersim_id)
+        self.PMU = PMU(self, self.managed_powersim_id)
 
 
     """
@@ -88,7 +82,7 @@ class hostApplicationLayer(basicHostIPCLayer):
     def on_start_up(self):
 
         self.PMU.start()
-        self.log.info("Started PMUs on " + str(self.host_id))
+        self.log.info("Started PMU:  " + self.managed_powersim_id + " on " + str(self.host_id))
 
     """
        Called before initiating shutdown of IPC. It can be overridden to stop essential services.
@@ -97,4 +91,4 @@ class hostApplicationLayer(basicHostIPCLayer):
     def on_shutdown(self):
         self.PMU.stop = True
         self.PMU.join()
-        self.log.info("Stopped PMUs on " + str(self.host_id))
+        self.log.info("Stopped PMU: " + self.managed_powersim_id + " on " + str(self.host_id))

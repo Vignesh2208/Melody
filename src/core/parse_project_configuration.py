@@ -20,6 +20,7 @@ class Experiment(NetPower):
                  log_dir,
                  emulated_background_traffic_flows,
                  replay_traffic_flows,
+                 cyber_host_apps,
                  enable_kronos,
                  relative_cpu_speed):
         super(
@@ -32,6 +33,7 @@ class Experiment(NetPower):
             log_dir,
             emulated_background_traffic_flows,
             replay_traffic_flows,
+            cyber_host_apps,
             enable_kronos,
             relative_cpu_speed,
             CPUS_SUBSET)
@@ -41,6 +43,7 @@ def get_network_configuration(project_config):
     cyber_node_roles = []
     cyber_emulation_spec = project_config.cyber_emulation_spec
     n_hosts = cyber_emulation_spec.num_hosts
+    cyber_host_apps = {}
     topology_params = {
         "num_hosts": cyber_emulation_spec.num_hosts,
         "num_switches": cyber_emulation_spec.num_switches,
@@ -65,10 +68,13 @@ def get_network_configuration(project_config):
         is_configured = False
         for mapping in project_config.cyber_physical_map:
             if mapping.cyber_entity_id == curr_host:
-                cyber_node_roles.append((mapping.description,
-                                         [mapped_powersim_entity for mapped_powersim_entity in
-                                          mapping.mapped_powersim_entity_id]))
+                cyber_node_roles.append((curr_host,
+                                         [(entity.mapped_powersim_entity_id, entity.listen_port) for entity in
+                                          mapping.mapped_powersim_entity]))
+
                 is_configured = True
+                if mapping.HasField("app_layer_src"):
+                    cyber_host_apps[curr_host] = mapping.app_layer_src
         if not is_configured:
             print "ERROR: Cyber Node Role Not specified for ", curr_host, " in the project configuration!"
             sys.exit(0)
@@ -91,11 +97,11 @@ def get_network_configuration(project_config):
     )
 
     network_configuration.setup_network_graph(mininet_setup_gap=1, synthesis_setup_gap=1)
-    return network_configuration
+    return network_configuration, cyber_host_apps
 
 
 def get_experiment_container(project_config, project_run_time_args):
-    network_configuration = get_network_configuration(project_config)
+    network_configuration, cyber_host_apps = get_network_configuration(project_config)
     script_dir = os.path.dirname(os.path.realpath(__file__))
     idx = script_dir.index('Melody')
     base_dir = script_dir[0:idx] + "Melody"
@@ -142,6 +148,7 @@ def get_experiment_container(project_config, project_run_time_args):
                       log_dir=log_dir,
                       emulated_background_traffic_flows=bg_flows,
                       replay_traffic_flows=replay_flows,
+                      cyber_host_apps=cyber_host_apps,
                       enable_kronos=project_run_time_args["enable_kronos"],
                       relative_cpu_speed=project_run_time_args["rel_cpu_speed"])
 

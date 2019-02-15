@@ -11,53 +11,24 @@ from defines import *
 
 class ReplayOrchestrator(threading.Thread):
 
-    def __init__(self, net_power_obj, replay_plan_file, net_cfg_file, run_time):
+    def __init__(self, net_power_obj, replay_plan_file, run_time):
 
         threading.Thread.__init__(self)
 
         self.thread_cmd_queue = Queue.Queue()
         self.replay_plan_file = replay_plan_file
-        self.net_cfg_file = net_cfg_file
         self.run_time = run_time
-        self.involved_replay_nodes = {}
-        self.mininet_node_ids = []
-        self.cyber_entity_id_to_ip = {}
-        self.cyber_entity_id_to_mapped_powersim_ids = {}
-        self.ip_to_cyber_entity_id = {}
         self.shared_bufs = {}
         self.log = logger.Logger("/tmp/replay_orchestrator_log.txt", "Replay Orchestrator")
         self.replay_plan = None
         self.start_time = None
         self.net_power_obj = net_power_obj
-        self.extract_mapping()
 
     def get_curr_cmd(self):
         curr_cmd = self.thread_cmd_queue.get(block=True)
         return curr_cmd
 
-    def extract_mapping(self):
 
-        assert (os.path.isfile(self.net_cfg_file) == True)
-        lines = [line.rstrip('\n') for line in open(self.net_cfg_file)]
-
-        for line in lines:
-            line = ' '.join(line.split())
-            line = line.replace(" ", "")
-            split_list = line.split(',')
-            assert (len(split_list) >= 3)
-            host_id = int(split_list[0][1:])
-            ip_addr = split_list[1]
-            port = int(split_list[2])
-
-            self.cyber_entity_id_to_ip[host_id] = (ip_addr, port)
-            self.ip_to_cyber_entity_id[ip_addr] = host_id
-            for i in xrange(3, len(split_list)):
-                powersim_id = str(split_list[i])
-                if host_id not in self.cyber_entity_id_to_mapped_powersim_ids.keys():
-                    self.cyber_entity_id_to_mapped_powersim_ids[host_id] = []
-                self.cyber_entity_id_to_mapped_powersim_ids[host_id].append(powersim_id)
-
-            self.mininet_node_ids.append(split_list[0])
 
     def signal_pcap_replay_trigger(self, node_id, pcap_file_path):
         ret = 0
@@ -66,35 +37,6 @@ class ReplayOrchestrator(threading.Thread):
                                                             + "-replay-main-cmd-channel-buffer", pcap_file_path, 0)
         self.log.info("Signalled start of replay phase to node:" + str(node_id))
 
-    def extract_involved_replay_nodes(self, replay_pcap_f_name):
-        assert os.path.isfile(self.replay_plan_file + "/" + replay_pcap_f_name)
-        self.involved_replay_nodes[replay_pcap_f_name] = []
-
-        pcap_file_path = self.replay_plan_file + "/" + replay_pcap_f_name
-        replay_pcap_reader = dpkt.pcap.Reader(open(pcap_file_path, 'rb'))
-
-        l2_type = replay_pcap_reader.datalink()
-
-        for ts, curr_pkt in replay_pcap_reader:
-
-            if l2_type == dpkt.pcap.DLT_NULL:
-                src_ip, dst_ip = get_pkt_src_dst_IP(curr_pkt, dpkt.pcap.DLT_NULL)
-            elif l2_type == dpkt.pcap.DLT_LINUX_SLL:
-                src_ip, dst_ip = get_pkt_src_dst_IP(curr_pkt, dpkt.pcap.DLT_LINUX_SLL)
-            else:
-                src_ip, dst_ip = get_pkt_src_dst_IP(curr_pkt)
-
-            try:
-                src_host_id = self.ip_to_cyber_entity_id[src_ip]
-                dst_host_id = self.ip_to_cyber_entity_id[dst_ip]
-
-                if src_host_id not in self.involved_replay_nodes[replay_pcap_f_name]:
-                    self.involved_replay_nodes[replay_pcap_f_name].append(src_host_id)
-
-                if dst_host_id not in self.involved_replay_nodes[replay_pcap_f_name]:
-                    self.involved_replay_nodes[replay_pcap_f_name].append(dst_host_id)
-            except RuntimeError:
-                pass
 
     def send_command(self, cmd):
         self.thread_cmd_queue.put(cmd)

@@ -8,20 +8,20 @@ import random
 
 class hostApplicationLayer(basicHostIPCLayer):
 
-    def __init__(self, host_id, log_file, host_id_to_powersim_id, host_id_to_ip):
-        basicHostIPCLayer.__init__(self, host_id, log_file, host_id_to_powersim_id, host_id_to_ip)
+    def __init__(self, host_id, log_file, powersim_ids_mapping, managed_powersim_id):
+        basicHostIPCLayer.__init__(self, host_id, log_file, powersim_ids_mapping, managed_powersim_id)
 
         self.mapped_PLCs = {
-                                "PMU_Pilot_Bus_2": "PLC_GenBus_30",
-                                "PMU_Pilot_Bus_6": "PLC_GenBus_31",
-                                "PMU_Pilot_Bus_9": "PLC_GenBus_32",
-                                "PMU_Pilot_Bus_10": "PLC_GenBus_33",
-                                "PMU_Pilot_Bus_19": "PLC_GenBus_34",
-                                "PMU_Pilot_Bus_20": "PLC_GenBus_35",
-                                "PMU_Pilot_Bus_22": "PLC_GenBus_36",
-                                "PMU_Pilot_Bus_23": "PLC_GenBus_37",
-                                "PMU_Pilot_Bus_25": "PLC_GenBus_38",
-                                "PMU_Pilot_Bus_29": "PLC_GenBus_39",
+                                "PMU_Pilot_Bus_2": "PLC_Gen_Bus_30",
+                                "PMU_Pilot_Bus_6": "PLC_Gen_Bus_31",
+                                "PMU_Pilot_Bus_9": "PLC_Gen_Bus_32",
+                                "PMU_Pilot_Bus_10": "PLC_Gen_Bus_33",
+                                "PMU_Pilot_Bus_19": "PLC_Gen_Bus_34",
+                                "PMU_Pilot_Bus_20": "PLC_Gen_Bus_35",
+                                "PMU_Pilot_Bus_22": "PLC_Gen_Bus_36",
+                                "PMU_Pilot_Bus_23": "PLC_Gen_Bus_37",
+                                "PMU_Pilot_Bus_25": "PLC_Gen_Bus_38",
+                                "PMU_Pilot_Bus_29": "PLC_Gen_Bus_39",
                             }
 
     """

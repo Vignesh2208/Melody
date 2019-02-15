@@ -12,118 +12,59 @@ from src.utils.sleep_functions import sleep
 
 
 class basicHostIPCLayer(threading.Thread):
-    def __init__(self, host_id, log_file):
+    def __init__(self, host_id, log_file, powersim_ids_mapping, managed_powersim_id):
         threading.Thread.__init__(self)
 
-        self.thread_cmd_lock = threading.Lock()
-        self.thread_callback_queue = {}
-        self.thread_callback_lock = threading.Lock()
-        self.n_pending_callbacks = 0
 
         self.thread_cmd_queue = []
         self.host_id = host_id
+        self.managed_powersim_id = managed_powersim_id
+        self.powersim_ids_mapping = powersim_ids_mapping
+
+        self.host_ip = self.powersim_ids_mapping[self.managed_powersim_id]["mapped_host_ip"]
+        self.listen_port = self.powersim_ids_mapping[self.managed_powersim_id]["port"]
+
         self.log = logger.Logger(log_file, "Host " + str(host_id) + " IPC Thread")
-        self.host_id_to_powersim_id = None
-        self.powersim_id_to_host_id = None
-        self.attack_layer = None
-        self.raw_sock = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_RAW)
+        self.raw_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-    """ -- DO NOT OVERRIDE -- """
-
-    def set_attack_layer(self, attack_layer):
-        self.attack_layer = attack_layer
-
-    """ -- DO NOT OVERRIDE -- """
-
-    def get_attack_layer(self):
-        return self.attack_layer
 
     """ -- DO NOT OVERRIDE -- """
 
     def get_curr_cmd(self):
-        curr_cmd = None
-        self.thread_cmd_lock.acquire()
-        if len(self.thread_cmd_queue) > 0:
+        try:
             curr_cmd = self.thread_cmd_queue.pop()
-        self.thread_cmd_lock.release()
+        except IndexError:
+            return None
         return curr_cmd
 
     """ -- DO NOT OVERRIDE -- """
 
     def cancel_thread(self):
-        self.thread_cmd_lock.acquire()
         self.thread_cmd_queue.append(CMD_QUIT)
-        self.thread_cmd_lock.release()
 
-    """ -- DO NOT OVERRIDE -- """
 
-    def set_powersim_id_map(self, powersim_id_map):
-        self.host_id_to_powersim_id = powersim_id_map
-        self.powersim_id_to_host_id = {}
-        for host_id in self.host_id_to_powersim_id.keys():
-            powersim_id_set = self.host_id_to_powersim_id[host_id]
-            for powersim_entity_id in powersim_id_set:
-                self.powersim_id_to_host_id[powersim_entity_id] = host_id
-
-    """ -- DO NOT OVERRIDE -- """
-
-    def get_mapped_powersim_ids_for_node(self, cyber_entity_id):
-        if cyber_entity_id in self.host_id_to_powersim_id.keys():
-            return self.host_id_to_powersim_id[cyber_entity_id]
-        else:
-            return None
-
-    """ -- DO NOT OVERRIDE -- """
-
-    def get_mapped_cyber_entity_for_node(self, powersim_entity_id):
-        if powersim_entity_id in self.powersim_id_to_host_id.keys():
-            return self.powersim_id_to_host_id[powersim_entity_id]
-        else:
-            return None
 
     """ -- DO NOT OVERRIDE -- """
 
     def tx_pkt_to_powersim_entity(self, pkt):
-        pkt_parsed = pss_pb2.PowerSimMessage()
+        pkt_parsed = pss_pb2.CyberMessage()
         pkt_parsed.ParseFromString(pkt)
-        if pkt_parsed.HasField("read_request"):
-            dst_powersim_entity_id = pkt_parsed.read_request.objid
-        elif pkt_parsed.HasField("write_request"):
-            dst_powersim_entity_id = pkt_parsed.write_request.objid
-        elif pkt_parsed.HasField("response"):
-            dst_powersim_entity_id = pkt_parsed.response.receiver_attributes.receiver_id
-        else:
-            dst_powersim_entity_id = None
+        cyber_entity_ip = self.powersim_ids_mapping[pkt_parsed.dst_application_id]["mapped_host_ip"]
+        cyber_entity_port = self.powersim_ids_mapping[pkt_parsed.dst_application_id]["port"]
+        self.raw_sock.sendto(pkt, (cyber_entity_ip, cyber_entity_port))
 
-        cyber_entity_id = self.get_mapped_cyber_entity_for_node(dst_powersim_entity_id)
-        if cyber_entity_id is not None:
-            self.attack_layer.run_on_thread(self.attack_layer.on_rx_pkt_from_ipc_layer,
-                                            dst_powersim_entity_id, pkt, cyber_entity_id)
-
-    """ -- DO NOT OVERRIDE -- """
-
-    def run_on_thread(self, function, powersim_entity_id, *args):
-        self.thread_callback_lock.acquire()
-        if powersim_entity_id not in self.thread_callback_queue.keys():
-            self.thread_callback_queue[powersim_entity_id] = []
-            self.thread_callback_queue[powersim_entity_id].append((function, args))
-        else:
-            if len(self.thread_callback_queue[powersim_entity_id]) == 0:
-                self.thread_callback_queue[powersim_entity_id].append((function, args))
-            else:
-                self.thread_callback_queue[powersim_entity_id][0] = (function, args)
-        self.n_pending_callbacks = self.n_pending_callbacks + 1
-        self.thread_callback_lock.release()
 
     """ -- DO NOT OVERRIDE -- """
 
     def run(self):
 
         self.log.info("Started underlying IPC layer ... ")
-        #self.log.info("Power sim id to cyber entity id map: " + str(self.powersim_id_to_host_id))
-        #self.log.info("Cyber entity id to powersim id map: " + str(self.host_id_to_powersim_id))
+        self.log.info("Started listening on IP: " + self.host_ip + " PORT: " + str(self.listen_port))
         sys.stdout.flush()
-        assert (self.attack_layer is not None)
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP
+        sock.settimeout(SOCKET_TIMEOUT)
+        sock.bind((self.host_ip, self.listen_port))
+
         self.on_start_up()
         while True:
 
@@ -134,22 +75,13 @@ class basicHostIPCLayer(threading.Thread):
                 sys.stdout.flush()
                 break
 
-            callback_fns = []
-            self.thread_callback_lock.acquire()
-            if self.n_pending_callbacks == 0:
-                self.thread_callback_lock.release()
-            else:
+            try:
+                data, addr = sock.recvfrom(MAXPKTSIZE)
+            except socket.timeout:
+                data = None
+            if data is not None:
+                self.on_rx_pkt_from_network(str(data))
 
-                values = list(self.thread_callback_queue.values())
-                for i in xrange(0, len(values)):
-                    if len(values[i]) > 0:
-                        callback_fns.append(values[i].pop())
-                self.n_pending_callbacks = 0
-                self.thread_callback_lock.release()
-
-                for i in xrange(0, len(callback_fns)):
-                    function, args = callback_fns[i]
-                    function(*args)
 
 
     """

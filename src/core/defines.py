@@ -48,17 +48,9 @@ POWERSIM_ID_HDR_LEN = 10
 
 
 def extract_powersim_entity_id_from_pkt(pkt):
-    pkt_parsed = pss_pb2.PowerSimMessage()
+    pkt_parsed = pss_pb2.CyberMessage()
     pkt_parsed.ParseFromString(pkt)
-    if pkt_parsed.HasField("read_request"):
-        dst_powersim_entity_id = pkt_parsed.read_request.objid
-    elif pkt_parsed.HasField("write_request"):
-        dst_powersim_entity_id = pkt_parsed.write_request.objid
-    elif pkt_parsed.HasField("response"):
-        dst_powersim_entity_id = pkt_parsed.response.receiver_attributes.receiver_id
-    else:
-        assert(False)
-    return dst_powersim_entity_id
+    return pkt_parsed.dst_application_id
 
 
 def inet_to_str(inet):

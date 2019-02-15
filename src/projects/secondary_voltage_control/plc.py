@@ -8,11 +8,11 @@ import time
 
 
 class PLC(threading.Thread):
-    def __init__(self, host_control_layer, plc_names):
+    def __init__(self, host_control_layer, plc_name):
         threading.Thread.__init__(self)
         self.host_control_layer = host_control_layer
         self.stop = False
-        self.plc_names = plc_names
+        self.plc_name = plc_name
         self.recv_pkt_queue = []
 
     def run(self):
@@ -39,26 +39,19 @@ class PLC(threading.Thread):
 
             recv_time = float(time.time())
 
-            self.host_control_layer.cmd_lock.acquire()
-
-            self.host_control_layer.log.info("Rx New packet for PLC: " + pkt_parsed.dst_application_id)
-            self.host_control_layer.log.info("Control delay:" + str(recv_time - pmu_send_tstamp))
-            self.host_control_layer.log.info("\n" + str(pkt_parsed))
-            self.host_control_layer.cmd_lock.release()
+            self.host_control_layer.log.info("Rx New packet for PLC: \n" + str(pkt_parsed))
+            self.host_control_layer.log.info("Experienced control delay:" + str(recv_time - pmu_send_tstamp))
+            self.host_control_layer.log.info("----------------------------------------")
 
             request_no += 1
 
 
 class hostApplicationLayer(basicHostIPCLayer):
 
-    def __init__(self, host_id, log_file, host_id_powersim_id, host_id_to_ip):
-        basicHostIPCLayer.__init__(self, host_id, log_file, host_id_powersim_id, host_id_to_ip)
-        self.plc_names = []
+    def __init__(self, host_id, log_file, powersim_ids_mapping, managed_powersim_id):
+        basicHostIPCLayer.__init__(self, host_id, log_file, powersim_ids_mapping, managed_powersim_id)
         self.cmd_lock = threading.Lock()
-
-        for plc_name in self.host_id_to_powersim_id[self.host_id]:
-            self.plc_names.append(plc_name)
-        self.PLC = PLC(self, self.plc_names)
+        self.PLC = PLC(self, self.managed_powersim_id)
 
 
     """
@@ -81,7 +74,7 @@ class hostApplicationLayer(basicHostIPCLayer):
     def on_start_up(self):
 
         self.PLC.start()
-        self.log.info("Started PLC on " + str(self.host_id))
+        self.log.info("Started PLC: " + self.managed_powersim_id + " on " + str(self.host_id))
 
     """
        Called before initiating shutdown of IPC. It can be overridden to stop essential services.
@@ -90,4 +83,4 @@ class hostApplicationLayer(basicHostIPCLayer):
     def on_shutdown(self):
         self.PLC.stop = True
         self.PLC.join()
-        self.log.info("Stopping PLC on " + str(self.host_id))
+        self.log.info("Stopping PLC: "  + self.managed_powersim_id + " on " + str(self.host_id))

@@ -28,6 +28,7 @@ class NetPower(object):
                  log_dir,
                  emulated_background_traffic_flows,
                  replay_traffic_flows,
+                 cyber_host_apps,
                  enable_kronos,
                  rel_cpu_speed,
                  CPUS_SUBSET):
@@ -41,7 +42,8 @@ class NetPower(object):
         self.project_name = self.network_configuration.project_name
         self.run_time = run_time
         self.power_simulator_ip = self.network_configuration.power_simulator_ip
-        self.node_mappings = {}
+        self.host_to_powersim_ids = {}
+        self.powersim_id_to_host = {}
         self.project_dir = project_dir
         self.base_dir = base_dir
         self.enable_kronos = enable_kronos
@@ -54,6 +56,7 @@ class NetPower(object):
         self.emulation_driver_pids = []
         self.replay_driver_pids = []
         self.timeslice = 100000
+        self.cyber_host_apps = cyber_host_apps
 
         self.emulated_background_traffic_flows = emulated_background_traffic_flows
         self.replay_traffic_flows = replay_traffic_flows
@@ -61,7 +64,7 @@ class NetPower(object):
 
         self.get_emulation_driver_params()
 
-        self.node_mappings_file_path = "/tmp/node_mappings.txt"
+        self.node_mappings_file_path = "/tmp/node_mappings.json"
         self.log_dir = log_dir
         self.flag_debug = True  # flag for debug printing
 
@@ -79,14 +82,23 @@ class NetPower(object):
 
         if not os.path.exists(self.log_dir):
             os.makedirs(self.log_dir)
+        for i in xrange(0, len(self.network_configuration.roles)):
+                mininet_host_name = self.network_configuration.roles[i][0]
 
+                self.host_to_powersim_ids[mininet_host_name] = []
+                port_mapping = self.network_configuration.roles[i][1]
+                for mapping in port_mapping:
+                    entity_id = mapping[0]
+                    self.host_to_powersim_ids[mininet_host_name].append(entity_id)
         self.open_main_cmd_channel_buffers()
+        
         self.check_kronos_loaded()
         self.replay_flows_container = ReplayFlowsContainer()
         for flow in self.replay_traffic_flows:
             self.replay_flows_container.add_replay_flow(flow)
         self.nodes_involved_in_replay = self.replay_flows_container.get_all_involved_nodes()
         self.replay_orchestrator = None
+        
 
         set_cpu_affinity(int(os.getpid()))
 
@@ -114,8 +126,7 @@ class NetPower(object):
 
         if self.enable_kronos == 1:
             print "Kronos >> Synchronizing and freezing all processes ..."
-            n_tracers = len(self.host_pids.keys()) + len(self.switch_pids.keys()) + len(
-                self.emulation_driver_pids) + len(self.replay_driver_pids)
+            n_tracers = len(self.pid_list)
             while synchronizeAndFreeze(n_tracers) <= 0:
                 print "Kronos >> Synchronize and Freeze failed. Retrying in 1 sec"
                 time.sleep(1)
@@ -135,7 +146,7 @@ class NetPower(object):
             stopExp()
             print "Kronos >> Stopping synchronized experiment at Local Time: ", str(datetime.now())
             self.trigger_all_processes("EXIT")
-            self.send_to_replay_orchestrator("EXIT")
+            self.replay_orchestrator.send_command("EXIT")
             print "Kronos >> Stopped synchronized experiment"
         else:
             print "Melody >> Stopping emulation at Local Time: ", str(datetime.now())
@@ -144,23 +155,17 @@ class NetPower(object):
     def generate_node_mappings(self, roles):
         with open(self.node_mappings_file_path, "w") as outfile:
             for i in xrange(0, len(roles)):
-                mininet_host = self.network_configuration.mininet_obj.hosts[i]
-                self.node_mappings[mininet_host.name] = (mininet_host.IP(), roles[i], DEFAULT_HOST_UDP_PORT)
-                lineTowrite = str(mininet_host.name) + "," + str(mininet_host.IP()) + "," + str(
-                    DEFAULT_HOST_UDP_PORT)
+                mininet_host_name = roles[i][0]
+                port_mapping = roles[i][1]
+                for mapping in port_mapping:
+                    entity_id = mapping[0]
+                    entity_port = mapping[1]
+                    self.powersim_id_to_host[entity_id] = {}
+                    self.powersim_id_to_host[entity_id]["port"] = entity_port
+                    self.powersim_id_to_host[entity_id]["mapped_host"] = mininet_host_name
+                    self.powersim_id_to_host[entity_id]["mapped_host_ip"] = "10.0.0." + str(mininet_host_name[1:])
 
-                if len(roles[i][1]) == 0:
-                    lineTowrite += "," + mininet_host.name + "_NOT_MAPPED\n"
-                else:
-                    lineTowrite += ","
-
-                for j in xrange(0, len(roles[i][1])):
-                    if j < len(roles[i][1]) - 1:
-                        lineTowrite = lineTowrite + roles[i][1][j] + ","
-                    else:
-                        lineTowrite = lineTowrite + roles[i][1][j] + "\n"
-
-                outfile.write(lineTowrite)
+            json.dump(self.powersim_id_to_host, outfile)
 
     def cmd_to_start_process_under_tracer(self, cmd_to_run, tracer_id):
 
@@ -174,27 +179,34 @@ class NetPower(object):
         return ' '.join(tracer_args)
 
     def start_host_processes(self):
-        print "Melody >> Starting all hosts ..."
+        print "Melody >> Starting all hosts: ", self.cyber_host_apps
 
         for mininet_host in self.network_configuration.mininet_obj.hosts:
-            host_id = int(mininet_host.name[1:])
-            host_log_file = self.log_dir + "/" + mininet_host.name + "_log.txt"
-            host_py_script = self.base_dir + "/src/core/host.py"
-            cmd_to_run = "python " + str(
-                host_py_script) + " -l " + host_log_file + " -c " + self.node_mappings_file_path + " -r " + str(
-                self.run_time) + " -n " + str(self.project_name) + " -d " + str(host_id)
+            if mininet_host.name not in self.host_to_powersim_ids:
+                continue
 
-            if self.enable_kronos == 1:
-                cmd_to_run = self.cmd_to_start_process_under_tracer(cmd_to_run, host_id)
-            cmd_to_run += ' > ' + host_log_file + ' 2>&1 & echo $! '
+            for mapped_powerim_id in self.host_to_powersim_ids[mininet_host.name]:
+                host_id = int(mininet_host.name[1:])
+                host_log_file = self.log_dir + "/" + mapped_powerim_id  + "_log.txt"
+                host_py_script = self.base_dir + "/src/core/host.py"
+                cmd_to_run = "python " + str(
+                    host_py_script) + " -l " + host_log_file + " -c " + self.node_mappings_file_path + " -r " + str(
+                    self.run_time) + " -n " + str(self.project_name) + " -d " + str(host_id) + " -m "  + str(mapped_powerim_id)
 
-            with tempfile.NamedTemporaryFile() as f:
-                mininet_host.cmd(cmd_to_run + '>> ' + f.name)
-                pid = int(f.read())
-                self.host_pids[mininet_host.name] = pid
-                self.pid_list.append(pid)
+                if mininet_host.name in self.cyber_host_apps:
+                    cmd_to_run += " -a " + str(self.cyber_host_apps[mininet_host.name])
 
-            set_cpu_affinity(mininet_host.pid)
+                if self.enable_kronos == 1:
+                    cmd_to_run = self.cmd_to_start_process_under_tracer(cmd_to_run, host_id)
+                cmd_to_run += ' > ' + host_log_file + ' 2>&1 & echo $! '
+
+                with tempfile.NamedTemporaryFile() as f:
+                    mininet_host.cmd(cmd_to_run + '>> ' + f.name)
+                    pid = int(f.read())
+                    self.host_pids[mininet_host.name] = pid
+                    self.pid_list.append(pid)
+
+                set_cpu_affinity(mininet_host.pid)
 
     def start_switch_processes(self):
         print "Melody >> Starting all switches ..."
@@ -348,23 +360,13 @@ class NetPower(object):
 
         print "Melody >> Starting proxy ... "
 
-        """
-        proxy_py_script = self.proxy_dir + "/proxy.py"
-        proxy_log_file = self.log_dir + "/proxy_log.txt"
-        core_proxy_start_cmd = "python " + str(proxy_py_script)
-        proxy_start_cmd = core_proxy_start_cmd + " -c " + self.node_mappings_file_path + " -l " \
-                          + proxy_log_file + " -r " + str(self.run_time) + " -p " + self.power_simulator_ip \
-                          + " -d " + str(self.control_node_id) + " &"
-        os.system(proxy_start_cmd)
-        """
 
     def start_replay_orchestrator(self):
         print "Melody >> Starting replay orchestrator ... "
 
         self.replay_flows_container.create_replay_plan()
         replay_plan_file = "/tmp/replay_plan.json"
-        self.replay_orchestrator = ReplayOrchestrator(self, replay_plan_file, self.node_mappings_file_path,
-                                                      self.run_time)
+        self.replay_orchestrator = ReplayOrchestrator(self, replay_plan_file, self.run_time)
         self.replay_orchestrator.start()
 
     def send_cmd_to_node(self, node_name, cmd):
@@ -392,13 +394,15 @@ class NetPower(object):
             self.send_cmd_to_node(host.name, "sudo iptables -I OUTPUT -p tcp --tcp-flags RST RST -j ACCEPT")
 
     def open_main_cmd_channel_buffers(self):
-
+        print "Melody >> Opening main inter-process communication channels ..." 
         for mininet_host in self.network_configuration.mininet_obj.hosts:
-            result = self.shared_buf_array.open(bufName=str(mininet_host.name) + "-main-cmd-channel-buffer",
-                                                isProxy=True)
-            if result == BUF_NOT_INITIALIZED or result == FAILURE:
-                print "Shared Buffer open failed! Buffer not initialized for host: " + str(mininet_host.name)
-                sys.exit(0)
+            if mininet_host.name in self.host_to_powersim_ids:
+                for mapped_powersim_id in self.host_to_powersim_ids[mininet_host.name]:
+                    result = self.shared_buf_array.open(mapped_powersim_id + "-main-cmd-channel-buffer",
+		                                    isProxy=True)
+                    if result == BUF_NOT_INITIALIZED or result == FAILURE:
+                        print "Shared Buffer open failed! Buffer not initialized for host: " + str(mininet_host.name)
+                        sys.exit(0)
 
             result = self.shared_buf_array.open(bufName=str(mininet_host.name) + "-replay-main-cmd-channel-buffer",
                                                 isProxy=True)
@@ -417,9 +421,11 @@ class NetPower(object):
 
     def trigger_all_processes(self, trigger_cmd):
         for mininet_host in self.network_configuration.mininet_obj.hosts:
-            ret = 0
-            while ret <= 0:
-                ret = self.shared_buf_array.write(str(mininet_host.name) + "-main-cmd-channel-buffer", trigger_cmd, 0)
+            if mininet_host.name in self.host_to_powersim_ids:
+                for mapped_powersim_id in self.host_to_powersim_ids[mininet_host.name]:
+                    ret = 0
+                    while ret <= 0:
+                        ret = self.shared_buf_array.write(mapped_powersim_id + "-main-cmd-channel-buffer", trigger_cmd, 0)
 
         for edp in self.emulation_driver_params:
             ret = 0
@@ -476,13 +482,6 @@ class NetPower(object):
             print "Hosts at switch:", sw.node_id
             for h in sw.attached_hosts:
                 print "Name:", h.node_id, "IP:", h.ip_addr, "Port:", h.switch_port
-
-        print "Roles assigned to the hosts:"
-        host_index = 1
-        for role in self.network_configuration.roles:
-            print "h" + str(host_index), ":", role
-            host_index += 1
-
         print ""
         print "########################################################################"
 
@@ -502,10 +501,8 @@ class NetPower(object):
 
     def initialize_project(self):
         print "Melody >> Initializing project ..."
-        self.print_topo_info()
-
-        # General Startup ...
         self.generate_node_mappings(self.network_configuration.roles)
+        self.print_topo_info()
         self.start_host_processes()
         self.start_switch_processes()
         self.start_pkt_captures()

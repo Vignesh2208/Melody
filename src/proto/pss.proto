@@ -8,27 +8,16 @@ enum StatusType {
   FAILED = 2;
 }
 
-message SenderAttributes {
-    required string sender_id = 1;
-    required string request_id = 2;
-}
-
-message ReceiverAttributes {
-    required string receiver_id = 1;
-    required string response_id = 2;
-}
 
 message ReadRequest{
   required string timestamp = 1;
   required string objtype = 2;
   required string objid = 3;
   required string fieldtype = 4;
-  required SenderAttributes sender_attributes = 5;
 }
 
 message Response {
   required string value = 1;
-  required ReceiverAttributes receiver_attributes = 2;
 }
 
 message WriteRequest {
@@ -37,15 +26,21 @@ message WriteRequest {
   required string objid = 3;
   required string fieldtype = 4;
   required string value = 5;
-  required SenderAttributes sender_attributes = 6;
 }
 
 message Status{
   required StatusType status = 1;
 }
 
-message PowerSimMessage {
-    optional ReadRequest read_request = 1;
-    optional WriteRequest write_request = 2;
-    optional Response response = 3;
+message KV {
+	required string key = 1;
+	optional string value = 2;
+}
+
+message CyberMessage {
+	required string dst_application_id = 1;
+	required string src_application_id = 2;
+	optional string msg_type =3;
+	repeated KV content = 4;
+			
 }

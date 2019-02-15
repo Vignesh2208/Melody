@@ -2,35 +2,19 @@ import shared_buffer
 from shared_buffer import *
 import logger
 from logger import *
-from basicNetworkServiceLayer import basicNetworkServiceLayer
 import getopt
 from src.utils.sleep_functions import sleep
 import time
+import json
 
 
 def extract_mappings(net_cfg_file):
-    cyber_entity_id_to_ip = {}
-    cyber_entity_id_to_mapped_powersim_ids = {}
     assert (os.path.isfile(net_cfg_file) == True)
-    lines = [line.rstrip('\n') for line in open(net_cfg_file)]
+    with open(net_cfg_file) as f:
+        data = json.load(f)
 
-    for line in lines:
-        line = ' '.join(line.split())
-        line = line.replace(" ", "")
-        split_list = line.split(',')
-        assert (len(split_list) >= 3)
-        host_id = int(split_list[0][1:])
-        ip_addr = split_list[1]
-        port = int(split_list[2])
-        cyber_entity_id_to_ip[host_id] = (ip_addr, port)
 
-        for i in xrange(3, len(split_list)):
-            powersim_id = str(split_list[i])
-            if host_id not in cyber_entity_id_to_mapped_powersim_ids.keys():
-                cyber_entity_id_to_mapped_powersim_ids[host_id] = []
-            cyber_entity_id_to_mapped_powersim_ids[host_id].append(powersim_id)
-
-    return cyber_entity_id_to_ip, cyber_entity_id_to_mapped_powersim_ids
+    return data
 
 
 def usage():
@@ -42,6 +26,7 @@ def usage():
     print "-r or --run-time=    Run time of host in seconds before it is shut-down <optional - default forever>"
     print "-n or --project-name= Name of project folder <optional - default is test project>"
     print "-d or --id= Id of the node. Required and must be > 0"
+    print "-a or --app= <Name-of-src-file containing application layer>"
     sys.exit(0)
 
 
@@ -52,10 +37,12 @@ def parseOpts():
     log_file = "stdout"
     run_time = 0
     project_name = "test"
+    app_layer_file = None
 
     try:
-        (opts, args) = getopt.getopt(sys.argv[1:], "hc:l:r:n:id:",
-                                     ["help", "netcfg-file=", "log-file=", "run-time=", "project-name=", "id="])
+        (opts, args) = getopt.getopt(sys.argv[1:], "hc:l:r:n:a:m:id:",
+                                     ["help", "netcfg-file=", "log-file=", "run-time=", "project-name=", "app=", "managed_powersim_id=", "id=",
+                                      ])
     except getopt.GetoptError as e:
         print (str(e))
         usage()
@@ -75,12 +62,18 @@ def parseOpts():
         if o in ("-d", "--id="):
             host_id = int(v)
 
-    assert (net_cfg_file_path is not None and host_id is not None)
-    return (net_cfg_file_path, log_file, run_time, project_name, host_id)
+        if o in ("-m", "--managed_powersim_id="):
+            managed_powersim_id = str(v)
+
+        if o in ("-a", "--app="):
+            app_layer_file = str(v)
+
+    assert (net_cfg_file_path is not None and host_id is not None and managed_powersim_id is not None)
+    return (net_cfg_file_path, log_file, run_time, project_name, host_id, app_layer_file, managed_powersim_id)
 
 
 def init_shared_buffers(host_id, run_time, shared_buf_array, log):
-    result = shared_buf_array.open(bufName="h" + str(host_id) + "-main-cmd-channel-buffer", isProxy=False)
+    result = shared_buf_array.open(bufName=managed_powersim_id + "-main-cmd-channel-buffer", isProxy=False)
 
     if result == BUF_NOT_INITIALIZED or result == FAILURE:
         log.error("Failed to open communication channel ! Not starting any threads !")
@@ -96,30 +89,29 @@ def init_shared_buffers(host_id, run_time, shared_buf_array, log):
         sys.exit(0)
 
 
-def main(host_id, net_cfg_file, log_file, run_time, project_name):
-    cyber_entity_id_to_ip, cyber_entity_id_to_mapped_powersim_ids = extract_mappings(net_cfg_file)
+def main(host_id, net_cfg_file, log_file, run_time, project_name, app_layer_file, managed_powersim_id):
+    powersim_ids_mapping = extract_mappings(net_cfg_file)
+    
     log = logger.Logger(log_file, "Host" + str(host_id) + ": ")
+
+    print "Powersim IDS Mapping: " + str(powersim_ids_mapping)
+    print "Managed PowerSim ID: " + str(managed_powersim_id)
     script_location = os.path.dirname(os.path.realpath(__file__))
     project_location = script_location + "/../projects/" + project_name + "/"
     shared_buf_array = shared_buffer_array()
 
-    host_control_layer_override_file = "h" + str(host_id) + "_control_layer"
     host_attack_layer_override_file = "h" + str(host_id) + "_attack_layer"
-    if os.path.isfile(project_location + host_control_layer_override_file + ".py"):
+    if app_layer_file is not None:
+        split_ls = app_layer_file.split('.')
+        host_control_layer_override_file = split_ls[0]
+        log.info("Override file name: " + host_control_layer_override_file)
         host_ipc_layer = __import__("src.projects." + str(project_name) + "." + host_control_layer_override_file,
-                                  globals(), locals(), ['hostControlLayer'], -1)
-        host_ipc_layer = host_ipc_layer.hostControlLayer
+                                  globals(), locals(), ['hostApplicationLayer'], -1)
+        host_ipc_layer = host_ipc_layer.hostApplicationLayer
     else:
         host_ipc_layer = __import__("basicHostIPCLayer", globals(), locals(), ['basicHostIPCLayer'], -1)
         host_ipc_layer = host_ipc_layer.basicHostIPCLayer
 
-    if os.path.isfile(project_location + host_attack_layer_override_file + ".py"):
-        host_attack_layer = __import__("src.projects." + str(project_name) + "." + host_attack_layer_override_file,
-                                   globals(), locals(),['hostAttackLayer'], -1)
-        host_attack_layer = host_attack_layer.hostAttackLayer
-    else:
-        host_attack_layer = __import__("basicHostAttackLayer", globals(), locals(), ['basicHostAttackLayer'], -1)
-        host_attack_layer = host_attack_layer.basicHostAttackLayer
 
     log.info("Initializing inter process communication channels ...")
     sys.stdout.flush()
@@ -128,23 +120,13 @@ def main(host_id, net_cfg_file, log_file, run_time, project_name):
     log.info("Successfully opened an inter process communication channel !")
     sys.stdout.flush()
 
-    ipc_layer = host_ipc_layer(host_id, log_file)
-    ipc_layer.set_powersim_id_map(cyber_entity_id_to_mapped_powersim_ids)
-    net_layer = basicNetworkServiceLayer(host_id, log_file, cyber_entity_id_to_ip)
-    attack_layer = host_attack_layer(host_id, log_file, ipc_layer, net_layer)
-    ipc_layer.set_attack_layer(attack_layer)
-    net_layer.set_attack_layer(attack_layer)
-    assert (ipc_layer is not None and net_layer is not None and attack_layer is not None)
-
+    ipc_layer = host_ipc_layer(host_id, log_file, powersim_ids_mapping, managed_powersim_id)
     log.info("Waiting for start command ... ")
     sys.stdout.flush()
     recv_msg = ''
     while "START" not in recv_msg:
-        dummy_id, recv_msg = shared_buf_array.read_until("h" + str(host_id) + "-main-cmd-channel-buffer",
+        dummy_id, recv_msg = shared_buf_array.read_until(managed_powersim_id + "-main-cmd-channel-buffer",
                                                          cool_off_time=0.1)
-
-    net_layer.start()
-    attack_layer.start()
     ipc_layer.start()
     log.info("Signalled all threads to start ...")
     sys.stdout.flush()
@@ -153,17 +135,14 @@ def main(host_id, net_cfg_file, log_file, run_time, project_name):
     log.info("Waiting for stop command ...")
     sys.stdout.flush()
     while "EXIT" not in recv_msg:
-        dummy_id, recv_msg = shared_buf_array.read_until("h" + str(host_id) + "-main-cmd-channel-buffer",
+        dummy_id, recv_msg = shared_buf_array.read_until(managed_powersim_id + "-main-cmd-channel-buffer",
                                                          cool_off_time=0.1)
 
     ipc_layer.cancel_thread()
-    attack_layer.cancel_thread()
-    net_layer.cancel_thread()
-
     log.info("Shutting Down ... ")
     sys.stdout.flush()
 
 
 if __name__ == "__main__":
-    net_cfg_file_path, log_file, run_time, project_name, host_id = parseOpts()
-    sys.exit(main(host_id, net_cfg_file_path, log_file, run_time, project_name))
+    net_cfg_file_path, log_file, run_time, project_name, host_id, app_layer_file, managed_powersim_id = parseOpts()
+    sys.exit(main(host_id, net_cfg_file_path, log_file, run_time, project_name, app_layer_file, managed_powersim_id))
