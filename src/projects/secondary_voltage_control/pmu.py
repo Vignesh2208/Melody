@@ -1,10 +1,12 @@
 from src.core.basicHostIPCLayer import basicHostIPCLayer
-from src.proto import pss_pb2
-from src.utils.sleep_functions import *
 from src.core.defines import *
-import threading
+import grpc
 import time
 import random
+import threading
+
+from src.proto import pss_pb2
+from src.proto import pss_pb2_grpc
 
 
 class PMU(threading.Thread):
@@ -33,7 +35,11 @@ class PMU(threading.Thread):
             pkt.msg_type = "PERIODIC_UPDATE"
             data = pkt.content.add()
             data.key = "VOLTAGE"
-            data.value = str(random.uniform(1, 10))
+            with grpc.insecure_channel('localhost:50051') as channel:
+                stub = pss_pb2_grpc.pssStub(channel)
+                readRequest = pss_pb2.ReadRequest(timestamp=str(time.time()), objtype="bus", objid="1", fieldtype="v")
+                #response = stub.read(readRequest)
+                data.value = stub.read(readRequest) #str(random.uniform(1, 10))
 
             data = pkt.content.add()
             data.key = "CURRENT"

@@ -38,6 +38,7 @@ def main():
     # Main Loop of Co-Simulation
     while True:
         exp.run_for(timestep_size)
+        exp.trigger_proxy_batch_processing()
 
         total_time_ran += timestep_size
         print "Time Elapsed: ", total_time_ran

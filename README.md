@@ -1,4 +1,4 @@
-A TestBed which integrates PowerWorld/RTDS with Mininet to simulate a
+A TestBed which integrates Power System Simulation with Mininet to simulate a
 Micro Grid control Architecture. This TestBed will be used for 
 Anomaly Detection Purposes.
 
@@ -18,7 +18,7 @@ Dependencies:
 #mininet
 #openvswitch
 #protobuf version >= 3.7
-#grpc
+#grpc (sudo pip install grpcio && sudo pip install grpcio-tools)
 #Kronos
 ```
 
@@ -44,5 +44,12 @@ Pre-Run Steps:
       
       -Append this line
       Defaults env_keep += "PYTHONPATH"
+
+```
+
+```
+TODO: the powersim case name ishardcoded for now, need to fix it
+Need to change the name of mapped_powersim_entity_id
+Change PSSService to remove MatPower dependency
 
 ```

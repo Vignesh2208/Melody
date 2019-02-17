@@ -1,14 +1,17 @@
 import datetime
 import json
 from datetime import datetime
+from google.protobuf.empty_pb2 import Empty
 from shared_buffer import *
 from src.cyber_network.traffic_flow import ReplayFlowsContainer
 from src.core.replay_orchestrator import ReplayOrchestrator
 from src.utils.sleep_functions import sleep
 from src.utils.util_functions import *
+from src.core.pss_server import *
 from defines import *
 from kronos_functions import *
 from kronos_helper_functions import *
+from src.proto import pss_pb2_grpc
 import subprocess
 import sys
 import os
@@ -61,6 +64,7 @@ class NetPower(object):
         self.emulated_background_traffic_flows = emulated_background_traffic_flows
         self.replay_traffic_flows = replay_traffic_flows
         self.emulation_driver_params = []
+        self.proxy_server = None
 
         self.get_emulation_driver_params()
 
@@ -359,6 +363,22 @@ class NetPower(object):
     def start_proxy_process(self):
 
         print "Melody >> Starting proxy ... "
+        #server = grpc.server(futures.ThreadPoolExecutor(max_workers=20))
+        #pss_pb2_grpc.add_pssServicer_to_server(PSSServicer(self.project_dir, "powersim_case"), server)
+
+        #server.add_insecure_port('[::]:50051')
+        #server.start()
+        server = None
+
+        self.proxy_server = server
+
+    def trigger_proxy_batch_processing(self):
+        with grpc.insecure_channel('localhost:50051') as channel:
+            stub = pss_pb2_grpc.pssStub(channel)
+            status = stub.process(Empty())
+            return status
+        return None
+
 
 
     def start_replay_orchestrator(self):
