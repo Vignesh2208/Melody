@@ -2,11 +2,27 @@ from src.core.basicHostIPCLayer import basicHostIPCLayer
 from src.core.defines import *
 import grpc
 import time
+import sys
 import random
 import threading
 
 from src.proto import pss_pb2
 from src.proto import pss_pb2_grpc
+
+def rpc_read(data):
+    print "Sending RPC request"
+    sys.stdout.flush()
+    try:
+        with grpc.insecure_channel('11.0.0.255:50051') as channel:
+            stub = pss_pb2_grpc.pssStub(channel)
+            readRequest = pss_pb2.ReadRequest(timestamp=str(time.time()), objtype="bus", objid="1", fieldtype="v")
+            data.value = str(stub.read(readRequest))
+            print "Received RPC response"
+            sys.stdout.flush()
+    except:
+        print "Error in creating RPC request"
+        sys.stdout.flush()
+        return
 
 
 class PMU(threading.Thread):
@@ -35,11 +51,10 @@ class PMU(threading.Thread):
             pkt.msg_type = "PERIODIC_UPDATE"
             data = pkt.content.add()
             data.key = "VOLTAGE"
-            with grpc.insecure_channel('localhost:50051') as channel:
-                stub = pss_pb2_grpc.pssStub(channel)
-                readRequest = pss_pb2.ReadRequest(timestamp=str(time.time()), objtype="bus", objid="1", fieldtype="v")
-                #response = stub.read(readRequest)
-                data.value = stub.read(readRequest) #str(random.uniform(1, 10))
+            data.value = "1"
+            t = threading.Thread(target=rpc_read, args=(data,))
+            t.start()
+            t.join()
 
             data = pkt.content.add()
             data.key = "CURRENT"
@@ -58,6 +73,7 @@ class PMU(threading.Thread):
 
             request_no += 1
             time.sleep(1)
+
 
 
 class hostApplicationLayer(basicHostIPCLayer):
@@ -87,8 +103,8 @@ class hostApplicationLayer(basicHostIPCLayer):
 
     def on_start_up(self):
 
-        self.PMU.start()
         self.log.info("Started PMU:  " + self.managed_powersim_id + " on " + str(self.host_id))
+        self.PMU.start()
 
     """
        Called before initiating shutdown of IPC. It can be overridden to stop essential services.

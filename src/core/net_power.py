@@ -7,18 +7,28 @@ from src.cyber_network.traffic_flow import ReplayFlowsContainer
 from src.core.replay_orchestrator import ReplayOrchestrator
 from src.utils.sleep_functions import sleep
 from src.utils.util_functions import *
+import grpc
+from grpc import *
+from src.proto import pss_pb2_grpc
 from src.core.pss_server import *
 from defines import *
 from kronos_functions import *
 from kronos_helper_functions import *
-from src.proto import pss_pb2_grpc
+from concurrent import futures
+from src.proto.pss_pb2_grpc import *
 import subprocess
 import sys
 import os
 import tempfile
+import threading
 from sys import stdout
 
 
+def rpc_process():
+    with grpc.insecure_channel('11.0.0.255:50051') as channel:
+        stub = pss_pb2_grpc.pssStub(channel)
+        status = stub.process(Empty())
+        logging.info("Process return <%s>"%status.status)
 
 
 class NetPower(object):
@@ -94,6 +104,9 @@ class NetPower(object):
                 for mapping in port_mapping:
                     entity_id = mapping[0]
                     self.host_to_powersim_ids[mininet_host_name].append(entity_id)
+
+                if len(self.host_to_powersim_ids[mininet_host_name]) == 0 :
+                    self.host_to_powersim_ids[mininet_host_name].append("DUMMY_" + str(mininet_host_name))
         self.open_main_cmd_channel_buffers()
         
         self.check_kronos_loaded()
@@ -168,6 +181,13 @@ class NetPower(object):
                     self.powersim_id_to_host[entity_id]["port"] = entity_port
                     self.powersim_id_to_host[entity_id]["mapped_host"] = mininet_host_name
                     self.powersim_id_to_host[entity_id]["mapped_host_ip"] = "10.0.0." + str(mininet_host_name[1:])
+                if len(port_mapping) == 0:
+                    entity_id = "DUMMY_" + str(mininet_host_name)
+                    entity_port = 5100
+                    self.powersim_id_to_host[entity_id] = {}
+                    self.powersim_id_to_host[entity_id]["port"] = entity_port
+                    self.powersim_id_to_host[entity_id]["mapped_host"] = mininet_host_name
+                    self.powersim_id_to_host[entity_id]["mapped_host_ip"] = "10.0.0." + str(mininet_host_name[1:])
 
             json.dump(self.powersim_id_to_host, outfile)
 
@@ -183,12 +203,9 @@ class NetPower(object):
         return ' '.join(tracer_args)
 
     def start_host_processes(self):
-        print "Melody >> Starting all hosts: ", self.cyber_host_apps
+        print "Melody >> Starting all hosts: ", self.cyber_host_apps, self.host_to_powersim_ids
 
         for mininet_host in self.network_configuration.mininet_obj.hosts:
-            if mininet_host.name not in self.host_to_powersim_ids:
-                continue
-
             for mapped_powerim_id in self.host_to_powersim_ids[mininet_host.name]:
                 host_id = int(mininet_host.name[1:])
                 host_log_file = self.log_dir + "/" + mapped_powerim_id  + "_log.txt"
@@ -199,6 +216,8 @@ class NetPower(object):
 
                 if mininet_host.name in self.cyber_host_apps:
                     cmd_to_run += " -a " + str(self.cyber_host_apps[mininet_host.name])
+                else:
+                    cmd_to_run += " -a NONE"
 
                 if self.enable_kronos == 1:
                     cmd_to_run = self.cmd_to_start_process_under_tracer(cmd_to_run, host_id)
@@ -342,6 +361,8 @@ class NetPower(object):
                                                      expected_no_of_pids=self.n_actual_tcpdump_procs)
         set_cpu_affinity_pid_list(sudo_tcpdump_parent_pids)
 
+        self.tcpdump_pids = sudo_tcpdump_parent_pids
+
     def set_netdevice_owners(self):
         print "Kronos >> Assuming control over mininet network interfaces ..."
         for mininet_switch in self.network_configuration.mininet_obj.switches:
@@ -363,21 +384,61 @@ class NetPower(object):
     def start_proxy_process(self):
 
         print "Melody >> Starting proxy ... "
-        #server = grpc.server(futures.ThreadPoolExecutor(max_workers=20))
-        #pss_pb2_grpc.add_pssServicer_to_server(PSSServicer(self.project_dir, "powersim_case"), server)
+        proxy_script = self.base_dir + "/src/core/pss_server.py"
+        cmd_to_run = "python " + str(proxy_script) + " --project_dir=" + self.project_dir + " --listen_ip=11.0.0.255"
+        cmd_to_run += ' > /tmp/proxy_log.txt 2>&1 & echo $! '
+        self.proxy_pid = -1
+        with tempfile.NamedTemporaryFile() as f:
+            os.system(cmd_to_run + '>> ' + f.name)
+            pid = int(f.read())
+            self.proxy_pid = pid
+            print "Melody >> Proxy PID: ", self.proxy_pid, " Waiting 5 sec for server to get setup ..."
+            time.sleep(5.0)
 
-        #server.add_insecure_port('[::]:50051')
-        #server.start()
-        server = None
+    def start_control_network(self):
+        print "Melody >> Starting Control Network"
+        for host in self.network_configuration.mininet_obj.hosts:
+            host_number = host.name[1:]
+            host.cmd("ip link add eth0 type veth peer name " + host.name + "base netns 1")
+            host.cmd("ifconfig eth0 up")
+            host.cmd("ifconfig eth0 11.0.0." + str(host_number))
+        os.system("sudo ip link add base type veth peer name hostbase netns 1")
+        os.system("sudo ifconfig base 11.0.0.255 up")
+        os.system("sudo ifconfig hostbase up")
+        os.system("sudo brctl addbr connect")
+        for host in self.network_configuration.mininet_obj.hosts:
+            os.system("sudo ifconfig " + str(host.name) + "base up")
+            os.system("sudo brctl addif connect " + str(host.name) + "base")
+        os.system("sudo brctl addif connect hostbase")
+        os.system("sudo ifconfig connect up")
 
-        self.proxy_server = server
+
+
+    def stop_control_network(self):
+        print "Melody >> Stopping Control Network"
+        os.system("sudo ifconfig connect down")
+        for host in self.network_configuration.mininet_obj.hosts:
+            host.cmd("ifconfig eth0 down")
+            host.cmd("ip link del eth0")
+        os.system("sudo ifconfig base down")
+        os.system("sudo ip link del base")
+        os.system("sudo ifconfig connect down")
+        os.system("sudo kill -15 " + str(self.proxy_pid))
+        os.system("sudo brctl delbr connect")
 
     def trigger_proxy_batch_processing(self):
-        with grpc.insecure_channel('localhost:50051') as channel:
+        print "Triggering next batch processing at proxy ..."
+        """
+        with grpc.insecure_channel('11.0.0.255:50051') as channel:
+            print "Opened channel ..."
             stub = pss_pb2_grpc.pssStub(channel)
+            print "Sending Empty Request ..."
             status = stub.process(Empty())
             return status
-        return None
+        """
+        t = threading.Thread(target=rpc_process)
+        t.start()
+        t.join()
 
 
 
@@ -517,6 +578,10 @@ class NetPower(object):
 
         print "Cleaning up ..."
         self.enable_TCP_RST()
+        self.stop_control_network()
+        print "Stopping all TCPDUMP processes ..."
+        for pid in self.tcpdump_pids:
+            os.system("sudo kill -2 " + str(pid))
         self.network_configuration.cleanup_mininet()
 
     def initialize_project(self):
@@ -525,13 +590,16 @@ class NetPower(object):
         self.print_topo_info()
         self.start_host_processes()
         self.start_switch_processes()
-        self.start_pkt_captures()
+        self.start_control_network()
         self.start_proxy_process()
+        self.start_pkt_captures()
         self.start_replay_orchestrator()
-
         # Background related
         self.start_emulation_drivers()
         self.start_replay_drivers()
+
+
+       
 
         # Kronos related
         if self.enable_kronos:

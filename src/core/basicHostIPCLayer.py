@@ -64,6 +64,7 @@ class basicHostIPCLayer(threading.Thread):
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP
         sock.settimeout(SOCKET_TIMEOUT)
         sock.bind((self.host_ip, self.listen_port))
+        time.sleep(1.0)
 
         self.on_start_up()
         while True:

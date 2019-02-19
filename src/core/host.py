@@ -37,7 +37,7 @@ def parseOpts():
     log_file = "stdout"
     run_time = 0
     project_name = "test"
-    app_layer_file = None
+    app_layer_file = "NONE"
 
     try:
         (opts, args) = getopt.getopt(sys.argv[1:], "hc:l:r:n:a:m:id:",
@@ -101,7 +101,7 @@ def main(host_id, net_cfg_file, log_file, run_time, project_name, app_layer_file
     shared_buf_array = shared_buffer_array()
 
     host_attack_layer_override_file = "h" + str(host_id) + "_attack_layer"
-    if app_layer_file is not None:
+    if app_layer_file != "NONE":
         split_ls = app_layer_file.split('.')
         host_control_layer_override_file = split_ls[0]
         log.info("Override file name: " + host_control_layer_override_file)

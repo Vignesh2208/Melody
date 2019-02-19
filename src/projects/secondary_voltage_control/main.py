@@ -2,6 +2,11 @@ import sys
 import argparse
 sys.path.append("./")
 from src.core.parse_project_configuration import *
+from src.core.net_power import *
+import grpc
+from src.proto import pss_pb2
+from src.proto import pss_pb2_grpc
+from google.protobuf.empty_pb2 import Empty
 
 
 def main():
@@ -30,11 +35,14 @@ def main():
                                 "admin_password": args.admin_password,
                             }
     exp = parse_experiment_configuration(project_run_time_args)
-    exp.initialize_project()
+    
 
+
+    exp.initialize_project()
     total_time_ran = 0
     timestep_size = 500*MS
 
+    
     # Main Loop of Co-Simulation
     while True:
         exp.run_for(timestep_size)
@@ -47,8 +55,9 @@ def main():
 
         #if total_time_ran == 1*SEC:
         #    exp.trigger_nxt_replay()
-
+    
     exp.close_project()
+    
 
 
 if __name__ == "__main__":
