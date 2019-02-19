@@ -10,15 +10,11 @@ from src.proto import pss_pb2
 from src.proto import pss_pb2_grpc
 
 def rpc_read(data):
-    print "Sending RPC request"
-    sys.stdout.flush()
     try:
         with grpc.insecure_channel('11.0.0.255:50051') as channel:
             stub = pss_pb2_grpc.pssStub(channel)
             readRequest = pss_pb2.ReadRequest(timestamp=str(time.time()), objtype="bus", objid="1", fieldtype="v")
             data.value = str(stub.read(readRequest))
-            print "Received RPC response"
-            sys.stdout.flush()
     except:
         print "Error in creating RPC request"
         sys.stdout.flush()
@@ -45,6 +41,7 @@ class PMU(threading.Thread):
         request_no = 0
         while not self.stop:
 
+
             pkt = pss_pb2.CyberMessage()
             pkt.src_application_id = self.pmu_name
             pkt.dst_application_id = "SCADA_CONTROLLER"
@@ -52,9 +49,8 @@ class PMU(threading.Thread):
             data = pkt.content.add()
             data.key = "VOLTAGE"
             data.value = "1"
-            t = threading.Thread(target=rpc_read, args=(data,))
-            t.start()
-            t.join()
+
+            rpc_read(data)
 
             data = pkt.content.add()
             data.key = "CURRENT"
@@ -70,9 +66,9 @@ class PMU(threading.Thread):
             self.host_control_layer.log.info("Sending Reading: \n" + str(pkt))
 
             self.tx_pkt_to_powersim_entity(pkt.SerializeToString(), pkt.dst_application_id)
-
-            request_no += 1
             time.sleep(1)
+            request_no += 1
+
 
 
 
