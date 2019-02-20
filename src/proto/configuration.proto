@@ -29,15 +29,18 @@ message PowerSimulationSpecification {
 	repeated PowerSimulationEntity entities = 1;
 }
 
-message MappedPowerSimEntity {
-    required string mapped_powersim_entity_id = 1;
+message MappedApplication {
+    required string application_id = 1;
     required int32 listen_port = 2;
+    optional string object_type = 3;
+    optional string object_id = 4;
+    optional string field_type = 5;
 }
 
 message CyberPhysicalMap {
 	required string cyber_entity_id = 1;
 	optional string app_layer_src = 2;
-	repeated MappedPowerSimEntity mapped_powersim_entity = 3;
+	repeated MappedApplication mapped_application = 3;
 	optional string description = 4;
 }
 

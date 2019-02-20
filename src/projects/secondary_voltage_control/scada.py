@@ -5,24 +5,56 @@ from src.core.defines import *
 import threading
 import time
 import random
+import numpy as np
+import config as cfg
+
+
+class SCADA(threading.Thread):
+    def __init__(self, host_control_layer, scada_controller_name):
+        threading.Thread.__init__(self)
+        self.host_control_layer = host_control_layer
+        self.stop = False
+        self.scada_controller_name = scada_controller_name
+
+
+    def run(self, debug=False):
+
+        _vp_nom = np.array([cfg.BUS_VM[bus] for bus in cfg.PILOT_BUS])
+        _vg = np.array([cfg.BUS_VM[gen] for gen in cfg.GEN])
+        C = loadObjectBinary("C.bin")
+        Cp = np.matrix([C[i] for i in range(cfg.LOAD_NO) if cfg.LOAD[i] in cfg.PILOT_BUS])
+        Cpi = Cp.I
+        alpha = 0.5
+
+        while not self.stop:
+            _vp = np.array([self.host_control_layer.vp[bus] for bus in cfg.PILOT_BUS])
+            u = np.dot(Cpi, alpha * (_vp - _vp_nom)).A1  # 1-d base array
+            _vg = np.array(_vg + u)
+
+
+            for i in range(cfg.GEN_NO):
+                pkt_new = pss_pb2.CyberMessage()
+                pkt_new.src_application_id = self.scada_controller_name
+                pkt_new.dst_application_id = "PLC_Gen_Bus_%d"%cfg.GEN[i]
+                data = pkt_new.content.add()
+                data.key = "VOLTAGE_SETPOINT"
+                data.value = str(_vg[i])
+
+                data = pkt_new.content.add()
+                data.key = "TIMESTAMP"
+                data.value = str(time.time())
+
+                self.host_control_layer.log.info("Tx New Control Pkt: " + str(pkt_new))
+                self.host_control_layer.tx_pkt_to_powersim_entity(pkt_new.SerializeToString())
+
+            time.sleep(1.5)
 
 class hostApplicationLayer(basicHostIPCLayer):
 
-    def __init__(self, host_id, log_file, powersim_ids_mapping, managed_powersim_id):
-        basicHostIPCLayer.__init__(self, host_id, log_file, powersim_ids_mapping, managed_powersim_id)
-
-        self.mapped_PLCs = {
-                                "PMU_Pilot_Bus_2": "PLC_Gen_Bus_30",
-                                "PMU_Pilot_Bus_6": "PLC_Gen_Bus_31",
-                                "PMU_Pilot_Bus_9": "PLC_Gen_Bus_32",
-                                "PMU_Pilot_Bus_10": "PLC_Gen_Bus_33",
-                                "PMU_Pilot_Bus_19": "PLC_Gen_Bus_34",
-                                "PMU_Pilot_Bus_20": "PLC_Gen_Bus_35",
-                                "PMU_Pilot_Bus_22": "PLC_Gen_Bus_36",
-                                "PMU_Pilot_Bus_23": "PLC_Gen_Bus_37",
-                                "PMU_Pilot_Bus_25": "PLC_Gen_Bus_38",
-                                "PMU_Pilot_Bus_29": "PLC_Gen_Bus_39",
-                            }
+    def __init__(self, host_id, log_file, powersim_ids_mapping, managed_application_id):
+        basicHostIPCLayer.__init__(self, host_id, log_file, powersim_ids_mapping, managed_application_id)
+        self.SCADA = SCADA(self, managed_application_id)
+        self.vp = {bus:cfg.BUS_VM[bus] for bus in cfg.PILOT_BUS}
 
     """
         This function gets called on reception of message from network.
@@ -33,25 +65,19 @@ class hostApplicationLayer(basicHostIPCLayer):
         pkt_parsed = pss_pb2.CyberMessage()
         pkt_parsed.ParseFromString(pkt)
 
-        if pkt_parsed.src_application_id in self.mapped_PLCs:
-            pkt_new = pss_pb2.CyberMessage()
-            pkt_new.src_application_id = "SCADA_CONTROLLER"
-            pkt_new.dst_application_id = self.mapped_PLCs[pkt_parsed.src_application_id]
-            data = pkt_new.content.add()
-            data.key = "VOLTAGE_SETPOINT"
-            data.value = str(random.uniform(1, 10))
+        recv_obj_id = None
+        recv_obj_value = None
+        for data_content in pkt_parsed.content:
+            if data_content.key == "OBJ_ID":
+                recv_obj_id = int(data_content.value)
+            if data_content.key == "VOLTAGE":
+                recv_obj_value = float(data_content.value)
+        assert(recv_obj_id is not None and recv_obj_value is not None)
+        assert(recv_obj_id in self.vp)
 
-            for content_ in pkt_parsed.content:
-                if str(content_.key) == "TIMESTAMP":
-                    pmu_send_timestamp = content_.value
-                    break
+        self.vp[recv_obj_id] = recv_obj_value
+        self.log.info("Rx pkt from: %d = %s"%(recv_obj_id,str(pkt_parsed)))
 
-            data = pkt_new.content.add()
-            data.key = "TIMESTAMP"
-            data.value = str(pmu_send_timestamp)
-
-            self.log.info("Tx New Pkt: " + str(pkt_new))
-            self.tx_pkt_to_powersim_entity(pkt_new.SerializeToString())
 
 
 
@@ -60,11 +86,12 @@ class hostApplicationLayer(basicHostIPCLayer):
     """
 
     def on_start_up(self):
-        pass
+        self.SCADA.start()
 
     """
        Called before initiating shutdown of IPC. It can be overridden to stop essential services.
     """
 
     def on_shutdown(self):
-        pass
+        self.SCADA.stop = True
+        self.SCADA.join()

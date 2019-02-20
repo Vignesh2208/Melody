@@ -44,8 +44,8 @@ class PSSServicer(pss_pb2_grpc.pssServicer): # a.k.a. the Proxy
         self.reqlock = Lock()   # thread-safe access to self.requests
         self.mp = MatPowerDriver("/tmp")
         self.mp.open(case_directory + "/" + case_name)
-        self.processlogfile = case_directory + "/process_order.txt"
-        self.requestlogfile = case_directory + "/request_order.txt"
+        self.processlogfile = "/tmp/process_order.txt"
+        self.requestlogfile = "/tmp/request_order.txt"
         open(self.processlogfile, "w").close()
         open(self.requestlogfile, "w").close()
 
@@ -150,6 +150,7 @@ if __name__ == '__main__':
     kill_now = False
 
     signal.signal(signal.SIGTERM, exit_gracefully)
+    signal.signal(signal.SIGINT, exit_gracefully)
     args = parser.parse_args()
 
     print "Project Directory: ", args.project_directory

@@ -115,6 +115,9 @@ class NetPower(object):
             self.replay_flows_container.add_replay_flow(flow)
         self.nodes_involved_in_replay = self.replay_flows_container.get_all_involved_nodes()
         self.replay_orchestrator = None
+        self.prev_queued_disturbance_threads = []
+        self.nxt_queued_disturbance_threads = []
+        self.total_elapsed_virtual_time = 0.0
         
 
         set_cpu_affinity(int(os.getpid()))
@@ -159,7 +162,6 @@ class NetPower(object):
 
         print "########################################################################"
         if self.enable_kronos == 1:
-            os.system("sudo killall -9 tcpdump")
             stopExp()
             print "Kronos >> Stopping synchronized experiment at Local Time: ", str(datetime.now())
             self.trigger_all_processes("EXIT")
@@ -392,7 +394,7 @@ class NetPower(object):
             os.system(cmd_to_run + '>> ' + f.name)
             pid = int(f.read())
             self.proxy_pid = pid
-            print "Melody >> Proxy PID: ", self.proxy_pid, " Waiting 5 sec for server to get setup ..."
+            print "Melody >> Proxy PID: ", self.proxy_pid, " Waiting 5 sec for GRPC server to get setup ..."
             time.sleep(5.0)
 
     def start_control_network(self):
@@ -416,6 +418,9 @@ class NetPower(object):
 
     def stop_control_network(self):
         print "Melody >> Stopping Control Network"
+        os.system("sudo kill -9 " + str(self.proxy_pid))
+        os.system("sudo fuser -k 50051/tcp")
+        time.sleep(5.0)
         os.system("sudo ifconfig connect down")
         for host in self.network_configuration.mininet_obj.hosts:
             host.cmd("ifconfig eth0 down")
@@ -423,23 +428,27 @@ class NetPower(object):
         os.system("sudo ifconfig base down")
         os.system("sudo ip link del base")
         os.system("sudo ifconfig connect down")
-        os.system("sudo kill -15 " + str(self.proxy_pid))
         os.system("sudo brctl delbr connect")
 
+
     def trigger_proxy_batch_processing(self):
+
         print "Triggering next batch processing at proxy ..."
-        """
-        with grpc.insecure_channel('11.0.0.255:50051') as channel:
-            print "Opened channel ..."
-            stub = pss_pb2_grpc.pssStub(channel)
-            print "Sending Empty Request ..."
-            status = stub.process(Empty())
-            return status
-        """
         t = threading.Thread(target=rpc_process)
         t.start()
         t.join()
 
+    def send_disturbance_to_powersim(self, obj_type, obj_id, field_type, value):
+        print "Queueing disturbance: OBJ_TYPE: %s, OBJ_ID: %s, "\
+              "FIELD_TYPE: %s, DISTURBANCE_VALUE: %s"%(obj_type, obj_id, field_type, value)
+
+        if self.enable_kronos:
+            tstamp = self.total_elapsed_virtual_time
+        else:
+            tstamp = time.time()
+
+        t = threading.Thread(target=rpc_write_disturbance, args=(obj_type, obj_id, field_type, value, tstamp,))
+        t.start()
 
 
     def start_replay_orchestrator(self):
@@ -479,8 +488,7 @@ class NetPower(object):
         for mininet_host in self.network_configuration.mininet_obj.hosts:
             if mininet_host.name in self.host_to_powersim_ids:
                 for mapped_powersim_id in self.host_to_powersim_ids[mininet_host.name]:
-                    result = self.shared_buf_array.open(mapped_powersim_id + "-main-cmd-channel-buffer",
-		                                    isProxy=True)
+                    result = self.shared_buf_array.open(mapped_powersim_id + "-main-cmd-channel-buffer", isProxy=True)
                     if result == BUF_NOT_INITIALIZED or result == FAILURE:
                         print "Shared Buffer open failed! Buffer not initialized for host: " + str(mininet_host.name)
                         sys.exit(0)
@@ -571,6 +579,7 @@ class NetPower(object):
         # Clean up ...
         if self.enable_kronos == 1:
             self.stop_synchronized_experiment()
+            time.sleep(5)
         else:
             self.trigger_all_processes("EXIT")
             self.replay_orchestrator.send_command("EXIT")
@@ -579,9 +588,9 @@ class NetPower(object):
         print "Cleaning up ..."
         self.enable_TCP_RST()
         self.stop_control_network()
-        print "Stopping all TCPDUMP processes ..."
-        for pid in self.tcpdump_pids:
-            os.system("sudo kill -2 " + str(pid))
+        #print "Stopping all TCPDUMP processes ..."
+        #for pid in self.tcpdump_pids:
+        #    os.system("sudo kill -2 " + str(pid))
         self.network_configuration.cleanup_mininet()
 
     def initialize_project(self):
@@ -662,6 +671,7 @@ class NetPower(object):
 
             if self.enable_kronos == 1:
                 stdout.write("\n")
+                self.total_elapsed_virtual_time += float(run_time_ns)/float(SEC)
 
     def close_project(self):
         self.cleanup()

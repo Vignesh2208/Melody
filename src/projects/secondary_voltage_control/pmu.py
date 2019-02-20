@@ -9,16 +9,6 @@ import threading
 from src.proto import pss_pb2
 from src.proto import pss_pb2_grpc
 
-def rpc_read(data):
-    try:
-        with grpc.insecure_channel('11.0.0.255:50051') as channel:
-            stub = pss_pb2_grpc.pssStub(channel)
-            readRequest = pss_pb2.ReadRequest(timestamp=str(time.time()), objtype="bus", objid="1", fieldtype="v")
-            data.value = str(stub.read(readRequest))
-    except:
-        print "Error in creating RPC request"
-        sys.stdout.flush()
-        return
 
 
 class PMU(threading.Thread):
@@ -28,6 +18,11 @@ class PMU(threading.Thread):
         self.stop = False
         self.pmu_name = pmu_name
         self.raw_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+        self.obj_type = "bus"
+        self.obj_id = self.pmu_name.split('_')[-1]
+        self.field_type = "v"
+
 
 
     def tx_pkt_to_powersim_entity(self, pkt, dst_application_id):
@@ -48,13 +43,11 @@ class PMU(threading.Thread):
             pkt.msg_type = "PERIODIC_UPDATE"
             data = pkt.content.add()
             data.key = "VOLTAGE"
-            data.value = "1"
 
-            rpc_read(data)
 
-            data = pkt.content.add()
-            data.key = "CURRENT"
-            data.value = str(random.uniform(1, 10))
+            ret = rpc_read(self.obj_type, self.obj_id, self.field_type)
+            assert(ret is not None)
+            data.value = ret
 
             data = pkt.content.add()
             data.key = "TIMESTAMP"
@@ -63,8 +56,13 @@ class PMU(threading.Thread):
             data = pkt.content.add()
             data.key = "COUNTER"
             data.value = str(request_no)
-            self.host_control_layer.log.info("Sending Reading: \n" + str(pkt))
 
+            data = pkt.content.add()
+            data.key = "OBJ_ID"
+            data.value = self.obj_id
+
+
+            self.host_control_layer.log.info("Sending Reading: \n" + str(pkt))
             self.tx_pkt_to_powersim_entity(pkt.SerializeToString(), pkt.dst_application_id)
             time.sleep(1)
             request_no += 1
@@ -74,9 +72,9 @@ class PMU(threading.Thread):
 
 class hostApplicationLayer(basicHostIPCLayer):
 
-    def __init__(self, host_id, log_file, powersim_ids_mapping, managed_powersim_id):
-        basicHostIPCLayer.__init__(self, host_id, log_file, powersim_ids_mapping, managed_powersim_id)
-        self.PMU = PMU(self, self.managed_powersim_id)
+    def __init__(self, host_id, log_file, powersim_ids_mapping, managed_application_id):
+        basicHostIPCLayer.__init__(self, host_id, log_file, powersim_ids_mapping, managed_application_id)
+        self.PMU = PMU(self, managed_application_id)
 
 
     """
@@ -99,7 +97,7 @@ class hostApplicationLayer(basicHostIPCLayer):
 
     def on_start_up(self):
 
-        self.log.info("Started PMU:  " + self.managed_powersim_id + " on " + str(self.host_id))
+        self.log.info("Started PMU:  " + self.managed_application_id + " on " + str(self.host_id))
         self.PMU.start()
 
     """
@@ -109,4 +107,4 @@ class hostApplicationLayer(basicHostIPCLayer):
     def on_shutdown(self):
         self.PMU.stop = True
         self.PMU.join()
-        self.log.info("Stopped PMU: " + self.managed_powersim_id + " on " + str(self.host_id))
+        self.log.info("Stopped PMU: " + self.managed_application_id + " on " + str(self.host_id))

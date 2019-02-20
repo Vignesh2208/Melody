@@ -46,12 +46,14 @@ def main():
     # Main Loop of Co-Simulation
     while True:
         exp.run_for(timestep_size)
+        exp.send_disturbance_to_powersim(obj_type="load", obj_id="4", field_type="v", value="202")
         exp.trigger_proxy_batch_processing()
 
         total_time_ran += timestep_size
         print "Time Elapsed: ", total_time_ran
         if total_time_ran >= args.run_time*SEC:
             break
+
 
         #if total_time_ran == 1*SEC:
         #    exp.trigger_nxt_replay()

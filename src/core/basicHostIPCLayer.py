@@ -12,17 +12,17 @@ from src.utils.sleep_functions import sleep
 
 
 class basicHostIPCLayer(threading.Thread):
-    def __init__(self, host_id, log_file, powersim_ids_mapping, managed_powersim_id):
+    def __init__(self, host_id, log_file, powersim_ids_mapping, managed_application_id):
         threading.Thread.__init__(self)
 
 
         self.thread_cmd_queue = []
         self.host_id = host_id
-        self.managed_powersim_id = managed_powersim_id
+        self.managed_application_id = managed_application_id
         self.powersim_ids_mapping = powersim_ids_mapping
 
-        self.host_ip = self.powersim_ids_mapping[self.managed_powersim_id]["mapped_host_ip"]
-        self.listen_port = self.powersim_ids_mapping[self.managed_powersim_id]["port"]
+        self.host_ip = self.powersim_ids_mapping[self.managed_application_id]["mapped_host_ip"]
+        self.listen_port = self.powersim_ids_mapping[self.managed_application_id]["port"]
 
         self.log = logger.Logger(log_file, "Host " + str(host_id) + " IPC Thread")
         self.raw_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)

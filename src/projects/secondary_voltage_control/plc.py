@@ -5,6 +5,7 @@ from src.proto import pss_pb2
 from src.utils.sleep_functions import *
 import threading
 import time
+import random
 
 
 class PLC(threading.Thread):
@@ -14,9 +15,14 @@ class PLC(threading.Thread):
         self.stop = False
         self.plc_name = plc_name
         self.recv_pkt_queue = []
+        self.obj_id = self.plc_name.split('_')[-1]
+        self.field_type = "v"
+        self.obj_type = "gen"
+
 
     def run(self):
         request_no = 0
+
         while not self.stop:
 
             try:
@@ -31,16 +37,18 @@ class PLC(threading.Thread):
             pkt_parsed = pss_pb2.CyberMessage()
             pkt_parsed.ParseFromString(data)
 
-            for content_type in pkt_parsed.content:
-                if content_type.key == "TIMESTAMP":
-                    pmu_send_tstamp = float(content_type.value)
-
             #possibly make an RPC call here
 
             recv_time = float(time.time())
 
             self.host_control_layer.log.info("Rx New packet for PLC: \n" + str(pkt_parsed))
-            self.host_control_layer.log.info("Experienced control delay:" + str(recv_time - pmu_send_tstamp))
+            voltage_setpoint = None
+            for data_content in pkt_parsed.content:
+                if data_content.key == "VOLTAGE_SETPOINT":
+                    voltage_setpoint = data_content.value
+            assert(voltage_setpoint is not None)
+            self.host_control_layer.log.info("Sending RPC Write Request ...")
+            rpc_write(self.obj_type, self.obj_id, self.field_type, voltage_setpoint)
             self.host_control_layer.log.info("----------------------------------------")
 
             request_no += 1
@@ -48,10 +56,10 @@ class PLC(threading.Thread):
 
 class hostApplicationLayer(basicHostIPCLayer):
 
-    def __init__(self, host_id, log_file, powersim_ids_mapping, managed_powersim_id):
-        basicHostIPCLayer.__init__(self, host_id, log_file, powersim_ids_mapping, managed_powersim_id)
+    def __init__(self, host_id, log_file, powersim_ids_mapping, managed_application_id):
+        basicHostIPCLayer.__init__(self, host_id, log_file, powersim_ids_mapping, managed_application_id)
         self.cmd_lock = threading.Lock()
-        self.PLC = PLC(self, self.managed_powersim_id)
+        self.PLC = PLC(self, self.managed_application_id)
 
 
     """
@@ -74,7 +82,7 @@ class hostApplicationLayer(basicHostIPCLayer):
     def on_start_up(self):
 
         self.PLC.start()
-        self.log.info("Started PLC: " + self.managed_powersim_id + " on " + str(self.host_id))
+        self.log.info("Started PLC: " + self.managed_application_id + " on " + str(self.host_id))
 
     """
        Called before initiating shutdown of IPC. It can be overridden to stop essential services.
@@ -83,4 +91,4 @@ class hostApplicationLayer(basicHostIPCLayer):
     def on_shutdown(self):
         self.PLC.stop = True
         self.PLC.join()
-        self.log.info("Stopping PLC: "  + self.managed_powersim_id + " on " + str(self.host_id))
+        self.log.info("Stopping PLC: "  + self.managed_application_id + " on " + str(self.host_id))

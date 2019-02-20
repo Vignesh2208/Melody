@@ -41,7 +41,7 @@ def parseOpts():
 
     try:
         (opts, args) = getopt.getopt(sys.argv[1:], "hc:l:r:n:a:m:id:",
-                                     ["help", "netcfg-file=", "log-file=", "run-time=", "project-name=", "app=", "managed_powersim_id=", "id=",
+                                     ["help", "netcfg-file=", "log-file=", "run-time=", "project-name=", "app=", "managed_application_id=", "id=",
                                       ])
     except getopt.GetoptError as e:
         print (str(e))
@@ -62,18 +62,20 @@ def parseOpts():
         if o in ("-d", "--id="):
             host_id = int(v)
 
-        if o in ("-m", "--managed_powersim_id="):
-            managed_powersim_id = str(v)
+        if o in ("-m", "--managed_application_id="):
+            managed_application_id = str(v)
 
         if o in ("-a", "--app="):
             app_layer_file = str(v)
 
-    assert (net_cfg_file_path is not None and host_id is not None and managed_powersim_id is not None)
-    return (net_cfg_file_path, log_file, run_time, project_name, host_id, app_layer_file, managed_powersim_id)
+    assert (net_cfg_file_path is not None and host_id is not None and managed_application_id is not None)
+    return (net_cfg_file_path, log_file, run_time, project_name, host_id, app_layer_file, managed_application_id)
 
 
-def init_shared_buffers(host_id, run_time, shared_buf_array, log):
-    result = shared_buf_array.open(bufName=managed_powersim_id + "-main-cmd-channel-buffer", isProxy=False)
+def init_shared_buffers(host_id, run_time, shared_buf_array, log, managed_application_id):
+    log.info("Buffer opened: " + managed_application_id + "-main-cmd-channel-buffer")
+    result = shared_buf_array.open(bufName=managed_application_id + "-main-cmd-channel-buffer", isProxy=False)
+
 
     if result == BUF_NOT_INITIALIZED or result == FAILURE:
         log.error("Failed to open communication channel ! Not starting any threads !")
@@ -89,18 +91,17 @@ def init_shared_buffers(host_id, run_time, shared_buf_array, log):
         sys.exit(0)
 
 
-def main(host_id, net_cfg_file, log_file, run_time, project_name, app_layer_file, managed_powersim_id):
+def main(host_id, net_cfg_file, log_file, run_time, project_name, app_layer_file, managed_application_id):
     powersim_ids_mapping = extract_mappings(net_cfg_file)
     
     log = logger.Logger(log_file, "Host" + str(host_id) + ": ")
 
-    print "Powersim IDS Mapping: " + str(powersim_ids_mapping)
-    print "Managed PowerSim ID: " + str(managed_powersim_id)
+    log.info("Powersim IDS Mapping: " + str(powersim_ids_mapping))
+    log.info("Managed PowerSim ID: " + str(managed_application_id))
     script_location = os.path.dirname(os.path.realpath(__file__))
     project_location = script_location + "/../projects/" + project_name + "/"
     shared_buf_array = shared_buffer_array()
 
-    host_attack_layer_override_file = "h" + str(host_id) + "_attack_layer"
     if app_layer_file != "NONE":
         split_ls = app_layer_file.split('.')
         host_control_layer_override_file = split_ls[0]
@@ -115,17 +116,17 @@ def main(host_id, net_cfg_file, log_file, run_time, project_name, app_layer_file
 
     log.info("Initializing inter process communication channels ...")
     sys.stdout.flush()
-    init_shared_buffers(host_id, run_time, shared_buf_array, log)
+    init_shared_buffers(host_id, run_time, shared_buf_array, log, managed_application_id)
 
     log.info("Successfully opened an inter process communication channel !")
     sys.stdout.flush()
 
-    ipc_layer = host_ipc_layer(host_id, log_file, powersim_ids_mapping, managed_powersim_id)
+    ipc_layer = host_ipc_layer(host_id, log_file, powersim_ids_mapping, managed_application_id)
     log.info("Waiting for start command ... ")
     sys.stdout.flush()
     recv_msg = ''
     while "START" not in recv_msg:
-        dummy_id, recv_msg = shared_buf_array.read_until(managed_powersim_id + "-main-cmd-channel-buffer",
+        dummy_id, recv_msg = shared_buf_array.read_until(managed_application_id + "-main-cmd-channel-buffer",
                                                          cool_off_time=0.1)
     ipc_layer.start()
     log.info("Signalled all threads to start ...")
@@ -135,7 +136,7 @@ def main(host_id, net_cfg_file, log_file, run_time, project_name, app_layer_file
     log.info("Waiting for stop command ...")
     sys.stdout.flush()
     while "EXIT" not in recv_msg:
-        dummy_id, recv_msg = shared_buf_array.read_until(managed_powersim_id + "-main-cmd-channel-buffer",
+        dummy_id, recv_msg = shared_buf_array.read_until(managed_application_id + "-main-cmd-channel-buffer",
                                                          cool_off_time=0.1)
 
     ipc_layer.cancel_thread()
@@ -144,5 +145,5 @@ def main(host_id, net_cfg_file, log_file, run_time, project_name, app_layer_file
 
 
 if __name__ == "__main__":
-    net_cfg_file_path, log_file, run_time, project_name, host_id, app_layer_file, managed_powersim_id = parseOpts()
-    sys.exit(main(host_id, net_cfg_file_path, log_file, run_time, project_name, app_layer_file, managed_powersim_id))
+    net_cfg_file_path, log_file, run_time, project_name, host_id, app_layer_file, managed_application_id = parseOpts()
+    sys.exit(main(host_id, net_cfg_file_path, log_file, run_time, project_name, app_layer_file, managed_application_id))

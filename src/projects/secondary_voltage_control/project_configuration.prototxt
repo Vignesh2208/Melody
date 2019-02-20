@@ -25,98 +25,158 @@ cyber_physical_map {
 cyber_physical_map {
     cyber_entity_id	:	"h3"
     app_layer_src: "pmu.py"
-    mapped_powersim_entity {
-        mapped_powersim_entity_id	:	"PMU_Pilot_Bus_2"
+    mapped_application {
+        application_id	:	"PMU_Pilot_Bus_2"
         listen_port : 5100
+        object_type: "bus"
+        object_id: "2"
+        field_type: "v"
     }
-    mapped_powersim_entity {
-        mapped_powersim_entity_id   :   "PMU_Pilot_Bus_6"
+    mapped_application {
+        application_id   :   "PMU_Pilot_Bus_6"
         listen_port : 5101
+        object_type: "bus"
+        object_id: "6"
+        field_type: "v"
     }
-    mapped_powersim_entity {
-        mapped_powersim_entity_id   :   "PMU_Pilot_Bus_9"
+    mapped_application {
+        application_id   :   "PMU_Pilot_Bus_9"
         listen_port : 5102
+        object_type: "bus"
+        object_id: "9"
+        field_type: "v"
     }
-    mapped_powersim_entity {
-        mapped_powersim_entity_id   :   "PMU_Pilot_Bus_10"
+    mapped_application {
+        application_id   :   "PMU_Pilot_Bus_10"
         listen_port : 5103
+        object_type: "bus"
+        object_id: "10"
+        field_type: "v"
     }
-    mapped_powersim_entity {
-        mapped_powersim_entity_id   :   "PMU_Pilot_Bus_19"
+    mapped_application {
+        application_id   :   "PMU_Pilot_Bus_19"
         listen_port : 5104
+        object_type: "bus"
+        object_id: "19"
+        field_type: "v"
     }
-    mapped_powersim_entity {
-        mapped_powersim_entity_id   :   "PMU_Pilot_Bus_20"
+    mapped_application {
+        application_id   :   "PMU_Pilot_Bus_20"
         listen_port : 5105
+        object_type: "bus"
+        object_id: "20"
+        field_type: "v"
     }
-    mapped_powersim_entity {
-        mapped_powersim_entity_id   :   "PMU_Pilot_Bus_22"
+    mapped_application {
+        application_id   :   "PMU_Pilot_Bus_22"
         listen_port : 5106
+        object_type: "bus"
+        object_id: "22"
+        field_type: "v"
     }
-    mapped_powersim_entity {
-        mapped_powersim_entity_id   :   "PMU_Pilot_Bus_23"
+    mapped_application {
+        application_id   :   "PMU_Pilot_Bus_23"
         listen_port : 5107
+        object_type: "bus"
+        object_id: "23"
+        field_type: "v"
     }
-    mapped_powersim_entity {
-        mapped_powersim_entity_id   :   "PMU_Pilot_Bus_25"
+    mapped_application {
+        application_id   :   "PMU_Pilot_Bus_25"
         listen_port : 5108
+        object_type: "bus"
+        object_id: "25"
+        field_type: "v"
     }
-    mapped_powersim_entity {
-        mapped_powersim_entity_id   :   "PMU_Pilot_Bus_29"
+    mapped_application {
+        application_id   :   "PMU_Pilot_Bus_29"
         listen_port : 5109
+        object_type: "bus"
+        object_id: "29"
+        field_type: "v"
     }
     description		            :	"PMUs for reading pilot buses"
 }
 cyber_physical_map {
     cyber_entity_id				:	"h4"
     app_layer_src: "plc.py"
-    mapped_powersim_entity {
-        mapped_powersim_entity_id	:	"PLC_Gen_Bus_30"
+    mapped_application {
+        application_id	:	"PLC_Gen_Bus_30"
         listen_port : 5100
+        object_type: "gen"
+        object_id: "30"
+        field_type: "v"
     }
-    mapped_powersim_entity {
-        mapped_powersim_entity_id   :   "PLC_Gen_Bus_31"
+    mapped_application {
+        application_id   :   "PLC_Gen_Bus_31"
         listen_port : 5101
+        object_type: "gen"
+        object_id: "31"
+        field_type: "v"
     }
-    mapped_powersim_entity {
-        mapped_powersim_entity_id   :   "PLC_Gen_Bus_32"
+    mapped_application {
+        application_id   :   "PLC_Gen_Bus_32"
         listen_port : 5102
+        object_type: "gen"
+        object_id: "32"
+        field_type: "v"
     }
-    mapped_powersim_entity {
-        mapped_powersim_entity_id   :   "PLC_Gen_Bus_33"
+    mapped_application {
+        application_id   :   "PLC_Gen_Bus_33"
         listen_port : 5103
+        object_type: "gen"
+        object_id: "33"
+        field_type: "v"
     }
-    mapped_powersim_entity {
-        mapped_powersim_entity_id   :   "PLC_Gen_Bus_34"
+    mapped_application {
+        application_id   :   "PLC_Gen_Bus_34"
         listen_port : 5104
+        object_type: "gen"
+        object_id: "34"
+        field_type: "v"
     }
-    mapped_powersim_entity {
-        mapped_powersim_entity_id   :   "PLC_Gen_Bus_35"
+    mapped_application {
+        application_id   :   "PLC_Gen_Bus_35"
         listen_port : 5105
+        object_type: "gen"
+        object_id: "35"
+        field_type: "v"
     }
-    mapped_powersim_entity {
-        mapped_powersim_entity_id   :   "PLC_Gen_Bus_36"
+    mapped_application {
+        application_id   :   "PLC_Gen_Bus_36"
         listen_port : 5106
+        object_type: "gen"
+        object_id: "36"
+        field_type: "v"
     }
-    mapped_powersim_entity {
-        mapped_powersim_entity_id   :   "PLC_Gen_Bus_37"
+    mapped_application {
+        application_id   :   "PLC_Gen_Bus_37"
         listen_port : 5107
+        object_type: "gen"
+        object_id: "37"
+        field_type: "v"
     }
-    mapped_powersim_entity {
-        mapped_powersim_entity_id   :   "PLC_Gen_Bus_38"
+    mapped_application {
+        application_id   :   "PLC_Gen_Bus_38"
         listen_port : 5108
+        object_type: "gen"
+        object_id: "38"
+        field_type: "v"
     }
-    mapped_powersim_entity {
-        mapped_powersim_entity_id   :   "PLC_Gen_Bus_39"
+    mapped_application {
+        application_id   :   "PLC_Gen_Bus_39"
         listen_port : 5109
+        object_type: "gen"
+        object_id: "39"
+        field_type: "v"
     }
     description		            :	"PLCs for controlling generator bus voltages"
 }
 cyber_physical_map {
     cyber_entity_id				:	"h5"
     app_layer_src: "scada.py"
-    mapped_powersim_entity {
-        mapped_powersim_entity_id   :   "SCADA_CONTROLLER"
+    mapped_application {
+        application_id   :   "SCADA_CONTROLLER"
         listen_port : 5100
     }
     description		            :	"Receives PMU data and sends commands to PLCs"

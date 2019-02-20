@@ -2,6 +2,10 @@ from pcapfile.protocols.linklayer import ethernet
 from pcapfile.protocols.network import ip
 import binascii
 import dpkt
+import grpc
+import sys
+import time
+from src.proto import pss_pb2_grpc
 
 import socket
 from dpkt.loopback import Loopback
@@ -9,6 +13,7 @@ from dpkt.ethernet import Ethernet
 from dpkt.sll import SLL
 from dpkt.ip import IP
 from src.proto import pss_pb2
+import cPickle as pickle
 
 # Error Defines
 SUCCESS = 1
@@ -45,7 +50,53 @@ POWERSIM_ID_HDR_LEN = 10
 
  
 
+def rpc_read(obj_type, obj_id, field_type):
+    try:
+        with grpc.insecure_channel('11.0.0.255:50051') as channel:
+            stub = pss_pb2_grpc.pssStub(channel)
+            readRequest = pss_pb2.ReadRequest(timestamp=str(time.time()), objtype=obj_type,
+                                              objid=obj_id,
+                                              fieldtype=field_type)
+            response = stub.read(readRequest)
+            return response.value
+    except:
+        print "Error in creating RPC request"
+        sys.stdout.flush()
+        return None
 
+def rpc_write(obj_type, obj_id, field_type, value):
+    try:
+        with grpc.insecure_channel('11.0.0.255:50051') as channel:
+            stub = pss_pb2_grpc.pssStub(channel)
+            writeRequest = pss_pb2.WriteRequest(timestamp=str(time.time()), objtype=obj_type,
+                                              objid=obj_id,
+                                              fieldtype=field_type,
+                                              value=value)
+            return stub.write(writeRequest)
+    except:
+        print "Error in creating RPC request"
+        sys.stdout.flush()
+        return None
+
+def rpc_write_disturbance(obj_type, obj_id, field_type, value, timestamp):
+    try:
+        with grpc.insecure_channel('11.0.0.255:50051') as channel:
+            stub = pss_pb2_grpc.pssStub(channel)
+            writeRequest = pss_pb2.WriteRequest(timestamp=str(timestamp), objtype=obj_type,
+                                              objid=obj_id,
+                                              fieldtype=field_type,
+                                              value=value)
+            return stub.write(writeRequest)
+    except:
+        print "Error in creating RPC request"
+        sys.stdout.flush()
+        return None
+
+def loadObjectBinary(filename):
+    with open(filename, "rb") as input:
+        obj = pickle.load(input)
+    print "# " + filename + " loaded"
+    return obj
 
 def extract_powersim_entity_id_from_pkt(pkt):
     pkt_parsed = pss_pb2.CyberMessage()

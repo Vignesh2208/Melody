@@ -69,8 +69,8 @@ def get_network_configuration(project_config):
         for mapping in project_config.cyber_physical_map:
             if mapping.cyber_entity_id == curr_host:
                 cyber_node_roles.append((curr_host,
-                                         [(entity.mapped_powersim_entity_id, entity.listen_port) for entity in
-                                          mapping.mapped_powersim_entity]))
+                                         [(entity.application_id, entity.listen_port) for entity in
+                                          mapping.mapped_application]))
 
                 is_configured = True
                 if mapping.HasField("app_layer_src"):
@@ -171,3 +171,5 @@ def parse_experiment_configuration(project_run_time_args):
         text_format.Parse(f.read(), project_config)
 
     return get_experiment_container(project_config, project_run_time_args)
+
+#def get_application_id_params(config_file, )
