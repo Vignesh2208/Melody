@@ -20,8 +20,8 @@ Smart grid communication networks typically use a two-layered architecture conta
   :alt: Smart Grid Communication Network Diagram
   :width: 80%
   :align: center
-
-A hypothetical smart grid control network topology in Mininet.
+  
+  A hypothetical smart grid control network topology in Mininet.
 
 Melody uses Mininet to emulate the communication network and Matpower to simulate the electrical behavior of the power grid. A proxy process provides an interface between the power simulator and the network emulator. Control commands originate from an emulated control node (e.g. a SCADA master) and are routed through the emulated network to the destination host (e.g an RTU controlling a circuit breaker). These commands are later transferred from this destination host to the power simulator via the proxy. The power simulator calculates the updated system state and sends out responses (e.g. voltage magnitude and angle measurements) which are re-routed back to the control node. 
 
@@ -29,15 +29,15 @@ Melody uses Mininet to emulate the communication network and Matpower to simulat
   :alt: Cyber-Physical Component Diagram
   :width: 80%
   :align: center
-
-Integration of cyber and physical components using a proxy process.
+  
+  Integration of cyber and physical components using a proxy process.
   
 .. figure:: images/melody_architecture.png
   :alt: Melody Architecture Diagram
   :width: 80%
   :align: center
-
-Melody Architecture Diagram.
+  
+  Melody Architecture Diagram.
 
 
 Virtual Time Integration
