@@ -20,11 +20,11 @@
 # -- Project information -----------------------------------------------------
 
 project = u'Melody'
-copyright = u'2019, Kartik Palani, Vignesh Babu, Hoang Hai Nguyen, Rakesh Kumar'
+copyright = u'2019, Project Moses'
 author = u'Kartik Palani, Vignesh Babu, Hoang Hai Nguyen, Elizabeth Reed, Rakesh Kumar'
 
 # The short X.Y version
-version = u''
+version = u'1.0'
 # The full version, including alpha/beta/rc tags
 release = u'1.0'
 

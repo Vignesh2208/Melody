@@ -24,11 +24,11 @@ Melody uses Mininet to emulate the communication network and Matpower to simulat
 .. image:: images/cyber_phys_components.png
   :alt: Cyber-Physical Component Diagram
   :width: 48%
-  :align: middle
+  :align: center
 .. image:: images/melody_architecture.png
   :alt: Melody Architecture Diagram
   :width: 48%
-  :align: middle
+  :align: center
   
 Each emulated host may run three types of driver processes:
 
