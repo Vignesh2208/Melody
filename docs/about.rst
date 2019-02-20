@@ -16,7 +16,7 @@ Architecture
 
 Smart grid communication networks typically use a two-layered architecture containing a corporate network and a fieldbus/control network. The corporate network handles IT management, operator control, and the storage and analysis of process control data. The control network consists of a topology of controllers and field devices interconnected through multiple switches.
 
-.. image:: images/cyber_phys_components.png
+.. image:: images/case_study_cyber_topology.png
   :alt: Cyber-Physical Components 
 
 Melody uses Mininet to emulate the communication network and MatPower to simulate the electrical behavior of the power grid. Melody generates packets either by emulating actual production software when possible or by embedding packet traces collected from arbitrary networks in the modelled network.
