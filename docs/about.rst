@@ -19,22 +19,27 @@ Smart grid communication networks typically use a two-layered architecture conta
 .. image:: images/case_study_cyber_topology.png
   :alt: Smart Grid Communication Network Diagram
 
-Melody uses Mininet to emulate the communication network and MatPower to simulate the electrical behavior of the power grid. A proxy process provides an interface between the power simulator and the network emulator. Control commands originate from an emulated control node (e.g. a SCADA master) and are routed through the emulated network to the destination host (e.g an RTU controlling a circuit breaker). These commands are later transferred from this destination host to the power simulator via the proxy. The power simulator calculates the updated system state and sends out responses (e.g. voltage magnitude and angle measurements) which are re-routed back to the control node. 
+Melody uses Mininet to emulate the communication network and Matpower to simulate the electrical behavior of the power grid. A proxy process provides an interface between the power simulator and the network emulator. Control commands originate from an emulated control node (e.g. a SCADA master) and are routed through the emulated network to the destination host (e.g an RTU controlling a circuit breaker). These commands are later transferred from this destination host to the power simulator via the proxy. The power simulator calculates the updated system state and sends out responses (e.g. voltage magnitude and angle measurements) which are re-routed back to the control node. 
 
 .. image:: images/cyber_phys_components.png
   :alt: Cyber-Physical Component Diagram
+  :width: 48%
+.. image:: images/melody_architecture.png
+  :alt: Melody Architecture Diagram
+  :width: 48%
   
 Each emulated host may run three types of driver processes:
 
-- emulation driver
-- replay driver
-- powersim driver
+- Emulation Driver: produces traffic by spawning processes that interact with each other
+- Replay Driver: initiates traffic replay actions at designated times
+- Powersim Driver: conveys power simulation state data across the cyber network to and from the proxy process; spawns the following three threads
+
+    - application layer thread: emulates smart grid applications (IPC layer)
+    - attack layer thread: intercepts, modifies, and injects application level packets
+    - network layer thread: handles packet transmissions and receptions
 
 
-Melody generates packets either by emulating actual production software when possible or by embedding packet traces collected from arbitrary networks in the modelled network.
-
-.. image:: images/melody_architecture.png
-  :alt: Melody Architecture Diagram
+Melody supports emulation of traffic with actual processes spawned on mininet hosts by emulation drivers. These processes may be spawned by the emulation drivers at specified offsets of time from the start of the experiment, and Melody generates packets either by emulating actual production software when possible or by embedding packet traces collected from arbitrary networks in the modelled network.
 
 <Virtual Time Discussion?>
 
