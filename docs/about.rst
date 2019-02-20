@@ -16,23 +16,38 @@ Architecture
 
 Smart grid communication networks typically use a two-layered architecture containing a corporate network and a fieldbus/control network. The corporate network handles IT management, operator control, and the storage and analysis of process control data. The control network consists of a topology of controllers and field devices interconnected through multiple switches.
 
-.. image:: images/case_study_cyber_topology.png
+.. figure:: images/case_study_cyber_topology.png
   :alt: Smart Grid Communication Network Diagram
   :width: 80%
   :align: center
 
+A hypothetical smart grid control network topology in Mininet.
+
 Melody uses Mininet to emulate the communication network and Matpower to simulate the electrical behavior of the power grid. A proxy process provides an interface between the power simulator and the network emulator. Control commands originate from an emulated control node (e.g. a SCADA master) and are routed through the emulated network to the destination host (e.g an RTU controlling a circuit breaker). These commands are later transferred from this destination host to the power simulator via the proxy. The power simulator calculates the updated system state and sends out responses (e.g. voltage magnitude and angle measurements) which are re-routed back to the control node. 
 
-.. image:: images/cyber_phys_components.png
+.. figure:: images/cyber_phys_components.png
   :alt: Cyber-Physical Component Diagram
   :width: 80%
   :align: center
+
+Integration of cyber and physical components using a proxy process.
   
-.. image:: images/melody_architecture.png
+.. figure:: images/melody_architecture.png
   :alt: Melody Architecture Diagram
   :width: 80%
   :align: center
-  
+
+Melody Architecture Diagram.
+
+
+Virtual Time Integration
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Virtual time in Melody is handled by Kronos. Kronos provides an API to add processes to its control and has the ability to automatically detect and control other processes which may be spawned by its current set of controlled processes. Emulation proceeds in rounds, where the virtual time of all controlled processes is advanced by a specified "time slice" each round. This time slice is usually set to the greatest common divisor of all link latencies in the network to avoid causal violations. Following the end of each round, the startup script instructs the power simulation to advance its simulation time by the duration of the round. The power simulation takes all input packets (from the proxy) gathered during the last round and responds with updated output packets (to the proxy) which are delivered to the corresponding destination nodes at the start of the next round.
+
+Traffic Generation
+^^^^^^^^^^^^^^^^^^^^^
+
 Each emulated host may run three types of driver processes:
 
 - Emulation Driver: produces traffic by spawning processes that interact with each other
@@ -41,8 +56,7 @@ Each emulated host may run three types of driver processes:
 
     - application layer thread: emulates smart grid applications (IPC layer)
     - attack layer thread: intercepts, modifies, and injects application level packets
-    - network layer thread: handles packet transmissions and receptions
-
+    - network layer thread: handles packet transmission and reception
 
 Melody supports emulation of traffic with actual processes spawned on mininet hosts by emulation drivers. These processes may be spawned by the emulation drivers at specified offsets of time from the start of the experiment, and may follow one of three different timing patterns. Melody generates packets either by emulating actual production software when possible or by embedding packet traces collected from arbitrary networks in the modelled network.
 
