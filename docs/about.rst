@@ -17,9 +17,20 @@ Architecture
 Smart grid communication networks typically use a two-layered architecture containing a corporate network and a fieldbus/control network. The corporate network handles IT management, operator control, and the storage and analysis of process control data. The control network consists of a topology of controllers and field devices interconnected through multiple switches.
 
 .. image:: images/case_study_cyber_topology.png
-  :alt: Cyber-Physical Components 
+  :alt: Smart Grid Communication Network Diagram
 
-Melody uses Mininet to emulate the communication network and MatPower to simulate the electrical behavior of the power grid. Melody generates packets either by emulating actual production software when possible or by embedding packet traces collected from arbitrary networks in the modelled network.
+Melody uses Mininet to emulate the communication network and MatPower to simulate the electrical behavior of the power grid. A proxy process provides an interface between the power simulator and the network emulator. Control commands originate from an emulated control node (e.g. a SCADA master) and are routed through the emulated network to the destination host (e.g an RTU controlling a circuit breaker). These commands are later transferred from this destination host to the power simulator via the proxy. The power simulator calculates the updated system state and sends out responses (e.g. voltage magnitude and angle measurements) which are re-routed back to the control node. 
+
+.. image:: images/cyber_phys_components.png
+  :alt: Cyber-Physical Component Diagram
+  
+Each emulated host may run three types of driver processes:
+- emulation driver
+- replay driver
+- powersim driver
+
+
+Melody generates packets either by emulating actual production software when possible or by embedding packet traces collected from arbitrary networks in the modelled network.
 
 .. image:: images/melody_architecture.png
   :alt: Melody Architecture Diagram
