@@ -27,6 +27,7 @@ Melody uses Mininet to emulate the communication network and Matpower to simulat
   :alt: Cyber-Physical Component Diagram
   :width: 80%
   :align: center
+  
 .. image:: images/melody_architecture.png
   :alt: Melody Architecture Diagram
   :width: 80%
