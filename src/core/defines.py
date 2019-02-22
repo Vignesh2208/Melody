@@ -104,6 +104,17 @@ def rpc_write(writelist):
 
 
 
+def rpc_process():
+    try:
+        with grpc.insecure_channel(GRPC_SERVER_LOCATION) as channel:
+            stub = pss_pb2_grpc.pssStub(channel)
+            request = pss_pb2.ProcessRequest(id=getid())
+            status = stub.process(request)
+    except:
+        print "Error creating RPC process request !"
+
+
+
 
 def inet_to_str(inet):
     """Convert inet object to a string

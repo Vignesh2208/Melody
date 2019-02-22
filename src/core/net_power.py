@@ -19,15 +19,6 @@ from src.proto import pss_pb2
 from src.proto import pss_pb2_grpc
 
 
-def rpc_process():
-    try:
-        with grpc.insecure_channel(GRPC_SERVER_LOCATION) as channel:
-            stub = pss_pb2_grpc.pssStub(channel)
-            request = pss_pb2.ProcessRequest(id=getid())
-            status = stub.process(request)
-    except:
-        print "Error creating request !"
-
 
 class NetPower(object):
 
