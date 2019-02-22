@@ -61,6 +61,7 @@ class EmulationDriver(object):
                 print cmd_list
                 sys.stdout.flush()
                 p = subprocess.Popen(cmd_list, shell=False)
+                #os.system(self.cmd)
             except RuntimeError:
                 print "Error running command: ", sys.exec_info()[0]
 

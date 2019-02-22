@@ -26,7 +26,7 @@ TEMP_ERROR = -2
 PROXY_NODE_ID = 0
 CMD_QUIT = 1
 MAXPKTSIZE = 10000
-SOCKET_TIMEOUT = 5
+SOCKET_TIMEOUT = 1
 ETH_TYPE_FRAME = 1
 
 
@@ -69,20 +69,6 @@ def rpc_write(obj_type, obj_id, field_type, value):
         with grpc.insecure_channel('11.0.0.255:50051') as channel:
             stub = pss_pb2_grpc.pssStub(channel)
             writeRequest = pss_pb2.WriteRequest(timestamp=str(time.time()), objtype=obj_type,
-                                              objid=obj_id,
-                                              fieldtype=field_type,
-                                              value=value)
-            return stub.write(writeRequest)
-    except:
-        print "Error in creating RPC request"
-        sys.stdout.flush()
-        return None
-
-def rpc_write_disturbance(obj_type, obj_id, field_type, value, timestamp):
-    try:
-        with grpc.insecure_channel('11.0.0.255:50051') as channel:
-            stub = pss_pb2_grpc.pssStub(channel)
-            writeRequest = pss_pb2.WriteRequest(timestamp=str(timestamp), objtype=obj_type,
                                               objid=obj_id,
                                               fieldtype=field_type,
                                               value=value)

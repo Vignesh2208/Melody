@@ -81,6 +81,7 @@ class NetPower(object):
         self.node_mappings_file_path = "/tmp/node_mappings.json"
         self.log_dir = log_dir
         self.flag_debug = True  # flag for debug printing
+        self.nxt_tracer_id = 0
 
         # Clean up logs from previous run(s)
         os.system("rm -rf " + self.log_dir + "/*")
@@ -93,6 +94,9 @@ class NetPower(object):
         self.n_actual_tcpdump_procs = 0
         self.n_dilated_tcpdump_procs = 0
         self.started = False
+
+
+
 
         if not os.path.exists(self.log_dir):
             os.makedirs(self.log_dir)
@@ -118,8 +122,6 @@ class NetPower(object):
         self.prev_queued_disturbance_threads = []
         self.nxt_queued_disturbance_threads = []
         self.total_elapsed_virtual_time = 0.0
-        
-
         set_cpu_affinity(int(os.getpid()))
 
     def get_emulation_driver_params(self):
@@ -146,14 +148,13 @@ class NetPower(object):
 
         if self.enable_kronos == 1:
             print "Kronos >> Synchronizing and freezing all processes ..."
-            n_tracers = len(self.pid_list)
+            n_tracers = self.nxt_tracer_id
             while synchronizeAndFreeze(n_tracers) <= 0:
                 print "Kronos >> Synchronize and Freeze failed. Retrying in 1 sec"
                 time.sleep(1)
             print "Kronos >> Synchronize and Freeze succeeded !"
             print "Kronos >> Experiment started with Rel_cpu_speed: ", self.rel_cpu_speed, " at Local Time: " + str(
                 datetime.now())
-
         else:
             self.start_time = time.time()
             print "Melody >> Experiment started with Kronos disabled ... "
@@ -193,15 +194,17 @@ class NetPower(object):
 
             json.dump(self.powersim_id_to_host, outfile)
 
-    def cmd_to_start_process_under_tracer(self, cmd_to_run, tracer_id):
+    def cmd_to_start_process_under_tracer(self, cmd_to_run):
 
         tracer_path = "/usr/bin/tracer"
         tracer_args = [tracer_path]
-        tracer_args.extend(["-i", str(tracer_id)])
+        tracer_args.extend(["-i", str(self.nxt_tracer_id)])
         tracer_args.extend(["-r", str(self.rel_cpu_speed)])
         tracer_args.extend(["-n", str(self.timeslice)])
         tracer_args.extend(["-c", "\"" + cmd_to_run + "\""])
         tracer_args.append("-s")
+
+        self.nxt_tracer_id += 1
         return ' '.join(tracer_args)
 
     def start_host_processes(self):
@@ -222,7 +225,7 @@ class NetPower(object):
                     cmd_to_run += " -a NONE"
 
                 if self.enable_kronos == 1:
-                    cmd_to_run = self.cmd_to_start_process_under_tracer(cmd_to_run, host_id)
+                    cmd_to_run = self.cmd_to_start_process_under_tracer(cmd_to_run)
                 cmd_to_run += ' > ' + host_log_file + ' 2>&1 & echo $! '
 
                 with tempfile.NamedTemporaryFile() as f:
@@ -235,14 +238,12 @@ class NetPower(object):
 
     def start_switch_processes(self):
         print "Melody >> Starting all switches ..."
-        n_hosts = len(self.host_pids.keys())
-
         for mininet_switch in self.network_configuration.mininet_obj.switches:
-            sw_id = int(mininet_switch.name[1:]) + n_hosts
+            sw_id = int(mininet_switch.name[1:])
             cmd_to_run = "python " + self.base_dir + "/src/utils/dummy_nop_process.py"
             sw_log_file = "/tmp/sw_" + str(sw_id) + "_log.txt"
             if self.enable_kronos == 1:
-                cmd_to_run = self.cmd_to_start_process_under_tracer(cmd_to_run, sw_id)
+                cmd_to_run = self.cmd_to_start_process_under_tracer(cmd_to_run)
             cmd_to_run += ' > ' + sw_log_file + ' 2>&1 & echo $! '
             with tempfile.NamedTemporaryFile() as f:
                 mininet_switch.cmd(cmd_to_run + '>> ' + f.name)
@@ -255,21 +256,17 @@ class NetPower(object):
     def start_emulation_drivers(self):
 
         driver_py_script = self.base_dir + "/src/core/emulation_driver.py"
-        tracer_id = len(self.host_pids.keys()) + len(self.switch_pids.keys())
-
         for edp in self.emulation_driver_params:
 
             mininet_host = self.network_configuration.mininet_obj.get(edp["node_id"])
             driver_log_file = "/tmp/" + str(edp["driver_id"]) + "_log.txt"
-            tracer_id += 1
-
             input_params_file_path = "/tmp/" + edp["driver_id"] + ".json"
             with open(input_params_file_path, "w") as f:
                 json.dump(edp, f)
 
             cmd_to_run = "python " + str(driver_py_script) + " --input_params_file_path=" + input_params_file_path
             if self.enable_kronos == 1:
-                cmd_to_run = self.cmd_to_start_process_under_tracer(cmd_to_run, tracer_id)
+                cmd_to_run = self.cmd_to_start_process_under_tracer(cmd_to_run)
             cmd_to_run += ' > ' + driver_log_file + ' 2>&1 & echo $! '
 
             with tempfile.NamedTemporaryFile() as f:
@@ -282,8 +279,6 @@ class NetPower(object):
     def start_replay_drivers(self):
 
         driver_py_script = self.base_dir + "/src/core/replay_driver.py"
-        tracer_id = len(self.host_pids.keys()) + len(self.switch_pids.keys()) + len(self.emulation_driver_pids)
-
         for node in self.nodes_involved_in_replay:
             mininet_host = self.network_configuration.mininet_obj.get(node)
             rdp = {"driver_id": mininet_host.name + "-replay",
@@ -297,11 +292,10 @@ class NetPower(object):
             input_params_file_path = "/tmp/" + str(rdp["driver_id"]) + ".json"
             with open(input_params_file_path, "w") as f:
                 json.dump(rdp, f)
-            tracer_id += 1
 
             cmd_to_run = "python " + str(driver_py_script) + " --input_params_file_path=" + input_params_file_path
             if self.enable_kronos == 1:
-                cmd_to_run = self.cmd_to_start_process_under_tracer(cmd_to_run, tracer_id)
+                cmd_to_run = self.cmd_to_start_process_under_tracer(cmd_to_run)
             cmd_to_run += ' > ' + driver_log_file + ' 2>&1 & echo $! '
 
             with tempfile.NamedTemporaryFile() as f:
@@ -380,7 +374,7 @@ class NetPower(object):
             assert mininet_host.name in self.host_pids
             tracer_pid = self.host_pids[mininet_host.name]
             for name in mininet_host.intfNames():
-                if name != "lo":
+                if name != "lo" and name != "eth0" :
                     set_netdevice_owner(tracer_pid, name)
 
     def start_proxy_process(self):
@@ -414,7 +408,23 @@ class NetPower(object):
         os.system("sudo brctl addif connect hostbase")
         os.system("sudo ifconfig connect up")
 
+    def start_disturbance_generator(self):
+        if os.path.isfile(self.project_dir + "/disturbances.prototxt"):
+            disturbance_gen_script = self.base_dir + "/src/core/disturbance_gen.py"
+            disturbance_file = self.project_dir + "/disturbances.prototxt"
+            disturbance_gen_log_file = "/tmp/disturbance_gen_log.txt"
 
+            cmd_to_run = "python " + str(disturbance_gen_script) +\
+                         " --path_to_disturbance_file=" + disturbance_file
+            if self.enable_kronos == 1:
+                cmd_to_run = self.cmd_to_start_process_under_tracer(cmd_to_run)
+            cmd_to_run += ' > ' + disturbance_gen_log_file + ' 2>&1 & echo $! '
+
+            with tempfile.NamedTemporaryFile() as f:
+                os.system(cmd_to_run + '>> ' + f.name)
+                pid = int(f.read())
+                print "Melody >> Disturbance Generator PID: ", pid
+                self.pid_list.append(pid)
 
     def stop_control_network(self):
         print "Melody >> Stopping Control Network"
@@ -430,30 +440,14 @@ class NetPower(object):
         os.system("sudo ifconfig connect down")
         os.system("sudo brctl delbr connect")
 
-
     def trigger_proxy_batch_processing(self):
-
         print "Triggering next batch processing at proxy ..."
         t = threading.Thread(target=rpc_process)
         t.start()
         t.join()
 
-    def send_disturbance_to_powersim(self, obj_type, obj_id, field_type, value):
-        print "Queueing disturbance: OBJ_TYPE: %s, OBJ_ID: %s, "\
-              "FIELD_TYPE: %s, DISTURBANCE_VALUE: %s"%(obj_type, obj_id, field_type, value)
-
-        if self.enable_kronos:
-            tstamp = self.total_elapsed_virtual_time
-        else:
-            tstamp = time.time()
-
-        t = threading.Thread(target=rpc_write_disturbance, args=(obj_type, obj_id, field_type, value, tstamp,))
-        t.start()
-
-
     def start_replay_orchestrator(self):
         print "Melody >> Starting replay orchestrator ... "
-
         self.replay_flows_container.create_replay_plan()
         replay_plan_file = "/tmp/replay_plan.json"
         self.replay_orchestrator = ReplayOrchestrator(self, replay_plan_file, self.run_time)
@@ -475,13 +469,12 @@ class NetPower(object):
     def disable_TCP_RST(self):
 
         for host in self.network_configuration.mininet_obj.hosts:
-            self.send_cmd_to_node(host.name, "sudo iptables -I OUTPUT -p tcp --tcp-flags RST RST -j DROP")
-        sleep(1)
+            self.send_cmd_to_node(host.name, "sudo iptables -I OUTPUT -p tcp --tcp-flags RST RST -j DROP &")
 
     def enable_TCP_RST(self):
 
         for host in self.network_configuration.mininet_obj.hosts:
-            self.send_cmd_to_node(host.name, "sudo iptables -I OUTPUT -p tcp --tcp-flags RST RST -j ACCEPT")
+            self.send_cmd_to_node(host.name, "sudo iptables -I OUTPUT -p tcp --tcp-flags RST RST -j ACCEPT &")
 
     def open_main_cmd_channel_buffers(self):
         print "Melody >> Opening main inter-process communication channels ..." 
@@ -540,17 +533,20 @@ class NetPower(object):
                 dummy_id, msg = self.shared_buf_array.read(str(host) \
                                                             + "-replay-main-cmd-channel-buffer")
                 if msg == "LOADED":
-                    print "Melody >> Got a PCAP-Loaded message from replay driver for node: ", host
+                    print "\nMelody >> Got a PCAP-Loaded message from replay driver for node: ", host
                     outstanding_hosts.remove(host)
                     sys.stdout.flush()
             if self.enable_kronos == 1:
                 progress_n_rounds(1)
                 n_warmup_rounds += 1
-                stdout.write("\rNumber of rounds ran until all replay pcaps were loaded: %d" % n_warmup_rounds)
-                stdout.flush()
 
+                if n_warmup_rounds % 100 == 0:
+                    stdout.write("\rNumber of rounds ran until all replay pcaps were loaded: %d" % n_warmup_rounds)
+                    stdout.flush()
             else:
                 sleep(0.1)
+        if self.enable_kronos == 1 :
+            print "\nMelody >> All pcaps loaded in ", float(n_warmup_rounds*self.timeslice)/float(SEC), " seconds (virtual time)"
         print "\nMelody >> All replay drivers ready to proceed ..."
         sys.stdout.flush()
 
@@ -583,20 +579,19 @@ class NetPower(object):
         else:
             self.trigger_all_processes("EXIT")
             self.replay_orchestrator.send_command("EXIT")
+            for pid in self.pid_list:
+                os.system("sudo kill -9 %s"%str(pid))
             time.sleep(5)
 
         print "Cleaning up ..."
         self.enable_TCP_RST()
         self.stop_control_network()
-        #print "Stopping all TCPDUMP processes ..."
-        #for pid in self.tcpdump_pids:
-        #    os.system("sudo kill -2 " + str(pid))
         self.network_configuration.cleanup_mininet()
 
     def initialize_project(self):
         print "Melody >> Initializing project ..."
         self.generate_node_mappings(self.network_configuration.roles)
-        self.print_topo_info()
+        #self.print_topo_info()
         self.start_host_processes()
         self.start_switch_processes()
         self.start_control_network()
@@ -606,19 +601,15 @@ class NetPower(object):
         # Background related
         self.start_emulation_drivers()
         self.start_replay_drivers()
-
-
-       
+        self.start_disturbance_generator()
 
         # Kronos related
         if self.enable_kronos:
-
             self.set_netdevice_owners()
             self.start_synchronized_experiment()
             self.start_time = get_current_virtual_time()
         else:
             self.start_time = time.time()
-            # if timekeeper is not enabled, restrict emulation/replay operations to cpu subset
             for pid in self.emulation_driver_pids:  # *NEW*
                 set_def_cpu_affinity(pid, self.cpus_subset)
             for pid in self.replay_driver_pids:
@@ -651,8 +642,6 @@ class NetPower(object):
                 n_rounds = int(20 * NS_PER_MS / self.timeslice)
             n_total_rounds = int(run_time_ns / self.timeslice)
             n_rounds_progressed = 0
-
-            k = 0
             while True:
 
                 if self.enable_kronos == 1:

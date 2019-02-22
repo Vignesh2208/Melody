@@ -442,6 +442,7 @@ class NetworkConfiguration(object):
             self.mininet_obj = Mininet(topo=self.topo,
                                        cleanup=True,
                                        autoStaticArp=True,
+                                       autoSetMacs=True,
                                        link=TCLink,
                                        controller=lambda name: RemoteController(name,
                                                                                 ip=self.controller_ip,

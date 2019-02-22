@@ -1,0 +1,56 @@
+disturbance {
+    timestamp: "0.5"
+    objtype: "load"
+    objid: "4"
+    fieldtype: "q"
+    value: "230"
+}
+disturbance {
+    timestamp: "1.0"
+    objtype: "load"
+    objid: "4"
+    fieldtype: "q"
+    value: "230"
+}
+disturbance {
+    timestamp: "1.5"
+    objtype: "load"
+    objid: "4"
+    fieldtype: "q"
+    value: "230"
+}
+disturbance {
+    timestamp: "2.0"
+    objtype: "load"
+    objid: "4"
+    fieldtype: "q"
+    value: "230"
+}
+disturbance {
+    timestamp: "2.5"
+    objtype: "load"
+    objid: "4"
+    fieldtype: "q"
+    value: "230"
+}
+disturbance {
+    timestamp: "3.0"
+    objtype: "load"
+    objid: "4"
+    fieldtype: "q"
+    value: "230"
+}
+disturbance {
+    timestamp: "3.5"
+    objtype: "load"
+    objid: "4"
+    fieldtype: "q"
+    value: "230"
+}
+disturbance {
+    timestamp: "4.0"
+    objtype: "load"
+    objid: "4"
+    fieldtype: "q"
+    value: "230"
+}

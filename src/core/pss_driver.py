@@ -47,10 +47,10 @@ class PSSDriverAbstract:
 
 
 class MatPowerDriver(PSSDriverAbstract):
-    def __init__(self, workingdir):
+    def __init__(self, workingdir="."):
         self.workingdir = workingdir
-        self.matfile = workingdir + "/simulation.m"
-        self.case = workingdir + "/tmpcase"
+        self.matfile = self.workingdir + "/simulation.m"
+        self.case = self.workingdir + "/tmpcase"
 
 
     def _run_octave(self, matfile):
@@ -73,6 +73,8 @@ class MatPowerDriver(PSSDriverAbstract):
         openfile.write('''mpc = loadcase('%s');\n'''%self.case)
         if objtype == "gen" and fieldtype == "v":
             openfile.write('''mpc.gen(find(mpc.gen(:,1)==%s),6) = %s;\n'''%(objid, value))
+        elif objtype == "load" and fieldtype == "q":
+            openfile.write('''mpc.bus(find(mpc.bus(:,1)==%s),4) = %s;\n'''%(objid, value))
         openfile.write('''savecase('%s', mpc);\n'''%self.case)
         openfile.close()
 
@@ -85,6 +87,8 @@ class MatPowerDriver(PSSDriverAbstract):
         for objtype, objid, fieldtype, value in writelist:
             if objtype == "gen" and fieldtype == "v":
                 openfile.write('''mpc.gen(find(mpc.gen(:,1)==%s),6) = %s;\n'''%(objid, value))
+            elif objtype == "load" and fieldtype == "q":
+                openfile.write('''mpc.bus(find(mpc.bus(:,1)==%s),4) = %s;\n'''%(objid, value))
         openfile.write('''savecase('%s', mpc);\n'''%self.case)
         openfile.close()
 
@@ -108,7 +112,7 @@ class MatPowerDriver(PSSDriverAbstract):
                 if int(d[0]) == int(objid):
                     return str(d[7])
 
-
+    
     def close(self):
         pass
 

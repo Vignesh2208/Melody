@@ -44,3 +44,8 @@ message CyberMessage {
 	repeated KV content = 4;
 			
 }
+
+
+message Disturbances {
+    repeated WriteRequest disturbance = 1;
+}

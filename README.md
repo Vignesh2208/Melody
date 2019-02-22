@@ -20,6 +20,11 @@ Dependencies:
 #protobuf version >= 3.7
 #grpc (sudo pip install grpcio && sudo pip install grpcio-tools)
 #Kronos
+
+For paramiko:
+pip install paramiko
+sudo apt-get install libkrb5-dev
+pip install gssapi
 ```
 
 ```

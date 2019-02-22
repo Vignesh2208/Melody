@@ -204,9 +204,8 @@ class ReplayDriver(object):
                 except KeyError as e:
                     pass
 
-        self.raw_rx_sock.close()
-        self.raw_tx_sock.close()
-        self.log.info("Closed socket, signalling End of Replay Stage ...")
+
+        self.log.info("Signalling End of Replay Stage ...")
         sys.stdout.flush()
         self.send_command_message("DONE")
         
@@ -225,7 +224,8 @@ class ReplayDriver(object):
             else:
                 self.log.error("Unknown PCAP file path:" + recv_msg)
                 break
-                
+        self.raw_rx_sock.close()
+        self.raw_tx_sock.close()
         self.log.info("Replay driver with id:" + self.driver_id + " exiting...")
         sys.stdout.flush()
 

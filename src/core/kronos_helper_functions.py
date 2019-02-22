@@ -20,7 +20,6 @@ def is_root() :
 	print "Needs to be run as root"
 	return 0
 
-
 def is_module_loaded() :
 
 	if os.path.isfile(KRONOS_FILE_NAME) == True:
@@ -29,18 +28,13 @@ def is_module_loaded() :
 		print "Kronos module is not loaded"
 		return 0
 
-
-
-		
 def get_current_virtual_time_pid(specified_pid) :
     return float(gettimepid(specified_pid))
-
-
 
 def get_current_virtual_time() :
     
     curr_time = get_current_virtual_time_pid(0)
-    if curr_time == 0.0 :
+    if curr_time == 0.0:
         return time.time()     
     return curr_time
 
