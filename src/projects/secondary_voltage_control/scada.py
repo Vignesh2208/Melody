@@ -1,13 +1,17 @@
 from src.core.basicHostIPCLayer import basicHostIPCLayer
-from src.proto import pss_pb2
-from src.utils.sleep_functions import *
 from src.core.defines import *
+from src.proto import css_pb2
 import threading
 import time
-import random
 import numpy as np
 import config as cfg
+import cPickle as pickle
 
+def loadObjectBinary(filename):
+    with open(filename, "rb") as input:
+        obj = pickle.load(input)
+    print "# " + filename + " loaded"
+    return obj
 
 class SCADA(threading.Thread):
     def __init__(self, host_control_layer, scada_controller_name):
@@ -15,7 +19,6 @@ class SCADA(threading.Thread):
         self.host_control_layer = host_control_layer
         self.stop = False
         self.scada_controller_name = scada_controller_name
-
 
     def run(self, debug=False):
 
@@ -33,7 +36,7 @@ class SCADA(threading.Thread):
 
 
             for i in range(cfg.GEN_NO):
-                pkt_new = pss_pb2.CyberMessage()
+                pkt_new = css_pb2.CyberMessage()
                 pkt_new.src_application_id = self.scada_controller_name
                 pkt_new.dst_application_id = "PLC_Gen_Bus_%d"%cfg.GEN[i]
                 data = pkt_new.content.add()
@@ -62,7 +65,7 @@ class hostApplicationLayer(basicHostIPCLayer):
     """
 
     def on_rx_pkt_from_network(self, pkt):
-        pkt_parsed = pss_pb2.CyberMessage()
+        pkt_parsed = css_pb2.CyberMessage()
         pkt_parsed.ParseFromString(pkt)
 
         recv_obj_id = None
@@ -77,9 +80,6 @@ class hostApplicationLayer(basicHostIPCLayer):
 
         self.vp[recv_obj_id] = recv_obj_value
         self.log.info("Rx pkt from: %d = %s"%(recv_obj_id,str(pkt_parsed)))
-
-
-
 
     """
         Called after initialization of IPC layer. It can be overridden to start essential services.

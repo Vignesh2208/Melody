@@ -1,34 +1,32 @@
 import datetime
 import json
 from datetime import datetime
-from google.protobuf.empty_pb2 import Empty
 from shared_buffer import *
 from src.cyber_network.traffic_flow import ReplayFlowsContainer
 from src.core.replay_orchestrator import ReplayOrchestrator
 from src.utils.sleep_functions import sleep
 from src.utils.util_functions import *
-import grpc
-from grpc import *
-from src.proto import pss_pb2_grpc
-from src.core.pss_server import *
 from defines import *
 from kronos_functions import *
 from kronos_helper_functions import *
-from concurrent import futures
-from src.proto.pss_pb2_grpc import *
 import subprocess
 import sys
 import os
 import tempfile
 import threading
 from sys import stdout
+from src.proto import pss_pb2
+from src.proto import pss_pb2_grpc
 
 
 def rpc_process():
-    with grpc.insecure_channel('11.0.0.255:50051') as channel:
-        stub = pss_pb2_grpc.pssStub(channel)
-        status = stub.process(Empty())
-        logging.info("Process return <%s>"%status.status)
+    try:
+        with grpc.insecure_channel(GRPC_SERVER_LOCATION) as channel:
+            stub = pss_pb2_grpc.pssStub(channel)
+            request = pss_pb2.ProcessRequest(id=getid())
+            status = stub.process(request)
+    except:
+        print "Error creating request !"
 
 
 class NetPower(object):

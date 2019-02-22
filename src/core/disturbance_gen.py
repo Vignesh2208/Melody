@@ -2,7 +2,7 @@ import sys
 import time
 import os
 import argparse
-from src.proto import pss_pb2
+from src.proto import configuration_pb2
 from google.protobuf import text_format
 from src.core.defines import rpc_write
 import datetime
@@ -11,7 +11,7 @@ import datetime
 def main(path_to_disturbance_file):
     start_time = time.time()
     assert os.path.isfile(path_to_disturbance_file) is True
-    disturbances = pss_pb2.Disturbances()
+    disturbances = configuration_pb2.Disturbances()
     with open(path_to_disturbance_file, 'r') as f:
         text_format.Parse(f.read(), disturbances)
 
@@ -21,12 +21,16 @@ def main(path_to_disturbance_file):
         if time_elapsed < float(disturbance.timestamp):
             time.sleep(float(disturbance.timestamp) - time_elapsed)
 
-        print str(datetime.datetime.now()) + " >> Queueing disturbance: OBJ_TYPE: %s, OBJ_ID: %s, " \
-              "FIELD_TYPE: %s, DISTURBANCE_VALUE: %s" % (disturbance.objtype, disturbance.objid,
-                                                         disturbance.fieldtype, disturbance.value)
+        print "Sending Following Disturbances at : ", str(datetime.datetime.now()), "  >> "
         sys.stdout.flush()
-        rpc_write(obj_type=disturbance.objtype, obj_id=disturbance.objid, field_type= disturbance.fieldtype,
-                  value=disturbance.value)
+
+        write_list = []
+        for request in disturbance.request:
+            print "Disturbance Description: OBJ_TYPE: %s, OBJ_ID: %s, " \
+              "FIELD_TYPE: %s, DISTURBANCE_VALUE: %s" % (request.objtype, request.objid,
+                                                         request.fieldtype, request.value)
+            write_list.append((request.objtype, request.objid, request.fieldtype, request.value))
+        rpc_write(write_list)
 
     print "Finished Sending all disturbances !"
     sys.stdout.flush()

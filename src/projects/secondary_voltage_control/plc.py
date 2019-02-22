@@ -1,11 +1,8 @@
 
+import threading
 from src.core.defines import *
 from src.core.basicHostIPCLayer import basicHostIPCLayer
-from src.proto import pss_pb2
-from src.utils.sleep_functions import *
-import threading
-import time
-import random
+from src.proto import css_pb2
 
 
 class PLC(threading.Thread):
@@ -16,7 +13,7 @@ class PLC(threading.Thread):
         self.plc_name = plc_name
         self.recv_pkt_queue = []
         self.obj_id = self.plc_name.split('_')[-1]
-        self.field_type = "v"
+        self.field_type = "Vg"
         self.obj_type = "gen"
 
 
@@ -34,12 +31,8 @@ class PLC(threading.Thread):
                 time.sleep(0.001)
                 continue
 
-            pkt_parsed = pss_pb2.CyberMessage()
+            pkt_parsed = css_pb2.CyberMessage()
             pkt_parsed.ParseFromString(data)
-
-            #possibly make an RPC call here
-
-            recv_time = float(time.time())
 
             self.host_control_layer.log.info("Rx New packet for PLC: \n" + str(pkt_parsed))
             voltage_setpoint = None
@@ -48,7 +41,7 @@ class PLC(threading.Thread):
                     voltage_setpoint = data_content.value
             assert(voltage_setpoint is not None)
             self.host_control_layer.log.info("Sending RPC Write Request ...")
-            rpc_write(self.obj_type, self.obj_id, self.field_type, voltage_setpoint)
+            rpc_write([(self.obj_type, self.obj_id, self.field_type, voltage_setpoint)])
             self.host_control_layer.log.info("----------------------------------------")
 
             request_no += 1
@@ -68,8 +61,7 @@ class hostApplicationLayer(basicHostIPCLayer):
     """
 
     def on_rx_pkt_from_network(self, pkt):
-        # just print the proto message for now
-        pkt_parsed = pss_pb2.CyberMessage()
+        pkt_parsed = css_pb2.CyberMessage()
         pkt_parsed.ParseFromString(pkt)
         self.PLC.recv_pkt_queue.append(pkt)
 

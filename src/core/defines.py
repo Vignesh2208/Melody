@@ -1,19 +1,17 @@
-from pcapfile.protocols.linklayer import ethernet
-from pcapfile.protocols.network import ip
-import binascii
 import dpkt
 import grpc
 import sys
 import time
-from src.proto import pss_pb2_grpc
-
+import random
 import socket
+
 from dpkt.loopback import Loopback
 from dpkt.ethernet import Ethernet
 from dpkt.sll import SLL
 from dpkt.ip import IP
 from src.proto import pss_pb2
-import cPickle as pickle
+from src.proto import pss_pb2_grpc
+
 
 # Error Defines
 SUCCESS = 1
@@ -36,6 +34,7 @@ MS = 1000*USEC
 SEC = 1000*MS
 NS_PER_MS = 1000000
 NS_PER_SEC = 1000000000
+GRPC_SERVER_LOCATION = "11.0.0.255:50051"
 
 TRAFFIC_FLOW_PERIODIC = 'Periodic'
 TRAFFIC_FLOW_EXPONENTIAL = 'Exponential'
@@ -48,46 +47,62 @@ DEFAULT_HOST_UDP_PORT = 5100
 POWERSIM_ID_HDR_LEN = 10
 
 
- 
 
-def rpc_read(obj_type, obj_id, field_type):
+def getid():
+    return str(hash(time.time() + random.random()))
+
+def rpc_read(readlist):
+
     try:
-        with grpc.insecure_channel('11.0.0.255:50051') as channel:
-            stub = pss_pb2_grpc.pssStub(channel)
-            readRequest = pss_pb2.ReadRequest(timestamp=str(time.time()), objtype=obj_type,
-                                              objid=obj_id,
-                                              fieldtype=field_type)
-            response = stub.read(readRequest)
-            return response.value
+        channel = grpc.insecure_channel(GRPC_SERVER_LOCATION)
+        stub = pss_pb2_grpc.pssStub(channel)
+        readRequest = pss_pb2.ReadRequest(timestamp=time.time())
+
+        counter = 0
+        for objtype, objid, fieldtype in readlist:
+            req = readRequest.request.add()
+            req.id = str(counter)
+            req.objtype = objtype
+            req.objid = objid
+            req.fieldtype = fieldtype
+            req.value = ""
+            counter += 1
+
+        readResponse = stub.read(readRequest)
+        response = {int(res.id):res.value for res in readResponse.response}
+        return [response[id] for id in xrange(0,counter)]
     except:
-        print "Error in creating RPC request"
+        print "Error in creating RPC read request ..."
         sys.stdout.flush()
         return None
 
-def rpc_write(obj_type, obj_id, field_type, value):
+
+def rpc_write(writelist):
+
     try:
-        with grpc.insecure_channel('11.0.0.255:50051') as channel:
-            stub = pss_pb2_grpc.pssStub(channel)
-            writeRequest = pss_pb2.WriteRequest(timestamp=str(time.time()), objtype=obj_type,
-                                              objid=obj_id,
-                                              fieldtype=field_type,
-                                              value=value)
-            return stub.write(writeRequest)
+        channel = grpc.insecure_channel(GRPC_SERVER_LOCATION)
+        stub = pss_pb2_grpc.pssStub(channel)
+        writeRequest = pss_pb2.WriteRequest(timestamp=time.time())
+
+        counter = 0
+        for objtype, objid, fieldtype, value in writelist:
+            req = writeRequest.request.add()
+            req.id = str(counter)
+            req.objtype = objtype
+            req.objid = objid
+            req.fieldtype = fieldtype
+            req.value = value
+            counter += 1
+
+        writeStatus = stub.write(writeRequest)
+        status = {int(res.id): res.status for res in writeStatus.status}
+        return [status[id] for id in xrange(0, counter)]
     except:
-        print "Error in creating RPC request"
+        print "Error in creating RPC write request ..."
         sys.stdout.flush()
         return None
 
-def loadObjectBinary(filename):
-    with open(filename, "rb") as input:
-        obj = pickle.load(input)
-    print "# " + filename + " loaded"
-    return obj
 
-def extract_powersim_entity_id_from_pkt(pkt):
-    pkt_parsed = pss_pb2.CyberMessage()
-    pkt_parsed.ParseFromString(pkt)
-    return pkt_parsed.dst_application_id
 
 
 def inet_to_str(inet):

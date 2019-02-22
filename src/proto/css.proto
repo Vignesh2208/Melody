@@ -1,0 +1,19 @@
+syntax = "proto2";
+import "google/protobuf/empty.proto";
+package melody_cybersim_proto;
+
+
+message KV {
+	required string key = 1;
+	optional string value = 2;
+}
+
+message CyberMessage {
+	required string dst_application_id = 1;
+	required string src_application_id = 2;
+	optional string msg_type =3;
+	repeated KV content = 4;
+
+}
+
+

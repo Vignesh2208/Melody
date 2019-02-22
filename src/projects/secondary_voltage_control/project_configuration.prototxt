@@ -3,8 +3,8 @@ cyber_emulation_spec {
     topology_name: "clique"
     num_hosts: 5
     num_switches: 5
-    inter_switch_link_latency_ms: 1000
-    host_switch_link_latency_ms: 1000
+    inter_switch_link_latency_ms: 500
+    host_switch_link_latency_ms: 500
     additional_topology_param {
         parameter_name: "per_switch_links"
         parameter_value_int: 2
@@ -31,70 +31,70 @@ cyber_physical_map {
         listen_port : 5100
         object_type: "bus"
         object_id: "2"
-        field_type: "v"
+        field_type: "Vm"
     }
     mapped_application {
         application_id   :   "PMU_Pilot_Bus_6"
         listen_port : 5101
         object_type: "bus"
         object_id: "6"
-        field_type: "v"
+        field_type: "Vm"
     }
     mapped_application {
         application_id   :   "PMU_Pilot_Bus_9"
         listen_port : 5102
         object_type: "bus"
         object_id: "9"
-        field_type: "v"
+        field_type: "Vm"
     }
     mapped_application {
         application_id   :   "PMU_Pilot_Bus_10"
         listen_port : 5103
         object_type: "bus"
         object_id: "10"
-        field_type: "v"
+        field_type: "Vm"
     }
     mapped_application {
         application_id   :   "PMU_Pilot_Bus_19"
         listen_port : 5104
         object_type: "bus"
         object_id: "19"
-        field_type: "v"
+        field_type: "Vm"
     }
     mapped_application {
         application_id   :   "PMU_Pilot_Bus_20"
         listen_port : 5105
         object_type: "bus"
         object_id: "20"
-        field_type: "v"
+        field_type: "Vm"
     }
     mapped_application {
         application_id   :   "PMU_Pilot_Bus_22"
         listen_port : 5106
         object_type: "bus"
         object_id: "22"
-        field_type: "v"
+        field_type: "Vm"
     }
     mapped_application {
         application_id   :   "PMU_Pilot_Bus_23"
         listen_port : 5107
         object_type: "bus"
         object_id: "23"
-        field_type: "v"
+        field_type: "Vm"
     }
     mapped_application {
         application_id   :   "PMU_Pilot_Bus_25"
         listen_port : 5108
         object_type: "bus"
         object_id: "25"
-        field_type: "v"
+        field_type: "Vm"
     }
     mapped_application {
         application_id   :   "PMU_Pilot_Bus_29"
         listen_port : 5109
         object_type: "bus"
         object_id: "29"
-        field_type: "v"
+        field_type: "Vm"
     }
     description		            :	"PMUs for reading pilot buses"
 }
@@ -106,70 +106,70 @@ cyber_physical_map {
         listen_port : 5100
         object_type: "gen"
         object_id: "30"
-        field_type: "v"
+        field_type: "Vg"
     }
     mapped_application {
         application_id   :   "PLC_Gen_Bus_31"
         listen_port : 5101
         object_type: "gen"
         object_id: "31"
-        field_type: "v"
+        field_type: "Vg"
     }
     mapped_application {
         application_id   :   "PLC_Gen_Bus_32"
         listen_port : 5102
         object_type: "gen"
         object_id: "32"
-        field_type: "v"
+        field_type: "Vg"
     }
     mapped_application {
         application_id   :   "PLC_Gen_Bus_33"
         listen_port : 5103
         object_type: "gen"
         object_id: "33"
-        field_type: "v"
+        field_type: "Vg"
     }
     mapped_application {
         application_id   :   "PLC_Gen_Bus_34"
         listen_port : 5104
         object_type: "gen"
         object_id: "34"
-        field_type: "v"
+        field_type: "Vg"
     }
     mapped_application {
         application_id   :   "PLC_Gen_Bus_35"
         listen_port : 5105
         object_type: "gen"
         object_id: "35"
-        field_type: "v"
+        field_type: "Vg"
     }
     mapped_application {
         application_id   :   "PLC_Gen_Bus_36"
         listen_port : 5106
         object_type: "gen"
         object_id: "36"
-        field_type: "v"
+        field_type: "Vg"
     }
     mapped_application {
         application_id   :   "PLC_Gen_Bus_37"
         listen_port : 5107
         object_type: "gen"
         object_id: "37"
-        field_type: "v"
+        field_type: "Vg"
     }
     mapped_application {
         application_id   :   "PLC_Gen_Bus_38"
         listen_port : 5108
         object_type: "gen"
         object_id: "38"
-        field_type: "v"
+        field_type: "Vg"
     }
     mapped_application {
         application_id   :   "PLC_Gen_Bus_39"
         listen_port : 5109
         object_type: "gen"
         object_id: "39"
-        field_type: "v"
+        field_type: "Vg"
     }
     description		            :	"PLCs for controlling generator bus voltages"
 }
@@ -198,30 +198,6 @@ bg_flow {
     flow_start_time		:	1
     description		    :	"Ping flow between h3 to h2 starting at time 1.0 seconds"
 }
-bg_flow {
-    src_cyber_entity	:	"h1"
-    dst_cyber_entity	:	"h3"
-    cmd_to_run_at_src	:	"python  /home/moses/Melody/src/core/tools/telnet_client.py --dest_ip h3"
-    cmd_to_run_at_dst	:	"sudo socat tcp-l:23,reuseaddr,fork exec:/bin/login,pty,setsid,setpgid,stderr,ctty"
-    flow_start_time		:	1
-    description		    :	"Telnet connection between h1 and h3 starting at time 1.0 seconds"
-}
-replay_flow {
-    involved_cyber_entity: "h1"
-    involved_cyber_entity: "h3"
-    pcap_file_path: "/home/moses/Melody/src/projects/secondary_voltage_control/replay_pcaps/pmu_access_h1_h3.pcap"
-    description: "Replaying a PMU access gathered from a real network over the path between h1-h3"
-}
-replay_flow {
-    involved_cyber_entity: "h2"
-    involved_cyber_entity: "h5"
-    pcap_file_path: "/home/moses/Melody/src/projects/secondary_voltage_control/replay_pcaps/vpn_h2_h5.pcap"
-    description: "Replaying a VPN access pcap gathered from a real network over the path between h2-h5"
-}
-replay_flow {
-    involved_cyber_entity: "h1"
-    involved_cyber_entity: "h3"
-    pcap_file_path: "/home/moses/Melody/src/projects/secondary_voltage_control/replay_pcaps/pmu_fuzzing_h1_h3.pcap"
-    description: "Replaying a PMU fuzzing attack gathered from a real network over the path between h1-h3"
-}
+
+
 

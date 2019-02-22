@@ -1,5 +1,8 @@
 syntax = "proto2";
+import "pss.proto";
 package melody_configuration;
+
+
 
 
 message TopologyParameter {
@@ -67,4 +70,8 @@ message ProjectConfiguration {
 	repeated BackGroundFlow bg_flow = 5;
 	repeated PcapReplayFlow replay_flow = 6;
 
+}
+
+message Disturbances {
+    repeated melody_powersim_proto.WriteRequest disturbance = 1;
 }

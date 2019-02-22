@@ -1,20 +1,11 @@
-import shared_buffer
-from shared_buffer import *
-import sys
 import threading
 import logger
-import datetime
-from datetime import datetime
 from defines import *
-from src.proto import pss_pb2
-import time
-from src.utils.sleep_functions import sleep
-
+from src.proto import css_pb2
 
 class basicHostIPCLayer(threading.Thread):
     def __init__(self, host_id, log_file, powersim_ids_mapping, managed_application_id):
         threading.Thread.__init__(self)
-
 
         self.thread_cmd_queue = []
         self.host_id = host_id
@@ -47,7 +38,7 @@ class basicHostIPCLayer(threading.Thread):
     """ -- DO NOT OVERRIDE -- """
 
     def tx_pkt_to_powersim_entity(self, pkt):
-        pkt_parsed = pss_pb2.CyberMessage()
+        pkt_parsed = css_pb2.CyberMessage()
         pkt_parsed.ParseFromString(pkt)
         cyber_entity_ip = self.powersim_ids_mapping[pkt_parsed.dst_application_id]["mapped_host_ip"]
         cyber_entity_port = self.powersim_ids_mapping[pkt_parsed.dst_application_id]["port"]
