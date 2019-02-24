@@ -1,0 +1,170 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>About &#8212; Melody 1.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="author" title="About these documents" href="#" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Getting Started" href="getting_started.html" />
+    <link rel="prev" title="Melody: Co-Simulation of Cyber Physical Systems" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="about">
+<h1>About<a class="headerlink" href="#about" title="Permalink to this headline">¶</a></h1>
+<p>Melody is a dataset generation tool for the modern power grid. Melody synthesizes network traffic for scalable systems, modeling both the cyber and physical components of the smart grid. It utilizes virtual time to generate traffic with high fidelity from a simulated physical network integrated with an emulated cyber network.</p>
+<div class="section" id="motivation">
+<h2>Motivation<a class="headerlink" href="#motivation" title="Permalink to this headline">¶</a></h2>
+<p>As control devices become increasingly prevalent in smart grid systems, the detection and prevention of attacks on these devices also become more critical, since attacks focused on the inherent security vulnerabilities of these devices could result in catastrophic failures. Machine learning based Network Intrusion Detection Systems (NIDS) seek to identify such attacks, but in order to do so, they rely on learning the normal traffic patterns of the system in question and subsequently finding anomalies in future network traffic. Due to associated security risks and operational resource constraints, this type of system network traffic data is not readily available for research purposes. Melody provides a framework for synthesizing these types of datasets.</p>
+<p>Researchers can utilize Melody to generate both normal background network traffic and attack traffic in a modeled smart grid control network. Melody synthesizes high temporal fidelity datasets using a virtual time system that allows for fine-grained control over the execution of the system processes. Adversarial traffic is embedded within background traffic via emulation and traffic replay mechanisms. Melody has been evaluated to demonstrate that its synthesized datasets have temporal characteristics analogous to data obtained from a real network. Melody has the capability to generate datasets representing networks containing thousands of simultaneous flows while maintaining temporal and causal fidelity.</p>
+</div>
+<div class="section" id="architecture">
+<h2>Architecture<a class="headerlink" href="#architecture" title="Permalink to this headline">¶</a></h2>
+<p>Smart grid communication networks typically use a two-layered architecture containing a corporate network and a fieldbus/control network. The corporate network handles IT management, operator control, and the storage and analysis of process control data. The control network consists of a topology of controllers and field devices interconnected through multiple switches.</p>
+<div class="figure align-center" id="id1">
+<a class="reference internal image-reference" href="_images/case_study_cyber_topology.png"><img alt="Smart Grid Communication Network Diagram" src="_images/case_study_cyber_topology.png" style="width: 80%;" /></a>
+<p class="caption"><span class="caption-text">A hypothetical smart grid control network topology in Mininet.</span></p>
+</div>
+<p>Melody uses Mininet to emulate the communication network and Matpower to simulate the electrical behavior of the power grid. A proxy process provides an interface between the power simulator and the network emulator. Control commands originate from an emulated control node (e.g. a SCADA master) and are routed through the emulated network to the destination host (e.g an RTU controlling a circuit breaker). These commands are later transferred from this destination host to the power simulator via the proxy. The power simulator calculates the updated system state and sends out responses (e.g. voltage magnitude and angle measurements) which are re-routed back to the control node.</p>
+<div class="figure align-center" id="id2">
+<a class="reference internal image-reference" href="_images/cyber_phys_components.png"><img alt="Cyber-Physical Component Diagram" src="_images/cyber_phys_components.png" style="width: 80%;" /></a>
+<p class="caption"><span class="caption-text">Integration of cyber and physical components using a proxy process.</span></p>
+</div>
+<div class="figure align-center" id="id3">
+<a class="reference internal image-reference" href="_images/melody_architecture.png"><img alt="Melody Architecture Diagram" src="_images/melody_architecture.png" style="width: 80%;" /></a>
+<p class="caption"><span class="caption-text">Melody Architecture Diagram.</span></p>
+</div>
+<div class="section" id="virtual-time-integration">
+<h3>Virtual Time Integration<a class="headerlink" href="#virtual-time-integration" title="Permalink to this headline">¶</a></h3>
+<p>Virtual time in Melody is handled by Kronos. Kronos provides an API to add processes to its control and has the ability to automatically detect and control other processes which may be spawned by its current set of controlled processes. Emulation proceeds in rounds, where the virtual time of all controlled processes is advanced by a specified “time slice” each round. This time slice is usually set to the greatest common divisor of all link latencies in the network to avoid causal violations. Following the end of each round, the startup script instructs the power simulation to advance its simulation time by the duration of the round. The power simulation takes all input packets (from the proxy) gathered during the last round and responds with updated output packets (to the proxy) which are delivered to the corresponding destination nodes at the start of the next round.</p>
+</div>
+<div class="section" id="traffic-generation">
+<h3>Traffic Generation<a class="headerlink" href="#traffic-generation" title="Permalink to this headline">¶</a></h3>
+<p>Each emulated host may run three types of driver processes:</p>
+<ul>
+<li><p class="first">Emulation Driver: produces traffic by spawning processes that interact with each other</p>
+</li>
+<li><p class="first">Replay Driver: initiates traffic replay actions at designated times</p>
+</li>
+<li><p class="first">Powersim Driver: conveys power simulation state data across the cyber network to and from the proxy process; spawns the following three threads</p>
+<blockquote>
+<div><ul class="simple">
+<li>application layer thread: emulates smart grid applications (IPC layer)</li>
+<li>attack layer thread: intercepts, modifies, and injects application level packets</li>
+<li>network layer thread: handles packet transmission and reception</li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+<p>Melody supports emulation of traffic with actual processes spawned on mininet hosts by emulation drivers. These processes may be spawned by the emulation drivers at specified offsets of time from the start of the experiment, and may follow one of three different timing patterns. Melody generates packets either by emulating actual production software when possible or by embedding packet traces collected from arbitrary networks in the modelled network.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Melody</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">About</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#motivation">Motivation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#architecture">Architecture</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#virtual-time-integration">Virtual Time Integration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#traffic-generation">Traffic Generation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">Python Modules Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contact.html">Contact</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">Melody: Co-Simulation of Cyber Physical Systems</a></li>
+      <li>Next: <a href="getting_started.html" title="next chapter">Getting Started</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Project Moses.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/about.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
