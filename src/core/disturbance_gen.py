@@ -3,15 +3,28 @@
 .. moduleauthor:: Vignesh Babu <vig2208@gmail.com>
 """
 
-import sys
-import time
-import os
 import argparse
 from src.proto import configuration_pb2
 from google.protobuf import text_format
-from src.core.defines import rpc_write
 import datetime
+import shared_buffer
+from shared_buffer import *
 
+
+
+def init_shared_buffers(shared_buf_array):
+    """Initialize shared buffers used for communication with the main Melody process
+
+    :param shared_buf_array: A shared buffer array object (defined in src/core/shared_buffer.py)
+    :return: None
+    """
+
+    result = shared_buf_array.open(bufName="disturbance-gen-cmd-channel-buffer", isProxy=False)
+    if result == BUF_NOT_INITIALIZED or result == FAILURE:
+        print "Failed to open communication channel ! Not starting any threads !"
+        sys.exit(0)
+    print "Buffer opened: disturbance-gen-cmd-channel-buffer"
+    sys.stdout.flush()
 
 def main(path_to_disturbance_file):
     """Starts the disturbance generator and sends disturbances to the power simulation at specified relative timestamps
@@ -24,6 +37,13 @@ def main(path_to_disturbance_file):
     :type path_to_disturbance_file: str
     :return: None
     """
+    shared_buf_array = shared_buffer_array()
+    init_shared_buffers(shared_buf_array)
+
+    recv_msg = ''
+    while "START" not in recv_msg:
+        dummy_id, recv_msg = shared_buf_array.read_until("disturbance-gen-cmd-channel-buffer", cool_off_time=0.1)
+
     start_time = time.time()
     assert os.path.isfile(path_to_disturbance_file) is True
     disturbances = configuration_pb2.Disturbances()
@@ -35,6 +55,7 @@ def main(path_to_disturbance_file):
         if time_elapsed < float(disturbance.timestamp):
             time.sleep(float(disturbance.timestamp) - time_elapsed)
 
+        print "-----------------------------------------------------------------------------"
         print "Sending Following Disturbances at : ", str(datetime.datetime.now()), "  >> "
         sys.stdout.flush()
 
@@ -46,11 +67,13 @@ def main(path_to_disturbance_file):
             write_list.append((request.objtype, request.objid, request.fieldtype, request.value))
         rpc_write(write_list)
 
+    print "-----------------------------------------------------------------------------"
     print "Finished Sending all disturbances !"
     sys.stdout.flush()
 
-    while True:
-        time.sleep(1.0)
+    recv_msg = ''
+    while "EXIT" not in recv_msg:
+        dummy_id, recv_msg = shared_buf_array.read_until("disturbance-gen-cmd-channel-buffer", cool_off_time=0.1)
 
 
 if __name__ == "__main__":

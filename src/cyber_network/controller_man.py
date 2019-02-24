@@ -16,7 +16,7 @@ class ControllerMan(object):
 
         os.system("sudo killall ryu-manager")
 
-        ryu_cmd = ["ryu-manager", "--observe-links", "ryu.app.ofctl_rest", "ryu.app.rest_topology"]
+        ryu_cmd = ["ryu-manager", "--observe-links", "ryu.app.ofctl_rest", "ryu.app.rest_topology", "ryu.app.simple_switch"]
         self.ryu_proc = subprocess.Popen(ryu_cmd, stdout=subprocess.PIPE)
         return 6633
 

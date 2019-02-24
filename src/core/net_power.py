@@ -642,6 +642,11 @@ class NetPower(object):
                 print "Shared Buffer open failed! Buffer not initialized for driver: " + edp["driver_id"]
                 sys.exit(0)
 
+        result = self.shared_buf_array.open(bufName="disturbance-gen-cmd-channel-buffer", isProxy=True)
+        if result == BUF_NOT_INITIALIZED or result == FAILURE:
+            print "Shared Buffer open open failed! Buffer not initialized for disturbance generator "
+            sys.exit(0)
+
         print "Melody >> Opened main inter-process communication channels ... "
 
     def trigger_all_processes(self, trigger_cmd):
@@ -662,6 +667,8 @@ class NetPower(object):
             ret = 0
             while ret <= 0:
                 ret = self.shared_buf_array.write(edp["driver_id"] + "-main-cmd-channel-buffer", trigger_cmd, 0)
+
+        self.shared_buf_array.write("disturbance-gen-cmd-channel-buffer", trigger_cmd, 0)
 
         print "Melody >> Triggered hosts and drivers with command: ", trigger_cmd
 
