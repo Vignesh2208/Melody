@@ -1,3 +1,8 @@
+"""Linear topology
+
+.. moduleauthor:: Rakesh Kumar (gopchandani@gmail.com)
+"""
+
 from mininet import topo
 from mininet.topo import Topo
 import random
@@ -6,12 +11,20 @@ import random
 class LinearTopo(Topo):
 
     def __init__(self, params):
+        """Initialization of topology
+
+        :param params: A dictionary created from project_configuration.prototxt. It will contain all required
+                       parameters "num_hosts", "num_switches", "switch_switch_link_latency_range"
+                       and "host_switch_link_latency_range". In addition, any additional parameters defined
+                       in configuration will also be included.
+        :type params: dict
+        """
         self.params = params
         Topo.__init__(self)
 
         if params["num_switches"] < 1 :
             print "Need to have at least 2 switches for a linear topology."
-            raise
+            raise Exception
 
         self.num_switches = params["num_switches"]
         self.total_switches = params["num_switches"]

@@ -351,13 +351,6 @@ static PyObject * py_bufWrite(PyObject * self, PyObject * args){
    	}
 
    	assert(bufName != NULL && data != NULL && (dataLen > 0 && dataLen < MAXPKTSIZE) && dstID >= 0);
-
-   	/*printf("bufWirte name %s\n",bufName);
-   	printf("bufWrite data %s\n",data);
-   	printf("bufWrite dataLen %d\n",dataLen);
-   	printf("bufWrite isProxy %d\n",isProxy);
-   	printf("bufWrite dstID %d\n",dstID);*/
-
    	res = __bufWrite(bufName,data,dataLen,isProxy,dstID);
    	
 	return Py_BuildValue("i", res);   	

@@ -1,15 +1,27 @@
+"""Replay driver
+
+.. moduleauthor:: Vignesh Babu <vig2208@gmail.com>, Rakesh Kumar (gopchandani@gmail.com)
+"""
+
+
 import argparse
 import json
-import datetime
 import logger
-from src.utils.sleep_functions import sleep
-from datetime import datetime
 from shared_buffer import *
 import time
+import binascii
 
 
 class ReplayDriver(object):
+    """Controls replaying pcaps
+
+    """
     def __init__(self, input_params):
+        """Initializes the replay driver.
+
+        :param input_params: a dictionary containing parameters and pcaps to load
+        :type input_params: dict
+        """
 
         self.driver_id = input_params["driver_id"]
         self.run_time = input_params["run_time"]
@@ -35,7 +47,13 @@ class ReplayDriver(object):
         self.raw_tx_sock = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_RAW)
 
     def init_shared_buffers(self, run_time):
+        """Initializes shared buffers to allow communication with the main melody process
 
+        :param run_time: run time in seconds. If the buffer cannot be opened, the driver would simply run for
+                         the specified amount and exit gracefully.
+        :type run_time: int
+        :return: None
+        """
         result = self.shared_buf_array.open(bufName=str(self.driver_id) + "-main-cmd-channel-buffer", isProxy=False)
         if result == BUF_NOT_INITIALIZED or result == FAILURE:
             self.log.info("Cmd channel buffer open failed !")
@@ -44,26 +62,39 @@ class ReplayDriver(object):
                 while True:
                     time.sleep(1.0)
 
-            start_time = time.time()
-            sleep(run_time + 2)
-            while time.time() < start_time + float(run_time):
-                time.sleep(1.0)
+            time.sleep(run_time)
             sys.exit(0)
 
         self.log.info("Cmd channel buffer open succeeded !")
         sys.stdout.flush()
 
     def send_command_message(self, msg):
+        """Sends a message over the shared buffer
+
+        :param msg: Message to send
+        :type msg: str
+        :return: None
+        """
         ret = 0
         while ret <= 0:
             ret = self.shared_buf_array.write(self.driver_id + "-main-cmd-channel-buffer", msg, 0)
             time.sleep(0.001)
 
     def recv_command_message(self):
+        """Gets command from the shared buffer
+
+        :return: string or None
+        """
         dummy_id, msg = self.shared_buf_array.read_until(str(self.driver_id) + "-main-cmd-channel-buffer")
         return msg
     
     def load_pcap(self, pcap_file_path):
+        """Loads a pcap specified by the pcap_file_path
+
+        :param pcap_file_path: Absolute path to the pcap file
+        :type pcap_file_path: str
+        :return: None
+        """
         recv_events = {}
         send_events = []
 
@@ -118,7 +149,10 @@ class ReplayDriver(object):
         return send_events, recv_events
 
     def load_pcaps(self):
+        """Load all pcaps which involve this mininet host
 
+        :return: None
+        """
         self.log.info("Loading pcaps involving: " + str(self.node_id))
         for stage_dict in self.attack_plan:
 
@@ -140,7 +174,14 @@ class ReplayDriver(object):
         sys.stdout.flush()
 
     def trigger_replay(self, pcap_file_path):
+        """Triggers replay of the pcap_file specified by pcap_file_path
 
+        .. note:: The pcap file must have already been loaded before calling this.
+
+        :param pcap_file_path: Absolute path to pcap file
+        :type pcap_file_path: str
+        :return: None
+        """
         self.log.info("Replaying PCAP file " + pcap_file_path)
         sys.stdout.flush()
         
@@ -204,12 +245,15 @@ class ReplayDriver(object):
                 except KeyError as e:
                     pass
 
-
         self.log.info("Signalling End of Replay Stage ...")
         sys.stdout.flush()
         self.send_command_message("DONE")
         
     def wait_for_commands(self):
+        """Wait for a trigger replay command from the main melody process
+
+        :return: None
+        """
         recv_msg = ''
         
         while "EXIT" not in recv_msg:
@@ -231,6 +275,10 @@ class ReplayDriver(object):
 
 
 def main():
+    """Creates a replay driver and calls wait_for_commands
+
+    :return: None
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument("--input_params_file_path", dest="input_params_file_path")
     sys.stdout.flush()

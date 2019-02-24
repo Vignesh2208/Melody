@@ -21,37 +21,45 @@ message Status {
   required StatusType status = 2;
 }
 
+// Format of a response message sent by proxy
 message Response {
-  required string id = 1;
-  required string value = 2;
+  required string id = 1;   // Must match a request id
+  required string value = 2;    // Value contained in the response
 }
 
+// Format of each request message
 message Request {
-  required string id = 1;
-  required string objtype = 2;
-  required string objid = 3;
-  required string fieldtype = 4;
-  required string value = 5;
+  required string id = 1;   // Unique id
+  required string objtype = 2;  // Objtype: must be interpreted by the powersim driver
+  required string objid = 3;    // Objid: must be interpreted by the powersim driver
+  required string fieldtype = 4;    // Fieldtype: must be interpreted by the powersim driver
+  required string value = 5;    // Will contain the returned value for a write request or should be empty for a
+                                // read request
 }
 
+// A Read request specifies the object ot be read
 message ReadRequest {
-  required float timestamp = 1;
-  repeated Request request = 2;
+  required float timestamp = 1; // Virtual timestamp at which the request was generated
+  repeated Request request = 2; // Description of each request
 }
 
+// Format of response sent by proxy for a Read request
 message ReadResponse {
   repeated Response response = 1;
 }
 
+// A WriteRequest may specify multiple objects to be written
 message WriteRequest {
-  required float timestamp = 1;
-  repeated Request request = 2;
+  required float timestamp = 1; // Virtual timestamp at which the request was generated
+  repeated Request request = 2; // Description of each request
 }
 
+// Status of a WriteRequest. Sent by proxy after processing a WriteRequest.
 message WriteStatus {
   repeated Status status = 1;
 }
 
+// Format of message sent to trigger batch processing at proxy
 message ProcessRequest {
   required string id = 1;
 }

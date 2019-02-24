@@ -1,3 +1,8 @@
+"""Helper functions.
+
+.. moduleauthor:: Vignesh Babu <vig2208@gmail.com>
+"""
+
 import dpkt
 import grpc
 import sys
@@ -36,22 +41,28 @@ NS_PER_MS = 1000000
 NS_PER_SEC = 1000000000
 GRPC_SERVER_LOCATION = "11.0.0.255:50051"
 
-TRAFFIC_FLOW_PERIODIC = 'Periodic'
-TRAFFIC_FLOW_EXPONENTIAL = 'Exponential'
 TRAFFIC_FLOW_ONE_SHOT = 'OneShot'
-
-# Every network simulated node listens on this port by default for udp pkts from other nodes
-DEFAULT_HOST_UDP_PORT = 5100
-
-# 10 characters for holding the length of power sim id. currently only used for power world
-POWERSIM_ID_HDR_LEN = 10
-
 
 
 def getid():
+    """Returns a random unique string ID
+
+    :return: str
+    """
     return str(hash(time.time() + random.random()))
 
+
 def rpc_read(readlist):
+    """Makes a GRPC read request call to the proxy. It may be used to read some values from the power simulation.
+
+    It takes in as input a list of read requests and composes and sends a single GRPC read request to the proxy.
+    It waits until the proxy sends a response and returns the values contained in the response or None if there
+    was an error.
+
+    :param readlist: A list of tuples (objtype (str), objid (str), fieldtype (str)). Refer src/proto/pss.proto
+    :type readlist: list of tuples
+    :return: list of str or None
+    """
 
     try:
         channel = grpc.insecure_channel(GRPC_SERVER_LOCATION)
@@ -78,6 +89,16 @@ def rpc_read(readlist):
 
 
 def rpc_write(writelist):
+    """Makes a GRPC write request call to the proxy. It may be used to write some values to the power simulation
+
+    It takes in as input a list of write requests and composes and sends a single GRPC write request to the proxy.
+    It waits until the proxy sends a response and returns the status response or None if there was an error.
+
+    :param writelist: A list of tuples (objtype (str), objid (str), fieldtype (str), value(str)).
+                      Refer src/proto/pss.proto
+    :type writelist: list of tuples
+    :return: list of int (Refer src/proto/pss.proto: WriteStatus)  or None
+    """
 
     try:
         channel = grpc.insecure_channel(GRPC_SERVER_LOCATION)
@@ -103,27 +124,29 @@ def rpc_write(writelist):
         return None
 
 
-
 def rpc_process():
+    """Sends a batch processing GRPC request request.
+
+    Called by Melody to initiate processing of all read/write requests received in the last batch.
+
+    :return: None
+    """
     try:
         with grpc.insecure_channel(GRPC_SERVER_LOCATION) as channel:
             stub = pss_pb2_grpc.pssStub(channel)
             request = pss_pb2.ProcessRequest(id=getid())
-            status = stub.process(request)
+            stub.process(request)
     except:
         print "Error creating RPC process request !"
 
 
-
-
 def inet_to_str(inet):
     """Convert inet object to a string
-        Args:
-            inet (inet struct): inet network address
-        Returns:
-            str: Printable/readable IP address
+
+    :param inet: inet network address
+    :type inet: inet struct
+    :return:  str of printable/readable IP address
     """
-    # First try ipv4 and then ipv6
     try:
         return socket.inet_ntop(socket.AF_INET, inet)
     except ValueError:
@@ -132,12 +155,11 @@ def inet_to_str(inet):
 
 def str_to_inet(str):
     """Convert string object to an inet
-        Args:
-            str: Printable/readable IP address
-        Returns:
-            inet (inet struct): inet network address
+
+    :param str: printable/readable IP address
+    :type str: str
+    :return: inet (inet struct) - an inet network address
     """
-    # First try ipv4 and then ipv6
     try:
         return socket.inet_pton(socket.AF_INET, str)
     except ValueError:
@@ -145,8 +167,14 @@ def str_to_inet(str):
 
 
 def get_ip_loopback(buf):
-    # Unpack the data within the Ethernet frame (the IP packet)
-    # Pulling out src, dst, length, fragment info, TTL, and Protocol
+    """Unpack the data within the Ethernet frame (the IP packet)
+
+    Pulling out src, dst, length, fragment info, TTL, and Protocol
+
+    :param buf: A string buffer containing the entire packet
+    :type buf: str
+    :return: ip of type (dpkt.IP)
+    """
     lp = Loopback(buf)
     lp.unpack(buf)
     ip = lp.data
@@ -154,6 +182,14 @@ def get_ip_loopback(buf):
 
 
 def get_ip_ethernet(buf):
+    """Unpack the data within the Ethernet frame (the IP packet)
+
+    Pulling out src, dst, length, fragment info, TTL, and Protocol
+
+    :param buf: A string buffer containing the entire packet
+    :type buf: str
+    :return: ip of type (dpkt.IP)
+    """
     lp = Ethernet(buf)
     lp.unpack(buf)
     ip = lp.data
@@ -161,21 +197,33 @@ def get_ip_ethernet(buf):
 
 
 def get_ip_sll(buf):
+    """Unpack the data within the SLL frame (the IP packet)
+
+    Pulling out src, dst, length, fragment info, TTL, and Protocol
+
+    :param buf: A string buffer containing the entire packet
+    :type buf: str
+    :return: ip of type (dpkt.IP)
+    """
     lp = SLL(buf)
     lp.unpack(buf)
     ip = lp.data
     return ip
 
 
-def get_pkt_src_dst_IP(buf, DL_TYPE=ETH_TYPE_FRAME):
-    """
+def get_pkt_src_dst_IP(buf, dl_type=ETH_TYPE_FRAME):
+    """Get src and dst IP from raw packet string
+
     :param buf: A string buffer containing the entire packet
+    :type buf: str
+    :param dl_type: Link Layer type defined in dpkt.pcap. (Default ETH_TYPE_FRAME)
+    :type dl_type: int
     :return: A tuple with source and destination IP strings
     """
 
-    if DL_TYPE == dpkt.pcap.DLT_NULL:
+    if dl_type == dpkt.pcap.DLT_NULL:
         ip = get_ip_loopback(buf)
-    elif DL_TYPE == dpkt.pcap.DLT_LINUX_SLL:
+    elif dl_type == dpkt.pcap.DLT_LINUX_SLL:
         ip = get_ip_sll(buf)
     else:
         ip = get_ip_ethernet(buf)
@@ -183,15 +231,19 @@ def get_pkt_src_dst_IP(buf, DL_TYPE=ETH_TYPE_FRAME):
     return inet_to_str(ip.src), inet_to_str(ip.dst)
 
 
-def get_raw_ip_pkt(buf, DL_TYPE=ETH_TYPE_FRAME):
-    """
+def get_raw_ip_pkt(buf, dl_type=ETH_TYPE_FRAME):
+    """Get IP payload from raw packet string
+
     :param buf: A string buffer containing the entire packet
+    :type buf: str
+    :param dl_type: Link Layer type defined in dpkt.pcap. (Default ETH_TYPE_FRAME)
+    :type dl_type: int
     :return: A string buffer with IP payload
     """
 
-    if DL_TYPE == dpkt.pcap.DLT_NULL:
+    if dl_type == dpkt.pcap.DLT_NULL:
         ip = get_ip_loopback(buf)
-    elif DL_TYPE == dpkt.pcap.DLT_LINUX_SLL:
+    elif dl_type == dpkt.pcap.DLT_LINUX_SLL:
         ip = get_ip_sll(buf)
     else:
         ip = get_ip_ethernet(buf)
@@ -200,13 +252,10 @@ def get_raw_ip_pkt(buf, DL_TYPE=ETH_TYPE_FRAME):
 
 
 def decode_raw_ip_payload_src_dst(buf):
+    """Get src,dst ip address from raw ip payload string
+
+    :param buf: A string buffer containing raw ip payload
+    :return: A typle with source and destination IP strings
+    """
     ip = IP(buf)
     return inet_to_str(ip.src), inet_to_str(ip.dst)
-
-
-
-def is_pkt_from_attack_dispatcher(pkt_str):
-    if pkt_str[0] == "1":
-        return True
-    else:
-        return False

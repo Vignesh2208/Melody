@@ -1,3 +1,8 @@
+"""Disturbance generator
+
+.. moduleauthor:: Vignesh Babu <vig2208@gmail.com>
+"""
+
 import sys
 import time
 import os
@@ -9,12 +14,21 @@ import datetime
 
 
 def main(path_to_disturbance_file):
+    """Starts the disturbance generator and sends disturbances to the power simulation at specified relative timestamps
+
+    Disturbances and their relative timestamps are specified in a file according to the Disturbance message format
+    defined in src/proto/configuration.proto
+
+    :param path_to_disturbance_file: Absolute path to file containing disturbances specified in Disturbance proto
+                                     format. (Refer src/proto/configuration.proto : Disturbances)
+    :type path_to_disturbance_file: str
+    :return: None
+    """
     start_time = time.time()
     assert os.path.isfile(path_to_disturbance_file) is True
     disturbances = configuration_pb2.Disturbances()
     with open(path_to_disturbance_file, 'r') as f:
         text_format.Parse(f.read(), disturbances)
-
 
     for disturbance in disturbances.disturbance:
         time_elapsed = time.time() - start_time

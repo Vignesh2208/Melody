@@ -13,6 +13,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
     <link rel="author" title="About these documents" href="#" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -45,10 +46,25 @@
 <div class="section" id="architecture">
 <h2>Architecture<a class="headerlink" href="#architecture" title="Permalink to this headline">¶</a></h2>
 <p>Smart grid communication networks typically use a two-layered architecture containing a corporate network and a fieldbus/control network. The corporate network handles IT management, operator control, and the storage and analysis of process control data. The control network consists of a topology of controllers and field devices interconnected through multiple switches.</p>
-<img alt="Smart Grid Communication Network Diagram" src="_images/case_study_cyber_topology.png" />
+<div class="figure align-center" id="id1">
+<a class="reference internal image-reference" href="_images/case_study_cyber_topology.png"><img alt="Smart Grid Communication Network Diagram" src="_images/case_study_cyber_topology.png" style="width: 80%;" /></a>
+<p class="caption"><span class="caption-text">A hypothetical smart grid control network topology in Mininet.</span></p>
+</div>
 <p>Melody uses Mininet to emulate the communication network and Matpower to simulate the electrical behavior of the power grid. A proxy process provides an interface between the power simulator and the network emulator. Control commands originate from an emulated control node (e.g. a SCADA master) and are routed through the emulated network to the destination host (e.g an RTU controlling a circuit breaker). These commands are later transferred from this destination host to the power simulator via the proxy. The power simulator calculates the updated system state and sends out responses (e.g. voltage magnitude and angle measurements) which are re-routed back to the control node.</p>
-<a class="reference internal image-reference" href="_images/cyber_phys_components.png"><img alt="Cyber-Physical Component Diagram" class="align-center" src="_images/cyber_phys_components.png" style="width: 48%;" /></a>
-<a class="reference internal image-reference" href="_images/melody_architecture.png"><img alt="Melody Architecture Diagram" class="align-center" src="_images/melody_architecture.png" style="width: 48%;" /></a>
+<div class="figure align-center" id="id2">
+<a class="reference internal image-reference" href="_images/cyber_phys_components.png"><img alt="Cyber-Physical Component Diagram" src="_images/cyber_phys_components.png" style="width: 80%;" /></a>
+<p class="caption"><span class="caption-text">Integration of cyber and physical components using a proxy process.</span></p>
+</div>
+<div class="figure align-center" id="id3">
+<a class="reference internal image-reference" href="_images/melody_architecture.png"><img alt="Melody Architecture Diagram" src="_images/melody_architecture.png" style="width: 80%;" /></a>
+<p class="caption"><span class="caption-text">Melody Architecture Diagram.</span></p>
+</div>
+<div class="section" id="virtual-time-integration">
+<h3>Virtual Time Integration<a class="headerlink" href="#virtual-time-integration" title="Permalink to this headline">¶</a></h3>
+<p>Virtual time in Melody is handled by Kronos. Kronos provides an API to add processes to its control and has the ability to automatically detect and control other processes which may be spawned by its current set of controlled processes. Emulation proceeds in rounds, where the virtual time of all controlled processes is advanced by a specified “time slice” each round. This time slice is usually set to the greatest common divisor of all link latencies in the network to avoid causal violations. Following the end of each round, the startup script instructs the power simulation to advance its simulation time by the duration of the round. The power simulation takes all input packets (from the proxy) gathered during the last round and responds with updated output packets (to the proxy) which are delivered to the corresponding destination nodes at the start of the next round.</p>
+</div>
+<div class="section" id="traffic-generation">
+<h3>Traffic Generation<a class="headerlink" href="#traffic-generation" title="Permalink to this headline">¶</a></h3>
 <p>Each emulated host may run three types of driver processes:</p>
 <ul>
 <li><p class="first">Emulation Driver: produces traffic by spawning processes that interact with each other</p>
@@ -60,12 +76,13 @@
 <div><ul class="simple">
 <li>application layer thread: emulates smart grid applications (IPC layer)</li>
 <li>attack layer thread: intercepts, modifies, and injects application level packets</li>
-<li>network layer thread: handles packet transmissions and receptions</li>
+<li>network layer thread: handles packet transmission and reception</li>
 </ul>
 </div></blockquote>
 </li>
 </ul>
 <p>Melody supports emulation of traffic with actual processes spawned on mininet hosts by emulation drivers. These processes may be spawned by the emulation drivers at specified offsets of time from the start of the experiment, and may follow one of three different timing patterns. Melody generates packets either by emulating actual production software when possible or by embedding packet traces collected from arbitrary networks in the modelled network.</p>
+</div>
 </div>
 </div>
 
@@ -89,7 +106,11 @@
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">About</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#motivation">Motivation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#architecture">Architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#architecture">Architecture</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#virtual-time-integration">Virtual Time Integration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#traffic-generation">Traffic Generation</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
@@ -117,6 +138,14 @@
     </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
         </div>
       </div>
       <div class="clearer"></div>
@@ -125,8 +154,8 @@
       &copy;2019, Project Moses.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.9</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
       <a href="_sources/about.rst.txt"

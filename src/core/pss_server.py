@@ -1,3 +1,8 @@
+"""The proxy process
+
+.. moduleauthor:: Hoang Hai Nguyen <email>
+"""
+
 from concurrent import futures
 import time
 import logging

@@ -1,4 +1,7 @@
-__author__ = 'Rakesh Kumar'
+"""Ring topology
+
+.. moduleauthor:: Rakesh Kumar (gopchandani@gmail.com)
+"""
 
 from mininet.topo import Topo
 
@@ -6,7 +9,14 @@ from mininet.topo import Topo
 class RingTopo(Topo):
     
     def __init__(self, params):
-        
+        """Initialization of topology
+
+        :param params: A dictionary created from project_configuration.prototxt. It will contain all required
+                       parameters "num_hosts", "num_switches", "switch_switch_link_latency_range"
+                       and "host_switch_link_latency_range". In addition, any additional parameters defined
+                       in configuration will also be included.
+        :type params: dict
+        """
         Topo.__init__(self)
         
         self.params = params

@@ -3,8 +3,8 @@ cyber_emulation_spec {
     topology_name: "clique"
     num_hosts: 5
     num_switches: 5
-    inter_switch_link_latency_ms: 500
-    host_switch_link_latency_ms: 500
+    inter_switch_link_latency_ms: 1
+    host_switch_link_latency_ms: 1
     additional_topology_param {
         parameter_name: "per_switch_links"
         parameter_value_int: 2
@@ -16,18 +16,18 @@ cyber_emulation_spec {
 }
 
 cyber_physical_map {
-    cyber_entity_id	:	"h1"
+    cyber_host_name	:	"h1"
     description		:	"Workstation"
 }
 cyber_physical_map {
-    cyber_entity_id	:	"h2"
+    cyber_host_name	:	"h2"
     description		:	"HMI"
 }
 cyber_physical_map {
-    cyber_entity_id	:	"h3"
-    app_layer_src: "pmu.py"
+    cyber_host_name	:	"h3"
     mapped_application {
         application_id	:	"PMU_Pilot_Bus_2"
+        application_src : "pmu.py"
         listen_port : 5100
         object_type: "bus"
         object_id: "2"
@@ -35,6 +35,7 @@ cyber_physical_map {
     }
     mapped_application {
         application_id   :   "PMU_Pilot_Bus_6"
+        application_src : "pmu.py"
         listen_port : 5101
         object_type: "bus"
         object_id: "6"
@@ -42,6 +43,7 @@ cyber_physical_map {
     }
     mapped_application {
         application_id   :   "PMU_Pilot_Bus_9"
+        application_src : "pmu.py"
         listen_port : 5102
         object_type: "bus"
         object_id: "9"
@@ -49,6 +51,7 @@ cyber_physical_map {
     }
     mapped_application {
         application_id   :   "PMU_Pilot_Bus_10"
+        application_src : "pmu.py"
         listen_port : 5103
         object_type: "bus"
         object_id: "10"
@@ -56,6 +59,7 @@ cyber_physical_map {
     }
     mapped_application {
         application_id   :   "PMU_Pilot_Bus_19"
+        application_src : "pmu.py"
         listen_port : 5104
         object_type: "bus"
         object_id: "19"
@@ -63,6 +67,7 @@ cyber_physical_map {
     }
     mapped_application {
         application_id   :   "PMU_Pilot_Bus_20"
+        application_src : "pmu.py"
         listen_port : 5105
         object_type: "bus"
         object_id: "20"
@@ -70,6 +75,7 @@ cyber_physical_map {
     }
     mapped_application {
         application_id   :   "PMU_Pilot_Bus_22"
+        application_src : "pmu.py"
         listen_port : 5106
         object_type: "bus"
         object_id: "22"
@@ -77,6 +83,7 @@ cyber_physical_map {
     }
     mapped_application {
         application_id   :   "PMU_Pilot_Bus_23"
+        application_src : "pmu.py"
         listen_port : 5107
         object_type: "bus"
         object_id: "23"
@@ -84,6 +91,7 @@ cyber_physical_map {
     }
     mapped_application {
         application_id   :   "PMU_Pilot_Bus_25"
+        application_src : "pmu.py"
         listen_port : 5108
         object_type: "bus"
         object_id: "25"
@@ -91,6 +99,7 @@ cyber_physical_map {
     }
     mapped_application {
         application_id   :   "PMU_Pilot_Bus_29"
+        application_src : "pmu.py"
         listen_port : 5109
         object_type: "bus"
         object_id: "29"
@@ -99,10 +108,10 @@ cyber_physical_map {
     description		            :	"PMUs for reading pilot buses"
 }
 cyber_physical_map {
-    cyber_entity_id				:	"h4"
-    app_layer_src: "plc.py"
+    cyber_host_name				:	"h4"
     mapped_application {
         application_id	:	"PLC_Gen_Bus_30"
+        application_src: "plc.py"
         listen_port : 5100
         object_type: "gen"
         object_id: "30"
@@ -110,6 +119,7 @@ cyber_physical_map {
     }
     mapped_application {
         application_id   :   "PLC_Gen_Bus_31"
+        application_src: "plc.py"
         listen_port : 5101
         object_type: "gen"
         object_id: "31"
@@ -117,6 +127,7 @@ cyber_physical_map {
     }
     mapped_application {
         application_id   :   "PLC_Gen_Bus_32"
+        application_src: "plc.py"
         listen_port : 5102
         object_type: "gen"
         object_id: "32"
@@ -124,6 +135,7 @@ cyber_physical_map {
     }
     mapped_application {
         application_id   :   "PLC_Gen_Bus_33"
+        application_src: "plc.py"
         listen_port : 5103
         object_type: "gen"
         object_id: "33"
@@ -131,6 +143,7 @@ cyber_physical_map {
     }
     mapped_application {
         application_id   :   "PLC_Gen_Bus_34"
+        application_src: "plc.py"
         listen_port : 5104
         object_type: "gen"
         object_id: "34"
@@ -138,6 +151,7 @@ cyber_physical_map {
     }
     mapped_application {
         application_id   :   "PLC_Gen_Bus_35"
+        application_src: "plc.py"
         listen_port : 5105
         object_type: "gen"
         object_id: "35"
@@ -145,6 +159,7 @@ cyber_physical_map {
     }
     mapped_application {
         application_id   :   "PLC_Gen_Bus_36"
+        application_src: "plc.py"
         listen_port : 5106
         object_type: "gen"
         object_id: "36"
@@ -152,6 +167,7 @@ cyber_physical_map {
     }
     mapped_application {
         application_id   :   "PLC_Gen_Bus_37"
+        application_src: "plc.py"
         listen_port : 5107
         object_type: "gen"
         object_id: "37"
@@ -159,6 +175,7 @@ cyber_physical_map {
     }
     mapped_application {
         application_id   :   "PLC_Gen_Bus_38"
+        application_src: "plc.py"
         listen_port : 5108
         object_type: "gen"
         object_id: "38"
@@ -166,6 +183,7 @@ cyber_physical_map {
     }
     mapped_application {
         application_id   :   "PLC_Gen_Bus_39"
+        application_src: "plc.py"
         listen_port : 5109
         object_type: "gen"
         object_id: "39"
@@ -174,10 +192,10 @@ cyber_physical_map {
     description		            :	"PLCs for controlling generator bus voltages"
 }
 cyber_physical_map {
-    cyber_entity_id				:	"h5"
-    app_layer_src: "scada.py"
+    cyber_host_name				:	"h5"
     mapped_application {
         application_id   :   "SCADA_CONTROLLER"
+        application_src: "scada.py"
         listen_port : 5100
     }
     description		            :	"Receives PMU data and sends commands to PLCs"

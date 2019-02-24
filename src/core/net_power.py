@@ -1,10 +1,15 @@
+"""Melody main orchestrator logic
+
+.. moduleauthor:: Vignesh Babu <vig2208@gmail.com>, Rakesh Kumar (gopchandani@gmail.com)
+"""
+
+
 import datetime
 import json
 from datetime import datetime
 from shared_buffer import *
 from src.cyber_network.traffic_flow import ReplayFlowsContainer
 from src.core.replay_orchestrator import ReplayOrchestrator
-from src.utils.sleep_functions import sleep
 from src.utils.util_functions import *
 from defines import *
 from kronos_functions import *
@@ -15,12 +20,15 @@ import os
 import tempfile
 import threading
 from sys import stdout
-from src.proto import pss_pb2
-from src.proto import pss_pb2_grpc
-
 
 
 class NetPower(object):
+    """Class which starts mininet, proxy, disturbance generator and manages their operation.
+    
+    It initializes the project and brings it under the control of Kronos. It provides API to drive the co-simulation
+    of mininet and a power simulator.
+    
+    """
 
     def __init__(self,
                  run_time,
@@ -32,8 +40,30 @@ class NetPower(object):
                  replay_traffic_flows,
                  cyber_host_apps,
                  enable_kronos,
-                 rel_cpu_speed,
-                 CPUS_SUBSET):
+                 rel_cpu_speed):
+        """Initializing Melody
+
+        :param run_time: Total running time of co-simulation in seconds
+        :type run_time: int
+        :param network_configuration: Mininet Network configuration obj
+        :type network_configuration: (src/cyber_network/network_configuration)
+        :param project_dir: Directory path of project
+        :type project_dir: str
+        :param base_dir: Melody Installation directory
+        :type base_dir: str
+        :param log_dir: Directory to store log files and pcaps
+        :type log_dir: str
+        :param emulated_background_traffic_flows: A list of EmulatedTrafficFlow objects
+        :type emulated_background_traffic_flows: a list of src/cyber_network/traffic_flow : EmulatedTrafficFlow objects
+        :param replay_traffic_flows: A list of ReplayTraficFlow objects
+        :type replay_traffic_flows: a list of src/cyber_network/traffic_flow : ReplayTrafficFlow objects
+        :param cyber_host_apps: A dictionary mapping an application_id to its corresponding source file
+        :type cyber_host_apps: dict
+        :param enable_kronos: Enable/Disable Kronos. 1 - enable kronos, 0 - disable kronos
+        :type enable_kronos: int
+        :param rel_cpu_speed: Relative cpu speed for virtual time advancement
+        :type rel_cpu_speed: int
+        """
 
         self.network_configuration = network_configuration
         self.switch_2_switch_latency = self.network_configuration.topo_params["switch_switch_link_latency_range"][0]
@@ -44,13 +74,13 @@ class NetPower(object):
         self.project_name = self.network_configuration.project_name
         self.run_time = run_time
         self.power_simulator_ip = self.network_configuration.power_simulator_ip
-        self.host_to_powersim_ids = {}
+        self.host_to_application_ids = {}
         self.powersim_id_to_host = {}
         self.project_dir = project_dir
         self.base_dir = base_dir
         self.enable_kronos = enable_kronos
         self.rel_cpu_speed = rel_cpu_speed
-        self.cpus_subset = CPUS_SUBSET
+        self.cpus_subset = "1-12"
 
         self.pid_list = []
         self.host_pids = {}
@@ -84,22 +114,19 @@ class NetPower(object):
         self.n_dilated_tcpdump_procs = 0
         self.started = False
 
-
-
-
         if not os.path.exists(self.log_dir):
             os.makedirs(self.log_dir)
         for i in xrange(0, len(self.network_configuration.roles)):
                 mininet_host_name = self.network_configuration.roles[i][0]
 
-                self.host_to_powersim_ids[mininet_host_name] = []
+                self.host_to_application_ids[mininet_host_name] = []
                 port_mapping = self.network_configuration.roles[i][1]
                 for mapping in port_mapping:
                     entity_id = mapping[0]
-                    self.host_to_powersim_ids[mininet_host_name].append(entity_id)
+                    self.host_to_application_ids[mininet_host_name].append(entity_id)
 
-                if len(self.host_to_powersim_ids[mininet_host_name]) == 0 :
-                    self.host_to_powersim_ids[mininet_host_name].append("DUMMY_" + str(mininet_host_name))
+                if len(self.host_to_application_ids[mininet_host_name]) == 0 :
+                    self.host_to_application_ids[mininet_host_name].append("DUMMY_" + str(mininet_host_name))
         self.open_main_cmd_channel_buffers()
         
         self.check_kronos_loaded()
@@ -114,6 +141,10 @@ class NetPower(object):
         set_cpu_affinity(int(os.getpid()))
 
     def get_emulation_driver_params(self):
+        """Construct list of emulated traffic flow objects
+
+        :return: None
+        """
         for bg_flow in self.emulated_background_traffic_flows:
             self.emulation_driver_params.append(bg_flow.get_emulated_driver_attributes(for_client=True))
             attr = bg_flow.get_emulated_driver_attributes(for_client=False)
@@ -121,6 +152,10 @@ class NetPower(object):
                 self.emulation_driver_params.append(attr)
 
     def check_kronos_loaded(self):
+        """Check if kronos is loaded
+
+        :return: Fails if Kronos is enabled but not loaded
+        """
         if self.enable_kronos == 1 and is_module_loaded() == 0:
             print "ERROR: Kronos is not loaded. Please load and try again!"
             sys.exit(0)
@@ -128,12 +163,20 @@ class NetPower(object):
             self.initialize_kronos_exp()
 
     def initialize_kronos_exp(self):
-        ret = initializeExp(1);
+        """Initialize Kronos exp
+
+        :return: None
+        """
+        ret = initializeExp(1)
         if ret < 0:
             print "ERROR:  Kronos initialization failed. Exiting ..."
             sys.exit(0)
 
     def start_synchronized_experiment(self):
+        """Start a synchronized kronos experiment if kronos is enabled
+
+        :return: None
+        """
 
         if self.enable_kronos == 1:
             print "Kronos >> Synchronizing and freezing all processes ..."
@@ -149,6 +192,10 @@ class NetPower(object):
             print "Melody >> Experiment started with Kronos disabled ... "
 
     def stop_synchronized_experiment(self):
+        """Stop a synchronized kronos experiment if kronos is disabled
+
+        :return: None
+        """
 
         print "########################################################################"
         if self.enable_kronos == 1:
@@ -162,6 +209,11 @@ class NetPower(object):
         print "########################################################################"
 
     def generate_node_mappings(self, roles):
+        """Generate a dictionary which maps application_id to a hostname, ip and port. Stores this in /tmp
+
+        :param roles: list of tuples (host_name, [application_id, listen_port])
+        :return: None
+        """
         with open(self.node_mappings_file_path, "w") as outfile:
             for i in xrange(0, len(roles)):
                 mininet_host_name = roles[i][0]
@@ -184,6 +236,12 @@ class NetPower(object):
             json.dump(self.powersim_id_to_host, outfile)
 
     def cmd_to_start_process_under_tracer(self, cmd_to_run):
+        """Gets a command string which can be started under kronos
+
+        :param cmd_to_run: Command to run under kronos control
+        :type cmd_to_run: str
+        :return: str command to run
+        """
 
         tracer_path = "/usr/bin/tracer"
         tracer_args = [tracer_path]
@@ -197,19 +255,25 @@ class NetPower(object):
         return ' '.join(tracer_args)
 
     def start_host_processes(self):
-        print "Melody >> Starting all hosts: ", self.cyber_host_apps, self.host_to_powersim_ids
+        """Starts all co-simulation host processes
+
+        This starts all specified applications inside mininet hosts.
+
+        :return: None
+        """
+        print "Melody >> Starting all hosts: "
 
         for mininet_host in self.network_configuration.mininet_obj.hosts:
-            for mapped_powerim_id in self.host_to_powersim_ids[mininet_host.name]:
+            for mapped_application_id in self.host_to_application_ids[mininet_host.name]:
                 host_id = int(mininet_host.name[1:])
-                host_log_file = self.log_dir + "/" + mapped_powerim_id  + "_log.txt"
+                host_log_file = self.log_dir + "/" + mapped_application_id  + "_log.txt"
                 host_py_script = self.base_dir + "/src/core/host.py"
                 cmd_to_run = "python " + str(
                     host_py_script) + " -l " + host_log_file + " -c " + self.node_mappings_file_path + " -r " + str(
-                    self.run_time) + " -n " + str(self.project_name) + " -d " + str(host_id) + " -m "  + str(mapped_powerim_id)
+                    self.run_time) + " -n " + str(self.project_name) + " -d " + str(host_id) + " -m "  + str(mapped_application_id)
 
-                if mininet_host.name in self.cyber_host_apps:
-                    cmd_to_run += " -a " + str(self.cyber_host_apps[mininet_host.name])
+                if mapped_application_id in self.cyber_host_apps:
+                    cmd_to_run += " -a " + str(self.cyber_host_apps[mapped_application_id])
                 else:
                     cmd_to_run += " -a NONE"
 
@@ -226,6 +290,10 @@ class NetPower(object):
                 set_cpu_affinity(mininet_host.pid)
 
     def start_switch_processes(self):
+        """Starts all mininet switch processes
+
+        :return: None
+        """
         print "Melody >> Starting all switches ..."
         for mininet_switch in self.network_configuration.mininet_obj.switches:
             sw_id = int(mininet_switch.name[1:])
@@ -243,6 +311,12 @@ class NetPower(object):
             set_cpu_affinity(mininet_switch.pid)
 
     def start_emulation_drivers(self):
+        """Starts all emulation drivers
+
+        Emulation drivers would control background traffic generation.
+
+        :return: None
+        """
 
         driver_py_script = self.base_dir + "/src/core/emulation_driver.py"
         for edp in self.emulation_driver_params:
@@ -266,6 +340,12 @@ class NetPower(object):
         print "Melody >> All background flow drivers started ..."
 
     def start_replay_drivers(self):
+        """Starts all replay drivers
+
+        Replay drivers would control replaying all pcaps.
+
+        :return: None
+        """
 
         driver_py_script = self.base_dir + "/src/core/replay_driver.py"
         for node in self.nodes_involved_in_replay:
@@ -296,6 +376,11 @@ class NetPower(object):
         print "Melody >> All replay flow drivers started ... "
 
     def start_host_capture(self, host_obj):
+        """Start packet capture in each host
+
+        :param host_obj: mininet_host object
+        :return: None
+        """
         core_cmd = "tcpdump"
         capture_cmd = "sudo " + core_cmd
         capture_log_file = self.log_dir + "/" + host_obj.name + ".pcap"
@@ -309,15 +394,21 @@ class NetPower(object):
         host_obj.cmd(capture_cmd)
 
     def start_all_host_captures(self):
+        """Start packet captures in all hosts
+
+        :return: None
+        """
         print "Melody >> Starting tcpdump capture on hosts ..."
         for host in self.network_configuration.mininet_obj.hosts:
             self.start_host_capture(host)
 
     def start_pkt_captures(self):
+        """Start packet captures in all host and switch interfaces
+
+        :return: None
+        """
         self.start_all_host_captures()
-
         print "Melody >> Starting tcpdump capture on switches ..."
-
         for mininet_link in self.network_configuration.mininet_obj.links:
             switchIntfs = mininet_link.intf1
             core_cmd = "tcpdump"
@@ -349,6 +440,10 @@ class NetPower(object):
         self.tcpdump_pids = sudo_tcpdump_parent_pids
 
     def set_netdevice_owners(self):
+        """Associates interfaces with Kronos so that packets are delayed in virtual time.
+
+        :return: None
+        """
         print "Kronos >> Assuming control over mininet network interfaces ..."
         for mininet_switch in self.network_configuration.mininet_obj.switches:
             assert mininet_switch.name in self.switch_pids
@@ -367,7 +462,10 @@ class NetPower(object):
                     set_netdevice_owner(tracer_pid, name)
 
     def start_proxy_process(self):
+        """Starts the proxy process
 
+        :return: None
+        """
         print "Melody >> Starting proxy ... "
         proxy_script = self.base_dir + "/src/core/pss_server.py"
         cmd_to_run = "python " + str(proxy_script) + " --project_dir=" + self.project_dir + " --listen_ip=11.0.0.255"
@@ -381,6 +479,12 @@ class NetPower(object):
             time.sleep(5.0)
 
     def start_control_network(self):
+        """Starts a separate control network which allows all mininet hosts to communicate outside the mininet network
+
+        The control network allows each host to send GRPC requests to the proxy.
+
+        :return: None
+        """
         print "Melody >> Starting Control Network"
         for host in self.network_configuration.mininet_obj.hosts:
             host_number = host.name[1:]
@@ -398,6 +502,12 @@ class NetPower(object):
         os.system("sudo ifconfig connect up")
 
     def start_disturbance_generator(self):
+        """Starts the disturbance generator process and brings it under the control of Kronos
+
+        The disturbance generator will send disturbances to the power simulator.
+
+        :return: None
+        """
         if os.path.isfile(self.project_dir + "/disturbances.prototxt"):
             disturbance_gen_script = self.base_dir + "/src/core/disturbance_gen.py"
             disturbance_file = self.project_dir + "/disturbances.prototxt"
@@ -416,6 +526,10 @@ class NetPower(object):
                 self.pid_list.append(pid)
 
     def stop_control_network(self):
+        """Stops the control network which enables GRPC connectivity
+
+        :return: None
+        """
         print "Melody >> Stopping Control Network"
         os.system("sudo kill -9 " + str(self.proxy_pid))
         os.system("sudo fuser -k 50051/tcp")
@@ -429,48 +543,88 @@ class NetPower(object):
         os.system("sudo ifconfig connect down")
         os.system("sudo brctl delbr connect")
 
-    def trigger_proxy_batch_processing(self):
-        print "Triggering next batch processing at proxy ..."
+    def sync_with_power_simulator(self):
+        """Sends an RPC process request to the proxy.
+
+        This triggers batch processing which processes all read/write rpc requests sent in the previous batch.
+
+        :return: None
+        """
+
         t = threading.Thread(target=rpc_process)
         t.start()
         t.join()
 
     def start_replay_orchestrator(self):
+        """Starts the replay orchestrator process
+
+        The replay orchestrator process will drive replaying pcaps.
+
+        :return: None
+        """
         print "Melody >> Starting replay orchestrator ... "
         self.replay_flows_container.create_replay_plan()
         replay_plan_file = "/tmp/replay_plan.json"
-        self.replay_orchestrator = ReplayOrchestrator(self, replay_plan_file, self.run_time)
+        self.replay_orchestrator = ReplayOrchestrator(self, replay_plan_file)
         self.replay_orchestrator.start()
 
     def send_cmd_to_node(self, node_name, cmd):
+        """Sends a command to execute on a mininet host
+
+        :param node_name: mininet host name
+        :type node_name: str
+        :param cmd: command string to execute
+        :type cmd: str
+        :return: None
+        """
         mininet_host = self.network_configuration.mininet_obj.get(node_name)
         if mininet_host is not None:
             mininet_host.cmd(cmd)
 
     def allow_icmp_requests(self):
+        """Enables ICMP requests on all hosts
+
+        :return: None
+        """
         for host in self.network_configuration.mininet_obj.hosts:
             self.send_cmd_to_node(host.name, "sudo iptables -I OUTPUT -p icmp -j ACCEPT &")
 
     def allow_icmp_responses(self):
+        """Allows ICMP responses on all hosts
+
+        :return: None
+        """
         for host in self.network_configuration.mininet_obj.hosts:
             self.send_cmd_to_node(host.name, "sudo iptables -I INPUT -p icmp -j ACCEPT &")
 
     def disable_TCP_RST(self):
+        """Disables TCP_RST on all hosts
 
+        :return: None
+        """
         for host in self.network_configuration.mininet_obj.hosts:
             self.send_cmd_to_node(host.name, "sudo iptables -I OUTPUT -p tcp --tcp-flags RST RST -j DROP &")
 
     def enable_TCP_RST(self):
+        """Enables TCP_RST on all hosts
 
+        :return: None
+        """
         for host in self.network_configuration.mininet_obj.hosts:
             self.send_cmd_to_node(host.name, "sudo iptables -I OUTPUT -p tcp --tcp-flags RST RST -j ACCEPT &")
 
     def open_main_cmd_channel_buffers(self):
+        """Open shared buffer channels to all hosts
+
+        Shared buffer channels are used to control co-simulation hosts, replay drivers and emulation drivers.
+
+        :return: None or exits on Failure to open shared buffer channels
+        """
         print "Melody >> Opening main inter-process communication channels ..." 
         for mininet_host in self.network_configuration.mininet_obj.hosts:
-            if mininet_host.name in self.host_to_powersim_ids:
-                for mapped_powersim_id in self.host_to_powersim_ids[mininet_host.name]:
-                    result = self.shared_buf_array.open(mapped_powersim_id + "-main-cmd-channel-buffer", isProxy=True)
+            if mininet_host.name in self.host_to_application_ids:
+                for mapped_application_id in self.host_to_application_ids[mininet_host.name]:
+                    result = self.shared_buf_array.open(mapped_application_id + "-main-cmd-channel-buffer", isProxy=True)
                     if result == BUF_NOT_INITIALIZED or result == FAILURE:
                         print "Shared Buffer open failed! Buffer not initialized for host: " + str(mininet_host.name)
                         sys.exit(0)
@@ -491,12 +645,18 @@ class NetPower(object):
         print "Melody >> Opened main inter-process communication channels ... "
 
     def trigger_all_processes(self, trigger_cmd):
+        """Sends a message over shared buffer channels to all co-simulated hosts, replay and emulation drivers
+
+        :param trigger_cmd: command to send
+        :type trigger_cmd: str
+        :return: None
+        """
         for mininet_host in self.network_configuration.mininet_obj.hosts:
-            if mininet_host.name in self.host_to_powersim_ids:
-                for mapped_powersim_id in self.host_to_powersim_ids[mininet_host.name]:
+            if mininet_host.name in self.host_to_application_ids:
+                for mapped_application_id in self.host_to_application_ids[mininet_host.name]:
                     ret = 0
                     while ret <= 0:
-                        ret = self.shared_buf_array.write(mapped_powersim_id + "-main-cmd-channel-buffer", trigger_cmd, 0)
+                        ret = self.shared_buf_array.write(mapped_application_id + "-main-cmd-channel-buffer", trigger_cmd, 0)
 
         for edp in self.emulation_driver_params:
             ret = 0
@@ -506,10 +666,21 @@ class NetPower(object):
         print "Melody >> Triggered hosts and drivers with command: ", trigger_cmd
 
     def trigger_nxt_replay(self):
+        """Sends a command to replay orchestrater
+
+        This queues a replay command on the replay orchestrator. The replay orchestrator will initate the next
+        replay as soon as possible.
+
+        :return: None
+        """
         print "Melody >> Triggering next replay ..."
         self.replay_orchestrator.send_command("TRIGGER")
 
     def wait_for_loaded_pcap_msg(self):
+        """Waits for required pcaps to be loaded by all replay-drivers
+
+        :return: None
+        """
 
         print "Melody >> In Warm up phase waiting for pcaps to be loaded by all replay drivers ... "
         n_warmup_rounds = 0
@@ -533,13 +704,16 @@ class NetPower(object):
                     stdout.write("\rNumber of rounds ran until all replay pcaps were loaded: %d" % n_warmup_rounds)
                     stdout.flush()
             else:
-                sleep(0.1)
+                time.sleep(0.1)
         if self.enable_kronos == 1 :
             print "\nMelody >> All pcaps loaded in ", float(n_warmup_rounds*self.timeslice)/float(SEC), " seconds (virtual time)"
         print "\nMelody >> All replay drivers ready to proceed ..."
         sys.stdout.flush()
 
     def print_topo_info(self):
+        """Prints topology information
+
+        """
 
         print "########################################################################"
         print ""
@@ -560,8 +734,10 @@ class NetPower(object):
         print "########################################################################"
 
     def cleanup(self):
+        """Cleanup the emulation
 
-        # Clean up ...
+        :return: None
+        """
         if self.enable_kronos == 1:
             self.stop_synchronized_experiment()
             time.sleep(5)
@@ -578,6 +754,13 @@ class NetPower(object):
         self.network_configuration.cleanup_mininet()
 
     def initialize_project(self):
+        """Initialize the project
+
+        Starts all co-simulation hosts, switches, control network, proxy, packet captures, emulation & replay drivers
+        and disturbance generator processes.
+
+        :return: None
+        """
         print "Melody >> Initializing project ..."
         self.generate_node_mappings(self.network_configuration.roles)
         #self.print_topo_info()
@@ -610,8 +793,17 @@ class NetPower(object):
 
         self.wait_for_loaded_pcap_msg()
 
-    def run_for(self, run_time_ns):
+    def run_for(self, run_time_ns, sync=True):
+        """Runs the cyber emulation for the specified time in nano seconds.
 
+        The cyber emulation gets frozen after running for the specified duration iff it is under kronos control.
+
+        :param run_time_ns: Batch run time in nano seconds
+        :type run_time_ns: int
+        :param sync: If True, it syncs with power simulator after running for the required time
+        :type sync: bool
+        :return: None
+        """
         if not self.started:
             print "########################################################################"
             print ""
@@ -637,7 +829,8 @@ class NetPower(object):
                     sys.stdout.flush()
                     progress_n_rounds(n_rounds)
                     n_rounds_progressed += n_rounds
-                    stdout.write("\rNumber of Rounds Progressed:  %d/%d" % (n_rounds_progressed, n_total_rounds))
+                    stdout.write("\rRunning for %f ms. Number of Rounds Progressed:  %d/%d" % (
+                        float(run_time_ns)/float(MS), n_rounds_progressed, n_total_rounds))
                     stdout.flush()
 
                     if n_rounds_progressed >= n_total_rounds:
@@ -648,8 +841,16 @@ class NetPower(object):
                     break
 
             if self.enable_kronos == 1:
+                if sync:
+                    stdout.write("\r................... Syncing with power simulator ...................")
+                    stdout.flush()
+                    self.sync_with_power_simulator()
                 stdout.write("\n")
                 self.total_elapsed_virtual_time += float(run_time_ns)/float(SEC)
 
     def close_project(self):
+        """To be called on finish
+
+        :return: None
+        """
         self.cleanup()

@@ -1,3 +1,8 @@
+"""Parsing project configuration specified in src/proto/configuration.proto format
+
+.. moduleauthor:: Vignesh Babu <vig2208@gmail.com>
+"""
+
 import sys
 from src.cyber_network.network_configuration import NetworkConfiguration
 from src.cyber_network.traffic_flow import EmulatedTrafficFlow, ReplayTrafficFlow
@@ -7,10 +12,14 @@ from src.core.shared_buffer import *
 from src.proto import configuration_pb2
 from google.protobuf import text_format
 
-CPUS_SUBSET = "1-12"
+
 
 
 class Experiment(NetPower):
+    """Experiment object inherits from src.core.NetPower
+
+    It provides API to control/start/stop the experiment.
+    """
 
     def __init__(self,
                  run_time,
@@ -35,11 +44,15 @@ class Experiment(NetPower):
             replay_traffic_flows,
             cyber_host_apps,
             enable_kronos,
-            relative_cpu_speed,
-            CPUS_SUBSET)
+            relative_cpu_speed)
 
 
 def get_network_configuration(project_config):
+    """From project_configuration, constructs a network_configuration object
+
+    :param project_config: Object of type src/proto/configuration.proto
+    :return: network_configuration obj of type src/cyber_network/network_configuration
+    """
     cyber_node_roles = []
     cyber_emulation_spec = project_config.cyber_emulation_spec
     n_hosts = cyber_emulation_spec.num_hosts
@@ -67,14 +80,14 @@ def get_network_configuration(project_config):
         curr_host = "h" + str(host_no)
         is_configured = False
         for mapping in project_config.cyber_physical_map:
-            if mapping.cyber_entity_id == curr_host:
+            if mapping.cyber_host_name == curr_host:
                 cyber_node_roles.append((curr_host,
                                          [(entity.application_id, entity.listen_port) for entity in
                                           mapping.mapped_application]))
 
                 is_configured = True
-                if mapping.HasField("app_layer_src"):
-                    cyber_host_apps[curr_host] = mapping.app_layer_src
+                for entity in mapping.mapped_application:
+                        cyber_host_apps[entity.application_id] = entity.application_src
         if not is_configured:
             print "ERROR: Cyber Node Role Not specified for ", curr_host, " in the project configuration!"
             sys.exit(0)
@@ -101,6 +114,12 @@ def get_network_configuration(project_config):
 
 
 def get_experiment_container(project_config, project_run_time_args):
+    """Constructs an experiment object from project config and project run time arguments
+
+    :param project_config: Object of type src/proto/configuration.proto
+    :param project_run_time_args: A dictionary of run time arguments
+    :return: Experiment object
+    """
     network_configuration, cyber_host_apps = get_network_configuration(project_config)
     script_dir = os.path.dirname(os.path.realpath(__file__))
     idx = script_dir.index('Melody')
@@ -122,18 +141,14 @@ def get_experiment_container(project_config, project_run_time_args):
             cmd_to_run_at_dst = cmd_to_run_at_dst.replace(hostname,
                                                           network_configuration.mininet_obj.get(hostname).IP())
 
-        bg_flows.append(EmulatedTrafficFlow(type=TRAFFIC_FLOW_ONE_SHOT,
-                                            offset=offset,
-                                            inter_flow_period=0,
+        bg_flows.append(EmulatedTrafficFlow(offset=offset,
                                             run_time=project_run_time_args["run_time"],
                                             src_mn_node=network_configuration.mininet_obj.get(
                                                 bg_flow_spec.src_cyber_entity),
                                             dst_mn_node=network_configuration.mininet_obj.get(
                                                 bg_flow_spec.dst_cyber_entity),
-                                            root_user_name=project_run_time_args["admin_user_name"],
-                                            root_password=project_run_time_args["admin_password"],
                                             server_process_start_cmd=cmd_to_run_at_dst,
-                                            client_expect_file=cmd_to_run_at_src,
+                                            client_process_start_cmd=cmd_to_run_at_src,
                                             long_running=True))
     replay_flows = []
     for replay_flow_spec in project_config.replay_flow:
@@ -154,12 +169,15 @@ def get_experiment_container(project_config, project_run_time_args):
 
 
 def parse_experiment_configuration(project_run_time_args):
+    """Uses project run time arguments to construct an Experiment object
+
+    :param project_run_time_args: A dictionary of run time arguments
+    :return: Experiment object
+    """
     assert "project_directory" in project_run_time_args, "ERROR: Project Directory must be specified !"
     assert "run_time" in project_run_time_args, "ERROR: Emulation Run time must be specified !"
     assert "enable_kronos" in project_run_time_args, "ERROR: Kronos state is not specified !"
     assert "rel_cpu_speed" in project_run_time_args, "ERROR: Kronos specific relative cpu speed is not specified !"
-    assert "admin_user_name" in project_run_time_args, "ERROR: Admin user name is not specified !"
-    assert "admin_password" in project_run_time_args, "ERROR: Admin user password is not specified !"
 
     configuration_file = project_run_time_args["project_directory"] + "/project_configuration.prototxt"
     if not os.path.isfile(configuration_file):

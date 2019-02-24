@@ -6,11 +6,22 @@ from src.proto import css_pb2
 
 
 class PLC(threading.Thread):
+    """A simple PLC implementation. It receives commands from SCADA controller and controls generator bus voltages.
+
+    """
     def __init__(self, host_control_layer, plc_name):
+        """
+
+        :param host_control_layer: hostApplicationLayer object
+        :param plc_name: application_id
+        :type plc_name: str
+        """
         threading.Thread.__init__(self)
         self.host_control_layer = host_control_layer
         self.stop = False
         self.plc_name = plc_name
+
+
         self.recv_pkt_queue = []
         self.obj_id = self.plc_name.split('_')[-1]
         self.field_type = "Vg"
@@ -40,6 +51,8 @@ class PLC(threading.Thread):
                 if data_content.key == "VOLTAGE_SETPOINT":
                     voltage_setpoint = data_content.value
             assert(voltage_setpoint is not None)
+
+            # Sends a write request to the proxy based on the received command from SCADA controller
             self.host_control_layer.log.info("Sending RPC Write Request ...")
             rpc_write([(self.obj_type, self.obj_id, self.field_type, voltage_setpoint)])
             self.host_control_layer.log.info("----------------------------------------")
@@ -49,38 +62,36 @@ class PLC(threading.Thread):
 
 class hostApplicationLayer(basicHostIPCLayer):
 
-    def __init__(self, host_id, log_file, powersim_ids_mapping, managed_application_id):
-        basicHostIPCLayer.__init__(self, host_id, log_file, powersim_ids_mapping, managed_application_id)
+    def __init__(self, host_id, log_file, application_ids_mapping, managed_application_id):
+        basicHostIPCLayer.__init__(self, host_id, log_file, application_ids_mapping, managed_application_id)
         self.cmd_lock = threading.Lock()
         self.PLC = PLC(self, self.managed_application_id)
 
 
-    """
-        This function gets called on reception of message from network.
-        pkt will be a string of type CyberMessage proto defined in src/proto/pss.proto
-    """
-
     def on_rx_pkt_from_network(self, pkt):
+        """
+            This function gets called on reception of message from network.
+            pkt will be a string of type CyberMessage proto defined in src/proto/css.proto
+            A packet sent by the SCADA controller will be caught here.
+        """
         pkt_parsed = css_pb2.CyberMessage()
         pkt_parsed.ParseFromString(pkt)
         self.PLC.recv_pkt_queue.append(pkt)
 
 
-
-    """
-        Called after initialization of IPC layer. It can be overridden to start essential services.
-    """
-
     def on_start_up(self):
+        """
+            Called after initialization of application layer. Here we start the PLC thread.
+        """
 
         self.PLC.start()
         self.log.info("Started PLC: " + self.managed_application_id + " on " + str(self.host_id))
 
-    """
-       Called before initiating shutdown of IPC. It can be overridden to stop essential services.
-    """
 
     def on_shutdown(self):
+        """
+            Called before shutdown of application layer. Here we shutdown the PLC thread
+        """
         self.PLC.stop = True
         self.PLC.join()
         self.log.info("Stopping PLC: "  + self.managed_application_id + " on " + str(self.host_id))

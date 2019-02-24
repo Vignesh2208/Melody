@@ -1,9 +1,13 @@
+"""Co-simulation host.
+
+.. moduleauthor:: Vignesh Babu <vig2208@gmail.com>
+"""
+
 import shared_buffer
 from shared_buffer import *
 import logger
 from logger import *
 import getopt
-from src.utils.sleep_functions import sleep
 import time
 import json
 
@@ -12,8 +16,6 @@ def extract_mappings(net_cfg_file):
     assert (os.path.isfile(net_cfg_file) == True)
     with open(net_cfg_file) as f:
         data = json.load(f)
-
-
     return data
 
 
@@ -41,8 +43,8 @@ def parseOpts():
 
     try:
         (opts, args) = getopt.getopt(sys.argv[1:], "hc:l:r:n:a:m:id:",
-                                     ["help", "netcfg-file=", "log-file=", "run-time=", "project-name=", "app=", "managed_application_id=", "id=",
-                                      ])
+                                     ["help", "netcfg-file=", "log-file=", "run-time=", "project-name=",
+                                      "app=", "managed_application_id=", "id="])
     except getopt.GetoptError as e:
         print (str(e))
         usage()
@@ -68,30 +70,60 @@ def parseOpts():
         if o in ("-a", "--app="):
             app_layer_file = str(v)
 
-    assert (net_cfg_file_path is not None and host_id is not None and managed_application_id is not None)
-    return (net_cfg_file_path, log_file, run_time, project_name, host_id, app_layer_file, managed_application_id)
+    assert net_cfg_file_path is not None and host_id is not None and managed_application_id is not None
+    return net_cfg_file_path, log_file, run_time, project_name, host_id, app_layer_file, managed_application_id
 
 
-def init_shared_buffers(host_id, run_time, shared_buf_array, log, managed_application_id):
+def init_shared_buffers(run_time, shared_buf_array, log, managed_application_id):
+    """Initialize shared buffers used for communication with the main Melody process
+
+    If the shared buffers cannot be opened successfully, the co-simulation host just sleeps for the specified amount of
+    run time.
+
+    :param run_time: Running time of co-simulation host in seconds
+    :type run_time: int
+    :param shared_buf_array: A shared buffer array object (defined in src/core/shared_buffer.py)
+    :param log: A logger object (defined in src/core/logger.py)
+    :param managed_application_id: The application_id assigned to this co-simulation host
+    :type managed_application_id: str
+    :return: None
+    """
     log.info("Buffer opened: " + managed_application_id + "-main-cmd-channel-buffer")
     result = shared_buf_array.open(bufName=managed_application_id + "-main-cmd-channel-buffer", isProxy=False)
-
-
     if result == BUF_NOT_INITIALIZED or result == FAILURE:
         log.error("Failed to open communication channel ! Not starting any threads !")
         sys.stdout.flush()
         if run_time == 0:
             while True:
-                sleep(1)
+                time.sleep(1)
 
-        start_time = time.time()
-        sleep(run_time + 2)
-        while time.time() < start_time + float(run_time):
-            sleep(1)
+        time.sleep(run_time)
         sys.exit(0)
 
 
 def main(host_id, net_cfg_file, log_file, run_time, project_name, app_layer_file, managed_application_id):
+    """Main entry point of the co-simulation host
+
+    Starts the co-simulation host and its application layer thread.
+
+    :param host_id: Mininet host number on which this process is run. (e.g 1 implies h1)
+    :type host_id: int
+    :param net_cfg_file: Absolute path of file containing a mapping of application ids to ip,port values
+    :type net_cfg_file: str
+    :param log_file: Absolute path of file where stdout will be logged.
+    :type log_file: str
+    :param run_time:  Running time of co-simulated host in seconds
+    :type run_time: int
+    :param project_name: Name of the project
+    :type project_name: str
+    :param app_layer_file: Name of the file containing application layer code for this host. If not specified, a
+                           default basicHostIPC layer thread will be started for the co-simulation host. The
+                           app_layer_file must be located inside src/projects/project_name
+    :type app_layer_file: str
+    :param managed_application_id: Name of the application assigned to this co-simulaiton host
+    :type managed_application_id: str
+    :return: None
+    """
     powersim_ids_mapping = extract_mappings(net_cfg_file)
     
     log = logger.Logger(log_file, "Host" + str(host_id) + ": ")
@@ -113,10 +145,9 @@ def main(host_id, net_cfg_file, log_file, run_time, project_name, app_layer_file
         host_ipc_layer = __import__("basicHostIPCLayer", globals(), locals(), ['basicHostIPCLayer'], -1)
         host_ipc_layer = host_ipc_layer.basicHostIPCLayer
 
-
     log.info("Initializing inter process communication channels ...")
     sys.stdout.flush()
-    init_shared_buffers(host_id, run_time, shared_buf_array, log, managed_application_id)
+    init_shared_buffers(run_time, shared_buf_array, log, managed_application_id)
 
     log.info("Successfully opened an inter process communication channel !")
     sys.stdout.flush()

@@ -19,20 +19,20 @@ from mininet.node import RemoteController
 from mininet.node import OVSSwitch
 from mininet.link import TCLink
 from controller_man import ControllerMan
-from cyber_network.synthesis.network_graph import NetworkGraph
-from cyber_network.synthesis.match import Match
+from src.cyber_network.synthesis.network_graph import NetworkGraph
+from src.cyber_network.synthesis.match import Match
 
-from cyber_network.topologies.ring_topo import RingTopo
-from cyber_network.topologies.clos_topo import ClosTopo
-from cyber_network.topologies.linear_topo import LinearTopo
-from cyber_network.topologies.clique_topo import CliqueTopo
-from cyber_network.topologies.clique_enterprise_topo import CliqueEnterpriseTopo
+from src.cyber_network.topologies.ring_topo import RingTopo
+from src.cyber_network.topologies.clos_topo import ClosTopo
+from src.cyber_network.topologies.linear_topo import LinearTopo
+from src.cyber_network.topologies.clique_topo import CliqueTopo
+from src.cyber_network.topologies.clique_enterprise_topo import CliqueEnterpriseTopo
 
-from cyber_network.synthesis.dijkstra_synthesis import DijkstraSynthesis
-from cyber_network.synthesis.aborescene_synthesis import AboresceneSynthesis
-from cyber_network.synthesis.simple_mac_synthesis import SimpleMACSynthesis
-from cyber_network.synthesis.synthesis_lib import SynthesisLib
-from cyber_network.synthesis.flow_specification import FlowSpecification
+from src.cyber_network.synthesis.dijkstra_synthesis import DijkstraSynthesis
+from src.cyber_network.synthesis.aborescene_synthesis import AboresceneSynthesis
+from src.cyber_network.synthesis.simple_mac_synthesis import SimpleMACSynthesis
+from src.cyber_network.synthesis.synthesis_lib import SynthesisLib
+from src.cyber_network.synthesis.flow_specification import FlowSpecification
 import subprocess
 
 from core.kronos_helper_functions import *
