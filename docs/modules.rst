@@ -1,5 +1,5 @@
-core
-====
+Python Modules Reference
+========================
 
 .. toctree::
    :maxdepth: 4
