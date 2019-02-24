@@ -1,11 +1,12 @@
-Melody: Power Grid Emulation
-=====================================
+Melody: Co-Simulation of Cyber Physical Systems
+===============================================
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 4
    
    about
    getting_started
+   modules
    contact
    
    :caption: Contents:
