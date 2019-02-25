@@ -33,7 +33,7 @@ Pre-Run Steps:
 - Setup the environment
     - cd Melody
     - sudo ./install_deps.sh
-    - sudo make install
+    - sudo python setup.py install
 
 - Setting up the python path
     - Add the following to ~/.bashrc
