@@ -5,6 +5,7 @@ echo "Installing python packages"
 echo "#############################################################################"
 
 sudo apt-get -y install python-pip
+sudo apt-get -y install python-dev
 sudo apt-get -y install libpcap-dev
 sudo apt-get -y install python-httplib2
 sudo apt-get -y install python-paramiko
