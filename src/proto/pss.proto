@@ -39,7 +39,7 @@ message Request {
 
 // A Read request specifies the object ot be read
 message ReadRequest {
-  required float timestamp = 1; // Virtual timestamp at which the request was generated
+  required string timestamp = 1; // Virtual timestamp at which the request was generated
   repeated Request request = 2; // Description of each request
 }
 
@@ -50,7 +50,7 @@ message ReadResponse {
 
 // A WriteRequest may specify multiple objects to be written
 message WriteRequest {
-  required float timestamp = 1; // Virtual timestamp at which the request was generated
+  required string timestamp = 1; // Virtual timestamp at which the request was generated
   repeated Request request = 2; // Description of each request
 }
 

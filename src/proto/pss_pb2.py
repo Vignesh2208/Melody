@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='melody_powersim_proto',
   syntax='proto2',
   serialized_options=None,
-  serialized_pb=_b('\n\tpss.proto\x12\x15melody_powersim_proto\"G\n\x06Status\x12\n\n\x02id\x18\x01 \x02(\t\x12\x31\n\x06status\x18\x02 \x02(\x0e\x32!.melody_powersim_proto.StatusType\"%\n\x08Response\x12\n\n\x02id\x18\x01 \x02(\t\x12\r\n\x05value\x18\x02 \x02(\t\"W\n\x07Request\x12\n\n\x02id\x18\x01 \x02(\t\x12\x0f\n\x07objtype\x18\x02 \x02(\t\x12\r\n\x05objid\x18\x03 \x02(\t\x12\x11\n\tfieldtype\x18\x04 \x02(\t\x12\r\n\x05value\x18\x05 \x02(\t\"Q\n\x0bReadRequest\x12\x11\n\ttimestamp\x18\x01 \x02(\x02\x12/\n\x07request\x18\x02 \x03(\x0b\x32\x1e.melody_powersim_proto.Request\"A\n\x0cReadResponse\x12\x31\n\x08response\x18\x01 \x03(\x0b\x32\x1f.melody_powersim_proto.Response\"R\n\x0cWriteRequest\x12\x11\n\ttimestamp\x18\x01 \x02(\x02\x12/\n\x07request\x18\x02 \x03(\x0b\x32\x1e.melody_powersim_proto.Request\"<\n\x0bWriteStatus\x12-\n\x06status\x18\x01 \x03(\x0b\x32\x1d.melody_powersim_proto.Status\"\x1c\n\x0eProcessRequest\x12\n\n\x02id\x18\x01 \x02(\t*4\n\nStatusType\x12\x0b\n\x07UNKNOWN\x10\x00\x12\r\n\tSUCCEEDED\x10\x01\x12\n\n\x06\x46\x41ILED\x10\x02\x32\xff\x01\n\x03pss\x12Q\n\x04read\x12\".melody_powersim_proto.ReadRequest\x1a#.melody_powersim_proto.ReadResponse\"\x00\x12R\n\x05write\x12#.melody_powersim_proto.WriteRequest\x1a\".melody_powersim_proto.WriteStatus\"\x00\x12Q\n\x07process\x12%.melody_powersim_proto.ProcessRequest\x1a\x1d.melody_powersim_proto.Status\"\x00')
+  serialized_pb=_b('\n\tpss.proto\x12\x15melody_powersim_proto\"G\n\x06Status\x12\n\n\x02id\x18\x01 \x02(\t\x12\x31\n\x06status\x18\x02 \x02(\x0e\x32!.melody_powersim_proto.StatusType\"%\n\x08Response\x12\n\n\x02id\x18\x01 \x02(\t\x12\r\n\x05value\x18\x02 \x02(\t\"W\n\x07Request\x12\n\n\x02id\x18\x01 \x02(\t\x12\x0f\n\x07objtype\x18\x02 \x02(\t\x12\r\n\x05objid\x18\x03 \x02(\t\x12\x11\n\tfieldtype\x18\x04 \x02(\t\x12\r\n\x05value\x18\x05 \x02(\t\"Q\n\x0bReadRequest\x12\x11\n\ttimestamp\x18\x01 \x02(\t\x12/\n\x07request\x18\x02 \x03(\x0b\x32\x1e.melody_powersim_proto.Request\"A\n\x0cReadResponse\x12\x31\n\x08response\x18\x01 \x03(\x0b\x32\x1f.melody_powersim_proto.Response\"R\n\x0cWriteRequest\x12\x11\n\ttimestamp\x18\x01 \x02(\t\x12/\n\x07request\x18\x02 \x03(\x0b\x32\x1e.melody_powersim_proto.Request\"<\n\x0bWriteStatus\x12-\n\x06status\x18\x01 \x03(\x0b\x32\x1d.melody_powersim_proto.Status\"\x1c\n\x0eProcessRequest\x12\n\n\x02id\x18\x01 \x02(\t*4\n\nStatusType\x12\x0b\n\x07UNKNOWN\x10\x00\x12\r\n\tSUCCEEDED\x10\x01\x12\n\n\x06\x46\x41ILED\x10\x02\x32\xff\x01\n\x03pss\x12Q\n\x04read\x12\".melody_powersim_proto.ReadRequest\x1a#.melody_powersim_proto.ReadResponse\"\x00\x12R\n\x05write\x12#.melody_powersim_proto.WriteRequest\x1a\".melody_powersim_proto.WriteStatus\"\x00\x12Q\n\x07process\x12%.melody_powersim_proto.ProcessRequest\x1a\x1d.melody_powersim_proto.Status\"\x00')
 )
 
 _STATUSTYPE = _descriptor.EnumDescriptor(
@@ -200,8 +200,8 @@ _READREQUEST = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='timestamp', full_name='melody_powersim_proto.ReadRequest.timestamp', index=0,
-      number=1, type=2, cpp_type=6, label=2,
-      has_default_value=False, default_value=float(0),
+      number=1, type=9, cpp_type=9, label=2,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
@@ -269,8 +269,8 @@ _WRITEREQUEST = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='timestamp', full_name='melody_powersim_proto.WriteRequest.timestamp', index=0,
-      number=1, type=2, cpp_type=6, label=2,
-      has_default_value=False, default_value=float(0),
+      number=1, type=9, cpp_type=9, label=2,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),

@@ -854,6 +854,10 @@ class NetPower(object):
                     self.sync_with_power_simulator()
                 stdout.write("\n")
                 self.total_elapsed_virtual_time += float(run_time_ns)/float(SEC)
+            elif sync:
+                stdout.write("\r................... Syncing with power simulator ...................\n")
+                stdout.flush()
+                self.sync_with_power_simulator()
 
     def close_project(self):
         """To be called on finish

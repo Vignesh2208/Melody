@@ -22,15 +22,21 @@ def exit_gracefully(signum, frame):
     print "Proxy Exiting Gracefully !"
     kill_now = True
 
+
+REQUEST_LOG = "RLOG"
+PROCESS_LOG = "PLOG"
+
+
 class Job():
-    def __init__(self, request, reply, event):
+    def __init__(self, request, reply):
         self.request = request
         self.reply = reply
-        self.event = event
+        self.event = Event()
 
     def to_string(self):
         # TODO: implement
         return ""
+
 
 class PSSServicer(pss_pb2_grpc.pssServicer): # a.k.a. the Proxy
     def __init__(self,  case_directory, case_name):
@@ -38,62 +44,49 @@ class PSSServicer(pss_pb2_grpc.pssServicer): # a.k.a. the Proxy
         self.jobLock = Lock()  # thread-safe access to job list
         self.mp = MatPowerDriver("/tmp")
         self.mp.open(case_directory + "/" + case_name)
-        self.rlog = logging.getLogger("request_order")
-        self.plog = logging.getLogger("process_order")
-
+        self.rlog = logging.getLogger(REQUEST_LOG)
+        self.plog = logging.getLogger(PROCESS_LOG)
 
     def read(self, readRequest, context):
-        self.rlog.info("%f %s" % (readRequest.timestamp, "Read"))
-
-        event = Event()
-        job = Job(readRequest, None, event)
-
         self.jobLock.acquire()
-        try:
-            self.jobs.append(job)
-        finally:
-            self.jobLock.release()
-
-        event.wait()
+        for req in readRequest.request:
+            self.rlog.info("%s,READ,%s,%s,%s,%s" % (readRequest.timestamp, req.id, req.objtype, req.objid, req.fieldtype))
+        job = Job(readRequest, None)
+        self.jobs.append(job)
+        self.jobLock.release()
+        job.event.wait()
         readResponse = job.reply
 
         return readResponse
 
     def write(self, writeRequest, context):
-        self.rlog.info("%f %s" % (writeRequest.timestamp, "Write"))
-
-        event = Event()
-        job = Job(writeRequest, None, event)
-
         self.jobLock.acquire()
-        try:
-            self.jobs.append(job)
-        finally:
-            self.jobLock.release()
-
-        event.wait()
+        for req in writeRequest.request:
+            self.rlog.info("%s,WRITE,%s,%s,%s,%s,%s" % (
+            writeRequest.timestamp, req.id, req.objtype, req.objid, req.fieldtype, req.value))
+        job = Job(writeRequest, None)
+        self.jobs.append(job)
+        self.jobLock.release()
+        job.event.wait()
         writeStatus = job.reply
 
         return writeStatus
 
     def process(self, request, context):
-        self.jobLock.acquire()
-        self.rlog.info("Process id=%s" % request.id)
+        if len(self.jobs) == 0:
+            return pss_pb2.Status(id=request.id, status=pss_pb2.SUCCEEDED)
 
-        status = pss_pb2.Status()
-        status.id = request.id
+        else:
+            self.jobLock.acquire()
+            processStatus = pss_pb2.Status(id=request.id)
+            self.plog.info("--------------------")
 
-        self.plog.info("Start batch processing")
-
-        try:
             while len(self.jobs) > 0:
                 # Pop the earliest job from job list
-                timestamps = [job.request.timestamp for job in self.jobs]
+                timestamps = [float(job.request.timestamp) for job in self.jobs]
                 idx = timestamps.index(min(timestamps))
                 job = self.jobs.pop(idx)
                 request = job.request
-
-                self.plog.info("timestamp=%f, type=%s" % (request.timestamp, type(request)))
 
                 if type(request) == pss_pb2.ReadRequest:
                     readResponse = pss_pb2.ReadResponse()
@@ -102,8 +95,8 @@ class PSSServicer(pss_pb2_grpc.pssServicer): # a.k.a. the Proxy
                         res = readResponse.response.add()
                         res.id = req.id
                         res.value = self.mp.read(req.objtype, req.objid, req.fieldtype)
-                        self.plog.info("READ <%s,%s,%s,%s> returns <%s>" % (
-                        req.id, req.objtype, req.objid, req.fieldtype, res.value))
+                        self.plog.info("%s,READ,%s,%s,%s,%s,%s" % (
+                        request.timestamp, req.id, req.objtype, req.objid, req.fieldtype, res.value))
 
                     job.reply = readResponse
                     job.event.set()
@@ -119,18 +112,15 @@ class PSSServicer(pss_pb2_grpc.pssServicer): # a.k.a. the Proxy
                         res = writeStatus.status.add()
                         res.id = req.id
                         res.status = pss_pb2.SUCCEEDED  # TODO: get write status from pss
-                        self.plog.info("WRITE <%s,%s,%s,%s,%s> returns <%s>" % (
-                        req.id, req.objtype, req.objid, req.fieldtype, req.value, res.status))
+                        self.plog.info("%s,WRITE,%s,%s,%s,%s,%s,%s" % (
+                        request.timestamp, req.id, req.objtype, req.objid, req.fieldtype, req.value, res.status))
 
                     job.reply = writeStatus
                     job.event.set()
 
-        finally:
             self.jobLock.release()
-            self.plog.info("Stop batch processing")
-
-            status.status = pss_pb2.SUCCEEDED
-            return status
+            processStatus.status = pss_pb2.SUCCEEDED
+            return processStatus
         
     
 if __name__ == '__main__':

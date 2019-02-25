@@ -67,7 +67,7 @@ def rpc_read(readlist):
     try:
         channel = grpc.insecure_channel(GRPC_SERVER_LOCATION)
         stub = pss_pb2_grpc.pssStub(channel)
-        readRequest = pss_pb2.ReadRequest(timestamp=time.time())
+        readRequest = pss_pb2.ReadRequest(timestamp=str(time.time()))
 
         counter = 0
         for objtype, objid, fieldtype in readlist:
@@ -103,7 +103,7 @@ def rpc_write(writelist):
     try:
         channel = grpc.insecure_channel(GRPC_SERVER_LOCATION)
         stub = pss_pb2_grpc.pssStub(channel)
-        writeRequest = pss_pb2.WriteRequest(timestamp=time.time())
+        writeRequest = pss_pb2.WriteRequest(timestamp=str(time.time()))
 
         counter = 0
         for objtype, objid, fieldtype, value in writelist:
