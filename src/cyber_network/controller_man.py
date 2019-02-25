@@ -1,3 +1,8 @@
+"""Ryu controller management
+
+.. moduleauthor:: Rakesh Kumar (gopchandani@gmail.com)
+"""
+
 import subprocess
 import os
 

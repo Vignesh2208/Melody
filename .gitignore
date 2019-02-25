@@ -116,7 +116,6 @@ logs/microgrid_with_background_traffic/
 logs/
 
 #configuration
-src/Projects/microgrid_with_background_traffic/configurations/
-src/projects/timekeeper_integration/configurations
-src/projects/evaluation/configurations
+src/projects/secondary_voltage_control/configurations
+src/projects/configurations
 src/configurations/

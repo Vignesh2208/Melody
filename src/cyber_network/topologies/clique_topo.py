@@ -1,19 +1,30 @@
-__author__ = 'Rakesh Kumar'
+"""Sample clique topology
+
+.. moduleauthor:: Rakesh Kumar (gopchandani@gmail.com)
+"""
 
 import random
 from mininet.topo import Topo
 
 
-class CliqueTopo(Topo):
+class CyberTopology(Topo):
     
     def __init__(self, params):
+        """Initialization of topology
+
+        :param params: A dictionary created from project_configuration.prototxt. It will contain all required
+                       parameters "num_hosts", "num_switches", "switch_switch_link_latency_range"
+                       and "host_switch_link_latency_range". In addition, any additional parameters defined
+                       in configuration will also be included.
+        :type params: dict
+        """
         
         Topo.__init__(self)
         self.params = params
 
         if params["num_switches"] < 2:
             print "Need to have at least three switches for a ring."
-            raise
+            raise Exception
 
         if params["per_switch_links"] < 2 and params["per_switch_links"] > params["num_switches"] - 1:
             print "Cannot have less than 2 and more than " + str(params["num_switches"] -1) + " links."
@@ -74,5 +85,3 @@ class CliqueTopo(Topo):
             params_str += "_" + str(k) + "_" + str(v)
         return self.__class__.__name__ + params_str
 
-
-topos = {"cliquetopo": (lambda: CliqueTopo())}

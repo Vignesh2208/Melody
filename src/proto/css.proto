@@ -1,0 +1,24 @@
+// Protocol buffer for specifying format of messages between applications in the cyber emulation
+
+syntax = "proto2";
+import "google/protobuf/empty.proto";
+package melody_cybersim_proto;
+
+// Simple key, value pair content description
+message KV {
+	required string key = 1;
+	optional string value = 2;
+}
+
+
+// Messages transmitted between applications are encapsulated using this format.
+// The application messages captured in pcaps will be of this format.
+// TODO: Replace this with specific protocol implementation translators like DNP3, MODBUS
+message CyberMessage {
+	required string dst_application_id = 1;
+	required string src_application_id = 2;
+	optional string msg_type =3;
+	repeated KV content = 4; // Each Cyber Message may be a set of key,value pairs
+}
+
+

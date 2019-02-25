@@ -1,80 +1,106 @@
+"""Emulation Driver
+
+.. moduleauthor:: Vignesh Babu <vig2208@gmail.com>, Rakesh Kumar (gopchandani@gmail.com)
+"""
+
 import argparse
-import os
 import json
-from utils.sleep_functions import sleep
-from defines import *
-import sys
 import datetime
 from datetime import datetime
 import shared_buffer
-from shared_buffer import  *
+from shared_buffer import *
 import time
 import subprocess
 
 
 class EmulationDriver(object):
+    """An emulation driver is responsible for emulating background flow traffic in the mininet network.
+
+    It is assigned a command to execute and spawned inside a mininet host. It forks a child process and executes
+    the assigned command.
+    """
 
     def __init__(self, input_params):
+        """Initialization
 
-        self.type = input_params["type"]
+        :param input_params: A dictionary of input parameters including command to execute and when to start the
+                             command.
+        :type input_params: dict
+        :return None
+        """
+
         self.cmd = input_params["cmd"]
         self.offset = input_params["offset"]
-        self.inter_flow_period = input_params["inter_flow_period"]
         self.run_time = input_params["run_time"]
-        self.long_running = input_params["long_running"]
-        self.root_user_name = input_params["root_user_name"]
-        self.root_password = input_params["root_password"]
         self.driver_id = input_params["driver_id"]
-
+        self.shared_buf_array = shared_buffer_array()
         self.init_shared_buffers(self.driver_id, self.run_time)
-        
-    def init_shared_buffers(self,driver_id,run_time):
-       
-        self.sharedBufferArray = shared_buffer_array()
-        result = self.sharedBufferArray.open(bufName=str(driver_id) + "main-cmd-channel-buffer",isProxy=False)
 
+    def init_shared_buffers(self, driver_id, run_time):
+        """Initialize shared buffers used for communication with the main Melody process
+
+        If the shared buffers cannot be opened successfully, the driver just sleeps for the specified amount of
+        run time.
+
+        :param driver_id: A unique id string assigned to this driver. The shared buffer is opened with this ID.
+        :type driver_id: str
+        :param run_time: Running time of driver in seconds
+        :type run_time: int
+        :return: None
+        """
+
+        result = self.shared_buf_array.open(bufName=str(driver_id) + "-main-cmd-channel-buffer", isProxy=False)
         if result == BUF_NOT_INITIALIZED or result == FAILURE:
-            print "Cmd channel buffer open failed!. Not starting any processe !"
-            if run_time == 0 :
+            print "Cmd channel buffer open failed!. Not starting any processes !"
+            if run_time == 0:
                 while True:
-                    sleep(1)
-                    
-            start_time = time.time()
-            sleep(run_time + 2)
-            while time.time() < start_time + float(run_time):
-			    sleep(1)
-            sys.exit(0)	
-            
+                    time.sleep(1)
+
+            time.sleep(run_time)
+            sys.exit(0)
+
         print "Cmd channel buffer open succeeded !"
         sys.stdout.flush()
 
     def trigger(self):
+        """Start executing the assigned command.
 
-        if self.type == TRAFFIC_FLOW_ONE_SHOT:
-            sleep(int(self.offset))
-            print "Started command at ", str(datetime.now())
+        Forks a new process and starts the command.
+
+        :return: None
+        """
+        if self.cmd == "":
+            print "Nothing to execute ..."
+            return
+
+        time.sleep(int(self.offset))
+        print "Started executing command at ", str(datetime.now())
+        sys.stdout.flush()
+        try:
+            cmd_list = self.cmd.split(' ')
+            for arg in cmd_list:
+                if arg == '':
+                    cmd_list.remove(arg)
+            print cmd_list
             sys.stdout.flush()
-            #os.system(self.cmd + " &")
-            try:
-                cmd_list = self.cmd.split(' ')
-                print cmd_list
-                print self.cmd
-                sys.stdout.flush()
-                p = subprocess.Popen(cmd_list,shell=False)
-            except:
-                print "Error running command: ", sys.exec_info()[0]
+            subprocess.Popen(cmd_list, shell=False)
+        except RuntimeError:
+            print "Error running command: ", sys.exec_info()[0]
 
-        elif self.type == TRAFFIC_FLOW_EXPONENTIAL:
-            pass
-        elif self.type == TRAFFIC_FLOW_PERIODIC:
-            pass
 
 
 def main():
+    """Main entry point of the emulation_driver
+
+    Creates an emulation driver, initializes it and triggers executing the command at the right time. It also
+    handles shutting down the driver.
+
+    :return: None
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument("--input_params_file_path", dest="input_params_file_path")
 
-    print "Started emulation driver ..."
+    print "Started background flow emulation driver ..."
     sys.stdout.flush()
     args = parser.parse_args()
 
@@ -83,35 +109,25 @@ def main():
 
     d = EmulationDriver(input_params)
 
-    print "Waiting for START command ... buf = ", str(d.driver_id) + "main-cmd-channel-buffer"
+    print "Waiting for START command ... "
     sys.stdout.flush()
     recv_msg = ''
     while "START" not in recv_msg:
-        recv_msg = ''
-        dummy_id, recv_msg = d.sharedBufferArray.read(str(d.driver_id) + "main-cmd-channel-buffer")
-
+        dummy_id, recv_msg = d.shared_buf_array.read_until(str(d.driver_id) + "-main-cmd-channel-buffer")
 
     print "Triggered emulation driver at ", str(datetime.now())
     sys.stdout.flush()
     d.trigger()
 
-    print "Waiting for exit command at ", str(datetime.now())
+    print "Waiting for STOP command ... "
     sys.stdout.flush()
     recv_msg = ''
-    i = 1
     while "EXIT" not in recv_msg:
-        recv_msg = ''
-        print "Checking for EXIT for the ", i ," time at: ", str(datetime.now())
-        sys.stdout.flush()
-        i = i + 1
-        sleep(1)
-        dummy_id, recv_msg = d.sharedBufferArray.read(str(d.driver_id) + "main-cmd-channel-buffer")
+        dummy_id, recv_msg = d.shared_buf_array.read_until(str(d.driver_id) + "-main-cmd-channel-buffer")
 
-    print "Shutting down driver ..."
+    print "Shutting down background flow emulation driver ..."
     sys.stdout.flush()
 
 
 if __name__ == "__main__":
     main()
-
-

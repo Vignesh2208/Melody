@@ -1,0 +1,114 @@
+
+import threading
+from src.core.defines import *
+from src.core.basicHostIPCLayer import basicHostIPCLayer
+from src.proto import css_pb2
+
+
+class PLC(threading.Thread):
+    """A simple PLC implementation. It receives commands from SCADA controller and controls generator bus voltages.
+
+    """
+    def __init__(self, host_control_layer, plc_name):
+        """
+
+        :param host_control_layer: hostApplicationLayer object
+        :param plc_name: application_id
+        :type plc_name: str
+        """
+        threading.Thread.__init__(self)
+        self.host_control_layer = host_control_layer
+        self.stop = False
+        self.plc_name = plc_name
+        self.recv_pkt_queue = []
+
+
+
+    def run(self):
+        request_no = 0
+
+        field_type_to_write = "Vg"
+        obj_type_to_write = "gen"
+
+        #A mapping which specifies which generator bus is controlled by each plc
+        obj_id_to_plc = {
+            "PLC_Gen_Bus_30" : "30",
+            "PLC_Gen_Bus_31": "31",
+            "PLC_Gen_Bus_32": "32",
+            "PLC_Gen_Bus_33": "33",
+            "PLC_Gen_Bus_34": "34",
+            "PLC_Gen_Bus_35": "35",
+            "PLC_Gen_Bus_36": "36",
+            "PLC_Gen_Bus_37": "37",
+            "PLC_Gen_Bus_38": "38",
+            "PLC_Gen_Bus_39": "39",
+        }
+
+        #Get the generator bus controlled by this plc. For instance if plc_name is "PLC_Gen_Bus_30", then it controls
+        #generator bus "30"
+        obj_id_to_write = obj_id_to_plc[self.plc_name]
+
+        while not self.stop:
+
+            try:
+                data = self.recv_pkt_queue.pop()
+            except IndexError:
+                data = None
+
+            if data is None:
+                time.sleep(0.001)
+                continue
+
+            pkt_parsed = css_pb2.CyberMessage()
+            pkt_parsed.ParseFromString(data)
+
+            self.host_control_layer.log.info("Rx New packet for PLC: \n" + str(pkt_parsed))
+            voltage_setpoint = None
+            for data_content in pkt_parsed.content:
+                if data_content.key == "VOLTAGE_SETPOINT":
+                    voltage_setpoint = data_content.value
+            assert(voltage_setpoint is not None)
+
+            # Sends a write request to the proxy based on the received command from SCADA controller
+            self.host_control_layer.log.info("Sending RPC Write Request ...")
+            rpc_write([(obj_type_to_write, obj_id_to_write, field_type_to_write, voltage_setpoint)])
+            self.host_control_layer.log.info("----------------------------------------")
+
+            request_no += 1
+
+
+class hostApplicationLayer(basicHostIPCLayer):
+
+    def __init__(self, host_id, log_file, application_ids_mapping, managed_application_id):
+        basicHostIPCLayer.__init__(self, host_id, log_file, application_ids_mapping, managed_application_id)
+        self.cmd_lock = threading.Lock()
+        self.PLC = PLC(self, self.managed_application_id)
+
+
+    def on_rx_pkt_from_network(self, pkt):
+        """
+            This function gets called on reception of message from network.
+            pkt will be a string of type CyberMessage proto defined in src/proto/css.proto
+            A packet sent by the SCADA controller will be caught here.
+        """
+        pkt_parsed = css_pb2.CyberMessage()
+        pkt_parsed.ParseFromString(pkt)
+        self.PLC.recv_pkt_queue.append(pkt)
+
+
+    def on_start_up(self):
+        """
+            Called after initialization of application layer. Here we start the PLC thread.
+        """
+
+        self.PLC.start()
+        self.log.info("Started PLC: " + self.managed_application_id + " on " + str(self.host_id))
+
+
+    def on_shutdown(self):
+        """
+            Called before shutdown of application layer. Here we shutdown the PLC thread
+        """
+        self.PLC.stop = True
+        self.PLC.join()
+        self.log.info("Stopping PLC: "  + self.managed_application_id + " on " + str(self.host_id))

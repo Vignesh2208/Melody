@@ -1,0 +1,233 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Quick Start &#8212; Melody 1.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="author" title="About these documents" href="about.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Python Modules Reference" href="modules.html" />
+    <link rel="prev" title="Project Configuration" href="project_configuration.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="quick-start">
+<h1>Quick Start<a class="headerlink" href="#quick-start" title="Permalink to this headline">¶</a></h1>
+<p>In this section we will help you install Melody and run you through a simple tutorial that helps you generate your first dataset.</p>
+<div class="section" id="example-secondary-voltage-control">
+<h2>Example: Secondary Voltage Control<a class="headerlink" href="#example-secondary-voltage-control" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="https://github.com/Vignesh2208/Melody/tree/Melody_Matpower_project/src/projects/secondary_voltage_control/">This example</a> uses Melody to implement Secondary Voltage Control (SVC) for the <a class="reference external" href="https://icseg.iti.illinois.edu/ieee-39-bus-system//">IEEE 39-bus New England</a> power system model. The goal of SVC is to maintain the voltages at specifically chosen load buses called pilot buses at nominal values, subjected to random demand fluctuations throughout the day, by adjusting the voltages at generator buses. In this example, we implement SVC as a standard textbook p-controller which works on the first-order approximation of the power system. Being part of a close-loop control system, SVC is sensitive to the timing of (i) the input signals, which are voltages at pilot buses reported to the SCADA controller by the emulated PMUs, and (ii) the output signals, which are voltage setpoints of generator buses that are sent from the same SCADA server to the emulated PLCs. It is therefore crucially important that Melody is capable of precisely controlling the advance of virtual simulation time using Kronos.</p>
+<div class="section" id="pmus">
+<h3>PMUs<a class="headerlink" href="#pmus" title="Permalink to this headline">¶</a></h3>
+<p>The PMU application is implemented in <a class="reference external" href="https://github.com/Vignesh2208/Melody/blob/Melody_Matpower_project/src/projects/secondary_voltage_control/pmu.py/">this</a> Python script. Each PMU is mapped to one pilot bus and is run as a process inside a mininet host. The PMU configuration can be found in the <a class="reference external" href="https://github.com/Vignesh2208/Melody/blob/Melody_Matpower_project/src/projects/secondary_voltage_control/project_configuration.prototxt/">projection configuration file</a>, which is explained further below. During runtime, each PMU periodically sends GRPC read requests to the Proxy process to get the voltage measurement at its pilot bus:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Creating a list of read requests</span>
+<span class="c1"># self.obj_type = &quot;bus&quot;</span>
+<span class="c1"># self.obj_id = 2 (for pilot bus #2)</span>
+<span class="c1"># self.fieldtype = &quot;Vm&quot; (Vm for voltage magnitude)</span>
+<span class="n">pilot_busses_to_read</span> <span class="o">=</span> <span class="p">[(</span><span class="n">obj_type_to_read</span><span class="p">,</span> <span class="n">obj_id_to_read</span><span class="p">,</span> <span class="n">field_type_to_read</span><span class="p">)]</span>
+
+<span class="c1"># Making a GRPC call to get the voltage measurement</span>
+<span class="c1"># The call blocks until Proxy returns the values</span>
+<span class="n">ret</span> <span class="o">=</span> <span class="n">rpc_read</span><span class="p">(</span><span class="n">pilot_busses_to_read</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Once receiving the voltage reading, the PMU forwards it to the SCADA server over UDP:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># pkt is a css_pb2.CyberMessage object that contains information about</span>
+<span class="c1"># the PMU, including its application ID and voltage measurement</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">host_control_layer</span><span class="o">.</span><span class="n">tx_pkt_to_powersim_entity</span><span class="p">(</span><span class="n">pkt</span><span class="o">.</span><span class="n">SerializeToString</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="scada-controller">
+<h3>SCADA controller<a class="headerlink" href="#scada-controller" title="Permalink to this headline">¶</a></h3>
+<p>The SCADA controller is implemented in <a class="reference external" href="https://github.com/Vignesh2208/Melody/blob/Melody_Matpower_project/src/projects/secondary_voltage_control/scada.py/">this</a> Python script. The SCADA process contains two main threads:</p>
+<ul class="simple">
+<li>One that keeps listening to UDP packets sent by PMUs containing voltage measurements</li>
+<li>The other that periodically (i) runs the SVC algorithm using the most up-to-date voltage measurements to compute the voltage setpoints at generator buses and (ii) sends them to the PLCs</li>
+</ul>
+</div>
+<div class="section" id="plcs">
+<h3>PLCs<a class="headerlink" href="#plcs" title="Permalink to this headline">¶</a></h3>
+<p>The PLC application is implemented in <a class="reference external" href="https://github.com/Vignesh2208/Melody/blob/Melody_Matpower_project/src/projects/secondary_voltage_control/plc.py/">this</a> Python script. Each PLC is mapped to one generator bus that it directly controls. Unlike PMUs and the SCADA server, PLCs do not run periodically. Instead, each PMU application waits for UDP packets sent by the SCADA controller, parses the packets to extract the generator voltage setpoints, then updates them to the power system simulation by issueing a GRPC write request to the Proxy:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Making a GRPC call to change the generator voltage setpoint</span>
+<span class="n">rpc_write</span><span class="p">([(</span><span class="n">obj_type_to_write</span><span class="p">,</span> <span class="n">obj_id_to_write</span><span class="p">,</span> <span class="n">field_type_to_write</span><span class="p">,</span> <span class="n">voltage_setpoint</span><span class="p">)])</span>
+</pre></div>
+</div>
+<p>Note that _all_ packets sent from PMUs to the SCADA controller and from the SCADA controller to the PLCs will travel through mininet network. Hence, they can be monitored using our packet capturing tool. However, the same tool will not capture the GRPC read and write requests. Interactions with the Proxy will be logged by the Proxy itself.</p>
+</div>
+<div class="section" id="disturbances">
+<h3>Disturbances<a class="headerlink" href="#disturbances" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="configuration">
+<h3>Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a></h3>
+<p>Configuration of the simulation is specified in the <a class="reference external" href="https://github.com/Vignesh2208/Melody/blob/Melody_Matpower_project/src/projects/secondary_voltage_control/project_configuration.prototxt/">project configuration file</a>. Below we provide the high level summarization of the project:</p>
+<ul class="simple">
+<li>System model: IEEE 39-bus New England case</li>
+<li>Power sytem simulation tool: <a class="reference external" href="http://www.pserc.cornell.edu/matpower/">MatPower</a></li>
+<li>Network simulation tool: Mininet</li>
+<li>Application: Secondary Voltage Control</li>
+<li>Generator buses (controlled by SVC): 30, 31, 32, 33, 34, 35, 36, 37, 38, 39</li>
+<li>Pilot buses: 2, 6, 9, 10, 19, 20, 22, 23, 25, 29</li>
+<li>Cyber network: 5-switch clique/ring topology</li>
+</ul>
+</div>
+<div class="section" id="starting-the-example">
+<h3>Starting the example<a class="headerlink" href="#starting-the-example" title="Permalink to this headline">¶</a></h3>
+<p>Switch to the project directory:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">~/</span><span class="n">Melody</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">projects</span><span class="o">/</span><span class="n">secondary_voltage_control</span>
+<span class="c1"># set enable_kronos=0 if you wish to run without kronos support</span>
+<span class="c1"># if enable_kronos is set to 1, ensure that kronos module is pre-loaded</span>
+<span class="n">sudo</span> <span class="n">python</span> <span class="n">main</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">enable_kronos</span><span class="o">=</span><span class="mi">1</span> <span class="o">--</span><span class="n">run_time</span><span class="o">=</span><span class="mi">10</span>
+</pre></div>
+</div>
+<p>This would run the example for 10 seconds in virtual time.</p>
+</div>
+<div class="section" id="generated-log-files">
+<h3>Generated Log files<a class="headerlink" href="#generated-log-files" title="Permalink to this headline">¶</a></h3>
+<p>Log files and pcaps which are generated are stored inside:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">~/</span><span class="n">Melogy</span><span class="o">/</span><span class="n">logs</span><span class="o">/</span><span class="n">secondary_voltage_control</span>
+</pre></div>
+</div>
+<p>One log file is generated for each application id.</p>
+</div>
+<div class="section" id="results">
+<h3>Results<a class="headerlink" href="#results" title="Permalink to this headline">¶</a></h3>
+<p>We setup three following experiments:</p>
+<ul class="simple">
+<li>Without Kronos</li>
+<li>With Kronos, minimal network link delay (1ms)</li>
+<li>With Kronos, large network link delay (500ms)</li>
+</ul>
+<p>For each experiment, we measure SVC’s step response when there is a step change in reactive power consumption at bus #4 from 184 to 230 MVAR (25% increment). The data are collected for 25 seconds of virtual time. Using our lab’s setup, it takes about 10 to 15 minutes to complete one experiment.</p>
+<div class="figure align-center" id="id3">
+<a class="reference internal image-reference" href="_images/without_kronos.png"><img alt="Without Kronos" src="_images/without_kronos.png" style="width: 100%;" /></a>
+<p class="caption"><span class="caption-text">Without Kronos</span></p>
+</div>
+<p>As can be seen from the above graph, without Kronos, the timings of the measurements are totally messed up. Since SVC is time sensitive, that leads to unstable behaviors towards the end of the simulation.</p>
+<div class="figure align-center" id="id4">
+<a class="reference internal image-reference" href="_images/with_kronos.png"><img alt="With Kronos and 1ms network link delay" src="_images/with_kronos.png" style="width: 100%;" /></a>
+<p class="caption"><span class="caption-text">With Kronos and 1ms network link delay</span></p>
+</div>
+<p>With Kronos, we can see that SVC makes the right adjustment to bring the voltages at pilot buses back to their nominal values, which is indicated by all relative change of pilot bus voltages being at 1.0. The generator voltage setpoints slightly overshoot but finally stabilize 15 seconds after the onset of the disturbance.</p>
+<div class="figure align-center" id="id5">
+<a class="reference internal image-reference" href="_images/with_kronos_and_delay_500.png"><img alt="With Kronos and 500ms network link delay" src="_images/with_kronos_and_delay_500.png" style="width: 100%;" /></a>
+<p class="caption"><span class="caption-text">With Kronos and 500ms network link delay</span></p>
+</div>
+<p>By introducing the network link delay of 500ms, it takes on average 2 seconds for each PMU to send data to the SCADA controller (i.e. 4 hops) and another 1.5 seconds for the SCADA controller to send to the PLCs (3 hops). The net result is a delay of at least 3.5 seconds for every change in the power system to be reflected back, which results in the observed oscillation. This experiment showcases the ability of Melody as a cosimulation tool, i.e. changes in the cyber network setting has the potential of affecting the performance of a cyber-physical system.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Melody</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="project_configuration.html">Project Configuration</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Quick Start</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#example-secondary-voltage-control">Example: Secondary Voltage Control</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pmus">PMUs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scada-controller">SCADA controller</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#plcs">PLCs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#disturbances">Disturbances</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#configuration">Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#starting-the-example">Starting the example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#generated-log-files">Generated Log files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#results">Results</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">Python Modules Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contact.html">Contact</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="project_configuration.html" title="previous chapter">Project Configuration</a></li>
+      <li>Next: <a href="modules.html" title="next chapter">Python Modules Reference</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Project Moses.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/quick_start.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

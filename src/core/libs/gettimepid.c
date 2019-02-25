@@ -1,30 +1,38 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <string.h>
-#include <signal.h>
 #include <sys/syscall.h>
 #include <stdarg.h>
-#include <sys/time.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <sys/socket.h>
-#include <linux/netlink.h>
-#include <errno.h>
 #include <fcntl.h>
 #include <sys/select.h>
 #include <Python.h>
+#include <sys/ioctl.h>
+
+#define TK_IOC_MAGIC  'k'
+#define TK_IO_GET_CURRENT_VIRTUAL_TIME _IOW(TK_IOC_MAGIC,  4, int)
 
 /*
-Returns the virtual time of an LXC, given it's pid
+Returns the virtual time of an experiment, given it's pid. If pid == 0, it queries Kronos anyway for expected_virtual_time
 */
 int gettimepid(int pid, struct timeval *tv, struct timezone *tz) {
 
-    long double res;
+        int res, fp;
+
+	if (pid == 0) {
+		fp = open("/proc/status", O_RDWR);
+		if (fp == -1) {
+			return -1;
+		}
+		res = ioctl(fp, TK_IO_GET_CURRENT_VIRTUAL_TIME, tv);
+		close(fp);
+		return res;
+	}
+
+	
 	#ifdef __x86_64
-	return syscall(315, pid, tv, tz);
+	return syscall(327, pid, tv, tz);
 	#endif
-	return syscall(352, pid, tv , tz);
+	return syscall(378, pid, tv , tz);
 	
 }
 
@@ -35,12 +43,14 @@ static PyObject * py_gettimepid(PyObject * self, PyObject * args){
 	char result[100];
 		
 	if (!PyArg_ParseTuple(args, "i", &pid)) {
-        Py_RETURN_NONE;
+        	Py_RETURN_NONE;
    	}
    	
    	memset(result,0,100);
-	gettimepid(pid,&tv,&tz);
-	sprintf(result,"%ld.%ld\n",tv.tv_sec,tv.tv_usec);
+	if (gettimepid(pid,&tv,&tz) >= 0 )
+		sprintf(result,"%ld.%ld\n",tv.tv_sec,tv.tv_usec);
+	else
+		sprintf(result,"0.0\n");
    	
    	return Py_BuildValue("s", result); 
    	

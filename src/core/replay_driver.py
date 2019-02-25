@@ -1,28 +1,41 @@
+"""Replay driver
+
+.. moduleauthor:: Vignesh Babu <vig2208@gmail.com>, Rakesh Kumar (gopchandani@gmail.com)
+"""
+
+
 import argparse
 import json
-import datetime
-import time
-
-from utils.sleep_functions import sleep
-from datetime import datetime
+import logger
 from shared_buffer import *
+import time
+import binascii
 
 
 class ReplayDriver(object):
+    """Controls replaying pcaps
+
+    """
     def __init__(self, input_params):
+        """Initializes the replay driver.
+
+        :param input_params: a dictionary containing parameters and pcaps to load
+        :type input_params: dict
+        """
 
         self.driver_id = input_params["driver_id"]
         self.run_time = input_params["run_time"]
         self.node_id = input_params["node_id"]
         self.node_ip = input_params["node_ip"]
         self.rtt = {}
+        self.log = logger.Logger("/tmp/" + self.node_id + "_replay_log.txt", "Replay Driver")
         # Load up the attack plan
-        self.attack_plan_file_path = input_params["attack_path_file_path"]
+        self.attack_plan_file_path = input_params["replay_plan_file_path"]
         with open(self.attack_plan_file_path, "r") as f:
             self.attack_plan = json.load(f)
 
         # Setup the channel with the orchestrator
-        self.sharedBufferArray = shared_buffer_array()
+        self.shared_buf_array = shared_buffer_array()
         self.init_shared_buffers(self.run_time)
 
         # Load the relevant pcap files and load them up in a dict keyed by the name of pcap file.
@@ -34,35 +47,54 @@ class ReplayDriver(object):
         self.raw_tx_sock = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_RAW)
 
     def init_shared_buffers(self, run_time):
+        """Initializes shared buffers to allow communication with the main melody process
 
-        result = self.sharedBufferArray.open(bufName=str(self.driver_id) + "main-cmd-channel-buffer", isProxy=False)
+        :param run_time: run time in seconds. If the buffer cannot be opened, the driver would simply run for
+                         the specified amount and exit gracefully.
+        :type run_time: int
+        :return: None
+        """
+        result = self.shared_buf_array.open(bufName=str(self.driver_id) + "-main-cmd-channel-buffer", isProxy=False)
         if result == BUF_NOT_INITIALIZED or result == FAILURE:
-            print "Cmd channel buffer open failed !"
+            self.log.info("Cmd channel buffer open failed !")
             sys.stdout.flush()
             if run_time == 0:
                 while True:
-                    sleep(1)
+                    time.sleep(1.0)
 
-            start_time = time.time()
-            sleep(run_time + 2)
-            while time.time() < start_time + float(run_time):
-                sleep(1)
+            time.sleep(run_time)
             sys.exit(0)
 
-        print "Cmd channel buffer open succeeded !"
+        self.log.info("Cmd channel buffer open succeeded !")
         sys.stdout.flush()
 
     def send_command_message(self, msg):
+        """Sends a message over the shared buffer
+
+        :param msg: Message to send
+        :type msg: str
+        :return: None
+        """
         ret = 0
         while ret <= 0:
-            ret = self.sharedBufferArray.write(self.driver_id + "main-cmd-channel-buffer", msg, 0)
+            ret = self.shared_buf_array.write(self.driver_id + "-main-cmd-channel-buffer", msg, 0)
+            time.sleep(0.001)
 
     def recv_command_message(self):
-        msg = ''
-        dummy_id, msg = self.sharedBufferArray.read(str(self.driver_id) + "main-cmd-channel-buffer")
+        """Gets command from the shared buffer
+
+        :return: string or None
+        """
+        dummy_id, msg = self.shared_buf_array.read_until(str(self.driver_id) + "-main-cmd-channel-buffer")
         return msg
     
     def load_pcap(self, pcap_file_path):
+        """Loads a pcap specified by the pcap_file_path
+
+        :param pcap_file_path: Absolute path to the pcap file
+        :type pcap_file_path: str
+        :return: None
+        """
         recv_events = {}
         send_events = []
 
@@ -111,13 +143,17 @@ class ReplayDriver(object):
                     recv_events[ip_payload] = []
                     recv_events[ip_payload].append(curr_send_idx)
 
-        print "IP = ", self.node_ip
-        print "LOADED PCAP:", pcap_file_path, "SEND EVENTS:", len(send_events), "RECV EVENTS:", len(recv_events.keys())
+        self.log.info("LOADED PCAP:" + pcap_file_path + "SEND EVENTS:" + str(len(send_events)) + "RECV EVENTS:" +
+                      str(len(recv_events.keys())))
         sys.stdout.flush()
         return send_events, recv_events
 
     def load_pcaps(self):
+        """Load all pcaps which involve this mininet host
 
+        :return: None
+        """
+        self.log.info("Loading pcaps involving: " + str(self.node_id))
         for stage_dict in self.attack_plan:
 
             if stage_dict["active"] == "false":
@@ -132,15 +168,21 @@ class ReplayDriver(object):
                     self.rtt[stage_dict["pcap_file_path"]] = 0.0
                 if self.node_id in stage_dict["involved_nodes"]:
                     self.loaded_pcaps[stage_dict["pcap_file_path"]] = self.load_pcap(stage_dict["pcap_file_path"])
-                
-                    
-                
 
         self.send_command_message("LOADED")
+        self.log.info("Loaded all pcaps and sent acknowledgement ... !")
+        sys.stdout.flush()
 
     def trigger_replay(self, pcap_file_path):
+        """Triggers replay of the pcap_file specified by pcap_file_path
 
-        print "Replaying PCAP file ", pcap_file_path, "at time:", str(datetime.now())
+        .. note:: The pcap file must have already been loaded before calling this.
+
+        :param pcap_file_path: Absolute path to pcap file
+        :type pcap_file_path: str
+        :return: None
+        """
+        self.log.info("Replaying PCAP file " + pcap_file_path)
         sys.stdout.flush()
         
         send_events, recv_events = self.loaded_pcaps[pcap_file_path]
@@ -153,23 +195,23 @@ class ReplayDriver(object):
         curr_rtt = self.rtt[pcap_file_path]
 
         while True:
-            if curr_send_event == None :
-
+            if curr_send_event is None:
                 if curr_send_idx < len(send_events):
                     curr_send_event = send_events[curr_send_idx]
                     payload = binascii.unhexlify(str(curr_send_event[0]))
                     dst_ip = curr_send_event[1]
                     n_required_recv_events = curr_send_event[2]
                     send_sleep_time = float(curr_send_event[3]) - curr_rtt
-                    print "Sending Replay Event: Dst = ", dst_ip, " N Req Recv events = ", n_required_recv_events
+                    self.log.info("Sending Replay Event: Dst = "
+                                  + dst_ip + " N Req Recv events = " + str(n_required_recv_events))
                     sys.stdout.flush()
 
-            if curr_send_event == None:
+            if curr_send_event is None:
                 break
 
             if n_required_recv_events == 0:
                 if send_sleep_time > 0 :
-                    sleep(send_sleep_time)
+                    time.sleep(send_sleep_time)
                 self.raw_tx_sock.sendto(payload, (dst_ip, 0))
                 curr_send_event = None
                 curr_send_idx = curr_send_idx + 1
@@ -178,7 +220,7 @@ class ReplayDriver(object):
                 try:
                     raw_pkt = self.raw_rx_sock.recv(MAXPKTSIZE)
                 except socket.error as e:
-                    raw_pkt = None
+                    self.log.error("Socket Error: " + str(e))
                     continue
 
                 assert len(raw_pkt) != 0
@@ -194,21 +236,24 @@ class ReplayDriver(object):
                             n_required_recv_events = n_required_recv_events - 1
                         else:
                             recv_events[ip_payload].pop(0)
-                            send_events[first_send_window] = [send_events[first_send_window][0], send_events[first_send_window][1], send_events[first_send_window][2] - 1]
+                            send_events[first_send_window] = [send_events[first_send_window][0],
+                                                              send_events[first_send_window][1],
+                                                              send_events[first_send_window][2] - 1]
                     else:
                         pass
 
                 except KeyError as e:
                     pass
 
-        self.raw_rx_sock.close()
-        self.raw_tx_sock.close()
-        print "curr_send_idx:", curr_send_idx
-        print "Closed socket, signalling End of Replay Stage at ", str(datetime.now())
+        self.log.info("Signalling End of Replay Stage ...")
         sys.stdout.flush()
         self.send_command_message("DONE")
         
     def wait_for_commands(self):
+        """Wait for a trigger replay command from the main melody process
+
+        :return: None
+        """
         recv_msg = ''
         
         while "EXIT" not in recv_msg:
@@ -221,18 +266,21 @@ class ReplayDriver(object):
             if recv_msg in self.loaded_pcaps:
                 self.trigger_replay(recv_msg)
             else:
-                print "Unknown PCAP file path:", recv_msg
+                self.log.error("Unknown PCAP file path:" + recv_msg)
                 break
-                
-        print "Replay driver with id:", self.driver_id, "exiting..."
+        self.raw_rx_sock.close()
+        self.raw_tx_sock.close()
+        self.log.info("Replay driver with id:" + self.driver_id + " exiting...")
         sys.stdout.flush()
 
 
 def main():
+    """Creates a replay driver and calls wait_for_commands
+
+    :return: None
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument("--input_params_file_path", dest="input_params_file_path")
-
-    print "Started Replay driver ..."
     sys.stdout.flush()
     args = parser.parse_args()
 
@@ -240,6 +288,7 @@ def main():
         input_params = json.load(f)
 
     d = ReplayDriver(input_params)
+    d.log.info("Started Replay driver ...")
     d.wait_for_commands()
 
 

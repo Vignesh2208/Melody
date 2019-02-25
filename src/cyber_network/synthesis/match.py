@@ -376,6 +376,7 @@ class Match(DictMixin):
 
                 if field_name == "ethernet_source" or field_name == "ethernet_destination":
 
+
                     mac_hex_str = hex(self[field_name])[2:]
                     if len(mac_hex_str) == 11:
                         mac_hex_str = "0" + mac_hex_str
@@ -465,8 +466,20 @@ class Match(DictMixin):
                     if len(mac_hex_str) == 11:
                         mac_hex_str = "0" + mac_hex_str
 
+                    if len(mac_hex_str) == 1:
+                        mac_hex_str = "00000000000" + mac_hex_str
+                    elif len(mac_hex_str) == 2:
+                        mac_hex_str = "0000000000" + mac_hex_str
+
+                    #
+                    # print self[field_name]
+                    # print "mac_hex_str:", type(mac_hex_str), mac_hex_str
+                    #
+                    # raw_input("stop")
+
                     mac_hex_str = unicode(':'.join(s.encode('hex') for s in mac_hex_str.decode('hex')))
                     match_json[ryu_field_names_mapping_reverse[field_name]] = mac_hex_str
+
                 else:
                     match_json[ryu_field_names_mapping_reverse[field_name]] = self[field_name]
 

@@ -1,4 +1,4 @@
-A TestBed which integrates PowerWorld/RTDS with Mininet to simulate a
+A TestBed which integrates Power System Simulation with Mininet to simulate a
 Micro Grid control Architecture. This TestBed will be used for 
 Anomaly Detection Purposes.
 
@@ -17,27 +17,40 @@ Dependencies:
 #expect 
 #mininet
 #openvswitch
-#TimeKeeper
+#protobuf version >= 3.7
+#grpc (sudo pip install grpcio && sudo pip install grpcio-tools)
+#Kronos
+
 ```
 
 ```
 Pre-Run Steps:
 
-- Install TimeKeeper. Compile the New TimeKeeper Kernel
+- Install Kronos.
+- Install protobuf, protoc.
+- Install grpc.
 
 - Setup the environment
     - cd Melody
-    - sudo ./setup.sh
-    - sudo ./install_opendnp3.sh
+    - sudo ./install_deps.sh
+    - sudo make install
 
-- Settin up the python path
+- Setting up the python path
     - Add the following to ~/.bashrc
       export PYTHONPATH=$PYTHONPATH:<path-to-melody>/src
+      export PYTHONPATH=$PYTHONPATH:<path-to-melody>/src/core
 
     - Do the following
       sudo visudo
       
       -Append this line
       Defaults env_keep += "PYTHONPATH"
+
+```
+
+```
+TODO: the powersim case name ishardcoded for now, need to fix it
+Need to change the name of mapped_powersim_entity_id
+Change PSSService to remove MatPower dependency
 
 ```

@@ -3,8 +3,7 @@ __author__ = 'Rakesh Kumar'
 from collections import defaultdict
 from copy import deepcopy
 import networkx as nx
-
-from cyber_network.synthesis.intent import Intent
+from src.cyber_network.synthesis.intent import Intent
 
 
 class SimpleMACSynthesis:

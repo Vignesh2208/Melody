@@ -13,7 +13,7 @@ void __flushBuffer(char * buf, int length){
 
 void __init() {
 	
-	hmap_init(&sharedBufMap,"string",0);
+	hmap_init(&sharedBufMap,0);
 	llist_init(&sharedBufNames);
 
 }
@@ -56,7 +56,7 @@ Called by host/proxy
 bool __addNewSharedBuffer(char * bufName, bool isProxy) {
 	int length = strlen(bufName) + 1;
 	char * newBufName = (char *)malloc(sizeof(char)*length);
-	__flushBuffer(newBufName,length+1);
+	__flushBuffer(newBufName,length);
 	//shm_unlink(bufName);
     int fd = shm_open(bufName,O_CREAT|O_RDWR,S_IRUSR | S_IWUSR);
     if(fd == -1){
@@ -76,7 +76,7 @@ bool __addNewSharedBuffer(char * bufName, bool isProxy) {
 	assert(strlen(newBufName) == length - 1);
 
 	llist_append(&sharedBufNames,newBufName);
-	hmap_put(&sharedBufMap,newBufName,newBufPtr);
+	hmap_put_abs(&sharedBufMap,str_hash(newBufName),newBufPtr);
 
 	if(isProxy) {
 		__initNewSharedBuffer(newBufPtr);
@@ -93,19 +93,22 @@ Called by host/proxy
 void __destroyAllSharedBuffers() {
 	while(llist_size(&sharedBufNames) > 0) {
 		char * bufName = llist_pop(&sharedBufNames);
-		sharedPacketBuf * bufPtr = hmap_get(&sharedBufMap,bufName);
+		sharedPacketBuf * bufPtr = hmap_get_abs(&sharedBufMap,str_hash(bufName));
 		assert(bufName != NULL && bufPtr != NULL);
 
 		munmap(bufPtr,sizeof(sharedPacketBuf));
 		//shm_unlink(bufName);
 		free(bufName);
 	}
+
+	hmap_destroy(&sharedBufMap);
+	llist_destroy(&sharedBufNames);
 }
 
 
 
 sharedPacketBuf * __getSharedBuffer(char * bufName){
-	return hmap_get(&sharedBufMap,bufName);
+	return hmap_get_abs(&sharedBufMap,str_hash(bufName));
 }
 
 /*
@@ -149,36 +152,42 @@ int __bufRead(char * bufName, char * storeBuf, bool isProxy) {
 
 	if (isProxy == TRUE) {
 
-		sem_wait(&bufPtr->lock);
+		if (sem_trywait(&bufPtr->lock) == 0) {
 		
-		if(__PollProxyRead(bufPtr)) {
-			memcpy(storeBuf,bufPtr->pkt,MAXPKTSIZE);
-			nRead = bufPtr->dstID + 1;
-			bufPtr->ack = TRUE;
-			bufPtr->dirty = FALSE;
-			bufPtr->pktLen = 0;
-		}
-		else
+			if(__PollProxyRead(bufPtr)) {
+				memcpy(storeBuf,bufPtr->pkt,MAXPKTSIZE);
+				nRead = bufPtr->dstID + 1;
+				bufPtr->ack = TRUE;
+				bufPtr->dirty = FALSE;
+				bufPtr->pktLen = 0;
+			}
+			else
+				nRead = 0;
+		
+			sem_post(&bufPtr->lock);
+		} else {
 			nRead = 0;
-		
-		sem_post(&bufPtr->lock);
+		}
 
 	}
 	else{
 
-		sem_wait(&bufPtr->lock);
+		if (sem_trywait(&bufPtr->lock) == 0) {
 		
-		if(__PollHostRead(bufPtr)) {
-			memcpy(storeBuf,bufPtr->pkt,MAXPKTSIZE);
-			nRead = bufPtr->dstID + 1;
-			bufPtr->ack = TRUE;
-			bufPtr->dirty = FALSE;
-			bufPtr->pktLen = 0;
-		}
-		else {
+			if(__PollHostRead(bufPtr)) {
+				memcpy(storeBuf,bufPtr->pkt,MAXPKTSIZE);
+				nRead = bufPtr->dstID + 1;
+				bufPtr->ack = TRUE;
+				bufPtr->dirty = FALSE;
+				bufPtr->pktLen = 0;
+			}
+			else {
+				nRead = 0;
+			}
+			sem_post(&bufPtr->lock);
+		} else {
 			nRead = 0;
 		}
-		sem_post(&bufPtr->lock);
 
 	}
 
@@ -342,13 +351,6 @@ static PyObject * py_bufWrite(PyObject * self, PyObject * args){
    	}
 
    	assert(bufName != NULL && data != NULL && (dataLen > 0 && dataLen < MAXPKTSIZE) && dstID >= 0);
-
-   	/*printf("bufWirte name %s\n",bufName);
-   	printf("bufWrite data %s\n",data);
-   	printf("bufWrite dataLen %d\n",dataLen);
-   	printf("bufWrite isProxy %d\n",isProxy);
-   	printf("bufWrite dstID %d\n",dstID);*/
-
    	res = __bufWrite(bufName,data,dataLen,isProxy,dstID);
    	
 	return Py_BuildValue("i", res);   	
