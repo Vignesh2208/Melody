@@ -27,7 +27,7 @@ class Mock(MagicMock):
     def __getattr__(cls, name):
         return MagicMock()
 
-MOCK_MODULES = ['mininet', 'mininet.net', 'kronos_functions']
+MOCK_MODULES = ['mininet', 'mininet.net', 'mininet.node', 'mininet.link', 'kronos_functions']
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
 # -- Project information -----------------------------------------------------
