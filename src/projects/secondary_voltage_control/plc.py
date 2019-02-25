@@ -20,16 +20,33 @@ class PLC(threading.Thread):
         self.host_control_layer = host_control_layer
         self.stop = False
         self.plc_name = plc_name
-
-
         self.recv_pkt_queue = []
-        self.obj_id = self.plc_name.split('_')[-1]
-        self.field_type = "Vg"
-        self.obj_type = "gen"
+
 
 
     def run(self):
         request_no = 0
+
+        field_type_to_write = "Vg"
+        obj_type_to_write = "gen"
+
+        #A mapping which specifies which generator bus is controlled by each plc
+        obj_id_to_plc = {
+            "PLC_Gen_Bus_30" : "30",
+            "PLC_Gen_Bus_31": "31",
+            "PLC_Gen_Bus_32": "32",
+            "PLC_Gen_Bus_33": "33",
+            "PLC_Gen_Bus_34": "34",
+            "PLC_Gen_Bus_35": "35",
+            "PLC_Gen_Bus_36": "36",
+            "PLC_Gen_Bus_37": "37",
+            "PLC_Gen_Bus_38": "38",
+            "PLC_Gen_Bus_39": "39",
+        }
+
+        #Get the generator bus controlled by this plc. For instance if plc_name is "PLC_Gen_Bus_30", then it controls
+        #generator bus "30"
+        obj_id_to_write = obj_id_to_plc[self.plc_name]
 
         while not self.stop:
 
@@ -54,7 +71,7 @@ class PLC(threading.Thread):
 
             # Sends a write request to the proxy based on the received command from SCADA controller
             self.host_control_layer.log.info("Sending RPC Write Request ...")
-            rpc_write([(self.obj_type, self.obj_id, self.field_type, voltage_setpoint)])
+            rpc_write([(obj_type_to_write, obj_id_to_write, field_type_to_write, voltage_setpoint)])
             self.host_control_layer.log.info("----------------------------------------")
 
             request_no += 1

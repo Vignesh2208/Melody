@@ -1,0 +1,208 @@
+Project Configuration
+=====================
+
+A Melody project consists of two components: (1) a cyber emulation and (2) a power simulation. This section specifies how to create a new project and configure its components.
+
+Creating a New Project
+^^^^^^^^^^^^^^^^^^^^^^
+
+* To create a new project with a <project_name>, please do the following::
+
+    cp -R ~/Melody/src/projects/blank_project ~/Melody/src/projects/<project_name>
+
+Specifying a Project Configuration
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The project configuration can be specified by editing the project_configuration.prototxt file located inside the project directory. The project configuration must be specified according to the `configuration.proto <https://github.com/Vignesh2208/Melody/blob/Melody_Matpower_project/src/proto/configuration.proto/>`_ format. We briefly describe the format below with an example. For the complete configuration, see `this <https://github.com/Vignesh2208/Melody/blob/Melody_Matpower_project/src/projects/secondary_voltage_control/project_configuration.prototxt/>`_. 
+
+* project_name: must match the name of the project directory::
+  
+    project_name: "secondary_voltage_control"
+
+* cyber_emulation_spec: describes the cyber topology::
+
+    cyber_emulation_spec {
+      topology_name: "clique_topo"
+      num_hosts: 5
+      num_switches: 5
+      inter_switch_link_latency_ms: 1
+      host_switch_link_latency_ms: 1
+      additional_topology_param {
+        parameter_name: "per_switch_links"
+        parameter_value_int: 2
+      }
+      additional_topology_param {
+        parameter_name: "num_hosts_per_switch"
+        parameter_value_int: 1
+      }
+    }
+
+  In this example, we specify to use the clique_topo. The name "clique_topo" is automatically resolved to a "clique_topo.py" file located inside::
+
+    ~/Melody/src/cyber_network/topologies
+
+  directory. The rest of the topology attributes are converted into a "**params**" dictionary and passed as a run time argument to the clique_topo object. In this example the generated "**params**" dictionary will be equal to::
+
+    params = {
+                "num_hosts": 5,
+                "num_switches" : 5,
+                "inter_switch_link_latency_ms": 1,
+                "host_switch_link_latency_ms" : 1,
+                "per_switch_links" : 2,
+                "num_hosts_per_switch" : 1,
+             }
+
+  The cyber topology implementation may use these parameters to construct a mininet topology by using the mininet Topo API.
+
+* cyber_physical_map: describes which applications are running on a specific mininet host::
+
+    cyber_physical_map {
+      cyber_host_name	:	"h3"
+      mapped_application {
+        application_id	:	"PMU_Pilot_Bus_2"
+        application_src : "pmu.py"
+        listen_port : 5100
+      }
+      mapped_application {
+        application_id   :   "PMU_Pilot_Bus_6"
+        application_src : "pmu.py"
+        listen_port : 5101
+      }
+      mapped_application {
+        application_id   :   "PMU_Pilot_Bus_9"
+        application_src : "pmu.py"
+        listen_port : 5102
+      }
+      mapped_application {
+        application_id   :   "PMU_Pilot_Bus_10"
+        application_src : "pmu.py"
+        listen_port : 5103
+      }
+      mapped_application {
+        application_id   :   "PMU_Pilot_Bus_19"
+        application_src : "pmu.py"
+        listen_port : 5104
+      }
+      mapped_application {
+        application_id   :   "PMU_Pilot_Bus_20"
+        application_src : "pmu.py"
+        listen_port : 5105
+      }
+      mapped_application {
+        application_id   :   "PMU_Pilot_Bus_22"
+        application_src : "pmu.py"
+        listen_port : 5106
+      }
+      mapped_application {
+        application_id   :   "PMU_Pilot_Bus_23"
+        application_src : "pmu.py"
+        listen_port : 5107
+      }
+      mapped_application {
+        application_id   :   "PMU_Pilot_Bus_25"
+        application_src : "pmu.py"
+        listen_port : 5108
+      }
+      mapped_application {
+        application_id   :   "PMU_Pilot_Bus_29"
+        application_src : "pmu.py"
+        listen_port : 5109
+      }
+      description :	"PMUs for reading pilot buses"
+    }
+
+  In this example, on mininet host "h3", 10 applications are configured to run. Each mapped application has a unique id and a port on which it is listening for packets. All applications in this case share the same source file which is automatically resolved to the file::
+
+    ~/Melody/src/projects/secondary_voltage_control/pmu.py. 
+
+  All 10 applications are started as separate processes which execute the same source file but they are passed their respective application_id and the application_ids of all other applications running in the network as arguments. The source file may perform different operations based on the passed/assigned application_id.
+
+* bg_flow: describes a background traffic flow. A single project configuration may have multiple background flow descriptions::
+
+    bg_flow {
+      src_cyber_entity	:	"h2"
+      dst_cyber_entity	:	"h3"
+      cmd_to_run_at_src	:	"ping -i 0.2 h3"
+      cmd_to_run_at_dst	:	""
+      flow_start_time		:	1
+      description		    :	"Ping flow between h1 to h3 starting at time 1.0 seconds"
+    }
+
+  In this examples, it describes a ping flow which is run between h2 and h3 every 200 ms starting at time 1.0 seconds from the beginning of the emulation. Note that the ping is simply given the name of the destination host h3 instead of its IP address. This is because Melody can automatically resolve the host name into its IP address at run time before executing the command. 
+
+* replay_flow: describes a replay traffic flow. A single project configuration may have multiple replay flow descriptions::
+
+    replay_flow {
+      involved_cyber_entity: "h1"
+      involved_cyber_entity: "h3"
+      pcap_file_path: "/home/moses/Melody/src/projects/secondary_voltage_control/replay_pcaps/pmu_fuzzing_h1_h3.pcap"
+      description: "Replaying a PMU fuzzing attack gathered from a real network over the path between h1-h3"
+    }
+
+  In this example, the pcap specified by the given absolute path is replayed between h1 and h3 when it is "**triggered**". We describe trigerring replays in a subsequent subsection. Note that a replay flow must have atleast 2 involved_cyber_entities and they must all be valid mininet host names.
+
+Creating custom cyber topologies
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+To create a new cyber topology, follow the steps given below::
+
+  cp ~/Melody/src/cyber_network/topologies/blank_topology.py ~/Melody/src/cyber_network/topologies/<cyber_topology_name>.py
+
+You may now edit the file and use the mininet API to implement a custom topology. It will then be accessible from the project configuration by simply specifying the same <cyber_topology_name> in the configuration.
+
+.. note:: Do not modify the class name inside the new file. It must remain as CyberTopology.
+
+Creating custom host applications
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+To create a new application inside a <project_name>, follow the steps given below::
+
+  cp ~/Melody/src/projects/<project_name>/blank_application.py ~/Melody/src/projects/<project_name>/<application_name>.py
+
+You may now edit the file and override specific functions of the `basicHostIPCLayer <https://github.com/Vignesh2208/Melody/blob/Melody_Matpower_project/src/core/basicHostIPCLayer.py>`_  class. Please refer the module documentation for more details. This file <application_name>.py may now be specified as an "application_src" attribute in the project configuration.
+
+.. note:: Do not modify the class name inside the new file. It must remain as hostApplicationLayer.
+
+Experiment control API
+^^^^^^^^^^^^^^^^^^^^^^
+
+Melody offers some simple API to control experiment flow. These may be used inside the main.py script of the project.
+
+* Creating an experiment container::
+
+    exp = parse_experiment_configuration(project_run_time_args)
+
+  project_run_time_args must be a dictionary with the following keys::
+
+    {
+        "project_directory": <directory of the main script>,
+        "run_time": <running time in seconds>,
+        "enable_kronos": <is kronos enabled: 1 or 0>,
+        "rel_cpu_speed": <relative cpu speed for a kronos experiment>,
+    }
+
+*  Initializing the project::
+
+      exp.initialize_project()
+
+   This starts all the hosts, proxy and application processes and waits until the experiment is triggered to run.
+
+*  Running the experiment::
+
+      exp.run_for(duration_ns)
+
+   This runs the experiment for the specified duration in nano seconds. It then automatically synchronizes with the proxy and the power simulator.
+
+*  Triggering replays::
+
+      exp.trigger_nxt_replay()
+
+   It can be used to trigger/start the next replay flow. Replays can be triggered only in the order in which they are specified in the project configuration. A variant of this call is::
+
+      exp.trigger_nxt_k_replays(k)
+
+   It will simultaneously send a start command for the next k replays. But only the largest first "n" non-conflicting replays will be immediately activated. Two replay flows are non-conflicting if they do not share any common "involved" hosts. Conflicting replays are scheduled at the earliest feasible time.
+
+*  Closing the project::
+
+     exp.close_project()

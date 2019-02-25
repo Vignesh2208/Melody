@@ -37,9 +37,6 @@ message MappedApplication {
                                             // Note that this is relative to the project directory. So absolute
                                             // path may not be specified.
     required int32 listen_port = 3;         // port on which the application should listen
-    optional string object_type = 4;
-    optional string object_id = 5;
-    optional string field_type = 6;
 }
 
 // Specifying the set of applications which can run on a mininet host

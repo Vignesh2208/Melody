@@ -64,3 +64,18 @@ sudo cp -v start_ovs.sh /etc/init.d/
 sudo rm start_ovs.sh
 sudo chmod +x /etc/init.d/start_ovs.sh
 sudo update-rc.d start_ovs.sh defaults
+sudo sh ~/Downloads/openvswitch-2.4.0/start_ovs.sh
+
+echo "#############################################################################"
+echo "Setting up Octave"
+echo "#############################################################################
+sudo add-apt-repository ppa:octave/stable
+sudo apt-get update
+sudo apt-get install octave
+
+echo "#############################################################################"
+echo "Setting up Protocol Buffers and GRPC tools"
+echo "#############################################################################
+sudo pip install protobuf==3.7.0rc2
+sudo python -m pip install grpcio
+sudo python -m pip install grpcio-tools

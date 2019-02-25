@@ -21,10 +21,6 @@ Dependencies:
 #grpc (sudo pip install grpcio && sudo pip install grpcio-tools)
 #Kronos
 
-For paramiko:
-pip install paramiko
-sudo apt-get install libkrb5-dev
-pip install gssapi
 ```
 
 ```
@@ -43,7 +39,8 @@ Pre-Run Steps:
 - Setting up the python path
     - Add the following to ~/.bashrc
       export PYTHONPATH=$PYTHONPATH:<path-to-melody>/src
-
+      export PYTHONPATH=$PYTHONPATH:<path-to-melody>/src/core
+      
     - Do the following
       sudo visudo
       

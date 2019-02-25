@@ -22,11 +22,31 @@ class PMU(threading.Thread):
         self.pmu_name = pmu_name
         self.raw_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-        self.obj_type = "bus"
-        self.obj_id = self.pmu_name.split('_')[-1]
-        self.field_type = "Vm"
+
 
     def run(self):
+
+        obj_type_to_read = "bus"
+        field_type_to_read = "Vm"
+
+        #A local mapping which specifies for each pmu, which object-id (i.e pilot bus) it should read
+        #For instance if the PMU's name is "PMU_Pilot_Bus_2", then it reads from pilot bus number 2
+        obj_id_to_pmu = {
+            "PMU_Pilot_Bus_2" : "2",
+            "PMU_Pilot_Bus_6" : "6",
+            "PMU_Pilot_Bus_9": "9",
+            "PMU_Pilot_Bus_10": "10",
+            "PMU_Pilot_Bus_19": "19",
+            "PMU_Pilot_Bus_20": "20",
+            "PMU_Pilot_Bus_22": "22",
+            "PMU_Pilot_Bus_23": "23",
+            "PMU_Pilot_Bus_25": "25",
+            "PMU_Pilot_Bus_29": "29",
+        }
+
+        assert self.pmu_name in obj_id_to_pmu
+        obj_id_to_read = obj_id_to_pmu[self.pmu_name]
+
         request_no = 0
         while not self.stop:
             pkt = css_pb2.CyberMessage()
@@ -35,7 +55,7 @@ class PMU(threading.Thread):
             pkt.msg_type = "PERIODIC_UPDATE"
 
             #Sends an RPC read request to get pilot bus reading.
-            pilot_busses_to_read = [(self.obj_type, self.obj_id, self.field_type)]
+            pilot_busses_to_read = [(obj_type_to_read, obj_id_to_read, field_type_to_read)]
             ret = rpc_read(pilot_busses_to_read)
             assert(ret is not None)
 
@@ -56,7 +76,7 @@ class PMU(threading.Thread):
 
             data = pkt.content.add()
             data.key = "OBJ_ID"
-            data.value = self.obj_id
+            data.value = obj_id_to_read
 
             #Sends pilot bus reading to SCADA controller.
             self.host_control_layer.log.info("Sending Reading: \n" + str(pkt))

@@ -1,37 +1,26 @@
 home_dir=$(HOME)
-melody_dir=${home_dir}/NetPower_TestBed
+melody_dir=${home_dir}/Melody
 core_dir=${melody_dir}/src/core
 utils_dir=${melody_dir}/src/utils
 
 
-
-clean_bin: 
-	@cd ${core_dir}/bin && $(MAKE) clean;
-
 clean_libs:
 	@cd ${core_dir}/libs && $(MAKE) clean;
-	@cd ${core_dir}/libs/utils && $(MAKE) clean;
-
-clean_utils:
-	@cd ${utils_dir} && $(MAKE) clean;
-
-build_bin:
-	@echo "#############################################################################"
-	@echo "Setting up NetPower"
-	@echo "#############################################################################"
-	@cd ${core_dir}/bin && $(MAKE) build;
+	@rm -f ${core_dir}/shared_buf.so
+	@rm -f ${core_dir}/gettimepid.so
 
 build_libs:
-	@cd ${core_dir}/libs && $(MAKE) build;
+    @echo "#############################################################################"
+	@echo "Setting up Melody"
+	@echo "#############################################################################"
+	@cd ${core_dir}/libs && $(MAKE) build_ext;
 
-build_utils:
-	@cd ${utils_dir} && $(MAKE) build;
 
-clean : clean_bin clean_libs clean_utils
+clean : clean_libs
 
-build:	build_bin build_libs build_utils
+build:	build_libs
 
-install_deps: @cd ${melody_dir} && ./setup.sh;
+install_deps: @cd ${melody_dir} && ./install_deps.sh;
 
 install: clean build
 		

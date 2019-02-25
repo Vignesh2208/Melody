@@ -21,7 +21,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='melody_configuration',
   syntax='proto2',
   serialized_options=None,
-  serialized_pb=_b('\n\x13\x63onfiguration.proto\x12\x14melody_configuration\x1a\tpss.proto\"\xa6\x01\n\x11TopologyParameter\x12\x16\n\x0eparameter_name\x18\x01 \x02(\t\x12\x1e\n\x16parameter_value_string\x18\x02 \x01(\t\x12\x1b\n\x13parameter_value_int\x18\x03 \x01(\x05\x12\x1e\n\x16parameter_value_double\x18\x04 \x01(\x01\x12\x1c\n\x14parameter_value_bool\x18\x05 \x01(\x08\"\xf4\x01\n\x1b\x43yberEmulationSpecification\x12\x15\n\rtopology_name\x18\x01 \x02(\t\x12\x11\n\tnum_hosts\x18\x02 \x02(\x05\x12\x14\n\x0cnum_switches\x18\x03 \x02(\x05\x12$\n\x1cinter_switch_link_latency_ms\x18\x04 \x02(\x05\x12#\n\x1bhost_switch_link_latency_ms\x18\x05 \x02(\x05\x12J\n\x19\x61\x64\x64itional_topology_param\x18\x06 \x03(\x0b\x32\'.melody_configuration.TopologyParameter\"\x95\x01\n\x11MappedApplication\x12\x16\n\x0e\x61pplication_id\x18\x01 \x02(\t\x12\x17\n\x0f\x61pplication_src\x18\x02 \x02(\t\x12\x13\n\x0blisten_port\x18\x03 \x02(\x05\x12\x13\n\x0bobject_type\x18\x04 \x01(\t\x12\x11\n\tobject_id\x18\x05 \x01(\t\x12\x12\n\nfield_type\x18\x06 \x01(\t\"\x85\x01\n\x10\x43yberPhysicalMap\x12\x17\n\x0f\x63yber_host_name\x18\x01 \x02(\t\x12\x43\n\x12mapped_application\x18\x02 \x03(\x0b\x32\'.melody_configuration.MappedApplication\x12\x13\n\x0b\x64\x65scription\x18\x03 \x01(\t\"\xa8\x01\n\x0e\x42\x61\x63kGroundFlow\x12\x18\n\x10src_cyber_entity\x18\x01 \x02(\t\x12\x18\n\x10\x64st_cyber_entity\x18\x02 \x02(\t\x12\x19\n\x11\x63md_to_run_at_src\x18\x03 \x02(\t\x12\x19\n\x11\x63md_to_run_at_dst\x18\x04 \x02(\t\x12\x17\n\x0f\x66low_start_time\x18\x05 \x02(\x05\x12\x13\n\x0b\x64\x65scription\x18\x06 \x01(\t\"\\\n\x0ePcapReplayFlow\x12\x1d\n\x15involved_cyber_entity\x18\x01 \x03(\t\x12\x16\n\x0epcap_file_path\x18\x02 \x02(\t\x12\x13\n\x0b\x64\x65scription\x18\x03 \x01(\t\"\xb3\x02\n\x14ProjectConfiguration\x12\x14\n\x0cproject_name\x18\x01 \x02(\t\x12O\n\x14\x63yber_emulation_spec\x18\x02 \x02(\x0b\x32\x31.melody_configuration.CyberEmulationSpecification\x12\x42\n\x12\x63yber_physical_map\x18\x03 \x03(\x0b\x32&.melody_configuration.CyberPhysicalMap\x12\x35\n\x07\x62g_flow\x18\x04 \x03(\x0b\x32$.melody_configuration.BackGroundFlow\x12\x39\n\x0breplay_flow\x18\x05 \x03(\x0b\x32$.melody_configuration.PcapReplayFlow\"H\n\x0c\x44isturbances\x12\x38\n\x0b\x64isturbance\x18\x01 \x03(\x0b\x32#.melody_powersim_proto.WriteRequest')
+  serialized_pb=_b('\n\x13\x63onfiguration.proto\x12\x14melody_configuration\x1a\tpss.proto\"\xa6\x01\n\x11TopologyParameter\x12\x16\n\x0eparameter_name\x18\x01 \x02(\t\x12\x1e\n\x16parameter_value_string\x18\x02 \x01(\t\x12\x1b\n\x13parameter_value_int\x18\x03 \x01(\x05\x12\x1e\n\x16parameter_value_double\x18\x04 \x01(\x01\x12\x1c\n\x14parameter_value_bool\x18\x05 \x01(\x08\"\xf4\x01\n\x1b\x43yberEmulationSpecification\x12\x15\n\rtopology_name\x18\x01 \x02(\t\x12\x11\n\tnum_hosts\x18\x02 \x02(\x05\x12\x14\n\x0cnum_switches\x18\x03 \x02(\x05\x12$\n\x1cinter_switch_link_latency_ms\x18\x04 \x02(\x05\x12#\n\x1bhost_switch_link_latency_ms\x18\x05 \x02(\x05\x12J\n\x19\x61\x64\x64itional_topology_param\x18\x06 \x03(\x0b\x32\'.melody_configuration.TopologyParameter\"Y\n\x11MappedApplication\x12\x16\n\x0e\x61pplication_id\x18\x01 \x02(\t\x12\x17\n\x0f\x61pplication_src\x18\x02 \x02(\t\x12\x13\n\x0blisten_port\x18\x03 \x02(\x05\"\x85\x01\n\x10\x43yberPhysicalMap\x12\x17\n\x0f\x63yber_host_name\x18\x01 \x02(\t\x12\x43\n\x12mapped_application\x18\x02 \x03(\x0b\x32\'.melody_configuration.MappedApplication\x12\x13\n\x0b\x64\x65scription\x18\x03 \x01(\t\"\xa8\x01\n\x0e\x42\x61\x63kGroundFlow\x12\x18\n\x10src_cyber_entity\x18\x01 \x02(\t\x12\x18\n\x10\x64st_cyber_entity\x18\x02 \x02(\t\x12\x19\n\x11\x63md_to_run_at_src\x18\x03 \x02(\t\x12\x19\n\x11\x63md_to_run_at_dst\x18\x04 \x02(\t\x12\x17\n\x0f\x66low_start_time\x18\x05 \x02(\x05\x12\x13\n\x0b\x64\x65scription\x18\x06 \x01(\t\"\\\n\x0ePcapReplayFlow\x12\x1d\n\x15involved_cyber_entity\x18\x01 \x03(\t\x12\x16\n\x0epcap_file_path\x18\x02 \x02(\t\x12\x13\n\x0b\x64\x65scription\x18\x03 \x01(\t\"\xb3\x02\n\x14ProjectConfiguration\x12\x14\n\x0cproject_name\x18\x01 \x02(\t\x12O\n\x14\x63yber_emulation_spec\x18\x02 \x02(\x0b\x32\x31.melody_configuration.CyberEmulationSpecification\x12\x42\n\x12\x63yber_physical_map\x18\x03 \x03(\x0b\x32&.melody_configuration.CyberPhysicalMap\x12\x35\n\x07\x62g_flow\x18\x04 \x03(\x0b\x32$.melody_configuration.BackGroundFlow\x12\x39\n\x0breplay_flow\x18\x05 \x03(\x0b\x32$.melody_configuration.PcapReplayFlow\"H\n\x0c\x44isturbances\x12\x38\n\x0b\x64isturbance\x18\x01 \x03(\x0b\x32#.melody_powersim_proto.WriteRequest')
   ,
   dependencies=[pss__pb2.DESCRIPTOR,])
 
@@ -181,27 +181,6 @@ _MAPPEDAPPLICATION = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='object_type', full_name='melody_configuration.MappedApplication.object_type', index=3,
-      number=4, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='object_id', full_name='melody_configuration.MappedApplication.object_id', index=4,
-      number=5, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='field_type', full_name='melody_configuration.MappedApplication.field_type', index=5,
-      number=6, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -214,8 +193,8 @@ _MAPPEDAPPLICATION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=473,
-  serialized_end=622,
+  serialized_start=472,
+  serialized_end=561,
 )
 
 
@@ -259,8 +238,8 @@ _CYBERPHYSICALMAP = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=625,
-  serialized_end=758,
+  serialized_start=564,
+  serialized_end=697,
 )
 
 
@@ -325,8 +304,8 @@ _BACKGROUNDFLOW = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=761,
-  serialized_end=929,
+  serialized_start=700,
+  serialized_end=868,
 )
 
 
@@ -370,8 +349,8 @@ _PCAPREPLAYFLOW = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=931,
-  serialized_end=1023,
+  serialized_start=870,
+  serialized_end=962,
 )
 
 
@@ -429,8 +408,8 @@ _PROJECTCONFIGURATION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1026,
-  serialized_end=1333,
+  serialized_start=965,
+  serialized_end=1272,
 )
 
 
@@ -460,8 +439,8 @@ _DISTURBANCES = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1335,
-  serialized_end=1407,
+  serialized_start=1274,
+  serialized_end=1346,
 )
 
 _CYBEREMULATIONSPECIFICATION.fields_by_name['additional_topology_param'].message_type = _TOPOLOGYPARAMETER

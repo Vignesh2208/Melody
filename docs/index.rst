@@ -1,11 +1,13 @@
-Melody: Co-Simulation of Cyber Physical Systems
+Melody: Emulation of Cyber Physical Systems
 ===============================================
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 6
    
    about
-   getting_started
+   installation
+   project_configuration
+   quick_start
    modules
    contact
    

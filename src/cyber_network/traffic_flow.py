@@ -1,4 +1,7 @@
+"""Holders for managing Emulated and Replay traffic flows
 
+.. moduleauthor:: Vignesh Babu <vig2208@gmail.com>
+"""
 import uuid
 import json
 

@@ -3,12 +3,11 @@
 .. moduleauthor:: Rakesh Kumar (gopchandani@gmail.com)
 """
 
-from mininet import topo
 from mininet.topo import Topo
 import random
 
 
-class LinearTopo(Topo):
+class CyberTopology(Topo):
 
     def __init__(self, params):
         """Initialization of topology

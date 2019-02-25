@@ -37,7 +37,7 @@ class SCADA(threading.Thread):
         C = loadObjectBinary("C.bin")
         Cp = np.matrix([C[i] for i in range(cfg.LOAD_NO) if cfg.LOAD[i] in cfg.PILOT_BUS])
         Cpi = Cp.I
-        alpha = 0.9
+        alpha = 0.4
 
         while not self.stop:
             _vp = np.array([self.host_control_layer.vp[bus] for bus in cfg.PILOT_BUS])

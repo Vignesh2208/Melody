@@ -52,10 +52,9 @@ Each emulated host may run three types of driver processes:
 
 - Emulation Driver: produces traffic by spawning processes that interact with each other
 - Replay Driver: initiates traffic replay actions at designated times
-- Powersim Driver: conveys power simulation state data across the cyber network to and from the proxy process; spawns the following three threads
+- Powersim Driver: conveys power simulation state data across the cyber network to and from the proxy process; spawns the following two threads
 
     - application layer thread: emulates smart grid applications (IPC layer)
-    - attack layer thread: intercepts, modifies, and injects application level packets
     - network layer thread: handles packet transmission and reception
 
 Melody supports emulation of traffic with actual processes spawned on mininet hosts by emulation drivers. These processes may be spawned by the emulation drivers at specified offsets of time from the start of the experiment, and may follow one of three different timing patterns. Melody generates packets either by emulating actual production software when possible or by embedding packet traces collected from arbitrary networks in the modelled network.

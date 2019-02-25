@@ -73,7 +73,6 @@ class NetPower(object):
         # Value is a tuple -- (IP Address, Role)
         self.project_name = self.network_configuration.project_name
         self.run_time = run_time
-        self.power_simulator_ip = self.network_configuration.power_simulator_ip
         self.host_to_application_ids = {}
         self.powersim_id_to_host = {}
         self.project_dir = project_dir
@@ -682,6 +681,10 @@ class NetPower(object):
         """
         print "Melody >> Triggering next replay ..."
         self.replay_orchestrator.send_command("TRIGGER")
+
+    def trigger_nxt_k_replays(self, k):
+        for i in xrange(0, k):
+            self.replay_orchestrator.send_command("TRIGGER")
 
     def wait_for_loaded_pcap_msg(self):
         """Waits for required pcaps to be loaded by all replay-drivers

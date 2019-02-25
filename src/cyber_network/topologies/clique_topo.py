@@ -7,7 +7,7 @@ import random
 from mininet.topo import Topo
 
 
-class CliqueTopo(Topo):
+class CyberTopology(Topo):
     
     def __init__(self, params):
         """Initialization of topology
@@ -85,5 +85,3 @@ class CliqueTopo(Topo):
             params_str += "_" + str(k) + "_" + str(v)
         return self.__class__.__name__ + params_str
 
-
-topos = {"cliquetopo": (lambda: CliqueTopo())}

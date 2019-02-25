@@ -7,7 +7,7 @@ import random
 from mininet.topo import Topo
 
 
-class CliqueEnterpriseTopo(Topo):
+class CyberTopology(Topo):
     """An example clique enterprise topology which creates a clique and attaches a linear two hop topology to
     the clique
     """
@@ -107,6 +107,3 @@ class CliqueEnterpriseTopo(Topo):
         for k, v in self.params.items():
             params_str += "_" + str(k) + "_" + str(v)
         return self.__class__.__name__ + params_str
-
-
-topos = {"cliqueenttopo": (lambda: CliqueEnterpriseTopo())}
