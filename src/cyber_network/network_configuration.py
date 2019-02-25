@@ -19,6 +19,7 @@ from src.cyber_network.synthesis.simple_mac_synthesis import SimpleMACSynthesis
 from src.cyber_network.synthesis.synthesis_lib import SynthesisLib
 from src.cyber_network.synthesis.flow_specification import FlowSpecification
 from src.core.kronos_helper_functions import *
+import subprocess
 
 class NetworkConfiguration(object):
 
@@ -273,7 +274,11 @@ class NetworkConfiguration(object):
 
         if self.mininet_obj:
             print "Mininet cleanup..."
-        os.system("sudo mn -c")
+            clean_up_cmd = ["sudo", "mn", "-c"]
+
+            with open("/tmp/mininet_cleanup.txt", "wb") as out, open("/tmp/mininet_cleanup.txt", "wb") as err:
+                p = subprocess.Popen(clean_up_cmd, stderr=err, stdout=out)
+                p.wait()
 
     def get_all_switch_hosts(self, switch_id):
 

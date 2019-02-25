@@ -758,10 +758,11 @@ class NetPower(object):
                 os.system("sudo kill -9 %s"%str(pid))
             time.sleep(5)
 
-        print "Cleaning up ..."
+        print "\n"
         self.enable_TCP_RST()
         self.stop_control_network()
         self.network_configuration.cleanup_mininet()
+        print "########################################################################"
 
     def initialize_project(self):
         """Initialize the project

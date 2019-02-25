@@ -4,6 +4,7 @@ from collections import defaultdict
 from copy import deepcopy
 import networkx as nx
 from src.cyber_network.synthesis.intent import Intent
+import sys
 
 
 class SimpleMACSynthesis:
@@ -81,9 +82,18 @@ class SimpleMACSynthesis:
 
     def synthesize_flow_specifications(self, flow_specs):
 
-        print "Synthesizing rules in the switches..."
 
+
+        total_flows = len(flow_specs)
+        processed_flows = 0
+        if total_flows == 0 :
+            progress = 100
+        else:
+            progress = (int(processed_flows)*100)/int(total_flows)
+        sys.stdout.write("\n\rSynthesizing rules in switches for all-to-all connectivity: %d%% completed"%progress)
+        sys.stdout.flush()
         for fs in flow_specs:
+
 
             # Compute intents for the path of the fs
             intent_list = self.compute_path_intents(fs)
@@ -91,3 +101,10 @@ class SimpleMACSynthesis:
             # Push intents one by one to the switches
             for intent in intent_list:
                 self.synthesis_lib.push_destination_host_mac_intent_flow(intent.switch_id, intent, 0, 100)
+
+            processed_flows += 1
+            progress = (int(processed_flows)*100) / int(total_flows)
+            sys.stdout.write("\rSynthesizing rules in switches for all-to-all connectivity: %d%% completed" % progress)
+            sys.stdout.flush()
+        sys.stdout.write("\n")
+
