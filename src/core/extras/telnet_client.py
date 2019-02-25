@@ -11,7 +11,7 @@ def main():
 
     dest_ip = args.dest_ip
     username = "moses"
-    password = "davidmnicol"
+    password = "project_melody"
 
     tn = telnetlib.Telnet(dest_ip)
     tn.expect(["login: "])
