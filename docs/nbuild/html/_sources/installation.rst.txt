@@ -101,6 +101,10 @@ It may be installed before/after Kronos installation. Please follow the steps gi
 
 .. _here: https://github.com/MATPOWER/matpower/blob/master/README.md
 
+* Install protoc (optional) by following these `instructions`_. Protoc can be used for development if the defined protos are to be changed and compiled. Use version >= 3.7.
+
+.. _instructions: http://google.github.io/proto-lens/installing-protoc.html
+
 * After installation of Melody, please reboot the VM/machine
 
 
