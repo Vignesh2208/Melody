@@ -4,4 +4,4 @@ def __bootstrap__():
 	__file__ = pkg_resources.resource_filename(__name__,'shared_buf.so')
 	__loader__ = None; del __bootstrap__, __loader__
 	imp.load_dynamic(__name__,__file__)
-__bootstrap__()
+#__bootstrap__()
