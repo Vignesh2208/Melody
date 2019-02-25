@@ -39,20 +39,534 @@
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="core-basichostipclayer-module">
-<h2>core.basicHostIPCLayer module<a class="headerlink" href="#core-basichostipclayer-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-core.basicHostIPCLayer">
+<span id="core-basichostipclayer-module"></span><h2>core.basicHostIPCLayer module<a class="headerlink" href="#module-core.basicHostIPCLayer" title="Permalink to this headline">¶</a></h2>
+<p>Default co-simulation application layer.</p>
+<dl class="class">
+<dt id="core.basicHostIPCLayer.basicHostIPCLayer">
+<em class="property">class </em><code class="descclassname">core.basicHostIPCLayer.</code><code class="descname">basicHostIPCLayer</code><span class="sig-paren">(</span><em>host_id</em>, <em>log_file</em>, <em>application_ids_mapping</em>, <em>managed_application_id</em><span class="sig-paren">)</span><a class="headerlink" href="#core.basicHostIPCLayer.basicHostIPCLayer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">threading.Thread</span></code></p>
+<p>Default application layer of co-simulation processes spawned inside mininet hosts</p>
+<p>A co-simulation process may implement a specific application layer by inheriting from this class.
+Co-simulation processes may interact with the power simulator through by making GRPC
+calls to the proxy.</p>
+<dl class="method">
+<dt id="core.basicHostIPCLayer.basicHostIPCLayer.cancel_thread">
+<code class="descname">cancel_thread</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.basicHostIPCLayer.basicHostIPCLayer.cancel_thread" title="Permalink to this definition">¶</a></dt>
+<dd><p>Send a command to terminate this thread</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Do not override</p>
 </div>
-<div class="section" id="core-defines-module">
-<h2>core.defines module<a class="headerlink" href="#core-defines-module" title="Permalink to this headline">¶</a></h2>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.basicHostIPCLayer.basicHostIPCLayer.get_curr_cmd">
+<code class="descname">get_curr_cmd</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.basicHostIPCLayer.basicHostIPCLayer.get_curr_cmd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the current pending command sent by the co-simulation host process</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">str or None – the command sent from the process to this thread</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Do not override</p>
 </div>
-<div class="section" id="core-disturbance-gen-module">
-<h2>core.disturbance_gen module<a class="headerlink" href="#core-disturbance-gen-module" title="Permalink to this headline">¶</a></h2>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.basicHostIPCLayer.basicHostIPCLayer.on_rx_pkt_from_network">
+<code class="descname">on_rx_pkt_from_network</code><span class="sig-paren">(</span><em>pkt</em><span class="sig-paren">)</span><a class="headerlink" href="#core.basicHostIPCLayer.basicHostIPCLayer.on_rx_pkt_from_network" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function gets called on reception of message from network.</p>
+<p>It may be overriden in the specific application layer implementation for a variety of purposes</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>pkt</strong> (<em>str</em>) – A packet string of the CyberMessage proto format specified in src/proto/css.proto</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.basicHostIPCLayer.basicHostIPCLayer.on_shutdown">
+<code class="descname">on_shutdown</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.basicHostIPCLayer.basicHostIPCLayer.on_shutdown" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function gets called upon shutdown of the thread.</p>
+<p>It may be overridden in specific application layer implementations for cleanup</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.basicHostIPCLayer.basicHostIPCLayer.on_start_up">
+<code class="descname">on_start_up</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.basicHostIPCLayer.basicHostIPCLayer.on_start_up" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function gets called on thread start up after all initilization is complete.</p>
+<p>It may be overridden in specific application layer implementations for starting
+user defined services.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.basicHostIPCLayer.basicHostIPCLayer.run">
+<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.basicHostIPCLayer.basicHostIPCLayer.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Main run function which starts the thread functionality</p>
+<p>Monitors the mininet network on ip,port specified for the assigned application_id. Upon
+receiving a packet intended for this application, it calls on_rx_packet_from_network</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Do not override</p>
 </div>
-<div class="section" id="core-emulation-driver-module">
-<h2>core.emulation_driver module<a class="headerlink" href="#core-emulation-driver-module" title="Permalink to this headline">¶</a></h2>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.basicHostIPCLayer.basicHostIPCLayer.tx_pkt_to_powersim_entity">
+<code class="descname">tx_pkt_to_powersim_entity</code><span class="sig-paren">(</span><em>pkt</em><span class="sig-paren">)</span><a class="headerlink" href="#core.basicHostIPCLayer.basicHostIPCLayer.tx_pkt_to_powersim_entity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transmit a co-simulation packet over the mininet cyber network</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>pkt</strong> (<em>str</em>) – A packet string which is converted to CyberMessage proto and sent over the network</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Do not override</p>
 </div>
-<div class="section" id="core-host-module">
-<h2>core.host module<a class="headerlink" href="#core-host-module" title="Permalink to this headline">¶</a></h2>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-core.defines">
+<span id="core-defines-module"></span><h2>core.defines module<a class="headerlink" href="#module-core.defines" title="Permalink to this headline">¶</a></h2>
+<p>Helper functions.</p>
+<dl class="function">
+<dt id="core.defines.decode_raw_ip_payload_src_dst">
+<code class="descclassname">core.defines.</code><code class="descname">decode_raw_ip_payload_src_dst</code><span class="sig-paren">(</span><em>buf</em><span class="sig-paren">)</span><a class="headerlink" href="#core.defines.decode_raw_ip_payload_src_dst" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get src,dst ip address from raw ip payload string</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>buf</strong> – A string buffer containing raw ip payload</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A typle with source and destination IP strings</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="core.defines.get_ip_ethernet">
+<code class="descclassname">core.defines.</code><code class="descname">get_ip_ethernet</code><span class="sig-paren">(</span><em>buf</em><span class="sig-paren">)</span><a class="headerlink" href="#core.defines.get_ip_ethernet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unpack the data within the Ethernet frame (the IP packet)</p>
+<p>Pulling out src, dst, length, fragment info, TTL, and Protocol</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>buf</strong> (<em>str</em>) – A string buffer containing the entire packet</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">ip of type (dpkt.IP)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="core.defines.get_ip_loopback">
+<code class="descclassname">core.defines.</code><code class="descname">get_ip_loopback</code><span class="sig-paren">(</span><em>buf</em><span class="sig-paren">)</span><a class="headerlink" href="#core.defines.get_ip_loopback" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unpack the data within the Ethernet frame (the IP packet)</p>
+<p>Pulling out src, dst, length, fragment info, TTL, and Protocol</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>buf</strong> (<em>str</em>) – A string buffer containing the entire packet</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">ip of type (dpkt.IP)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="core.defines.get_ip_sll">
+<code class="descclassname">core.defines.</code><code class="descname">get_ip_sll</code><span class="sig-paren">(</span><em>buf</em><span class="sig-paren">)</span><a class="headerlink" href="#core.defines.get_ip_sll" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unpack the data within the SLL frame (the IP packet)</p>
+<p>Pulling out src, dst, length, fragment info, TTL, and Protocol</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>buf</strong> (<em>str</em>) – A string buffer containing the entire packet</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">ip of type (dpkt.IP)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="core.defines.get_pkt_src_dst_IP">
+<code class="descclassname">core.defines.</code><code class="descname">get_pkt_src_dst_IP</code><span class="sig-paren">(</span><em>buf</em>, <em>dl_type=1</em><span class="sig-paren">)</span><a class="headerlink" href="#core.defines.get_pkt_src_dst_IP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get src and dst IP from raw packet string</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>buf</strong> (<em>str</em>) – A string buffer containing the entire packet</li>
+<li><strong>dl_type</strong> (<em>int</em>) – Link Layer type defined in dpkt.pcap. (Default ETH_TYPE_FRAME)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A tuple with source and destination IP strings</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="core.defines.get_raw_ip_pkt">
+<code class="descclassname">core.defines.</code><code class="descname">get_raw_ip_pkt</code><span class="sig-paren">(</span><em>buf</em>, <em>dl_type=1</em><span class="sig-paren">)</span><a class="headerlink" href="#core.defines.get_raw_ip_pkt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get IP payload from raw packet string</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>buf</strong> (<em>str</em>) – A string buffer containing the entire packet</li>
+<li><strong>dl_type</strong> (<em>int</em>) – Link Layer type defined in dpkt.pcap. (Default ETH_TYPE_FRAME)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A string buffer with IP payload</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="core.defines.getid">
+<code class="descclassname">core.defines.</code><code class="descname">getid</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.defines.getid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a random unique string ID</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="core.defines.inet_to_str">
+<code class="descclassname">core.defines.</code><code class="descname">inet_to_str</code><span class="sig-paren">(</span><em>inet</em><span class="sig-paren">)</span><a class="headerlink" href="#core.defines.inet_to_str" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert inet object to a string</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>inet</strong> (<em>inet struct</em>) – inet network address</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">str of printable/readable IP address</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="core.defines.rpc_process">
+<code class="descclassname">core.defines.</code><code class="descname">rpc_process</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.defines.rpc_process" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sends a batch processing GRPC request request.</p>
+<p>Called by Melody to initiate processing of all read/write requests received in the last batch.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="core.defines.rpc_read">
+<code class="descclassname">core.defines.</code><code class="descname">rpc_read</code><span class="sig-paren">(</span><em>readlist</em><span class="sig-paren">)</span><a class="headerlink" href="#core.defines.rpc_read" title="Permalink to this definition">¶</a></dt>
+<dd><p>Makes a GRPC read request call to the proxy. It may be used to read some values from the power simulation.</p>
+<p>It takes in as input a list of read requests and composes and sends a single GRPC read request to the proxy.
+It waits until the proxy sends a response and returns the values contained in the response or None if there
+was an error.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>readlist</strong> (<em>list of tuples</em>) – A list of tuples (objtype (str), objid (str), fieldtype (str)). Refer src/proto/pss.proto</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">list of str or None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="core.defines.rpc_write">
+<code class="descclassname">core.defines.</code><code class="descname">rpc_write</code><span class="sig-paren">(</span><em>writelist</em><span class="sig-paren">)</span><a class="headerlink" href="#core.defines.rpc_write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Makes a GRPC write request call to the proxy. It may be used to write some values to the power simulation</p>
+<p>It takes in as input a list of write requests and composes and sends a single GRPC write request to the proxy.
+It waits until the proxy sends a response and returns the status response or None if there was an error.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>writelist</strong> (<em>list of tuples</em>) – A list of tuples (objtype (str), objid (str), fieldtype (str), value(str)).
+Refer src/proto/pss.proto</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">list of int (Refer src/proto/pss.proto: WriteStatus)  or None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="core.defines.str_to_inet">
+<code class="descclassname">core.defines.</code><code class="descname">str_to_inet</code><span class="sig-paren">(</span><em>str</em><span class="sig-paren">)</span><a class="headerlink" href="#core.defines.str_to_inet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert string object to an inet</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>str</strong> (<em>str</em>) – printable/readable IP address</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">inet (inet struct) - an inet network address</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-core.disturbance_gen">
+<span id="core-disturbance-gen-module"></span><h2>core.disturbance_gen module<a class="headerlink" href="#module-core.disturbance_gen" title="Permalink to this headline">¶</a></h2>
+<p>Disturbance generator</p>
+<dl class="function">
+<dt id="core.disturbance_gen.init_shared_buffers">
+<code class="descclassname">core.disturbance_gen.</code><code class="descname">init_shared_buffers</code><span class="sig-paren">(</span><em>shared_buf_array</em><span class="sig-paren">)</span><a class="headerlink" href="#core.disturbance_gen.init_shared_buffers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize shared buffers used for communication with the main Melody process</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>shared_buf_array</strong> – A shared buffer array object (defined in src/core/shared_buffer.py)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="core.disturbance_gen.main">
+<code class="descclassname">core.disturbance_gen.</code><code class="descname">main</code><span class="sig-paren">(</span><em>path_to_disturbance_file</em><span class="sig-paren">)</span><a class="headerlink" href="#core.disturbance_gen.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>Starts the disturbance generator and sends disturbances to the power simulation at specified relative timestamps</p>
+<p>Disturbances and their relative timestamps are specified in a file according to the Disturbance message format
+defined in src/proto/configuration.proto</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path_to_disturbance_file</strong> (<em>str</em>) – Absolute path to file containing disturbances specified in Disturbance proto
+format. (Refer src/proto/configuration.proto : Disturbances)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-core.emulation_driver">
+<span id="core-emulation-driver-module"></span><h2>core.emulation_driver module<a class="headerlink" href="#module-core.emulation_driver" title="Permalink to this headline">¶</a></h2>
+<p>Emulation Driver</p>
+<dl class="class">
+<dt id="core.emulation_driver.EmulationDriver">
+<em class="property">class </em><code class="descclassname">core.emulation_driver.</code><code class="descname">EmulationDriver</code><span class="sig-paren">(</span><em>input_params</em><span class="sig-paren">)</span><a class="headerlink" href="#core.emulation_driver.EmulationDriver" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>An emulation driver is responsible for emulating background flow traffic in the mininet network.</p>
+<p>It is assigned a command to execute and spawned inside a mininet host. It forks a child process and executes
+the assigned command.</p>
+<dl class="method">
+<dt id="core.emulation_driver.EmulationDriver.init_shared_buffers">
+<code class="descname">init_shared_buffers</code><span class="sig-paren">(</span><em>driver_id</em>, <em>run_time</em><span class="sig-paren">)</span><a class="headerlink" href="#core.emulation_driver.EmulationDriver.init_shared_buffers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize shared buffers used for communication with the main Melody process</p>
+<p>If the shared buffers cannot be opened successfully, the driver just sleeps for the specified amount of
+run time.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>driver_id</strong> (<em>str</em>) – A unique id string assigned to this driver. The shared buffer is opened with this ID.</li>
+<li><strong>run_time</strong> (<em>int</em>) – Running time of driver in seconds</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.emulation_driver.EmulationDriver.trigger">
+<code class="descname">trigger</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.emulation_driver.EmulationDriver.trigger" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start executing the assigned command.</p>
+<p>Forks a new process and starts the command.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="core.emulation_driver.main">
+<code class="descclassname">core.emulation_driver.</code><code class="descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.emulation_driver.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>Main entry point of the emulation_driver</p>
+<p>Creates an emulation driver, initializes it and triggers executing the command at the right time. It also
+handles shutting down the driver.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-core.host">
+<span id="core-host-module"></span><h2>core.host module<a class="headerlink" href="#module-core.host" title="Permalink to this headline">¶</a></h2>
+<p>Co-simulation host.</p>
+<dl class="function">
+<dt id="core.host.extract_mappings">
+<code class="descclassname">core.host.</code><code class="descname">extract_mappings</code><span class="sig-paren">(</span><em>net_cfg_file</em><span class="sig-paren">)</span><a class="headerlink" href="#core.host.extract_mappings" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="core.host.init_shared_buffers">
+<code class="descclassname">core.host.</code><code class="descname">init_shared_buffers</code><span class="sig-paren">(</span><em>run_time</em>, <em>shared_buf_array</em>, <em>log</em>, <em>managed_application_id</em><span class="sig-paren">)</span><a class="headerlink" href="#core.host.init_shared_buffers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize shared buffers used for communication with the main Melody process</p>
+<p>If the shared buffers cannot be opened successfully, the co-simulation host just sleeps for the specified amount of
+run time.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>run_time</strong> (<em>int</em>) – Running time of co-simulation host in seconds</li>
+<li><strong>shared_buf_array</strong> – A shared buffer array object (defined in src/core/shared_buffer.py)</li>
+<li><strong>log</strong> – A logger object (defined in src/core/logger.py)</li>
+<li><strong>managed_application_id</strong> (<em>str</em>) – The application_id assigned to this co-simulation host</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="core.host.main">
+<code class="descclassname">core.host.</code><code class="descname">main</code><span class="sig-paren">(</span><em>host_id</em>, <em>net_cfg_file</em>, <em>log_file</em>, <em>run_time</em>, <em>project_name</em>, <em>app_layer_file</em>, <em>managed_application_id</em><span class="sig-paren">)</span><a class="headerlink" href="#core.host.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>Main entry point of the co-simulation host</p>
+<p>Starts the co-simulation host and its application layer thread.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>host_id</strong> (<em>int</em>) – Mininet host number on which this process is run. (e.g 1 implies h1)</li>
+<li><strong>net_cfg_file</strong> (<em>str</em>) – Absolute path of file containing a mapping of application ids to ip,port values</li>
+<li><strong>log_file</strong> (<em>str</em>) – Absolute path of file where stdout will be logged.</li>
+<li><strong>run_time</strong> (<em>int</em>) – Running time of co-simulated host in seconds</li>
+<li><strong>project_name</strong> (<em>str</em>) – Name of the project</li>
+<li><strong>app_layer_file</strong> (<em>str</em>) – Name of the file containing application layer code for this host. If not specified, a
+default basicHostIPC layer thread will be started for the co-simulation host. The
+app_layer_file must be located inside src/projects/project_name</li>
+<li><strong>managed_application_id</strong> (<em>str</em>) – Name of the application assigned to this co-simulaiton host</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="core.host.parseOpts">
+<code class="descclassname">core.host.</code><code class="descname">parseOpts</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.host.parseOpts" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="core.host.usage">
+<code class="descclassname">core.host.</code><code class="descname">usage</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.host.usage" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </div>
 <div class="section" id="core-kronos-helper-functions-module">
 <h2>core.kronos_helper_functions module<a class="headerlink" href="#core-kronos-helper-functions-module" title="Permalink to this headline">¶</a></h2>
@@ -229,17 +743,441 @@
 </dd></dl>
 
 </div>
-<div class="section" id="core-pss-server-module">
-<h2>core.pss_server module<a class="headerlink" href="#core-pss-server-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-core.pss_server">
+<span id="core-pss-server-module"></span><h2>core.pss_server module<a class="headerlink" href="#module-core.pss_server" title="Permalink to this headline">¶</a></h2>
+<p>The proxy process</p>
+<dl class="class">
+<dt id="core.pss_server.Job">
+<em class="property">class </em><code class="descclassname">core.pss_server.</code><code class="descname">Job</code><span class="sig-paren">(</span><em>request</em>, <em>reply</em><span class="sig-paren">)</span><a class="headerlink" href="#core.pss_server.Job" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="core.pss_server.Job.to_string">
+<code class="descname">to_string</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.pss_server.Job.to_string" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="core.pss_server.PSSServicer">
+<em class="property">class </em><code class="descclassname">core.pss_server.</code><code class="descname">PSSServicer</code><span class="sig-paren">(</span><em>case_directory</em>, <em>case_name</em><span class="sig-paren">)</span><a class="headerlink" href="#core.pss_server.PSSServicer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">src.proto.pss_pb2_grpc.pssServicer</span></code></p>
+<dl class="method">
+<dt id="core.pss_server.PSSServicer.process">
+<code class="descname">process</code><span class="sig-paren">(</span><em>request</em>, <em>context</em><span class="sig-paren">)</span><a class="headerlink" href="#core.pss_server.PSSServicer.process" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.pss_server.PSSServicer.read">
+<code class="descname">read</code><span class="sig-paren">(</span><em>readRequest</em>, <em>context</em><span class="sig-paren">)</span><a class="headerlink" href="#core.pss_server.PSSServicer.read" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.pss_server.PSSServicer.write">
+<code class="descname">write</code><span class="sig-paren">(</span><em>writeRequest</em>, <em>context</em><span class="sig-paren">)</span><a class="headerlink" href="#core.pss_server.PSSServicer.write" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="core.pss_server.exit_gracefully">
+<code class="descclassname">core.pss_server.</code><code class="descname">exit_gracefully</code><span class="sig-paren">(</span><em>signum</em>, <em>frame</em><span class="sig-paren">)</span><a class="headerlink" href="#core.pss_server.exit_gracefully" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </div>
-<div class="section" id="core-replay-driver-module">
-<h2>core.replay_driver module<a class="headerlink" href="#core-replay-driver-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-core.replay_driver">
+<span id="core-replay-driver-module"></span><h2>core.replay_driver module<a class="headerlink" href="#module-core.replay_driver" title="Permalink to this headline">¶</a></h2>
+<p>Replay driver</p>
+<dl class="class">
+<dt id="core.replay_driver.ReplayDriver">
+<em class="property">class </em><code class="descclassname">core.replay_driver.</code><code class="descname">ReplayDriver</code><span class="sig-paren">(</span><em>input_params</em><span class="sig-paren">)</span><a class="headerlink" href="#core.replay_driver.ReplayDriver" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Controls replaying pcaps</p>
+<dl class="method">
+<dt id="core.replay_driver.ReplayDriver.init_shared_buffers">
+<code class="descname">init_shared_buffers</code><span class="sig-paren">(</span><em>run_time</em><span class="sig-paren">)</span><a class="headerlink" href="#core.replay_driver.ReplayDriver.init_shared_buffers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initializes shared buffers to allow communication with the main melody process</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>run_time</strong> (<em>int</em>) – run time in seconds. If the buffer cannot be opened, the driver would simply run for
+the specified amount and exit gracefully.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.replay_driver.ReplayDriver.load_pcap">
+<code class="descname">load_pcap</code><span class="sig-paren">(</span><em>pcap_file_path</em><span class="sig-paren">)</span><a class="headerlink" href="#core.replay_driver.ReplayDriver.load_pcap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads a pcap specified by the pcap_file_path</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>pcap_file_path</strong> (<em>str</em>) – Absolute path to the pcap file</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.replay_driver.ReplayDriver.load_pcaps">
+<code class="descname">load_pcaps</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.replay_driver.ReplayDriver.load_pcaps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load all pcaps which involve this mininet host</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.replay_driver.ReplayDriver.recv_command_message">
+<code class="descname">recv_command_message</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.replay_driver.ReplayDriver.recv_command_message" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets command from the shared buffer</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">string or None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.replay_driver.ReplayDriver.send_command_message">
+<code class="descname">send_command_message</code><span class="sig-paren">(</span><em>msg</em><span class="sig-paren">)</span><a class="headerlink" href="#core.replay_driver.ReplayDriver.send_command_message" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sends a message over the shared buffer</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>msg</strong> (<em>str</em>) – Message to send</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.replay_driver.ReplayDriver.trigger_replay">
+<code class="descname">trigger_replay</code><span class="sig-paren">(</span><em>pcap_file_path</em><span class="sig-paren">)</span><a class="headerlink" href="#core.replay_driver.ReplayDriver.trigger_replay" title="Permalink to this definition">¶</a></dt>
+<dd><p>Triggers replay of the pcap_file specified by pcap_file_path</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The pcap file must have already been loaded before calling this.</p>
 </div>
-<div class="section" id="core-replay-orchestrator-module">
-<h2>core.replay_orchestrator module<a class="headerlink" href="#core-replay-orchestrator-module" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>pcap_file_path</strong> (<em>str</em>) – Absolute path to pcap file</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.replay_driver.ReplayDriver.wait_for_commands">
+<code class="descname">wait_for_commands</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.replay_driver.ReplayDriver.wait_for_commands" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wait for a trigger replay command from the main melody process</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="core.replay_driver.main">
+<code class="descclassname">core.replay_driver.</code><code class="descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.replay_driver.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a replay driver and calls wait_for_commands</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </div>
-<div class="section" id="core-shared-buffer-module">
-<h2>core.shared_buffer module<a class="headerlink" href="#core-shared-buffer-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-core.replay_orchestrator">
+<span id="core-replay-orchestrator-module"></span><h2>core.replay_orchestrator module<a class="headerlink" href="#module-core.replay_orchestrator" title="Permalink to this headline">¶</a></h2>
+<p>Replay Orchestrator</p>
+<dl class="class">
+<dt id="core.replay_orchestrator.ReplayOrchestrator">
+<em class="property">class </em><code class="descclassname">core.replay_orchestrator.</code><code class="descname">ReplayOrchestrator</code><span class="sig-paren">(</span><em>net_power_obj</em>, <em>replay_plan_file</em><span class="sig-paren">)</span><a class="headerlink" href="#core.replay_orchestrator.ReplayOrchestrator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">threading.Thread</span></code></p>
+<p>This thread orchestrates pcap replay by communicating with all replay drivers.</p>
+<dl class="method">
+<dt id="core.replay_orchestrator.ReplayOrchestrator.are_two_pcap_stages_conflicting">
+<code class="descname">are_two_pcap_stages_conflicting</code><span class="sig-paren">(</span><em>stage_1_nodes</em>, <em>stage_2_nodes</em><span class="sig-paren">)</span><a class="headerlink" href="#core.replay_orchestrator.ReplayOrchestrator.are_two_pcap_stages_conflicting" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks if two sets have nodes have any intersections</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>stage_1_nodes</strong> – list of host names</li>
+<li><strong>stage_2_nodes</strong> – list of host names</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">True if the intersection is not NULL, else False</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.replay_orchestrator.ReplayOrchestrator.cancel_thread">
+<code class="descname">cancel_thread</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.replay_orchestrator.ReplayOrchestrator.cancel_thread" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.replay_orchestrator.ReplayOrchestrator.get_curr_cmd">
+<code class="descname">get_curr_cmd</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.replay_orchestrator.ReplayOrchestrator.get_curr_cmd" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.replay_orchestrator.ReplayOrchestrator.is_pcap_stage_relevant">
+<code class="descname">is_pcap_stage_relevant</code><span class="sig-paren">(</span><em>involved_hosts</em><span class="sig-paren">)</span><a class="headerlink" href="#core.replay_orchestrator.ReplayOrchestrator.is_pcap_stage_relevant" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks if any node involved in the pcap doesn’t even exist in the emulation</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>involved_hosts</strong> – list of mininet host names</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True if all nodes involved are valid, else False</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.replay_orchestrator.ReplayOrchestrator.run">
+<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.replay_orchestrator.ReplayOrchestrator.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Listens for queued commands from the main melody process and sends triggers to the appropriate replay drivers</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.replay_orchestrator.ReplayOrchestrator.send_command">
+<code class="descname">send_command</code><span class="sig-paren">(</span><em>cmd</em><span class="sig-paren">)</span><a class="headerlink" href="#core.replay_orchestrator.ReplayOrchestrator.send_command" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="core.replay_orchestrator.ReplayOrchestrator.signal_pcap_replay_trigger">
+<code class="descname">signal_pcap_replay_trigger</code><span class="sig-paren">(</span><em>node_id</em>, <em>pcap_file_path</em><span class="sig-paren">)</span><a class="headerlink" href="#core.replay_orchestrator.ReplayOrchestrator.signal_pcap_replay_trigger" title="Permalink to this definition">¶</a></dt>
+<dd><p>Signals the pcap driver on “node_id” to run the pcap</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>node_id</strong> (<em>str</em>) – mininet host name</li>
+<li><strong>pcap_file_path</strong> (<em>str</em>) – Absolute path to the pcap to be replayed</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.replay_orchestrator.ReplayOrchestrator.trigger_replay">
+<code class="descname">trigger_replay</code><span class="sig-paren">(</span><em>node_ids</em>, <em>pcap_file</em><span class="sig-paren">)</span><a class="headerlink" href="#core.replay_orchestrator.ReplayOrchestrator.trigger_replay" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sends a trigger command to all nodes specified in node_ids</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>node_ids</strong> – list of mininet host names</li>
+<li><strong>pcap_file</strong> – pcap file to replay among those hosts</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-core.shared_buffer">
+<span id="core-shared-buffer-module"></span><h2>core.shared_buffer module<a class="headerlink" href="#module-core.shared_buffer" title="Permalink to this headline">¶</a></h2>
+<p>Shared Buffer</p>
+<dl class="class">
+<dt id="core.shared_buffer.shared_buffer">
+<em class="property">class </em><code class="descclassname">core.shared_buffer.</code><code class="descname">shared_buffer</code><span class="sig-paren">(</span><em>bufName</em>, <em>isProxy</em><span class="sig-paren">)</span><a class="headerlink" href="#core.shared_buffer.shared_buffer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Uses the shared_buffer library defined in src/core/libs</p>
+<dl class="method">
+<dt id="core.shared_buffer.shared_buffer.close">
+<code class="descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.shared_buffer.shared_buffer.close" title="Permalink to this definition">¶</a></dt>
+<dd><p>Closes the shared buffer</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.shared_buffer.shared_buffer.open">
+<code class="descname">open</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.shared_buffer.shared_buffer.open" title="Permalink to this definition">¶</a></dt>
+<dd><p>Opens the shared buffer</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.shared_buffer.shared_buffer.read">
+<code class="descname">read</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.shared_buffer.shared_buffer.read" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads from the shared buffer
+:return: str or None</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.shared_buffer.shared_buffer.write">
+<code class="descname">write</code><span class="sig-paren">(</span><em>msg</em>, <em>dstID=0</em><span class="sig-paren">)</span><a class="headerlink" href="#core.shared_buffer.shared_buffer.write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write message to the shared buffer</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>msg</strong> (<em>str</em>) – message to write</li>
+<li><strong>dstID</strong> – Not used</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="core.shared_buffer.shared_buffer_array">
+<em class="property">class </em><code class="descclassname">core.shared_buffer.</code><code class="descname">shared_buffer_array</code><a class="headerlink" href="#core.shared_buffer.shared_buffer_array" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Can be used to create an array of shared buffers</p>
+<dl class="method">
+<dt id="core.shared_buffer.shared_buffer_array.close">
+<code class="descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.shared_buffer.shared_buffer_array.close" title="Permalink to this definition">¶</a></dt>
+<dd><p>Closes all opened shared buffers</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.shared_buffer.shared_buffer_array.open">
+<code class="descname">open</code><span class="sig-paren">(</span><em>bufName</em>, <em>isProxy</em><span class="sig-paren">)</span><a class="headerlink" href="#core.shared_buffer.shared_buffer_array.open" title="Permalink to this definition">¶</a></dt>
+<dd><p>Opens a new shared buffer and adds it to the array</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>bufName</strong> (<em>str</em>) – buffer name</li>
+<li><strong>isProxy</strong> (<em>int</em>) – Specifies if the buffer is opened by the master or slave. 1-Master, 0-Slave</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.shared_buffer.shared_buffer_array.read">
+<code class="descname">read</code><span class="sig-paren">(</span><em>bufName</em><span class="sig-paren">)</span><a class="headerlink" href="#core.shared_buffer.shared_buffer_array.read" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads a buffer specified by buffer name. It is Non-Blocking.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>bufName</strong> (<em>str</em>) – buffer name to read</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">str or None if there is nothing to read in the buffer.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.shared_buffer.shared_buffer_array.read_until">
+<code class="descname">read_until</code><span class="sig-paren">(</span><em>bufName</em>, <em>cool_off_time=0.01</em><span class="sig-paren">)</span><a class="headerlink" href="#core.shared_buffer.shared_buffer_array.read_until" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads until something appears in the buffer.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>bufName</strong> (<em>str</em>) – buffer name to read</li>
+<li><strong>cool_off_time</strong> (<em>float</em>) – time to sleep in secs between two successive reads</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">str</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="core.shared_buffer.shared_buffer_array.write">
+<code class="descname">write</code><span class="sig-paren">(</span><em>bufName</em>, <em>msg</em>, <em>dstID=0</em><span class="sig-paren">)</span><a class="headerlink" href="#core.shared_buffer.shared_buffer_array.write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write a message to the buffer.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>bufName</strong> (<em>str</em>) – buffer name to write</li>
+<li><strong>msg</strong> (<em>str</em>) – Message to write</li>
+<li><strong>dstID</strong> – Not used</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">number of bytes written (int)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 <div class="section" id="module-core">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-core" title="Permalink to this headline">¶</a></h2>
@@ -271,20 +1209,20 @@
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">Python Modules Reference</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">core package</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#core-basichostipclayer-module">core.basicHostIPCLayer module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#core-defines-module">core.defines module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#core-disturbance-gen-module">core.disturbance_gen module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#core-emulation-driver-module">core.emulation_driver module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#core-host-module">core.host module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-core.basicHostIPCLayer">core.basicHostIPCLayer module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-core.defines">core.defines module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-core.disturbance_gen">core.disturbance_gen module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-core.emulation_driver">core.emulation_driver module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-core.host">core.host module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#core-kronos-helper-functions-module">core.kronos_helper_functions module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-core.logger">core.logger module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#core-net-power-module">core.net_power module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#core-parse-project-configuration-module">core.parse_project_configuration module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-core.pss_driver">core.pss_driver module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#core-pss-server-module">core.pss_server module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#core-replay-driver-module">core.replay_driver module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#core-replay-orchestrator-module">core.replay_orchestrator module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#core-shared-buffer-module">core.shared_buffer module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-core.pss_server">core.pss_server module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-core.replay_driver">core.replay_driver module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-core.replay_orchestrator">core.replay_orchestrator module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-core.shared_buffer">core.shared_buffer module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-core">Module contents</a></li>
 </ul>
 </li>
