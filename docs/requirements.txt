@@ -5,7 +5,5 @@ httplib2
 networkx
 netaddr
 numpy
-pypcapfile
-pcapy
 six==1.9.0
 
