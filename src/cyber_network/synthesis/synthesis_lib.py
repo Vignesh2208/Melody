@@ -152,7 +152,8 @@ class SynthesisLib(object):
         #resp = {"status": "200"}
         #pprint.pprint(pushed_content)
         if resp["status"].startswith("2"):
-            print "Pushed Successfully:", pushed_content.keys()[0]
+            pass
+            #print "Pushed Successfully:", pushed_content.keys()[0]
             #print resp["status"]
         else:
             print "Problem Pushing:", pushed_content.keys()[0]

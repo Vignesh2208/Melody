@@ -22,7 +22,10 @@ class ControllerMan(object):
         os.system("sudo killall ryu-manager")
 
         ryu_cmd = ["ryu-manager", "--observe-links", "ryu.app.ofctl_rest", "ryu.app.rest_topology"]
-        self.ryu_proc = subprocess.Popen(ryu_cmd, stdout=subprocess.PIPE)
+
+        with open("/tmp/ryu_stdout.txt", "wb") as out, open("/tmp/ryu_stderr.txt", "wb") as err:
+            self.ryu_proc = subprocess.Popen(ryu_cmd, stderr=err, stdout=out)
+
         return 6633
 
     def start_controller(self):
