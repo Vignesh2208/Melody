@@ -5,7 +5,8 @@
 
 import os
 import time
-from src.core.libs.gettimepid import gettimepid
+#from src.core.libs.gettimepid import gettimepid
+import gettimepid
 
 kronos_file_name = "/proc/status"
 
@@ -41,7 +42,7 @@ def get_current_virtual_time_pid(specified_pid):
 	:return: Virtual time secs (float) or Current real time secs (float) iff process is not controlled by Kronos
 	"""
 	
-	return float(gettimepid(specified_pid))
+	return float(gettimepid.gettimepid(specified_pid))
 
 
 def get_current_virtual_time():

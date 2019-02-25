@@ -8,7 +8,7 @@ import ctypes
 import sys
 import os
 import time
-from libs import shared_buf as sb
+import shared_buf as sb
 from defines import *
 
 
