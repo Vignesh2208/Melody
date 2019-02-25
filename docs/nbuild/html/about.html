@@ -13,6 +13,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
     <link rel="author" title="About these documents" href="#" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -49,7 +50,7 @@
 <a class="reference internal image-reference" href="_images/case_study_cyber_topology.png"><img alt="Smart Grid Communication Network Diagram" src="_images/case_study_cyber_topology.png" style="width: 80%;" /></a>
 <p class="caption"><span class="caption-text">A hypothetical smart grid control network topology in Mininet.</span></p>
 </div>
-<p>Melody uses Mininet to emulate the communication network and Matpower to simulate the electrical behavior of the power grid. A proxy process provides an interface between the power simulator and the network emulator. Control commands originate from an emulated control node (e.g. a SCADA master) and are routed through the emulated network to the destination host (e.g an RTU controlling a circuit breaker). These commands are later transferred from this destination host to the power simulator via the proxy. The power simulator calculates the updated system state and sends out responses (e.g. voltage magnitude and angle measurements) which are re-routed back to the control node.</p>
+<p>Melody uses Mininet to emulate the communication network and either <a class="reference external" href="http://www.pserc.cornell.edu/matpower/">MATPOWER</a> or <a class="reference external" href="https://www.powerworld.com/">PowerWorld Simulator</a> to simulate the physical behaviors of the power grid. A proxy process, which is implemented as a <a class="reference external" href="https://grpc.io/">GRPC</a> server, provides an interface between the power system simulator and the network emulator. Control commands originate from an emulated control node (e.g. a SCADA master) and are routed through the emulated network to the destination host (e.g an RTU controlling a circuit breaker). These commands are later transferred from this destination host to the power simulator via the proxy. The power simulator updates the system states (e.g. voltage magnitude and angle measurements), which are later picked up by sensor nodes (e.g. PMUs) and re-routed back to the control node.</p>
 <div class="figure align-center" id="id2">
 <a class="reference internal image-reference" href="_images/cyber_phys_components.png"><img alt="Cyber-Physical Component Diagram" src="_images/cyber_phys_components.png" style="width: 80%;" /></a>
 <p class="caption"><span class="caption-text">Integration of cyber and physical components using a proxy process.</span></p>
@@ -139,6 +140,14 @@
     </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
         </div>
       </div>
       <div class="clearer"></div>
@@ -147,8 +156,8 @@
       &copy;2019, Project Moses.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.9</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
       <a href="_sources/about.rst.txt"

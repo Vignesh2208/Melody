@@ -13,6 +13,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
     <link rel="author" title="About these documents" href="about.html" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -53,7 +54,11 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="installation.html#loading-kronos">Loading Kronos</a></li>
-<li class="toctree-l2"><a class="reference internal" href="installation.html#installing-melody">Installing Melody</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#installing-melody">Installing Melody</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#melody-post-installation-steps">Melody Post-Installation Steps</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#ready-to-use-melody-vm">Ready To Use Melody VM</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="project_configuration.html">Project Configuration</a><ul>
@@ -66,11 +71,11 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="quick_start.html">Quick Start</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="quick_start.html#example-secondary-voltage-control">Example: Secondary Voltage Control</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="quick_start.html#setup">Setup</a></li>
 <li class="toctree-l3"><a class="reference internal" href="quick_start.html#pmus">PMUs</a></li>
 <li class="toctree-l3"><a class="reference internal" href="quick_start.html#scada-controller">SCADA controller</a></li>
 <li class="toctree-l3"><a class="reference internal" href="quick_start.html#plcs">PLCs</a></li>
 <li class="toctree-l3"><a class="reference internal" href="quick_start.html#disturbances">Disturbances</a></li>
-<li class="toctree-l3"><a class="reference internal" href="quick_start.html#configuration">Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="quick_start.html#starting-the-example">Starting the example</a></li>
 <li class="toctree-l3"><a class="reference internal" href="quick_start.html#generated-log-files">Generated Log files</a></li>
 <li class="toctree-l3"><a class="reference internal" href="quick_start.html#results">Results</a></li>
@@ -83,18 +88,18 @@
 <li class="toctree-l3"><a class="reference internal" href="core.html#submodules">Submodules</a></li>
 <li class="toctree-l3"><a class="reference internal" href="core.html#module-core.basicHostIPCLayer">core.basicHostIPCLayer module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="core.html#module-core.defines">core.defines module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="core.html#core-disturbance-gen-module">core.disturbance_gen module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="core.html#core-emulation-driver-module">core.emulation_driver module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="core.html#core-host-module">core.host module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="core.html#core-kronos-helper-functions-module">core.kronos_helper_functions module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="core.html#module-core.disturbance_gen">core.disturbance_gen module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="core.html#module-core.emulation_driver">core.emulation_driver module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="core.html#module-core.host">core.host module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="core.html#module-core.kronos_helper_functions">core.kronos_helper_functions module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="core.html#module-core.logger">core.logger module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="core.html#core-net-power-module">core.net_power module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="core.html#core-parse-project-configuration-module">core.parse_project_configuration module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="core.html#module-core.net_power">core.net_power module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="core.html#module-core.parse_project_configuration">core.parse_project_configuration module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="core.html#module-core.pss_driver">core.pss_driver module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="core.html#module-core.pss_server">core.pss_server module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="core.html#core-replay-driver-module">core.replay_driver module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="core.html#module-core.replay_driver">core.replay_driver module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="core.html#module-core.replay_orchestrator">core.replay_orchestrator module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="core.html#core-shared-buffer-module">core.shared_buffer module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="core.html#module-core.shared_buffer">core.shared_buffer module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="core.html#module-core">Module contents</a></li>
 </ul>
 </li>
@@ -159,6 +164,14 @@
     </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
         </div>
       </div>
       <div class="clearer"></div>
@@ -167,8 +180,8 @@
       &copy;2019, Project Moses.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.9</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
       <a href="_sources/index.rst.txt"
