@@ -1,6 +1,6 @@
-"""The proxy process
+"""The proxy is implemented as a GRPC server.
 
-.. moduleauthor:: Hoang Hai Nguyen <email>
+.. moduleauthor:: Hoang Hai Nguyen <nhh311@gmail.com>
 """
 
 from concurrent import futures
@@ -28,17 +28,28 @@ PROCESS_LOG = "PLOG"
 
 
 class Job():
+    '''A data structure to store the GRPC read/write request, the reply, and an Event() object to signal when the reply is ready to be returned to the requester.
+    ''' 
     def __init__(self, request, reply):
         self.request = request
         self.reply = reply
         self.event = Event()
 
+    
     def to_string(self):
         # TODO: implement
         return ""
 
 
-class PSSServicer(pss_pb2_grpc.pssServicer): # a.k.a. the Proxy
+class PSSServicer(pss_pb2_grpc.pssServicer):
+    '''The proxy class.
+    @TODO: decouple MatPowerDriver from proxy initialization. This should be straightforward.
+
+    :param case_directory: directory containing the power system simulation case
+    :type case_directory: str
+    :param case_name: name of the power system simulation case
+    :type case_name: str
+    '''
     def __init__(self,  case_directory, case_name):
         self.jobs = []
         self.jobLock = Lock()  # thread-safe access to job list
@@ -47,7 +58,16 @@ class PSSServicer(pss_pb2_grpc.pssServicer): # a.k.a. the Proxy
         self.rlog = logging.getLogger(REQUEST_LOG)
         self.plog = logging.getLogger(PROCESS_LOG)
 
+        
     def read(self, readRequest, context):
+        '''Function to handle GRPC read requests from the simulated cyber network. Each GRPC read request is appended to the proxy's job list, where each job contains the request and its related information. The proxy processes all items in the job list once it receives the GRPC process request. The GRPC process request is invoked by the simulation main loop.
+
+        :param readRequest: a GRPC read request object, which is a list of requests sharing the same timestamp.
+        :type readRequest: pss_pb2.ReadRequest
+
+        :return: a pss_pb2.ReadResponse object.
+        '''
+        
         self.jobLock.acquire()
         for req in readRequest.request:
             self.rlog.info("%s,READ,%s,%s,%s,%s" % (readRequest.timestamp, req.id, req.objtype, req.objid, req.fieldtype))
@@ -59,7 +79,16 @@ class PSSServicer(pss_pb2_grpc.pssServicer): # a.k.a. the Proxy
 
         return readResponse
 
+    
     def write(self, writeRequest, context):
+        '''Function to handle GRPC write requests from the simulated cyber network. Similar to GRPC read requests, each GRPC write request is also appended to the proxy's job list, where each job contains the request and its related information. The proxy processes all items in the job list once it receives the GRPC process request. The GRPC process request is invoked by the simulation main loop.
+
+        :param writeRequest: a GRPC write request object, which is a list of requests sharing the same timestamp.
+        :type writeRequest: pss_pb2.WriteRequest
+
+        :return: a pss_pb2.WriteStatus object
+        '''
+
         self.jobLock.acquire()
         for req in writeRequest.request:
             self.rlog.info("%s,WRITE,%s,%s,%s,%s,%s" % (
@@ -72,7 +101,15 @@ class PSSServicer(pss_pb2_grpc.pssServicer): # a.k.a. the Proxy
 
         return writeStatus
 
+    
     def process(self, request, context):
+        '''Function to handle GRPC process requests from simulation main loop. Requests, including both read and write requests, are processed in the timing order as given by their timestamp, not by the order in which they were enlisted.
+
+        :param request: a GRPC process request object.
+        :type request: pss_pb2.ProcessRequest
+
+        :return: a pss_pb2.Status object.
+        '''
         if len(self.jobs) == 0:
             return pss_pb2.Status(id=request.id, status=pss_pb2.SUCCEEDED)
 
