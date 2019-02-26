@@ -13,7 +13,6 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="_static/language_data.js"></script>
     <link rel="author" title="About these documents" href="about.html" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -390,247 +389,17 @@ Refer src/proto/pss.proto</td>
 </dd></dl>
 
 </div>
-<div class="section" id="module-core.disturbance_gen">
-<span id="core-disturbance-gen-module"></span><h2>core.disturbance_gen module<a class="headerlink" href="#module-core.disturbance_gen" title="Permalink to this headline">¶</a></h2>
-<p>Disturbance generator</p>
-<dl class="function">
-<dt id="core.disturbance_gen.init_shared_buffers">
-<code class="descclassname">core.disturbance_gen.</code><code class="descname">init_shared_buffers</code><span class="sig-paren">(</span><em>shared_buf_array</em><span class="sig-paren">)</span><a class="headerlink" href="#core.disturbance_gen.init_shared_buffers" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initialize shared buffers used for communication with the main Melody process</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>shared_buf_array</strong> – A shared buffer array object (defined in src/core/shared_buffer.py)</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="core.disturbance_gen.main">
-<code class="descclassname">core.disturbance_gen.</code><code class="descname">main</code><span class="sig-paren">(</span><em>path_to_disturbance_file</em><span class="sig-paren">)</span><a class="headerlink" href="#core.disturbance_gen.main" title="Permalink to this definition">¶</a></dt>
-<dd><p>Starts the disturbance generator and sends disturbances to the power simulation at specified relative timestamps</p>
-<p>Disturbances and their relative timestamps are specified in a file according to the Disturbance message format
-defined in src/proto/configuration.proto</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path_to_disturbance_file</strong> (<em>str</em>) – Absolute path to file containing disturbances specified in Disturbance proto
-format. (Refer src/proto/configuration.proto : Disturbances)</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
+<div class="section" id="core-disturbance-gen-module">
+<h2>core.disturbance_gen module<a class="headerlink" href="#core-disturbance-gen-module" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="module-core.emulation_driver">
-<span id="core-emulation-driver-module"></span><h2>core.emulation_driver module<a class="headerlink" href="#module-core.emulation_driver" title="Permalink to this headline">¶</a></h2>
-<p>Emulation Driver</p>
-<dl class="class">
-<dt id="core.emulation_driver.EmulationDriver">
-<em class="property">class </em><code class="descclassname">core.emulation_driver.</code><code class="descname">EmulationDriver</code><span class="sig-paren">(</span><em>input_params</em><span class="sig-paren">)</span><a class="headerlink" href="#core.emulation_driver.EmulationDriver" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>An emulation driver is responsible for emulating background flow traffic in the mininet network.</p>
-<p>It is assigned a command to execute and spawned inside a mininet host. It forks a child process and executes
-the assigned command.</p>
-<dl class="method">
-<dt id="core.emulation_driver.EmulationDriver.init_shared_buffers">
-<code class="descname">init_shared_buffers</code><span class="sig-paren">(</span><em>driver_id</em>, <em>run_time</em><span class="sig-paren">)</span><a class="headerlink" href="#core.emulation_driver.EmulationDriver.init_shared_buffers" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initialize shared buffers used for communication with the main Melody process</p>
-<p>If the shared buffers cannot be opened successfully, the driver just sleeps for the specified amount of
-run time.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>driver_id</strong> (<em>str</em>) – A unique id string assigned to this driver. The shared buffer is opened with this ID.</li>
-<li><strong>run_time</strong> (<em>int</em>) – Running time of driver in seconds</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="core.emulation_driver.EmulationDriver.trigger">
-<code class="descname">trigger</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.emulation_driver.EmulationDriver.trigger" title="Permalink to this definition">¶</a></dt>
-<dd><p>Start executing the assigned command.</p>
-<p>Forks a new process and starts the command.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="function">
-<dt id="core.emulation_driver.main">
-<code class="descclassname">core.emulation_driver.</code><code class="descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.emulation_driver.main" title="Permalink to this definition">¶</a></dt>
-<dd><p>Main entry point of the emulation_driver</p>
-<p>Creates an emulation driver, initializes it and triggers executing the command at the right time. It also
-handles shutting down the driver.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
+<div class="section" id="core-emulation-driver-module">
+<h2>core.emulation_driver module<a class="headerlink" href="#core-emulation-driver-module" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="module-core.host">
-<span id="core-host-module"></span><h2>core.host module<a class="headerlink" href="#module-core.host" title="Permalink to this headline">¶</a></h2>
-<p>Co-simulation host.</p>
-<dl class="function">
-<dt id="core.host.extract_mappings">
-<code class="descclassname">core.host.</code><code class="descname">extract_mappings</code><span class="sig-paren">(</span><em>net_cfg_file</em><span class="sig-paren">)</span><a class="headerlink" href="#core.host.extract_mappings" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="core.host.init_shared_buffers">
-<code class="descclassname">core.host.</code><code class="descname">init_shared_buffers</code><span class="sig-paren">(</span><em>run_time</em>, <em>shared_buf_array</em>, <em>log</em>, <em>managed_application_id</em><span class="sig-paren">)</span><a class="headerlink" href="#core.host.init_shared_buffers" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initialize shared buffers used for communication with the main Melody process</p>
-<p>If the shared buffers cannot be opened successfully, the co-simulation host just sleeps for the specified amount of
-run time.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>run_time</strong> (<em>int</em>) – Running time of co-simulation host in seconds</li>
-<li><strong>shared_buf_array</strong> – A shared buffer array object (defined in src/core/shared_buffer.py)</li>
-<li><strong>log</strong> – A logger object (defined in src/core/logger.py)</li>
-<li><strong>managed_application_id</strong> (<em>str</em>) – The application_id assigned to this co-simulation host</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="core.host.main">
-<code class="descclassname">core.host.</code><code class="descname">main</code><span class="sig-paren">(</span><em>host_id</em>, <em>net_cfg_file</em>, <em>log_file</em>, <em>run_time</em>, <em>project_name</em>, <em>app_layer_file</em>, <em>managed_application_id</em><span class="sig-paren">)</span><a class="headerlink" href="#core.host.main" title="Permalink to this definition">¶</a></dt>
-<dd><p>Main entry point of the co-simulation host</p>
-<p>Starts the co-simulation host and its application layer thread.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>host_id</strong> (<em>int</em>) – Mininet host number on which this process is run. (e.g 1 implies h1)</li>
-<li><strong>net_cfg_file</strong> (<em>str</em>) – Absolute path of file containing a mapping of application ids to ip,port values</li>
-<li><strong>log_file</strong> (<em>str</em>) – Absolute path of file where stdout will be logged.</li>
-<li><strong>run_time</strong> (<em>int</em>) – Running time of co-simulated host in seconds</li>
-<li><strong>project_name</strong> (<em>str</em>) – Name of the project</li>
-<li><strong>app_layer_file</strong> (<em>str</em>) – Name of the file containing application layer code for this host. If not specified, a
-default basicHostIPC layer thread will be started for the co-simulation host. The
-app_layer_file must be located inside src/projects/project_name</li>
-<li><strong>managed_application_id</strong> (<em>str</em>) – Name of the application assigned to this co-simulaiton host</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="core.host.parseOpts">
-<code class="descclassname">core.host.</code><code class="descname">parseOpts</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.host.parseOpts" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="core.host.usage">
-<code class="descclassname">core.host.</code><code class="descname">usage</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.host.usage" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
+<div class="section" id="core-host-module">
+<h2>core.host module<a class="headerlink" href="#core-host-module" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="module-core.kronos_helper_functions">
-<span id="core-kronos-helper-functions-module"></span><h2>core.kronos_helper_functions module<a class="headerlink" href="#module-core.kronos_helper_functions" title="Permalink to this headline">¶</a></h2>
-<p>Kronos Python API</p>
-<dl class="function">
-<dt id="core.kronos_helper_functions.get_current_virtual_time">
-<code class="descclassname">core.kronos_helper_functions.</code><code class="descname">get_current_virtual_time</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.kronos_helper_functions.get_current_virtual_time" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return current virtual time during a live Kronos experiment</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Virtual time secs (float) or Current real time secs (float) iff there is no live Kronos experiment running
-at the time of the call.</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="core.kronos_helper_functions.get_current_virtual_time_pid">
-<code class="descclassname">core.kronos_helper_functions.</code><code class="descname">get_current_virtual_time_pid</code><span class="sig-paren">(</span><em>specified_pid</em><span class="sig-paren">)</span><a class="headerlink" href="#core.kronos_helper_functions.get_current_virtual_time_pid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get current virtual time of process with pid = specified_pid</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>specified_pid</strong> (<em>int</em>) – pid of process to check</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Virtual time secs (float) or Current real time secs (float) iff process is not controlled by Kronos</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="core.kronos_helper_functions.is_module_loaded">
-<code class="descclassname">core.kronos_helper_functions.</code><code class="descname">is_module_loaded</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.kronos_helper_functions.is_module_loaded" title="Permalink to this definition">¶</a></dt>
-<dd><p>Checks if Kronos is loaded</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">1 - SUCCESS, 0 - FAILURE</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="core.kronos_helper_functions.is_root">
-<code class="descclassname">core.kronos_helper_functions.</code><code class="descname">is_root</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.kronos_helper_functions.is_root" title="Permalink to this definition">¶</a></dt>
-<dd><p>Checks if calling process has sudo permission</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">1 - SUCCESS, 0 - FAILURE</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
+<div class="section" id="core-kronos-helper-functions-module">
+<h2>core.kronos_helper_functions module<a class="headerlink" href="#core-kronos-helper-functions-module" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="module-core.logger">
 <span id="core-logger-module"></span><h2>core.logger module<a class="headerlink" href="#module-core.logger" title="Permalink to this headline">¶</a></h2>
@@ -713,646 +482,155 @@ at the time of the call.</td>
 </dd></dl>
 
 </div>
-<div class="section" id="module-core.net_power">
-<span id="core-net-power-module"></span><h2>core.net_power module<a class="headerlink" href="#module-core.net_power" title="Permalink to this headline">¶</a></h2>
-<p>Melody main orchestrator logic</p>
-<dl class="class">
-<dt id="core.net_power.NetPower">
-<em class="property">class </em><code class="descclassname">core.net_power.</code><code class="descname">NetPower</code><span class="sig-paren">(</span><em>run_time</em>, <em>network_configuration</em>, <em>project_dir</em>, <em>base_dir</em>, <em>log_dir</em>, <em>emulated_background_traffic_flows</em>, <em>replay_traffic_flows</em>, <em>cyber_host_apps</em>, <em>enable_kronos</em>, <em>rel_cpu_speed</em><span class="sig-paren">)</span><a class="headerlink" href="#core.net_power.NetPower" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Class which starts mininet, proxy, disturbance generator and manages their operation.</p>
-<p>It initializes the project and brings it under the control of Kronos. It provides API to drive the co-simulation
-of mininet and a power simulator.</p>
-<dl class="method">
-<dt id="core.net_power.NetPower.allow_icmp_requests">
-<code class="descname">allow_icmp_requests</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.net_power.NetPower.allow_icmp_requests" title="Permalink to this definition">¶</a></dt>
-<dd><p>Enables ICMP requests on all hosts</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="core.net_power.NetPower.allow_icmp_responses">
-<code class="descname">allow_icmp_responses</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.net_power.NetPower.allow_icmp_responses" title="Permalink to this definition">¶</a></dt>
-<dd><p>Allows ICMP responses on all hosts</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="core.net_power.NetPower.check_kronos_loaded">
-<code class="descname">check_kronos_loaded</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.net_power.NetPower.check_kronos_loaded" title="Permalink to this definition">¶</a></dt>
-<dd><p>Check if kronos is loaded</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Fails if Kronos is enabled but not loaded</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="core.net_power.NetPower.cleanup">
-<code class="descname">cleanup</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.net_power.NetPower.cleanup" title="Permalink to this definition">¶</a></dt>
-<dd><p>Cleanup the emulation</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="core.net_power.NetPower.close_project">
-<code class="descname">close_project</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.net_power.NetPower.close_project" title="Permalink to this definition">¶</a></dt>
-<dd><p>To be called on finish</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="core.net_power.NetPower.cmd_to_start_process_under_tracer">
-<code class="descname">cmd_to_start_process_under_tracer</code><span class="sig-paren">(</span><em>cmd_to_run</em><span class="sig-paren">)</span><a class="headerlink" href="#core.net_power.NetPower.cmd_to_start_process_under_tracer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets a command string which can be started under kronos</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>cmd_to_run</strong> (<em>str</em>) – Command to run under kronos control</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">str command to run</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="core.net_power.NetPower.disable_TCP_RST">
-<code class="descname">disable_TCP_RST</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.net_power.NetPower.disable_TCP_RST" title="Permalink to this definition">¶</a></dt>
-<dd><p>Disables TCP_RST on all hosts</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="core.net_power.NetPower.enable_TCP_RST">
-<code class="descname">enable_TCP_RST</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.net_power.NetPower.enable_TCP_RST" title="Permalink to this definition">¶</a></dt>
-<dd><p>Enables TCP_RST on all hosts</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="core.net_power.NetPower.generate_node_mappings">
-<code class="descname">generate_node_mappings</code><span class="sig-paren">(</span><em>roles</em><span class="sig-paren">)</span><a class="headerlink" href="#core.net_power.NetPower.generate_node_mappings" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generate a dictionary which maps application_id to a hostname, ip and port. Stores this in /tmp</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>roles</strong> – list of tuples (host_name, [application_id, listen_port])</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="core.net_power.NetPower.get_emulation_driver_params">
-<code class="descname">get_emulation_driver_params</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.net_power.NetPower.get_emulation_driver_params" title="Permalink to this definition">¶</a></dt>
-<dd><p>Construct list of emulated traffic flow objects</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="core.net_power.NetPower.initialize_kronos_exp">
-<code class="descname">initialize_kronos_exp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.net_power.NetPower.initialize_kronos_exp" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initialize Kronos exp</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="core.net_power.NetPower.initialize_project">
-<code class="descname">initialize_project</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.net_power.NetPower.initialize_project" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initialize the project</p>
-<p>Starts all co-simulation hosts, switches, control network, proxy, packet captures, emulation &amp; replay drivers
-and disturbance generator processes.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="core.net_power.NetPower.open_main_cmd_channel_buffers">
-<code class="descname">open_main_cmd_channel_buffers</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.net_power.NetPower.open_main_cmd_channel_buffers" title="Permalink to this definition">¶</a></dt>
-<dd><p>Open shared buffer channels to all hosts</p>
-<p>Shared buffer channels are used to control co-simulation hosts, replay drivers and emulation drivers.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None or exits on Failure to open shared buffer channels</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="core.net_power.NetPower.print_topo_info">
-<code class="descname">print_topo_info</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.net_power.NetPower.print_topo_info" title="Permalink to this definition">¶</a></dt>
-<dd><p>Prints topology information</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="core.net_power.NetPower.run_for">
-<code class="descname">run_for</code><span class="sig-paren">(</span><em>run_time_ns</em>, <em>sync=True</em><span class="sig-paren">)</span><a class="headerlink" href="#core.net_power.NetPower.run_for" title="Permalink to this definition">¶</a></dt>
-<dd><p>Runs the cyber emulation for the specified time in nano seconds.</p>
-<p>The cyber emulation gets frozen after running for the specified duration iff it is under kronos control.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>run_time_ns</strong> (<em>int</em>) – Batch run time in nano seconds</li>
-<li><strong>sync</strong> (<em>bool</em>) – If True, it syncs with power simulator after running for the required time</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="core.net_power.NetPower.send_cmd_to_node">
-<code class="descname">send_cmd_to_node</code><span class="sig-paren">(</span><em>node_name</em>, <em>cmd</em><span class="sig-paren">)</span><a class="headerlink" href="#core.net_power.NetPower.send_cmd_to_node" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sends a command to execute on a mininet host</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>node_name</strong> (<em>str</em>) – mininet host name</li>
-<li><strong>cmd</strong> (<em>str</em>) – command string to execute</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="core.net_power.NetPower.set_netdevice_owners">
-<code class="descname">set_netdevice_owners</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.net_power.NetPower.set_netdevice_owners" title="Permalink to this definition">¶</a></dt>
-<dd><p>Associates interfaces with Kronos so that packets are delayed in virtual time.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="core.net_power.NetPower.start_all_host_captures">
-<code class="descname">start_all_host_captures</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.net_power.NetPower.start_all_host_captures" title="Permalink to this definition">¶</a></dt>
-<dd><p>Start packet captures in all hosts</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="core.net_power.NetPower.start_control_network">
-<code class="descname">start_control_network</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.net_power.NetPower.start_control_network" title="Permalink to this definition">¶</a></dt>
-<dd><p>Starts a separate control network which allows all mininet hosts to communicate outside the mininet network</p>
-<p>The control network allows each host to send GRPC requests to the proxy.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="core.net_power.NetPower.start_disturbance_generator">
-<code class="descname">start_disturbance_generator</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.net_power.NetPower.start_disturbance_generator" title="Permalink to this definition">¶</a></dt>
-<dd><p>Starts the disturbance generator process and brings it under the control of Kronos</p>
-<p>The disturbance generator will send disturbances to the power simulator.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="core.net_power.NetPower.start_emulation_drivers">
-<code class="descname">start_emulation_drivers</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.net_power.NetPower.start_emulation_drivers" title="Permalink to this definition">¶</a></dt>
-<dd><p>Starts all emulation drivers</p>
-<p>Emulation drivers would control background traffic generation.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="core.net_power.NetPower.start_host_capture">
-<code class="descname">start_host_capture</code><span class="sig-paren">(</span><em>host_obj</em><span class="sig-paren">)</span><a class="headerlink" href="#core.net_power.NetPower.start_host_capture" title="Permalink to this definition">¶</a></dt>
-<dd><p>Start packet capture in each host</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>host_obj</strong> – mininet_host object</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="core.net_power.NetPower.start_host_processes">
-<code class="descname">start_host_processes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.net_power.NetPower.start_host_processes" title="Permalink to this definition">¶</a></dt>
-<dd><p>Starts all co-simulation host processes</p>
-<p>This starts all specified applications inside mininet hosts.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="core.net_power.NetPower.start_pkt_captures">
-<code class="descname">start_pkt_captures</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.net_power.NetPower.start_pkt_captures" title="Permalink to this definition">¶</a></dt>
-<dd><p>Start packet captures in all host and switch interfaces</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="core.net_power.NetPower.start_proxy_process">
-<code class="descname">start_proxy_process</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.net_power.NetPower.start_proxy_process" title="Permalink to this definition">¶</a></dt>
-<dd><p>Starts the proxy process</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="core.net_power.NetPower.start_replay_drivers">
-<code class="descname">start_replay_drivers</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.net_power.NetPower.start_replay_drivers" title="Permalink to this definition">¶</a></dt>
-<dd><p>Starts all replay drivers</p>
-<p>Replay drivers would control replaying all pcaps.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="core.net_power.NetPower.start_replay_orchestrator">
-<code class="descname">start_replay_orchestrator</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.net_power.NetPower.start_replay_orchestrator" title="Permalink to this definition">¶</a></dt>
-<dd><p>Starts the replay orchestrator process</p>
-<p>The replay orchestrator process will drive replaying pcaps.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="core.net_power.NetPower.start_switch_processes">
-<code class="descname">start_switch_processes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.net_power.NetPower.start_switch_processes" title="Permalink to this definition">¶</a></dt>
-<dd><p>Starts all mininet switch processes</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="core.net_power.NetPower.start_synchronized_experiment">
-<code class="descname">start_synchronized_experiment</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.net_power.NetPower.start_synchronized_experiment" title="Permalink to this definition">¶</a></dt>
-<dd><p>Start a synchronized kronos experiment if kronos is enabled</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="core.net_power.NetPower.stop_control_network">
-<code class="descname">stop_control_network</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.net_power.NetPower.stop_control_network" title="Permalink to this definition">¶</a></dt>
-<dd><p>Stops the control network which enables GRPC connectivity</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="core.net_power.NetPower.stop_synchronized_experiment">
-<code class="descname">stop_synchronized_experiment</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.net_power.NetPower.stop_synchronized_experiment" title="Permalink to this definition">¶</a></dt>
-<dd><p>Stop a synchronized kronos experiment if kronos is disabled</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="core.net_power.NetPower.sync_with_power_simulator">
-<code class="descname">sync_with_power_simulator</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.net_power.NetPower.sync_with_power_simulator" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sends an RPC process request to the proxy.</p>
-<p>This triggers batch processing which processes all read/write rpc requests sent in the previous batch.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="core.net_power.NetPower.trigger_all_processes">
-<code class="descname">trigger_all_processes</code><span class="sig-paren">(</span><em>trigger_cmd</em><span class="sig-paren">)</span><a class="headerlink" href="#core.net_power.NetPower.trigger_all_processes" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sends a message over shared buffer channels to all co-simulated hosts, replay and emulation drivers</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>trigger_cmd</strong> (<em>str</em>) – command to send</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="core.net_power.NetPower.trigger_nxt_k_replays">
-<code class="descname">trigger_nxt_k_replays</code><span class="sig-paren">(</span><em>k</em><span class="sig-paren">)</span><a class="headerlink" href="#core.net_power.NetPower.trigger_nxt_k_replays" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="core.net_power.NetPower.trigger_nxt_replay">
-<code class="descname">trigger_nxt_replay</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.net_power.NetPower.trigger_nxt_replay" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sends a command to replay orchestrater</p>
-<p>This queues a replay command on the replay orchestrator. The replay orchestrator will initate the next
-replay as soon as possible.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="core.net_power.NetPower.wait_for_loaded_pcap_msg">
-<code class="descname">wait_for_loaded_pcap_msg</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.net_power.NetPower.wait_for_loaded_pcap_msg" title="Permalink to this definition">¶</a></dt>
-<dd><p>Waits for required pcaps to be loaded by all replay-drivers</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-</dd></dl>
-
+<div class="section" id="core-net-power-module">
+<h2>core.net_power module<a class="headerlink" href="#core-net-power-module" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="module-core.parse_project_configuration">
-<span id="core-parse-project-configuration-module"></span><h2>core.parse_project_configuration module<a class="headerlink" href="#module-core.parse_project_configuration" title="Permalink to this headline">¶</a></h2>
-<p>Parsing project configuration specified in src/proto/configuration.proto format</p>
-<dl class="class">
-<dt id="core.parse_project_configuration.Experiment">
-<em class="property">class </em><code class="descclassname">core.parse_project_configuration.</code><code class="descname">Experiment</code><span class="sig-paren">(</span><em>run_time</em>, <em>network_configuration</em>, <em>project_dir</em>, <em>base_dir</em>, <em>log_dir</em>, <em>emulated_background_traffic_flows</em>, <em>replay_traffic_flows</em>, <em>cyber_host_apps</em>, <em>enable_kronos</em>, <em>relative_cpu_speed</em><span class="sig-paren">)</span><a class="headerlink" href="#core.parse_project_configuration.Experiment" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">src.core.net_power.NetPower</span></code></p>
-<p>Experiment object inherits from src.core.NetPower</p>
-<p>It provides API to control/start/stop the experiment.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="core.parse_project_configuration.get_experiment_container">
-<code class="descclassname">core.parse_project_configuration.</code><code class="descname">get_experiment_container</code><span class="sig-paren">(</span><em>project_config</em>, <em>project_run_time_args</em><span class="sig-paren">)</span><a class="headerlink" href="#core.parse_project_configuration.get_experiment_container" title="Permalink to this definition">¶</a></dt>
-<dd><p>Constructs an experiment object from project config and project run time arguments</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>project_config</strong> – Object of type src/proto/configuration.proto</li>
-<li><strong>project_run_time_args</strong> – A dictionary of run time arguments</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Experiment object</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="core.parse_project_configuration.get_network_configuration">
-<code class="descclassname">core.parse_project_configuration.</code><code class="descname">get_network_configuration</code><span class="sig-paren">(</span><em>project_config</em><span class="sig-paren">)</span><a class="headerlink" href="#core.parse_project_configuration.get_network_configuration" title="Permalink to this definition">¶</a></dt>
-<dd><p>From project_configuration, constructs a network_configuration object</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>project_config</strong> – Object of type src/proto/configuration.proto</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">network_configuration obj of type src/cyber_network/network_configuration</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="core.parse_project_configuration.parse_experiment_configuration">
-<code class="descclassname">core.parse_project_configuration.</code><code class="descname">parse_experiment_configuration</code><span class="sig-paren">(</span><em>project_run_time_args</em><span class="sig-paren">)</span><a class="headerlink" href="#core.parse_project_configuration.parse_experiment_configuration" title="Permalink to this definition">¶</a></dt>
-<dd><p>Uses project run time arguments to construct an Experiment object</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>project_run_time_args</strong> – A dictionary of run time arguments</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Experiment object</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
+<div class="section" id="core-parse-project-configuration-module">
+<h2>core.parse_project_configuration module<a class="headerlink" href="#core-parse-project-configuration-module" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="module-core.pss_driver">
 <span id="core-pss-driver-module"></span><h2>core.pss_driver module<a class="headerlink" href="#module-core.pss_driver" title="Permalink to this headline">¶</a></h2>
+<p>Drivers for interacting with power system simulator.</p>
 <dl class="class">
 <dt id="core.pss_driver.MatPowerDriver">
 <em class="property">class </em><code class="descclassname">core.pss_driver.</code><code class="descname">MatPowerDriver</code><span class="sig-paren">(</span><em>workingdir='.'</em><span class="sig-paren">)</span><a class="headerlink" href="#core.pss_driver.MatPowerDriver" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#core.pss_driver.PSSDriverAbstract" title="core.pss_driver.PSSDriverAbstract"><code class="xref py py-class docutils literal notranslate"><span class="pre">core.pss_driver.PSSDriverAbstract</span></code></a></p>
+<p>Implementation of the PSSDriverAbstract class for MATPOWER. Commands are executed indirectly by generating the simulation.m file and run it using Octave. Changes to a case are accumulated in a temporary file during runtime. Mapping in the MATPOWERCONST dictionary follows the data file format provided in <a class="reference external" href="http://www.pserc.cornell.edu/matpower/manual.pdf">http://www.pserc.cornell.edu/matpower/manual.pdf</a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>workingdir</strong> (<em>str</em>) – directory for storing temporary files</td>
+</tr>
+</tbody>
+</table>
 <dl class="method">
 <dt id="core.pss_driver.MatPowerDriver.close">
 <code class="descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.pss_driver.MatPowerDriver.close" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Close the simulation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="core.pss_driver.MatPowerDriver.open">
 <code class="descname">open</code><span class="sig-paren">(</span><em>case</em><span class="sig-paren">)</span><a class="headerlink" href="#core.pss_driver.MatPowerDriver.open" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Open a MATPOWER case. Runtime modifications to the simulation via the write() function will be saved to a temporary file instead of to the file specified in the parameter. To save the modification to a specific file, please use the save() function instead.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>case</strong> (<em>str</em>) – full path to the case file.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="core.pss_driver.MatPowerDriver.read">
 <code class="descname">read</code><span class="sig-paren">(</span><em>objtype</em>, <em>objid</em>, <em>fieldtype</em><span class="sig-paren">)</span><a class="headerlink" href="#core.pss_driver.MatPowerDriver.read" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Read data from the MATPOWER case.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>objtype</strong> (<em>str</em>) – type of the power system object, which can be either “bus”, “gen”, or “branch”.</li>
+<li><strong>objid</strong> (<em>str</em>) – unique id of the power system object.</li>
+<li><strong>fieldtype</strong> (<em>str</em>) – property of the power system object.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">data from the MATPOWER case in str format.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="core.pss_driver.MatPowerDriver.run_pf">
 <code class="descname">run_pf</code><span class="sig-paren">(</span><em>method=None</em><span class="sig-paren">)</span><a class="headerlink" href="#core.pss_driver.MatPowerDriver.run_pf" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Run the power flow and write the results into three files, bus.csv, gen.csv, and branch.csv in the working directory.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>method</strong> (<em>str</em>) – method for running the power flow. If not specified, then Newton is run as the default method.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="core.pss_driver.MatPowerDriver.save">
 <code class="descname">save</code><span class="sig-paren">(</span><em>newcase</em><span class="sig-paren">)</span><a class="headerlink" href="#core.pss_driver.MatPowerDriver.save" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Save the (potentially modified) case in the temporary file to a specific file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>newcase</strong> (<em>str</em>) – full path to the new case file.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="core.pss_driver.MatPowerDriver.write">
 <code class="descname">write</code><span class="sig-paren">(</span><em>objtype</em>, <em>objid</em>, <em>fieldtype</em>, <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#core.pss_driver.MatPowerDriver.write" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Update the MATPOWER case. Depending on the content of the tuple (objtype, objid, fieldtype, value), this function can be used to execute different types of events, for example:</p>
+<ul class="simple">
+<li>Creating active power load change: (“bus”, objid, “Pd”, value)</li>
+<li>Changing voltage setpoints at generator bus: (“gen”, objid, “Vg”, value)</li>
+<li>Opening a line: (“branch”, objid, “status”, “0”)</li>
+</ul>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>objtype</strong> (<em>str</em>) – type of the power system object, which can be either “bus”, “gen”, or “branch”.</li>
+<li><strong>objid</strong> (<em>str</em>) – unique ID of the power system object.</li>
+<li><strong>fieldtype</strong> (<em>str</em>) – property of the power system object.</li>
+<li><strong>value</strong> (<em>str</em>) – value to the property of the power system object.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="core.pss_driver.MatPowerDriver.write_multiple">
 <code class="descname">write_multiple</code><span class="sig-paren">(</span><em>writelist</em><span class="sig-paren">)</span><a class="headerlink" href="#core.pss_driver.MatPowerDriver.write_multiple" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Update the MATPOWER case using multiple writes.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>writelist</strong> (<em>list</em>) – a list of tuple (objtype, objid, fieldtype, value).</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 </dd></dl>
 
@@ -1360,6 +638,7 @@ replay as soon as possible.</p>
 <dt id="core.pss_driver.PSSDriverAbstract">
 <em class="property">class </em><code class="descclassname">core.pss_driver.</code><code class="descname">PSSDriverAbstract</code><a class="headerlink" href="#core.pss_driver.PSSDriverAbstract" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Abstract class for implementing power system simulation-specific driver.</p>
 <dl class="method">
 <dt id="core.pss_driver.PSSDriverAbstract.close">
 <code class="descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.pss_driver.PSSDriverAbstract.close" title="Permalink to this definition">¶</a></dt>
@@ -1400,11 +679,12 @@ replay as soon as possible.</p>
 </div>
 <div class="section" id="module-core.pss_server">
 <span id="core-pss-server-module"></span><h2>core.pss_server module<a class="headerlink" href="#module-core.pss_server" title="Permalink to this headline">¶</a></h2>
-<p>The proxy process</p>
+<p>The proxy is implemented as a GRPC server.</p>
 <dl class="class">
 <dt id="core.pss_server.Job">
 <em class="property">class </em><code class="descclassname">core.pss_server.</code><code class="descname">Job</code><span class="sig-paren">(</span><em>request</em>, <em>reply</em><span class="sig-paren">)</span><a class="headerlink" href="#core.pss_server.Job" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="method">
+<dd><p>A data structure to store the GRPC read/write request, the reply, and an Event() object to signal when the reply is ready to be returned to the requester.</p>
+<dl class="method">
 <dt id="core.pss_server.Job.to_string">
 <code class="descname">to_string</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.pss_server.Job.to_string" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -1415,20 +695,67 @@ replay as soon as possible.</p>
 <dt id="core.pss_server.PSSServicer">
 <em class="property">class </em><code class="descclassname">core.pss_server.</code><code class="descname">PSSServicer</code><span class="sig-paren">(</span><em>case_directory</em>, <em>case_name</em><span class="sig-paren">)</span><a class="headerlink" href="#core.pss_server.PSSServicer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">src.proto.pss_pb2_grpc.pssServicer</span></code></p>
+<p>The proxy class.</p>
+<p>&#64;TODO: decouple MatPowerDriver logic from the proxy initialization. This should be straightforward.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>case_directory</strong> (<em>str</em>) – directory containing the power system simulation case</li>
+<li><strong>case_name</strong> (<em>str</em>) – name of the power system simulation case</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 <dl class="method">
 <dt id="core.pss_server.PSSServicer.process">
 <code class="descname">process</code><span class="sig-paren">(</span><em>request</em>, <em>context</em><span class="sig-paren">)</span><a class="headerlink" href="#core.pss_server.PSSServicer.process" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Function to handle GRPC process requests from simulation main loop. Requests, including both read and write requests, are processed in the timing order as given by their timestamps, not by the order in which they were enlisted to the job list. Process time may vary depending on the size of the job list and the type of requests.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>request</strong> (<em>pss_pb2.ProcessRequest</em>) – a GRPC process request object.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a pss_pb2.Status object.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="core.pss_server.PSSServicer.read">
 <code class="descname">read</code><span class="sig-paren">(</span><em>readRequest</em>, <em>context</em><span class="sig-paren">)</span><a class="headerlink" href="#core.pss_server.PSSServicer.read" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Function to handle GRPC read requests from the simulated cyber network. Each GRPC read request is appended to the proxy’s job list, where each job contains the request and its related information. The proxy processes all items in the job list once it receives the GRPC process request. The GRPC process request is invoked by the simulation main loop.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>readRequest</strong> (<em>pss_pb2.ReadRequest</em>) – a GRPC read request object, which is a list of requests sharing the same timestamp.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a pss_pb2.ReadResponse object.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="core.pss_server.PSSServicer.write">
 <code class="descname">write</code><span class="sig-paren">(</span><em>writeRequest</em>, <em>context</em><span class="sig-paren">)</span><a class="headerlink" href="#core.pss_server.PSSServicer.write" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Function to handle GRPC write requests from the simulated cyber network. Similar to GRPC read requests, each GRPC write request is also appended to the proxy’s job list, where each job contains the request and its related information. The proxy processes all items in the job list once it receives the GRPC process request. The GRPC process request is invoked by the simulation main loop.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>writeRequest</strong> (<em>pss_pb2.WriteRequest</em>) – a GRPC write request object, which is a list of requests sharing the same timestamp.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a pss_pb2.WriteStatus object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 </dd></dl>
 
@@ -1438,141 +765,8 @@ replay as soon as possible.</p>
 <dd></dd></dl>
 
 </div>
-<div class="section" id="module-core.replay_driver">
-<span id="core-replay-driver-module"></span><h2>core.replay_driver module<a class="headerlink" href="#module-core.replay_driver" title="Permalink to this headline">¶</a></h2>
-<p>Replay driver</p>
-<dl class="class">
-<dt id="core.replay_driver.ReplayDriver">
-<em class="property">class </em><code class="descclassname">core.replay_driver.</code><code class="descname">ReplayDriver</code><span class="sig-paren">(</span><em>input_params</em><span class="sig-paren">)</span><a class="headerlink" href="#core.replay_driver.ReplayDriver" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Controls replaying pcaps</p>
-<dl class="method">
-<dt id="core.replay_driver.ReplayDriver.init_shared_buffers">
-<code class="descname">init_shared_buffers</code><span class="sig-paren">(</span><em>run_time</em><span class="sig-paren">)</span><a class="headerlink" href="#core.replay_driver.ReplayDriver.init_shared_buffers" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initializes shared buffers to allow communication with the main melody process</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>run_time</strong> (<em>int</em>) – run time in seconds. If the buffer cannot be opened, the driver would simply run for
-the specified amount and exit gracefully.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="core.replay_driver.ReplayDriver.load_pcap">
-<code class="descname">load_pcap</code><span class="sig-paren">(</span><em>pcap_file_path</em><span class="sig-paren">)</span><a class="headerlink" href="#core.replay_driver.ReplayDriver.load_pcap" title="Permalink to this definition">¶</a></dt>
-<dd><p>Loads a pcap specified by the pcap_file_path</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>pcap_file_path</strong> (<em>str</em>) – Absolute path to the pcap file</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="core.replay_driver.ReplayDriver.load_pcaps">
-<code class="descname">load_pcaps</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.replay_driver.ReplayDriver.load_pcaps" title="Permalink to this definition">¶</a></dt>
-<dd><p>Load all pcaps which involve this mininet host</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="core.replay_driver.ReplayDriver.recv_command_message">
-<code class="descname">recv_command_message</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.replay_driver.ReplayDriver.recv_command_message" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets command from the shared buffer</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">string or None</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="core.replay_driver.ReplayDriver.send_command_message">
-<code class="descname">send_command_message</code><span class="sig-paren">(</span><em>msg</em><span class="sig-paren">)</span><a class="headerlink" href="#core.replay_driver.ReplayDriver.send_command_message" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sends a message over the shared buffer</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>msg</strong> (<em>str</em>) – Message to send</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="core.replay_driver.ReplayDriver.trigger_replay">
-<code class="descname">trigger_replay</code><span class="sig-paren">(</span><em>pcap_file_path</em><span class="sig-paren">)</span><a class="headerlink" href="#core.replay_driver.ReplayDriver.trigger_replay" title="Permalink to this definition">¶</a></dt>
-<dd><p>Triggers replay of the pcap_file specified by pcap_file_path</p>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">The pcap file must have already been loaded before calling this.</p>
-</div>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>pcap_file_path</strong> (<em>str</em>) – Absolute path to pcap file</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="core.replay_driver.ReplayDriver.wait_for_commands">
-<code class="descname">wait_for_commands</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.replay_driver.ReplayDriver.wait_for_commands" title="Permalink to this definition">¶</a></dt>
-<dd><p>Wait for a trigger replay command from the main melody process</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="function">
-<dt id="core.replay_driver.main">
-<code class="descclassname">core.replay_driver.</code><code class="descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.replay_driver.main" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creates a replay driver and calls wait_for_commands</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
+<div class="section" id="core-replay-driver-module">
+<h2>core.replay_driver module<a class="headerlink" href="#core-replay-driver-module" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="module-core.replay_orchestrator">
 <span id="core-replay-orchestrator-module"></span><h2>core.replay_orchestrator module<a class="headerlink" href="#module-core.replay_orchestrator" title="Permalink to this headline">¶</a></h2>
@@ -1685,154 +879,8 @@ the specified amount and exit gracefully.</td>
 </dd></dl>
 
 </div>
-<div class="section" id="module-core.shared_buffer">
-<span id="core-shared-buffer-module"></span><h2>core.shared_buffer module<a class="headerlink" href="#module-core.shared_buffer" title="Permalink to this headline">¶</a></h2>
-<p>Shared Buffer</p>
-<dl class="class">
-<dt id="core.shared_buffer.shared_buffer">
-<em class="property">class </em><code class="descclassname">core.shared_buffer.</code><code class="descname">shared_buffer</code><span class="sig-paren">(</span><em>bufName</em>, <em>isProxy</em><span class="sig-paren">)</span><a class="headerlink" href="#core.shared_buffer.shared_buffer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Uses the shared_buffer library defined in src/core/libs</p>
-<dl class="method">
-<dt id="core.shared_buffer.shared_buffer.close">
-<code class="descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.shared_buffer.shared_buffer.close" title="Permalink to this definition">¶</a></dt>
-<dd><p>Closes the shared buffer</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="core.shared_buffer.shared_buffer.open">
-<code class="descname">open</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.shared_buffer.shared_buffer.open" title="Permalink to this definition">¶</a></dt>
-<dd><p>Opens the shared buffer</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="core.shared_buffer.shared_buffer.read">
-<code class="descname">read</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.shared_buffer.shared_buffer.read" title="Permalink to this definition">¶</a></dt>
-<dd><p>Reads from the shared buffer
-:return: str or None</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="core.shared_buffer.shared_buffer.write">
-<code class="descname">write</code><span class="sig-paren">(</span><em>msg</em>, <em>dstID=0</em><span class="sig-paren">)</span><a class="headerlink" href="#core.shared_buffer.shared_buffer.write" title="Permalink to this definition">¶</a></dt>
-<dd><p>Write message to the shared buffer</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>msg</strong> (<em>str</em>) – message to write</li>
-<li><strong>dstID</strong> – Not used</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="core.shared_buffer.shared_buffer_array">
-<em class="property">class </em><code class="descclassname">core.shared_buffer.</code><code class="descname">shared_buffer_array</code><a class="headerlink" href="#core.shared_buffer.shared_buffer_array" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Can be used to create an array of shared buffers</p>
-<dl class="method">
-<dt id="core.shared_buffer.shared_buffer_array.close">
-<code class="descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.shared_buffer.shared_buffer_array.close" title="Permalink to this definition">¶</a></dt>
-<dd><p>Closes all opened shared buffers</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="core.shared_buffer.shared_buffer_array.open">
-<code class="descname">open</code><span class="sig-paren">(</span><em>bufName</em>, <em>isProxy</em><span class="sig-paren">)</span><a class="headerlink" href="#core.shared_buffer.shared_buffer_array.open" title="Permalink to this definition">¶</a></dt>
-<dd><p>Opens a new shared buffer and adds it to the array</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>bufName</strong> (<em>str</em>) – buffer name</li>
-<li><strong>isProxy</strong> (<em>int</em>) – Specifies if the buffer is opened by the master or slave. 1-Master, 0-Slave</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="core.shared_buffer.shared_buffer_array.read">
-<code class="descname">read</code><span class="sig-paren">(</span><em>bufName</em><span class="sig-paren">)</span><a class="headerlink" href="#core.shared_buffer.shared_buffer_array.read" title="Permalink to this definition">¶</a></dt>
-<dd><p>Reads a buffer specified by buffer name. It is Non-Blocking.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>bufName</strong> (<em>str</em>) – buffer name to read</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">str or None if there is nothing to read in the buffer.</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="core.shared_buffer.shared_buffer_array.read_until">
-<code class="descname">read_until</code><span class="sig-paren">(</span><em>bufName</em>, <em>cool_off_time=0.01</em><span class="sig-paren">)</span><a class="headerlink" href="#core.shared_buffer.shared_buffer_array.read_until" title="Permalink to this definition">¶</a></dt>
-<dd><p>Reads until something appears in the buffer.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>bufName</strong> (<em>str</em>) – buffer name to read</li>
-<li><strong>cool_off_time</strong> (<em>float</em>) – time to sleep in secs between two successive reads</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">str</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="core.shared_buffer.shared_buffer_array.write">
-<code class="descname">write</code><span class="sig-paren">(</span><em>bufName</em>, <em>msg</em>, <em>dstID=0</em><span class="sig-paren">)</span><a class="headerlink" href="#core.shared_buffer.shared_buffer_array.write" title="Permalink to this definition">¶</a></dt>
-<dd><p>Write a message to the buffer.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>bufName</strong> (<em>str</em>) – buffer name to write</li>
-<li><strong>msg</strong> (<em>str</em>) – Message to write</li>
-<li><strong>dstID</strong> – Not used</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">number of bytes written (int)</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-</dd></dl>
-
+<div class="section" id="core-shared-buffer-module">
+<h2>core.shared_buffer module<a class="headerlink" href="#core-shared-buffer-module" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="module-core">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-core" title="Permalink to this headline">¶</a></h2>
@@ -1866,18 +914,18 @@ the specified amount and exit gracefully.</td>
 <li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-core.basicHostIPCLayer">core.basicHostIPCLayer module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-core.defines">core.defines module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#module-core.disturbance_gen">core.disturbance_gen module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#module-core.emulation_driver">core.emulation_driver module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#module-core.host">core.host module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#module-core.kronos_helper_functions">core.kronos_helper_functions module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#core-disturbance-gen-module">core.disturbance_gen module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#core-emulation-driver-module">core.emulation_driver module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#core-host-module">core.host module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#core-kronos-helper-functions-module">core.kronos_helper_functions module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-core.logger">core.logger module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#module-core.net_power">core.net_power module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#module-core.parse_project_configuration">core.parse_project_configuration module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#core-net-power-module">core.net_power module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#core-parse-project-configuration-module">core.parse_project_configuration module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-core.pss_driver">core.pss_driver module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-core.pss_server">core.pss_server module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#module-core.replay_driver">core.replay_driver module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#core-replay-driver-module">core.replay_driver module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-core.replay_orchestrator">core.replay_orchestrator module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#module-core.shared_buffer">core.shared_buffer module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#core-shared-buffer-module">core.shared_buffer module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-core">Module contents</a></li>
 </ul>
 </li>
@@ -1909,14 +957,6 @@ the specified amount and exit gracefully.</td>
     </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
-
-
-
-
-
-
-
-
         </div>
       </div>
       <div class="clearer"></div>
@@ -1925,8 +965,8 @@ the specified amount and exit gracefully.</td>
       &copy;2019, Project Moses.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.4</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.9</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
       
       |
       <a href="_sources/core.rst.txt"
