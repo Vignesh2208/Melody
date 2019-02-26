@@ -1,4 +1,4 @@
-"""Driver for interacting with power system simulator.
+"""Drivers for interacting with power system simulator.
 
 .. moduleauthor:: Hoang Hai Nguyen <nhh311@gmail.com>
 """
@@ -61,12 +61,13 @@ MATPOWERCONST = {"bus":{"bus_i":1, "type":2, "Pd":3, "Qd":4, "Gs":5, "Bs":6, "ar
 
 
 class MatPowerDriver(PSSDriverAbstract):
-    '''Implementation of the PSSDriverAbstract class for MATPOWER. Commands are executed indirectly by generating the simulation.m file and run it using Octave. Changes to a case are accumulated in a temporary file during runtime. Mapping in MATPOWERCONST follows the data file format provided in http://www.pserc.cornell.edu/matpower/manual.pdf.
+    '''Implementation of the PSSDriverAbstract class for MATPOWER. Commands are executed indirectly by generating the simulation.m file and run it using Octave. Changes to a case are accumulated in a temporary file during runtime. Mapping in the MATPOWERCONST dictionary follows the data file format provided in http://www.pserc.cornell.edu/matpower/manual.pdf.
+
+    :param workingdir: directory for storing temporary files
+    :type workingdir: str
 '''
     def __init__(self, workingdir="."):
         '''Initialize the MATPOWER driver.
-        :param workingdir: directory for storing temporary files
-        :type workingdir: str
         '''
         self.workingdir = workingdir
         self.matfile = self.workingdir + "/simulation.m"
@@ -79,7 +80,7 @@ class MatPowerDriver(PSSDriverAbstract):
 
 
     def open(self, case):
-        '''Open a MATPOWER case. Modification to the simulation by invoking the write() function will be saved to a temporary case.
+        '''Open a MATPOWER case. Runtime modifications to the simulation via the write() function will be saved to a temporary file instead of to the file specified in the parameter. To save the modification to a specific file, please use the save() function instead.
 
         :param case: full path to the case file.
         :type case: str
@@ -158,7 +159,7 @@ class MatPowerDriver(PSSDriverAbstract):
 
 
     def run_pf(self, method=None):
-        '''Run the power flow. Results are written into three file bus.csv, gen.csv, and branch.csv in the working directory.
+        '''Run the power flow and write the results into three files, bus.csv, gen.csv, and branch.csv in the working directory.
         
         :param method: method for running the power flow. If not specified, then Newton is run as the default method.
         :type method: str
@@ -209,7 +210,7 @@ class MatPowerDriver(PSSDriverAbstract):
 
 
     def save(self, newcase):
-        '''Save the current case, potentially modified, to a new file.
+        '''Save the (potentially modified) case in the temporary file to a specific file.
 
         :param newcase: full path to the new case file.
         :type newcase: str

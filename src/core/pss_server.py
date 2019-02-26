@@ -43,7 +43,8 @@ class Job():
 
 class PSSServicer(pss_pb2_grpc.pssServicer):
     '''The proxy class.
-    @TODO: decouple MatPowerDriver from proxy initialization. This should be straightforward.
+
+    @TODO: decouple MatPowerDriver logic from the proxy initialization. This should be straightforward.
 
     :param case_directory: directory containing the power system simulation case
     :type case_directory: str
@@ -103,7 +104,7 @@ class PSSServicer(pss_pb2_grpc.pssServicer):
 
     
     def process(self, request, context):
-        '''Function to handle GRPC process requests from simulation main loop. Requests, including both read and write requests, are processed in the timing order as given by their timestamp, not by the order in which they were enlisted.
+        '''Function to handle GRPC process requests from simulation main loop. Requests, including both read and write requests, are processed in the timing order as given by their timestamps, not by the order in which they were enlisted to the job list. Process time may vary depending on the size of the job list and the type of requests.
 
         :param request: a GRPC process request object.
         :type request: pss_pb2.ProcessRequest
