@@ -12,7 +12,7 @@ from src.cyber_network.traffic_flow import ReplayFlowsContainer
 from src.core.replay_orchestrator import ReplayOrchestrator
 from src.utils.util_functions import *
 from defines import *
-from kronos_functions import *
+import kronos_functions
 from kronos_helper_functions import *
 import subprocess
 import sys
@@ -166,7 +166,7 @@ class NetPower(object):
 
         :return: None
         """
-        ret = initializeExp(1)
+        ret = kronos_functions.initializeExp(1)
         if ret < 0:
             print "ERROR:  Kronos initialization failed. Exiting ..."
             sys.exit(0)
@@ -180,7 +180,7 @@ class NetPower(object):
         if self.enable_kronos == 1:
             print "Kronos >> Synchronizing and freezing all processes ..."
             n_tracers = self.nxt_tracer_id
-            while synchronizeAndFreeze(n_tracers) <= 0:
+            while kronos_functions.synchronizeAndFreeze(n_tracers) <= 0:
                 print "Kronos >> Synchronize and Freeze failed. Retrying in 1 sec"
                 time.sleep(1)
             print "Kronos >> Synchronize and Freeze succeeded !"
@@ -198,7 +198,7 @@ class NetPower(object):
 
         print "########################################################################"
         if self.enable_kronos == 1:
-            stopExp()
+            kronos_functions.stopExp()
             print "Kronos >> Stopping synchronized experiment at Local Time: ", str(datetime.now())
             self.trigger_all_processes("EXIT")
             self.replay_orchestrator.send_command("EXIT")
@@ -450,7 +450,7 @@ class NetPower(object):
 
             for name in mininet_switch.intfNames():
                 if name != "lo":
-                    set_netdevice_owner(tracer_pid, name)
+                    kronos_functions.set_netdevice_owner(tracer_pid, name)
 
         for host_name in self.host_pids:
             mininet_host = self.network_configuration.mininet_obj.get(host_name)
@@ -458,7 +458,7 @@ class NetPower(object):
             tracer_pid = self.host_pids[mininet_host.name]
             for name in mininet_host.intfNames():
                 if name != "lo" and name != "eth0" :
-                    set_netdevice_owner(tracer_pid, name)
+                    kronos_functions.set_netdevice_owner(tracer_pid, name)
 
     def start_proxy_process(self):
         """Starts the proxy process
@@ -707,7 +707,7 @@ class NetPower(object):
                     outstanding_hosts.remove(host)
                     sys.stdout.flush()
             if self.enable_kronos == 1:
-                progress_n_rounds(1)
+                kronos_functions.progress_n_rounds(1)
                 n_warmup_rounds += 1
 
                 if n_warmup_rounds % 100 == 0:
@@ -838,7 +838,7 @@ class NetPower(object):
 
                 if self.enable_kronos == 1:
                     sys.stdout.flush()
-                    progress_n_rounds(n_rounds)
+                    kronos_functions.progress_n_rounds(n_rounds)
                     n_rounds_progressed += n_rounds
                     stdout.write("\rRunning for %f ms. Number of Rounds Progressed:  %d/%d" % (
                         float(run_time_ns)/float(MS), n_rounds_progressed, n_total_rounds))

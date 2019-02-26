@@ -53,7 +53,7 @@ To get started on Kronos, please perform the following setup steps:
 Verifying Installation
 ----------------------
 
-The following tests (optional) can run to verify the Kronos installation:
+The following tests (optional) can be run to verify the Kronos installation:
 
 * INS-SCHED specific test::
     
@@ -95,7 +95,22 @@ It may be installed before/after Kronos installation. Please follow the steps gi
   cd ~/ && git clone https://github.com/Vignesh2208/Melody.git
   cd ~/Melody
   sudo ./install_deps.sh
-  sudo make install
+  sudo python setup.py install
+
+Melody Post-Installation Steps
+------------------------------
+
+* Setting up python path::
+  
+    # Add the following to ~/.bashrc
+    export PYTHONPATH=$PYTHONPATH:<path-to-melody>/src
+    export PYTHONPATH=$PYTHONPATH:<path-to-melody>/src/core
+
+    # Do the following
+    sudo visudo
+      
+    # Append this line
+    Defaults env_keep += "PYTHONPATH"
 
 * Install Matpower by following instructions listed `here`_.
 
@@ -108,4 +123,20 @@ It may be installed before/after Kronos installation. Please follow the steps gi
 * After installation of Melody, please reboot the VM/machine
 
 
+Ready To Use Melody VM
+^^^^^^^^^^^^^^^^^^^^^^
+
+A precompiled ready to use VM can also be downloaded if you wish to get started quickly. The username of the VM is "**moses**" and password is "**project_melody**".
+Please follow the instructions given below to download and use the VM:
+
+* Downloading the VM::
+
+    Instructions to follow ...
+
+* Logging into the VM::
+
+    Upon grub start up, load the default highlighted kernel version (which is linux-4.4.5-ins-VT)
+    Username: moses, Password: project_melody
+
+*  Melody/Kronos is installed inside the VM in /home/moses directory along with all the required dependencies
   
