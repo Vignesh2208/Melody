@@ -36,7 +36,8 @@ To get started on Kronos, please perform the following setup steps:
 
 * Compile and configure Kronos kernel patch::
  
-    cd ~/Kronos && sudo make setup_kernel
+    cd ~/Kronos 
+    sudo make setup_kernel
 
   During the setup process do not allow kexec tools to handle kernel reboots.
   Over the course of kernel setup, a menu config would appear. 
@@ -120,7 +121,8 @@ Melody depends on the following packages and tools:
 
 It may be installed before/after Kronos installation. Please follow the steps given below to download and install melody and its dependencies. It is preferable to install Melody in the /home/${user} directory::
 
-  cd ~/ && git clone https://github.com/Vignesh2208/Melody.git
+  cd ~/ 
+  git clone https://github.com/Vignesh2208/Melody.git
   cd ~/Melody
   sudo ./install_deps.sh
   sudo python setup.py install
