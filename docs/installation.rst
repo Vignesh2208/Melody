@@ -43,7 +43,7 @@ To get started on Kronos, please perform the following setup steps:
 
   The following additional config steps should also be performed inside menuconfig:
 
-  Under General setup 
+  1. Under General setup 
 		     -->  Append a local kernel version name. (e.g it could be "-ins-VT")
 		     
 		     .. figure:: images/kernel_config_local_version.png
@@ -51,7 +51,7 @@ To get started on Kronos, please perform the following setup steps:
   			:width: 80%
   			:align: center
   
-  Under kernel_hacking 
+  #. Under kernel_hacking 
 		     --> enable Collect kernel timers statistics
 		     
 		     .. figure:: images/kernel_config_kernel_timers.png
@@ -59,7 +59,7 @@ To get started on Kronos, please perform the following setup steps:
   			:width: 80%
   			:align: center
 		     
-  Under Processor types and features 
+  #. Under Processor types and features 
                      --> Transparent Huge Page support 
                                                       --> Transparent Huge Page support sysfs defaults should be set to always
 						      
@@ -143,6 +143,16 @@ Melody Post-Installation Steps
 * Install Matpower by following instructions listed `here`_.
 
 .. _here: https://github.com/MATPOWER/matpower/blob/master/README.md
+
+    Note that it is recommended to install the development version of Matpower by cloning from the github repository, and then run the install_matpower script using Octave. When prompted to select from the MATPOWER Installation Options, choose the following:
+    
+        >3. DO modify the Octave path, and SAVE the updated path
+	>       (so you will not have to do it again next time you run Octave)
+    
+    .. figure:: images/octave_matpower_installation.png
+  	:alt: Screenshot of Matpower Installation using Octave
+  	:width: 80%
+  	:align: center
 
 * Install protoc (optional) by following these `instructions`_. Protoc can be used for development if the defined protos are to be changed and compiled. Use version >= 3.7.
 
