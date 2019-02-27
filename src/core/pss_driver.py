@@ -1,8 +1,17 @@
+"""Drivers for interacting with power system simulator.
+
+.. moduleauthor:: Hoang Hai Nguyen <nhh311@gmail.com>
+"""
+
+
 from __future__ import division
 from abc import ABCMeta, abstractmethod
 
 
 class PSSDriverAbstract:
+    '''Abstract class for implementing power system simulation-specific driver.
+    '''
+
     __metaclass__ = ABCMeta
 
     @abstractmethod

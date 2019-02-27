@@ -5,6 +5,8 @@ echo "Installing python packages"
 echo "#############################################################################"
 
 sudo apt-get -y install python-pip
+sudo apt-get -y install python-dev
+sudo apt-get -y install libyaml-dev
 sudo apt-get -y install libpcap-dev
 sudo apt-get -y install python-httplib2
 sudo apt-get -y install python-paramiko
@@ -77,5 +79,6 @@ echo "##########################################################################
 echo "Setting up Protocol Buffers and GRPC tools"
 echo "#############################################################################
 sudo pip install protobuf==3.7.0rc2
+sudo pip install cython
 sudo python -m pip install grpcio
 sudo python -m pip install grpcio-tools

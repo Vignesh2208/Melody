@@ -1320,10 +1320,12 @@ replay as soon as possible.</p>
 </div>
 <div class="section" id="module-core.pss_driver">
 <span id="core-pss-driver-module"></span><h2>core.pss_driver module<a class="headerlink" href="#module-core.pss_driver" title="Permalink to this headline">¶</a></h2>
+<p>Drivers for interacting with power system simulator.</p>
 <dl class="class">
 <dt id="core.pss_driver.PSSDriverAbstract">
 <em class="property">class </em><code class="descclassname">core.pss_driver.</code><code class="descname">PSSDriverAbstract</code><a class="headerlink" href="#core.pss_driver.PSSDriverAbstract" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Abstract class for implementing power system simulation-specific driver.</p>
 <dl class="method">
 <dt id="core.pss_driver.PSSDriverAbstract.close">
 <code class="descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.pss_driver.PSSDriverAbstract.close" title="Permalink to this definition">¶</a></dt>
@@ -1364,11 +1366,12 @@ replay as soon as possible.</p>
 </div>
 <div class="section" id="module-core.pss_server">
 <span id="core-pss-server-module"></span><h2>core.pss_server module<a class="headerlink" href="#module-core.pss_server" title="Permalink to this headline">¶</a></h2>
-<p>The proxy process</p>
+<p>The proxy is implemented as a GRPC server.</p>
 <dl class="class">
 <dt id="core.pss_server.Job">
 <em class="property">class </em><code class="descclassname">core.pss_server.</code><code class="descname">Job</code><span class="sig-paren">(</span><em>request</em>, <em>reply</em><span class="sig-paren">)</span><a class="headerlink" href="#core.pss_server.Job" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="method">
+<dd><p>A data structure to store the GRPC read/write request, the reply, and an Event() object to signal when the reply is ready to be returned to the requester.</p>
+<dl class="method">
 <dt id="core.pss_server.Job.to_string">
 <code class="descname">to_string</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.pss_server.Job.to_string" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -1382,17 +1385,50 @@ replay as soon as possible.</p>
 <dl class="method">
 <dt id="core.pss_server.PSSServicer.process">
 <code class="descname">process</code><span class="sig-paren">(</span><em>request</em>, <em>context</em><span class="sig-paren">)</span><a class="headerlink" href="#core.pss_server.PSSServicer.process" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Function to handle GRPC process requests from simulation main loop. Requests, including both read and write requests, are processed in the timing order as given by their timestamps, not by the order in which they were enlisted to the job list. Process time may vary depending on the size of the job list and the type of requests.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>request</strong> (<em>pss_pb2.ProcessRequest</em>) – a GRPC process request object.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a pss_pb2.Status object.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="core.pss_server.PSSServicer.read">
 <code class="descname">read</code><span class="sig-paren">(</span><em>readRequest</em>, <em>context</em><span class="sig-paren">)</span><a class="headerlink" href="#core.pss_server.PSSServicer.read" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Function to handle GRPC read requests from the simulated cyber network. Each GRPC read request is appended to the proxy’s job list, where each job contains the request and its related information. The proxy processes all items in the job list once it receives the GRPC process request. The GRPC process request is invoked by the simulation main loop.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>readRequest</strong> (<em>pss_pb2.ReadRequest</em>) – a GRPC read request object, which is a list of requests sharing the same timestamp.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a pss_pb2.ReadResponse object.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="core.pss_server.PSSServicer.write">
 <code class="descname">write</code><span class="sig-paren">(</span><em>writeRequest</em>, <em>context</em><span class="sig-paren">)</span><a class="headerlink" href="#core.pss_server.PSSServicer.write" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Function to handle GRPC write requests from the simulated cyber network. Similar to GRPC read requests, each GRPC write request is also appended to the proxy’s job list, where each job contains the request and its related information. The proxy processes all items in the job list once it receives the GRPC process request. The GRPC process request is invoked by the simulation main loop.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>writeRequest</strong> (<em>pss_pb2.WriteRequest</em>) – a GRPC write request object, which is a list of requests sharing the same timestamp.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a pss_pb2.WriteStatus object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 </dd></dl>
 
