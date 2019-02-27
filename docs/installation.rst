@@ -25,7 +25,7 @@ To get started on Kronos, please perform the following setup steps:
 
 * Clone Repository into /home/${user} directory. Checkout the master branch::
 
-    git clone https:://github.com/Vignesh2208/Kronos.git
+    git clone https://github.com/Vignesh2208/Kronos.git
 
 * Compile and configure Kronos kernel patch::
  
