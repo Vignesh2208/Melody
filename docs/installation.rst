@@ -38,11 +38,28 @@ To get started on Kronos, please perform the following setup steps:
 
   Under General setup 
 		     -->  Append a local kernel version name. (e.g it could be "-ins-VT")
+		     
+		     .. figure:: images/kernel_config_local_version.png
+  			:alt: Kernel Configuration Screenshot for Local Version
+  			:width: 80%
+  			:align: center
+  
   Under kernel_hacking 
 		     --> enable Collect kernel timers statistics
+		     
+		     .. figure:: images/kernel_config_kernel_timers.png
+  			:alt: Kernel Configuration Screenshot for Kernel Timers
+  			:width: 80%
+  			:align: center
+		     
   Under Processor types and features 
                      --> Transparent Huge Page support 
                                                       --> Transparent Huge Page support sysfs defaults should be set to always
+						      
+		     .. figure:: images/kernel_config_transparent_hugepage_support.png
+  			:alt: Kernel Configuration Screenshot for Transparent Huge Page Support
+  			:width: 80%
+  			:align: center	      
 
 * Reboot the machine and into the new kernel (identifiable by the appended local kernel version name in the previous step)
 
