@@ -6,6 +6,13 @@ Minimum System Requirements
 
 Melody and Kronos have been tested on Ubuntu 16.04.5 LTS. Kronos uses a modified linux kernel v4.4.50 patch. The system should consist of an Intel i5 or later processor with atleast 4 cores and 8 GB of RAM for good performance. It is preferable to install Kronos and Melody inside a VM with Virtualized Intel-VTx and CPU performance counters. This is known to avoid display driver issues on newer laptops/machines.
 
+.. figure:: images/vmware_virtual_machine_settings_virt.png
+  :alt: VMware Virtual Machine Settings Screenshot
+  :width: 80%
+  :align: center
+  
+  Virtualization Settings required for virtual machine in VMware.
+
 Installing Kronos
 ^^^^^^^^^^^^^^^^^
 
