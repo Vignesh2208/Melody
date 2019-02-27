@@ -146,13 +146,13 @@ Melody Post-Installation Steps
 
     Note that it is recommended to install the development version of Matpower by cloning from the github repository, and then run the install_matpower script using Octave. When prompted to select from the MATPOWER Installation Options, choose the following:
     
-        | 3. DO modify the Octave path, and SAVE the updated path
-	|        (so you will not have to do it again next time you run Octave)
+        :3. DO modify the Octave path, and SAVE the updated path
+	        (so you will not have to do it again next time you run Octave)
     
-    .. figure:: images/octave_matpower_installation.png
-  	:alt: Screenshot of Matpower Installation using Octave
-  	:width: 80%
-  	:align: center
+    	.. figure:: images/octave_matpower_installation.png
+  		:alt: Screenshot of Matpower Installation using Octave
+  		:width: 80%
+  		:align: center
 
 * Install protoc (optional) by following these `instructions`_. Protoc can be used for development if the defined protos are to be changed and compiled. Use version >= 3.7.
 
