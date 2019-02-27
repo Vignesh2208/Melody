@@ -131,8 +131,8 @@ Melody Post-Installation Steps
 * Setting up python path::
   
     # Add the following to ~/.bashrc
+    export PYTHONPATH=$PYTHONPATH:<path-to-melody>
     export PYTHONPATH=$PYTHONPATH:<path-to-melody>/src
-    export PYTHONPATH=$PYTHONPATH:<path-to-melody>/src/core
 
     # Do the following
     sudo visudo
