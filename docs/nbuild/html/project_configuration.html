@@ -50,7 +50,7 @@
 </div>
 <div class="section" id="specifying-a-project-configuration">
 <h2>Specifying a Project Configuration<a class="headerlink" href="#specifying-a-project-configuration" title="Permalink to this headline">¶</a></h2>
-<p>The project configuration can be specified by editing the project_configuration.prototxt file located inside the project directory. The project configuration must be specified according to the <a class="reference external" href="https://github.com/Vignesh2208/Melody/blob/Melody_Matpower_project/src/proto/configuration.proto/">configuration.proto</a> format. We briefly describe the format below with an example. For the complete configuration, see <a class="reference external" href="https://github.com/Vignesh2208/Melody/blob/Melody_Matpower_project/src/projects/secondary_voltage_control/project_configuration.prototxt/">this</a>.</p>
+<p>The project configuration can be specified by editing the project_configuration.prototxt file located inside the project directory. The project configuration must be specified according to the <a class="reference external" href="https://github.com/Vignesh2208/Melody/tree/master/src/proto/configuration.proto/">configuration.proto</a> format. We briefly describe the format below with an example. For the complete configuration, see <a class="reference external" href="https://github.com/Vignesh2208/Melody/tree/master/src/projects/secondary_voltage_control/project_configuration.prototxt/">this</a>.</p>
 <ul>
 <li><p class="first">project_name: must match the name of the project directory:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">project_name</span><span class="p">:</span> <span class="s2">&quot;secondary_voltage_control&quot;</span>
@@ -91,6 +91,15 @@
 </pre></div>
 </div>
 <p>The cyber topology implementation may use these parameters to construct a mininet topology by using the mininet Topo API.</p>
+</li>
+<li><p class="first">power_simulation_spec: describes the power simulator driver which will be used by proxy to handle incoming requests:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">power_simulation_spec</span> <span class="p">{</span>
+  <span class="n">power_sim_driver_name</span><span class="p">:</span> <span class="s2">&quot;MatPowerDriver&quot;</span>
+  <span class="n">case_file_path</span><span class="p">:</span> <span class="s2">&quot;/home/moses/Melody/src/power_sim/cases/case39.m&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>In this example, we use the MatPowerDriver. The specified driver name is automatically resolved to a “MatPowerDriver” class located in src/power_sim/drivers/MatPowerDriver.py. The case_file_path is passed as an argument to the “<strong>open</strong>” function implemented by the driver.</p>
 </li>
 <li><p class="first">cyber_physical_map: describes which applications are running on a specific mininet host:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cyber_physical_map</span> <span class="p">{</span>
@@ -162,7 +171,7 @@
   <span class="n">cmd_to_run_at_src</span> <span class="p">:</span>       <span class="s2">&quot;ping -i 0.2 h3&quot;</span>
   <span class="n">cmd_to_run_at_dst</span> <span class="p">:</span>       <span class="s2">&quot;&quot;</span>
   <span class="n">flow_start_time</span>           <span class="p">:</span>       <span class="mi">1</span>
-  <span class="n">description</span>                   <span class="p">:</span>   <span class="s2">&quot;Ping flow between h1 to h3 starting at time 1.0 seconds&quot;</span>
+  <span class="n">description</span>                   <span class="p">:</span>   <span class="s2">&quot;Ping flow between h2 to h3 starting at time 1.0 seconds&quot;</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -180,6 +189,10 @@
 <p>In this example, the pcap specified by the given absolute path is replayed between h1 and h3 when it is “<strong>triggered</strong>”. We describe trigerring replays in a subsequent subsection. Note that a replay flow must have atleast 2 involved_cyber_entities and they must all be valid mininet host names.</p>
 </li>
 </ul>
+</div>
+<div class="section" id="specifying-sending-disturbances-to-the-power-simulation">
+<h2>Specifying/Sending Disturbances to the Power Simulation<a class="headerlink" href="#specifying-sending-disturbances-to-the-power-simulation" title="Permalink to this headline">¶</a></h2>
+<p>A power system may be affected by outside sources of interference such as load changes. Melody allows specifying these disturbances in a file inside the project directory. The disturbances are specified in a “<strong>disturbances.prototxt</strong>” file according to the “<strong>Disturbances</strong>” message defined in src/proto/configuration.proto. In the working example we send five <a class="reference external" href="https://github.com/Vignesh2208/Melody/tree/master/src/projects/secondary_voltage_control/disturbances.prototxt">disturbances</a> at 2, 2.5, 3, 3.5 and 4 seconds after the start of the emulation.</p>
 </div>
 <div class="section" id="creating-custom-cyber-topologies">
 <h2>Creating custom cyber topologies<a class="headerlink" href="#creating-custom-cyber-topologies" title="Permalink to this headline">¶</a></h2>
@@ -199,10 +212,23 @@
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cp</span> <span class="o">~/</span><span class="n">Melody</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">projects</span><span class="o">/&lt;</span><span class="n">project_name</span><span class="o">&gt;/</span><span class="n">blank_application</span><span class="o">.</span><span class="n">py</span> <span class="o">~/</span><span class="n">Melody</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">projects</span><span class="o">/&lt;</span><span class="n">project_name</span><span class="o">&gt;/&lt;</span><span class="n">application_name</span><span class="o">&gt;.</span><span class="n">py</span>
 </pre></div>
 </div>
-<p>You may now edit the file and override specific functions of the <a class="reference external" href="https://github.com/Vignesh2208/Melody/blob/Melody_Matpower_project/src/core/basicHostIPCLayer.py">basicHostIPCLayer</a>  class. Please refer the module documentation for more details. This file &lt;application_name&gt;.py may now be specified as an “application_src” attribute in the project configuration.</p>
+<p>You may now edit the file and override specific functions of the <a class="reference external" href="https://github.com/Vignesh2208/Melody/tree/master/src/core/basicHostIPCLayer.py">basicHostIPCLayer</a>  class. Please refer the module documentation for more details. This file &lt;application_name&gt;.py may now be specified as an “application_src” attribute in the project configuration.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">Do not modify the class name inside the new file. It must remain as hostApplicationLayer.</p>
+</div>
+</div>
+<div class="section" id="changing-the-power-simulation-tool">
+<h2>Changing the Power Simulation Tool<a class="headerlink" href="#changing-the-power-simulation-tool" title="Permalink to this headline">¶</a></h2>
+<p>Melody supports flexible interchange of the power simulation tool used. By default it ships with support for MatPower. If the power simulator is to be changed, a new driver has to be implemented for the specific power simulator in question. The driver must implement the abstract class defined in ~/Melody/src/core/pss_driver.py and it must be placed in ~/Melody/src/power_sim/drivers.</p>
+<p>The following additional edits must also be made to src/core/pss_server.py:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># import the new driver &lt;driver-name&gt;</span>
+<span class="kn">from</span> <span class="nn">src.power_sim.drivers</span> <span class="k">import</span> <span class="o">&lt;</span><span class="n">driver</span><span class="o">-</span><span class="n">name</span><span class="o">&gt;</span>
+
+<span class="c1"># instantiate a driver object in __main__</span>
+<span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">driver_name</span> <span class="o">==</span> <span class="o">&lt;</span><span class="n">driver</span><span class="o">-</span><span class="n">name</span><span class="o">&gt;</span> <span class="p">:</span>
+    <span class="n">pss_driver</span>  <span class="o">=</span> <span class="o">&lt;</span><span class="n">driver</span><span class="o">-</span><span class="n">name</span><span class="o">&gt;.&lt;</span><span class="n">driver</span><span class="o">-</span><span class="n">class</span><span class="o">-</span><span class="n">name</span><span class="o">&gt;</span><span class="p">()</span>
+</pre></div>
 </div>
 </div>
 <div class="section" id="experiment-control-api">
@@ -233,7 +259,7 @@
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">exp</span><span class="o">.</span><span class="n">run_for</span><span class="p">(</span><span class="n">duration_ns</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>This runs the experiment for the specified duration in nano seconds. It then automatically synchronizes with the proxy and the power simulator.</p>
+<p>This runs the experiment for the specified duration in nano seconds. It then automatically synchronizes with the proxy and the power simulator. The mininum duration possible is 100 us. If a duration smaller than 100 us is passed, it will be capped to 100 us.</p>
 </li>
 <li><p class="first">Triggering replays:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">exp</span><span class="o">.</span><span class="n">trigger_nxt_replay</span><span class="p">()</span>
@@ -277,8 +303,10 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Project Configuration</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#creating-a-new-project">Creating a New Project</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#specifying-a-project-configuration">Specifying a Project Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#specifying-sending-disturbances-to-the-power-simulation">Specifying/Sending Disturbances to the Power Simulation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#creating-custom-cyber-topologies">Creating custom cyber topologies</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#creating-custom-host-applications">Creating custom host applications</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#changing-the-power-simulation-tool">Changing the Power Simulation Tool</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#experiment-control-api">Experiment control API</a></li>
 </ul>
 </li>

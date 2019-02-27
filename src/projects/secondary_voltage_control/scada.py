@@ -16,21 +16,24 @@ def loadObjectBinary(filename):
 class SCADA(threading.Thread):
     """A simple Proportional controller which controls voltages of generator busses
     """
-    def __init__(self, host_control_layer, scada_controller_name):
+    def __init__(self, host_control_layer, scada_controller_name, params):
         """
 
         :param host_control_layer: hostApplicationLayer object
         :param scada_controller_name: application_id
         :type scada_controller_name: str
+        :param params: is a dictionary containing parameters of key,value strings
         """
         threading.Thread.__init__(self)
         self.host_control_layer = host_control_layer
         self.stop = False
         self.scada_controller_name = scada_controller_name
+        self.params = params
 
     def run(self, debug=False):
         """Proportional control logic
         """
+        controller_timestep = float(self.params["controller_timestep_secs"])
 
         _vp_nom = np.array([cfg.BUS_VM[bus] for bus in cfg.PILOT_BUS])
         _vg = np.array([cfg.BUS_VM[gen] for gen in cfg.GEN])
@@ -60,14 +63,14 @@ class SCADA(threading.Thread):
                 self.host_control_layer.log.info("Tx New Control Pkt: " + str(pkt_new))
                 self.host_control_layer.tx_pkt_to_powersim_entity(pkt_new.SerializeToString())
 
-            time.sleep(1.5)
+            time.sleep(controller_timestep)
 
 
 class hostApplicationLayer(basicHostIPCLayer):
 
-    def __init__(self, host_id, log_file, application_ids_mapping, managed_application_id):
-        basicHostIPCLayer.__init__(self, host_id, log_file, application_ids_mapping, managed_application_id)
-        self.SCADA = SCADA(self, managed_application_id)
+    def __init__(self, host_id, log_file, application_ids_mapping, managed_application_id, params):
+        basicHostIPCLayer.__init__(self, host_id, log_file, application_ids_mapping, managed_application_id, params)
+        self.SCADA = SCADA(self, managed_application_id, params)
         self.vp = {bus:cfg.BUS_VM[bus] for bus in cfg.PILOT_BUS}
 
     def on_rx_pkt_from_network(self, pkt):

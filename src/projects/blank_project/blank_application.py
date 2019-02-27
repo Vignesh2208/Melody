@@ -5,7 +5,7 @@ from src.core.defines import *
 
 class hostApplicationLayer(basicHostIPCLayer):
 
-    def __init__(self, host_id, log_file, application_ids_mapping, managed_application_id):
+    def __init__(self, host_id, log_file, application_ids_mapping, managed_application_id, params):
         """Initialization
         :param host_id: The mininet host name in which this thread is spawned
         :type host_id: str
@@ -16,8 +16,10 @@ class hostApplicationLayer(basicHostIPCLayer):
         :param managed_application_id: Application id assigned to this co-simulation process
         :type managed_application_id: str
         :return:  None
+	:params: params is a dictionary of string keys and string values. All the attributes specified for 
+                 this application_id in the project_configuration.prototxt file will be passed here through this dictionary
         """
-        basicHostIPCLayer.__init__(self, host_id, log_file, application_ids_mapping, managed_application_id)
+        basicHostIPCLayer.__init__(self, host_id, log_file, application_ids_mapping, managed_application_id, params)
 
 
     def on_rx_pkt_from_network(self, pkt):

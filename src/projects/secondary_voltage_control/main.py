@@ -31,7 +31,7 @@ def main():
     total_time_ran = 0
 
     #MS, SEC are defined in src/core/defines.py
-    timestep_size = 500*MS
+    timestep_size = 10*MS
 
     
     # Main Loop of Co-Simulation

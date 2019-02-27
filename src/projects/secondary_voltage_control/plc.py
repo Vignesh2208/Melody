@@ -9,7 +9,7 @@ class PLC(threading.Thread):
     """A simple PLC implementation. It receives commands from SCADA controller and controls generator bus voltages.
 
     """
-    def __init__(self, host_control_layer, plc_name):
+    def __init__(self, host_control_layer, plc_name, params):
         """
 
         :param host_control_layer: hostApplicationLayer object
@@ -21,32 +21,15 @@ class PLC(threading.Thread):
         self.stop = False
         self.plc_name = plc_name
         self.recv_pkt_queue = []
-
+        self.params = params
 
 
     def run(self):
         request_no = 0
 
-        field_type_to_write = "Vg"
-        obj_type_to_write = "gen"
-
-        #A mapping which specifies which generator bus is controlled by each plc
-        obj_id_to_plc = {
-            "PLC_Gen_Bus_30" : "30",
-            "PLC_Gen_Bus_31": "31",
-            "PLC_Gen_Bus_32": "32",
-            "PLC_Gen_Bus_33": "33",
-            "PLC_Gen_Bus_34": "34",
-            "PLC_Gen_Bus_35": "35",
-            "PLC_Gen_Bus_36": "36",
-            "PLC_Gen_Bus_37": "37",
-            "PLC_Gen_Bus_38": "38",
-            "PLC_Gen_Bus_39": "39",
-        }
-
-        #Get the generator bus controlled by this plc. For instance if plc_name is "PLC_Gen_Bus_30", then it controls
-        #generator bus "30"
-        obj_id_to_write = obj_id_to_plc[self.plc_name]
+        obj_type_to_write = self.params["objtype"]
+        field_type_to_write = self.params["fieldtype"]
+        obj_id_to_write = self.params["objid"]
 
         while not self.stop:
 
@@ -79,10 +62,10 @@ class PLC(threading.Thread):
 
 class hostApplicationLayer(basicHostIPCLayer):
 
-    def __init__(self, host_id, log_file, application_ids_mapping, managed_application_id):
-        basicHostIPCLayer.__init__(self, host_id, log_file, application_ids_mapping, managed_application_id)
+    def __init__(self, host_id, log_file, application_ids_mapping, managed_application_id, params):
+        basicHostIPCLayer.__init__(self, host_id, log_file, application_ids_mapping, managed_application_id, params)
         self.cmd_lock = threading.Lock()
-        self.PLC = PLC(self, self.managed_application_id)
+        self.PLC = PLC(self, self.managed_application_id, params)
 
 
     def on_rx_pkt_from_network(self, pkt):

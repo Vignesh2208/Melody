@@ -31,7 +31,8 @@ class Experiment(NetPower):
                  replay_traffic_flows,
                  cyber_host_apps,
                  enable_kronos,
-                 relative_cpu_speed):
+                 relative_cpu_speed,
+                 power_sim_spec):
         super(
             Experiment,
             self).__init__(
@@ -44,7 +45,8 @@ class Experiment(NetPower):
             replay_traffic_flows,
             cyber_host_apps,
             enable_kronos,
-            relative_cpu_speed)
+            relative_cpu_speed,
+            power_sim_spec)
 
 
 def get_network_configuration(project_config):
@@ -156,6 +158,10 @@ def get_experiment_container(project_config, project_run_time_args):
         replay_flows.append(ReplayTrafficFlow(involved_nodes=involved_nodes,
                                               pcap_file_path=replay_flow_spec.pcap_file_path))
 
+    power_sim_spec = {}
+    power_sim_spec["driver_name"] = project_config.power_simulation_spec.power_sim_driver_name
+    power_sim_spec["case_file_path"] = project_config.power_simulation_spec.case_file_path
+
     return Experiment(run_time=project_run_time_args["run_time"],
                       network_configuration=network_configuration,
                       project_dir=project_run_time_args["project_directory"],
@@ -165,7 +171,8 @@ def get_experiment_container(project_config, project_run_time_args):
                       replay_traffic_flows=replay_flows,
                       cyber_host_apps=cyber_host_apps,
                       enable_kronos=project_run_time_args["enable_kronos"],
-                      relative_cpu_speed=project_run_time_args["rel_cpu_speed"])
+                      relative_cpu_speed=project_run_time_args["rel_cpu_speed"],
+                      power_sim_spec=power_sim_spec)
 
 
 def parse_experiment_configuration(project_run_time_args):
@@ -189,5 +196,10 @@ def parse_experiment_configuration(project_run_time_args):
         text_format.Parse(f.read(), project_config)
 
     return get_experiment_container(project_config, project_run_time_args)
+
+
+
+
+
 
 #def get_application_id_params(config_file, )

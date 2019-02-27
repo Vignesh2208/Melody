@@ -125,6 +125,9 @@ def main(host_id, net_cfg_file, log_file, run_time, project_name, app_layer_file
     :return: None
     """
     powersim_ids_mapping = extract_mappings(net_cfg_file)
+    with open("/tmp/application_params.json") as f:
+        app_attributes = json.load(f)
+
     
     log = logger.Logger(log_file, "Host" + str(host_id) + ": ")
 
@@ -132,6 +135,8 @@ def main(host_id, net_cfg_file, log_file, run_time, project_name, app_layer_file
     log.info("Managed PowerSim ID: " + str(managed_application_id))
     script_location = os.path.dirname(os.path.realpath(__file__))
     project_location = script_location + "/../projects/" + project_name + "/"
+
+    attributes = app_attributes[managed_application_id]
     shared_buf_array = shared_buffer_array()
 
     if app_layer_file != "NONE":
@@ -152,7 +157,7 @@ def main(host_id, net_cfg_file, log_file, run_time, project_name, app_layer_file
     log.info("Successfully opened an inter process communication channel !")
     sys.stdout.flush()
 
-    ipc_layer = host_ipc_layer(host_id, log_file, powersim_ids_mapping, managed_application_id)
+    ipc_layer = host_ipc_layer(host_id, log_file, powersim_ids_mapping, managed_application_id, attributes)
     log.info("Waiting for start command ... ")
     sys.stdout.flush()
     recv_msg = ''

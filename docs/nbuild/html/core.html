@@ -45,7 +45,7 @@
 <p>Default co-simulation application layer.</p>
 <dl class="class">
 <dt id="core.basicHostIPCLayer.basicHostIPCLayer">
-<em class="property">class </em><code class="descclassname">core.basicHostIPCLayer.</code><code class="descname">basicHostIPCLayer</code><span class="sig-paren">(</span><em>host_id</em>, <em>log_file</em>, <em>application_ids_mapping</em>, <em>managed_application_id</em><span class="sig-paren">)</span><a class="headerlink" href="#core.basicHostIPCLayer.basicHostIPCLayer" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">core.basicHostIPCLayer.</code><code class="descname">basicHostIPCLayer</code><span class="sig-paren">(</span><em>host_id</em>, <em>log_file</em>, <em>application_ids_mapping</em>, <em>managed_application_id</em>, <em>params</em><span class="sig-paren">)</span><a class="headerlink" href="#core.basicHostIPCLayer.basicHostIPCLayer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">threading.Thread</span></code></p>
 <p>Default application layer of co-simulation processes spawned inside mininet hosts</p>
 <p>A co-simulation process may implement a specific application layer by inheriting from this class.
@@ -718,7 +718,7 @@ at the time of the call.</td>
 <p>Melody main orchestrator logic</p>
 <dl class="class">
 <dt id="core.net_power.NetPower">
-<em class="property">class </em><code class="descclassname">core.net_power.</code><code class="descname">NetPower</code><span class="sig-paren">(</span><em>run_time</em>, <em>network_configuration</em>, <em>project_dir</em>, <em>base_dir</em>, <em>log_dir</em>, <em>emulated_background_traffic_flows</em>, <em>replay_traffic_flows</em>, <em>cyber_host_apps</em>, <em>enable_kronos</em>, <em>rel_cpu_speed</em><span class="sig-paren">)</span><a class="headerlink" href="#core.net_power.NetPower" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">core.net_power.</code><code class="descname">NetPower</code><span class="sig-paren">(</span><em>run_time</em>, <em>network_configuration</em>, <em>project_dir</em>, <em>base_dir</em>, <em>log_dir</em>, <em>emulated_background_traffic_flows</em>, <em>replay_traffic_flows</em>, <em>cyber_host_apps</em>, <em>enable_kronos</em>, <em>rel_cpu_speed</em>, <em>power_sim_spec</em><span class="sig-paren">)</span><a class="headerlink" href="#core.net_power.NetPower" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Class which starts mininet, proxy, disturbance generator and manages their operation.</p>
 <p>It initializes the project and brings it under the control of Kronos. It provides API to drive the co-simulation
@@ -852,6 +852,11 @@ of mininet and a power simulator.</p>
 </tbody>
 </table>
 </dd></dl>
+
+<dl class="method">
+<dt id="core.net_power.NetPower.get_application_id_attributes">
+<code class="descname">get_application_id_attributes</code><span class="sig-paren">(</span><em>application_id</em>, <em>project_config_file</em><span class="sig-paren">)</span><a class="headerlink" href="#core.net_power.NetPower.get_application_id_attributes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="core.net_power.NetPower.get_emulation_driver_params">
@@ -1253,7 +1258,7 @@ replay as soon as possible.</p>
 <p>Parsing project configuration specified in src/proto/configuration.proto format</p>
 <dl class="class">
 <dt id="core.parse_project_configuration.Experiment">
-<em class="property">class </em><code class="descclassname">core.parse_project_configuration.</code><code class="descname">Experiment</code><span class="sig-paren">(</span><em>run_time</em>, <em>network_configuration</em>, <em>project_dir</em>, <em>base_dir</em>, <em>log_dir</em>, <em>emulated_background_traffic_flows</em>, <em>replay_traffic_flows</em>, <em>cyber_host_apps</em>, <em>enable_kronos</em>, <em>relative_cpu_speed</em><span class="sig-paren">)</span><a class="headerlink" href="#core.parse_project_configuration.Experiment" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">core.parse_project_configuration.</code><code class="descname">Experiment</code><span class="sig-paren">(</span><em>run_time</em>, <em>network_configuration</em>, <em>project_dir</em>, <em>base_dir</em>, <em>log_dir</em>, <em>emulated_background_traffic_flows</em>, <em>replay_traffic_flows</em>, <em>cyber_host_apps</em>, <em>enable_kronos</em>, <em>relative_cpu_speed</em>, <em>power_sim_spec</em><span class="sig-paren">)</span><a class="headerlink" href="#core.parse_project_configuration.Experiment" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">src.core.net_power.NetPower</span></code></p>
 <p>Experiment object inherits from src.core.NetPower</p>
 <p>It provides API to control/start/stop the experiment.</p>
@@ -1316,47 +1321,6 @@ replay as soon as possible.</p>
 <div class="section" id="module-core.pss_driver">
 <span id="core-pss-driver-module"></span><h2>core.pss_driver module<a class="headerlink" href="#module-core.pss_driver" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
-<dt id="core.pss_driver.MatPowerDriver">
-<em class="property">class </em><code class="descclassname">core.pss_driver.</code><code class="descname">MatPowerDriver</code><span class="sig-paren">(</span><em>workingdir='.'</em><span class="sig-paren">)</span><a class="headerlink" href="#core.pss_driver.MatPowerDriver" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#core.pss_driver.PSSDriverAbstract" title="core.pss_driver.PSSDriverAbstract"><code class="xref py py-class docutils literal notranslate"><span class="pre">core.pss_driver.PSSDriverAbstract</span></code></a></p>
-<dl class="method">
-<dt id="core.pss_driver.MatPowerDriver.close">
-<code class="descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.pss_driver.MatPowerDriver.close" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="core.pss_driver.MatPowerDriver.open">
-<code class="descname">open</code><span class="sig-paren">(</span><em>case</em><span class="sig-paren">)</span><a class="headerlink" href="#core.pss_driver.MatPowerDriver.open" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="core.pss_driver.MatPowerDriver.read">
-<code class="descname">read</code><span class="sig-paren">(</span><em>objtype</em>, <em>objid</em>, <em>fieldtype</em><span class="sig-paren">)</span><a class="headerlink" href="#core.pss_driver.MatPowerDriver.read" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="core.pss_driver.MatPowerDriver.run_pf">
-<code class="descname">run_pf</code><span class="sig-paren">(</span><em>method=None</em><span class="sig-paren">)</span><a class="headerlink" href="#core.pss_driver.MatPowerDriver.run_pf" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="core.pss_driver.MatPowerDriver.save">
-<code class="descname">save</code><span class="sig-paren">(</span><em>newcase</em><span class="sig-paren">)</span><a class="headerlink" href="#core.pss_driver.MatPowerDriver.save" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="core.pss_driver.MatPowerDriver.write">
-<code class="descname">write</code><span class="sig-paren">(</span><em>objtype</em>, <em>objid</em>, <em>fieldtype</em>, <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#core.pss_driver.MatPowerDriver.write" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="core.pss_driver.MatPowerDriver.write_multiple">
-<code class="descname">write_multiple</code><span class="sig-paren">(</span><em>writelist</em><span class="sig-paren">)</span><a class="headerlink" href="#core.pss_driver.MatPowerDriver.write_multiple" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="class">
 <dt id="core.pss_driver.PSSDriverAbstract">
 <em class="property">class </em><code class="descclassname">core.pss_driver.</code><code class="descname">PSSDriverAbstract</code><a class="headerlink" href="#core.pss_driver.PSSDriverAbstract" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
@@ -1413,7 +1377,7 @@ replay as soon as possible.</p>
 
 <dl class="class">
 <dt id="core.pss_server.PSSServicer">
-<em class="property">class </em><code class="descclassname">core.pss_server.</code><code class="descname">PSSServicer</code><span class="sig-paren">(</span><em>case_directory</em>, <em>case_name</em><span class="sig-paren">)</span><a class="headerlink" href="#core.pss_server.PSSServicer" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">core.pss_server.</code><code class="descname">PSSServicer</code><span class="sig-paren">(</span><em>pssDriver</em>, <em>caseFile</em><span class="sig-paren">)</span><a class="headerlink" href="#core.pss_server.PSSServicer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">src.proto.pss_pb2_grpc.pssServicer</span></code></p>
 <dl class="method">
 <dt id="core.pss_server.PSSServicer.process">

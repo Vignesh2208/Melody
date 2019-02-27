@@ -48,7 +48,8 @@ To get started on Kronos, please perform the following setup steps:
 
 * Build and load Kronos module::
  
-    cd ~/Kronos && sudo make build load
+    cd ~/Kronos
+    sudo make build load
 
 Verifying Installation
 ----------------------
@@ -57,11 +58,13 @@ The following tests (optional) can be run to verify the Kronos installation:
 
 * INS-SCHED specific test::
     
-    cd ~/Kronos/src/tracer/tests && sudo make run_repeatability_test
+    cd ~/Kronos/src/tracer/tests
+    sudo make run_repeatability_test
 
 * Kronos integration tests::
 
-    cd ~/Kronos/tests && sudo make run
+    cd ~/Kronos/test
+    sudo make run
 
 All of the above tests should print a SUCCESS message.
 
@@ -70,7 +73,8 @@ Loading Kronos
 
 Inorder to use Kronos, it must be loaded after being built and after each VM/machine reboot. It can be loaded with the following command::
 
-  cd ~/Kronos && sudo make load
+  cd ~/Kronos
+  sudo make load
 
 
 Installing Melody

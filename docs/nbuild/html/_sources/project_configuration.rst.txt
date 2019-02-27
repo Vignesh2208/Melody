@@ -13,7 +13,7 @@ Creating a New Project
 Specifying a Project Configuration
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The project configuration can be specified by editing the project_configuration.prototxt file located inside the project directory. The project configuration must be specified according to the `configuration.proto <https://github.com/Vignesh2208/Melody/blob/Melody_Matpower_project/src/proto/configuration.proto/>`_ format. We briefly describe the format below with an example. For the complete configuration, see `this <https://github.com/Vignesh2208/Melody/blob/Melody_Matpower_project/src/projects/secondary_voltage_control/project_configuration.prototxt/>`_. 
+The project configuration can be specified by editing the project_configuration.prototxt file located inside the project directory. The project configuration must be specified according to the `configuration.proto <https://github.com/Vignesh2208/Melody/tree/master/src/proto/configuration.proto/>`_ format. We briefly describe the format below with an example. For the complete configuration, see `this <https://github.com/Vignesh2208/Melody/tree/master/src/projects/secondary_voltage_control/project_configuration.prototxt/>`_. 
 
 * project_name: must match the name of the project directory::
   
@@ -53,6 +53,15 @@ The project configuration can be specified by editing the project_configuration.
              }
 
   The cyber topology implementation may use these parameters to construct a mininet topology by using the mininet Topo API.
+
+* power_simulation_spec: describes the power simulator driver which will be used by proxy to handle incoming requests::
+
+    power_simulation_spec {
+      power_sim_driver_name: "MatPowerDriver"
+      case_file_path: "/home/moses/Melody/src/power_sim/cases/case39.m"
+    }
+
+  In this example, we use the MatPowerDriver. The specified driver name is automatically resolved to a "MatPowerDriver" class located in src/power_sim/drivers/MatPowerDriver.py. The case_file_path is passed as an argument to the "**open**" function implemented by the driver.
 
 * cyber_physical_map: describes which applications are running on a specific mininet host::
 
@@ -125,7 +134,7 @@ The project configuration can be specified by editing the project_configuration.
       cmd_to_run_at_src	:	"ping -i 0.2 h3"
       cmd_to_run_at_dst	:	""
       flow_start_time		:	1
-      description		    :	"Ping flow between h1 to h3 starting at time 1.0 seconds"
+      description		    :	"Ping flow between h2 to h3 starting at time 1.0 seconds"
     }
 
   In this examples, it describes a ping flow which is run between h2 and h3 every 200 ms starting at time 1.0 seconds from the beginning of the emulation. Note that the ping is simply given the name of the destination host h3 instead of its IP address. This is because Melody can automatically resolve the host name into its IP address at run time before executing the command. 
@@ -140,6 +149,12 @@ The project configuration can be specified by editing the project_configuration.
     }
 
   In this example, the pcap specified by the given absolute path is replayed between h1 and h3 when it is "**triggered**". We describe trigerring replays in a subsequent subsection. Note that a replay flow must have atleast 2 involved_cyber_entities and they must all be valid mininet host names.
+
+Specifying/Sending Disturbances to the Power Simulation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+A power system may be affected by outside sources of interference such as load changes. Melody allows specifying these disturbances in a file inside the project directory. The disturbances are specified in a "**disturbances.prototxt**" file according to the "**Disturbances**" message defined in src/proto/configuration.proto. In the working example we send five `disturbances <https://github.com/Vignesh2208/Melody/tree/master/src/projects/secondary_voltage_control/disturbances.prototxt>`_ at 2, 2.5, 3, 3.5 and 4 seconds after the start of the emulation.
+
 
 Creating custom cyber topologies
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -159,9 +174,24 @@ To create a new application inside a <project_name>, follow the steps given belo
 
   cp ~/Melody/src/projects/<project_name>/blank_application.py ~/Melody/src/projects/<project_name>/<application_name>.py
 
-You may now edit the file and override specific functions of the `basicHostIPCLayer <https://github.com/Vignesh2208/Melody/blob/Melody_Matpower_project/src/core/basicHostIPCLayer.py>`_  class. Please refer the module documentation for more details. This file <application_name>.py may now be specified as an "application_src" attribute in the project configuration.
+You may now edit the file and override specific functions of the `basicHostIPCLayer <https://github.com/Vignesh2208/Melody/tree/master/src/core/basicHostIPCLayer.py>`_  class. Please refer the module documentation for more details. This file <application_name>.py may now be specified as an "application_src" attribute in the project configuration.
 
 .. note:: Do not modify the class name inside the new file. It must remain as hostApplicationLayer.
+
+Changing the Power Simulation Tool
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Melody supports flexible interchange of the power simulation tool used. By default it ships with support for MatPower. If the power simulator is to be changed, a new driver has to be implemented for the specific power simulator in question. The driver must implement the abstract class defined in ~/Melody/src/core/pss_driver.py and it must be placed in ~/Melody/src/power_sim/drivers.
+
+The following additional edits must also be made to src/core/pss_server.py::
+
+  # import the new driver <driver-name>
+  from src.power_sim.drivers import <driver-name>
+
+  # instantiate a driver object in __main__
+  if args.driver_name == <driver-name> :
+      pss_driver  = <driver-name>.<driver-class-name>()
+
 
 Experiment control API
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -191,7 +221,7 @@ Melody offers some simple API to control experiment flow. These may be used insi
 
       exp.run_for(duration_ns)
 
-   This runs the experiment for the specified duration in nano seconds. It then automatically synchronizes with the proxy and the power simulator.
+   This runs the experiment for the specified duration in nano seconds. It then automatically synchronizes with the proxy and the power simulator. The mininum duration possible is 100 us. If a duration smaller than 100 us is passed, it will be capped to 100 us.
 
 *  Triggering replays::
 

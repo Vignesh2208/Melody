@@ -16,7 +16,7 @@ class basicHostIPCLayer(threading.Thread):
     Co-simulation processes may interact with the power simulator through by making GRPC
     calls to the proxy.
     """
-    def __init__(self, host_id, log_file, application_ids_mapping, managed_application_id):
+    def __init__(self, host_id, log_file, application_ids_mapping, managed_application_id, params):
         """Initialization
 
         :param host_id: The mininet host name in which this thread is spawned
@@ -27,6 +27,7 @@ class basicHostIPCLayer(threading.Thread):
         :type application_ids_mapping: dict
         :param managed_application_id: Application id assigned to this co-simulation process
         :type managed_application_id: str
+        :param params: is a dictionary containing parameters of key,value strings
         :return:  None
         """
         threading.Thread.__init__(self)
@@ -41,6 +42,7 @@ class basicHostIPCLayer(threading.Thread):
 
         self.log = logger.Logger(log_file, "Host " + str(host_id) + " IPC Thread")
         self.raw_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.params = params
 
     def get_curr_cmd(self):
         """Gets the current pending command sent by the co-simulation host process

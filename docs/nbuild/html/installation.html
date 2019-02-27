@@ -91,7 +91,8 @@ Over the course of kernel setup, a menu config would appear.</p>
 <li><p class="first">Reboot the machine and into the new kernel (identifiable by the appended local kernel version name in the previous step)</p>
 </li>
 <li><p class="first">Build and load Kronos module:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">~/</span><span class="n">Kronos</span> <span class="o">&amp;&amp;</span> <span class="n">sudo</span> <span class="n">make</span> <span class="n">build</span> <span class="n">load</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">~/</span><span class="n">Kronos</span>
+<span class="n">sudo</span> <span class="n">make</span> <span class="n">build</span> <span class="n">load</span>
 </pre></div>
 </div>
 </li>
@@ -101,12 +102,14 @@ Over the course of kernel setup, a menu config would appear.</p>
 <p>The following tests (optional) can be run to verify the Kronos installation:</p>
 <ul>
 <li><p class="first">INS-SCHED specific test:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">~/</span><span class="n">Kronos</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">tracer</span><span class="o">/</span><span class="n">tests</span> <span class="o">&amp;&amp;</span> <span class="n">sudo</span> <span class="n">make</span> <span class="n">run_repeatability_test</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">~/</span><span class="n">Kronos</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">tracer</span><span class="o">/</span><span class="n">tests</span>
+<span class="n">sudo</span> <span class="n">make</span> <span class="n">run_repeatability_test</span>
 </pre></div>
 </div>
 </li>
 <li><p class="first">Kronos integration tests:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">~/</span><span class="n">Kronos</span><span class="o">/</span><span class="n">tests</span> <span class="o">&amp;&amp;</span> <span class="n">sudo</span> <span class="n">make</span> <span class="n">run</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">~/</span><span class="n">Kronos</span><span class="o">/</span><span class="n">test</span>
+<span class="n">sudo</span> <span class="n">make</span> <span class="n">run</span>
 </pre></div>
 </div>
 </li>
@@ -117,7 +120,8 @@ Over the course of kernel setup, a menu config would appear.</p>
 <div class="section" id="loading-kronos">
 <h2>Loading Kronos<a class="headerlink" href="#loading-kronos" title="Permalink to this headline">¶</a></h2>
 <p>Inorder to use Kronos, it must be loaded after being built and after each VM/machine reboot. It can be loaded with the following command:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">~/</span><span class="n">Kronos</span> <span class="o">&amp;&amp;</span> <span class="n">sudo</span> <span class="n">make</span> <span class="n">load</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">~/</span><span class="n">Kronos</span>
+<span class="n">sudo</span> <span class="n">make</span> <span class="n">load</span>
 </pre></div>
 </div>
 </div>

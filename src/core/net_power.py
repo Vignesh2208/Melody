@@ -20,6 +20,8 @@ import os
 import tempfile
 import threading
 from sys import stdout
+from src.proto import configuration_pb2
+from google.protobuf import text_format
 
 
 class NetPower(object):
@@ -40,7 +42,8 @@ class NetPower(object):
                  replay_traffic_flows,
                  cyber_host_apps,
                  enable_kronos,
-                 rel_cpu_speed):
+                 rel_cpu_speed,
+                 power_sim_spec):
         """Initializing Melody
 
         :param run_time: Total running time of co-simulation in seconds
@@ -63,6 +66,8 @@ class NetPower(object):
         :type enable_kronos: int
         :param rel_cpu_speed: Relative cpu speed for virtual time advancement
         :type rel_cpu_speed: int
+        :param power_sim_spec: A dictionary containing powersim driver name and case file path
+        :type power_sim_spec: dict
         """
 
         self.network_configuration = network_configuration
@@ -80,6 +85,7 @@ class NetPower(object):
         self.enable_kronos = enable_kronos
         self.rel_cpu_speed = rel_cpu_speed
         self.cpus_subset = "1-12"
+        self.power_sim_spec = power_sim_spec
 
         self.pid_list = []
         self.host_pids = {}
@@ -126,6 +132,7 @@ class NetPower(object):
 
                 if len(self.host_to_application_ids[mininet_host_name]) == 0 :
                     self.host_to_application_ids[mininet_host_name].append("DUMMY_" + str(mininet_host_name))
+        self.attributes_dict = {}
         self.open_main_cmd_channel_buffers()
         
         self.check_kronos_loaded()
@@ -137,7 +144,27 @@ class NetPower(object):
         self.prev_queued_disturbance_threads = []
         self.nxt_queued_disturbance_threads = []
         self.total_elapsed_virtual_time = 0.0
+
         set_cpu_affinity(int(os.getpid()))
+
+    def get_application_id_attributes(self, application_id, project_config_file):
+
+        if not os.path.isfile(project_config_file):
+            print "Project config file is incorrect !"
+            return {}
+        project_config = configuration_pb2.ProjectConfiguration()
+        with open(project_config_file, 'r') as f:
+            text_format.Parse(f.read(), project_config)
+
+        attr = {}
+
+        for mapping in project_config.cyber_physical_map:
+            for mapped_app in mapping.mapped_application:
+                if mapped_app.application_id == application_id:
+                    for attribute in mapped_app.attribute:
+                        attr[attribute.name] = attribute.value
+                    break
+        return attr
 
     def get_emulation_driver_params(self):
         """Construct list of emulated traffic flow objects
@@ -233,6 +260,8 @@ class NetPower(object):
                     self.powersim_id_to_host[entity_id]["mapped_host_ip"] = "10.0.0." + str(mininet_host_name[1:])
 
             json.dump(self.powersim_id_to_host, outfile)
+        with open("/tmp/application_params.json", "w") as outfile:
+            json.dump(self.attributes_dict, outfile)
 
     def cmd_to_start_process_under_tracer(self, cmd_to_run):
         """Gets a command string which can be started under kronos
@@ -467,7 +496,8 @@ class NetPower(object):
         """
         print "Melody >> Starting proxy ... "
         proxy_script = self.base_dir + "/src/core/pss_server.py"
-        cmd_to_run = "python " + str(proxy_script) + " --project_dir=" + self.project_dir + " --listen_ip=11.0.0.255"
+        cmd_to_run = "python " + str(proxy_script) + " --driver_name=" + self.power_sim_spec["driver_name"] + \
+                     " --listen_ip=11.0.0.255" + " --case_file_path=" + self.power_sim_spec["case_file_path"]
         cmd_to_run += ' > /tmp/proxy_log.txt 2>&1 & echo $! '
         self.proxy_pid = -1
         with tempfile.NamedTemporaryFile() as f:
@@ -619,7 +649,8 @@ class NetPower(object):
 
         :return: None or exits on Failure to open shared buffer channels
         """
-        print "Melody >> Opening main inter-process communication channels ..." 
+        print "Melody >> Opening main inter-process communication channels ..."
+
         for mininet_host in self.network_configuration.mininet_obj.hosts:
             if mininet_host.name in self.host_to_application_ids:
                 for mapped_application_id in self.host_to_application_ids[mininet_host.name]:
@@ -627,6 +658,9 @@ class NetPower(object):
                     if result == BUF_NOT_INITIALIZED or result == FAILURE:
                         print "Shared Buffer open failed! Buffer not initialized for host: " + str(mininet_host.name)
                         sys.exit(0)
+
+                    self.attributes_dict[mapped_application_id] = self.get_application_id_attributes(
+                        mapped_application_id, self.project_dir + "/project_configuration.prototxt")
 
             result = self.shared_buf_array.open(bufName=str(mininet_host.name) + "-replay-main-cmd-channel-buffer",
                                                 isProxy=True)
@@ -831,7 +865,7 @@ class NetPower(object):
             if self.timeslice > 20 * NS_PER_MS:
                 n_rounds = 1
             else:
-                n_rounds = int(20 * NS_PER_MS / self.timeslice)
+                n_rounds = int(10 * NS_PER_MS / self.timeslice)
             n_total_rounds = int(run_time_ns / self.timeslice)
             n_rounds_progressed = 0
             while True:

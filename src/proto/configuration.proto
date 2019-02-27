@@ -30,6 +30,16 @@ message CyberEmulationSpecification {
 	repeated TopologyParameter additional_topology_param = 6;   // additional topology specific parameters
 }
 
+message PowerSimulationSpecification {
+	required string power_sim_driver_name = 1;
+	required string case_file_path = 2;
+}
+
+message ApplicationAttributes {
+	required string name = 1;
+	required string value = 2;
+}
+
 // Specifying attributes of an application which runs on a mininet host
 message MappedApplication {
     required string application_id = 1;     // ID assigned to the application
@@ -37,6 +47,8 @@ message MappedApplication {
                                             // Note that this is relative to the project directory. So absolute
                                             // path may not be specified.
     required int32 listen_port = 3;         // port on which the application should listen
+
+	repeated ApplicationAttributes attribute = 4; // application specific params
 }
 
 // Specifying the set of applications which can run on a mininet host
@@ -72,12 +84,13 @@ message ProjectConfiguration {
 
 	required string project_name = 1;       //Name of the project
 	required CyberEmulationSpecification cyber_emulation_spec = 2;      // Specification of the cyber emulation
-	repeated CyberPhysicalMap cyber_physical_map = 3;   // Specifying the mapping between applications which would
+	required PowerSimulationSpecification power_simulation_spec = 3;    // Specification of the power simulation
+	repeated CyberPhysicalMap cyber_physical_map = 4;   // Specifying the mapping between applications which would
 	                                                    // interact with the power simulator and mininet hosts on
 	                                                    // which they should run
-	repeated BackGroundFlow bg_flow = 4;    // Specifying background network flows which are initiated over
+	repeated BackGroundFlow bg_flow = 5;    // Specifying background network flows which are initiated over
 	                                        // the cyber network
-	repeated PcapReplayFlow replay_flow = 5;    // Specifying pcap replays which are initiated over the cyber network
+	repeated PcapReplayFlow replay_flow = 6;    // Specifying pcap replays which are initiated over the cyber network
 
 }
 

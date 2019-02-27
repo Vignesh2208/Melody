@@ -13,7 +13,10 @@ from src.proto import pss_pb2
 from src.proto import pss_pb2_grpc
 import argparse
 import signal
-from pss_driver import MatPowerDriver
+import os
+
+from src.power_sim.drivers import MatPowerDriver
+
 
 
 kill_now = False
@@ -39,11 +42,11 @@ class Job():
 
 
 class PSSServicer(pss_pb2_grpc.pssServicer): # a.k.a. the Proxy
-    def __init__(self,  case_directory, case_name):
+    def __init__(self,  pssDriver, caseFile):
         self.jobs = []
         self.jobLock = Lock()  # thread-safe access to job list
-        self.mp = MatPowerDriver("/tmp")
-        self.mp.open(case_directory + "/" + case_name)
+        self.driver = pssDriver
+        self.driver.open(caseFile)
         self.rlog = logging.getLogger(REQUEST_LOG)
         self.plog = logging.getLogger(PROCESS_LOG)
 
@@ -94,7 +97,7 @@ class PSSServicer(pss_pb2_grpc.pssServicer): # a.k.a. the Proxy
                     for req in request.request:
                         res = readResponse.response.add()
                         res.id = req.id
-                        res.value = self.mp.read(req.objtype, req.objid, req.fieldtype)
+                        res.value = self.driver.read(req.objtype, req.objid, req.fieldtype)
                         self.plog.info("%s,READ,%s,%s,%s,%s,%s" % (
                         request.timestamp, req.id, req.objtype, req.objid, req.fieldtype, res.value))
 
@@ -103,8 +106,8 @@ class PSSServicer(pss_pb2_grpc.pssServicer): # a.k.a. the Proxy
 
                 elif type(request) == pss_pb2.WriteRequest:
                     writelist = [(req.objtype, req.objid, req.fieldtype, req.value) for req in request.request]
-                    self.mp.write_multiple(writelist)
-                    self.mp.run_pf()
+                    self.driver.write_multiple(writelist)
+                    self.driver.run_pf()
 
                     writeStatus = pss_pb2.WriteStatus()
 
@@ -126,8 +129,9 @@ class PSSServicer(pss_pb2_grpc.pssServicer): # a.k.a. the Proxy
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--project_directory", dest="project_directory")
+    parser.add_argument("--driver_name", dest="driver_name")
     parser.add_argument("--listen_ip", dest="listen_ip")
+    parser.add_argument("--case_file_path", dest="case_file_path")
 
     global kill_now
     kill_now = False
@@ -136,22 +140,37 @@ if __name__ == '__main__':
     signal.signal(signal.SIGINT, exit_gracefully)
     args = parser.parse_args()
 
-    print "Project Directory: ", args.project_directory
+    print "Driver Name: ", args.driver_name
+    print "Case File: ", args.case_file_path
     print "Listening ON: ", args.listen_ip, " Port: 50051"
     sys.stdout.flush()
     logging.basicConfig(level=logging.DEBUG)
-    # how many workers is sufficient?
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10000))
-    pss_pb2_grpc.add_pssServicer_to_server(PSSServicer(args.project_directory, "powersim_case"), server)
+
+    if not os.path.isfile(args.case_file_path):
+        print "Specified case file not found !"
+        sys.stdout.flush()
+        raise NotImplementedError
+
+    if args.driver_name == "MatPowerDriver":
+        pss_driver = MatPowerDriver.MatPowerDriver()
+
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=1000), maximum_concurrent_rpcs = 1000)
+    pss_pb2_grpc.add_pssServicer_to_server(PSSServicer(pss_driver, args.case_file_path), server)
     server.add_insecure_port(args.listen_ip + ':50051')
     server.start()
+
+
     
     try:
         while True:
             time.sleep(1.0)
             if kill_now:
+                print "Exiting gracefully !"
+                sys.stdout.flush()
                 server.stop(0)
                 break
     except KeyboardInterrupt:
+        print "Exiting gracefully !"
+        sys.stdout.flush()
         server.stop(0)
 

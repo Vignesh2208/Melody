@@ -67,6 +67,11 @@ Disturbances
 
 Starting the example
 --------------------
+Load Kronos once upon restart::
+
+  cd ~/Kronos
+  sudo make load
+
 Switch to the project directory::
 
   cd ~/Melody/src/projects/secondary_voltage_control

@@ -9,43 +9,32 @@ from src.proto import css_pb2
 class PMU(threading.Thread):
     """Simple PMU implementation. It reads pilot buses ans sends the reading to a SCADA controller.
     """
-    def __init__(self, host_control_layer, pmu_name):
+    def __init__(self, host_control_layer, pmu_name, params):
         """
 
         :param host_control_layer: hostApplicationLayer object
         :param pmu_name: application_id
         :type pmu_name: str
+        :param params: is a dictionary containing parameters of key,value strings
         """
         threading.Thread.__init__(self)
         self.host_control_layer = host_control_layer
         self.stop = False
         self.pmu_name = pmu_name
         self.raw_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.params = params
+
 
 
 
     def run(self):
 
-        obj_type_to_read = "bus"
-        field_type_to_read = "Vm"
+        print "params = ", self.params
 
-        #A local mapping which specifies for each pmu, which object-id (i.e pilot bus) it should read
-        #For instance if the PMU's name is "PMU_Pilot_Bus_2", then it reads from pilot bus number 2
-        obj_id_to_pmu = {
-            "PMU_Pilot_Bus_2" : "2",
-            "PMU_Pilot_Bus_6" : "6",
-            "PMU_Pilot_Bus_9": "9",
-            "PMU_Pilot_Bus_10": "10",
-            "PMU_Pilot_Bus_19": "19",
-            "PMU_Pilot_Bus_20": "20",
-            "PMU_Pilot_Bus_22": "22",
-            "PMU_Pilot_Bus_23": "23",
-            "PMU_Pilot_Bus_25": "25",
-            "PMU_Pilot_Bus_29": "29",
-        }
-
-        assert self.pmu_name in obj_id_to_pmu
-        obj_id_to_read = obj_id_to_pmu[self.pmu_name]
+        obj_type_to_read = self.params["objtype"]
+        field_type_to_read = self.params["fieldtype"]
+        obj_id_to_read = self.params["objid"]
+        polling_time = float(self.params["polling_time_secs"])
 
         request_no = 0
         while not self.stop:
@@ -81,7 +70,7 @@ class PMU(threading.Thread):
             #Sends pilot bus reading to SCADA controller.
             self.host_control_layer.log.info("Sending Reading: \n" + str(pkt))
             self.host_control_layer.tx_pkt_to_powersim_entity(pkt.SerializeToString())
-            time.sleep(1)
+            time.sleep(polling_time)
             request_no += 1
 
 
@@ -89,9 +78,9 @@ class PMU(threading.Thread):
 
 class hostApplicationLayer(basicHostIPCLayer):
 
-    def __init__(self, host_id, log_file, application_ids_mapping, managed_application_id):
-        basicHostIPCLayer.__init__(self, host_id, log_file, application_ids_mapping, managed_application_id)
-        self.PMU = PMU(self, managed_application_id)
+    def __init__(self, host_id, log_file, application_ids_mapping, managed_application_id, params):
+        basicHostIPCLayer.__init__(self, host_id, log_file, application_ids_mapping, managed_application_id, params)
+        self.PMU = PMU(self, managed_application_id, params)
 
 
 
