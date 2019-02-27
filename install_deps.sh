@@ -70,14 +70,14 @@ sudo sh ~/Downloads/openvswitch-2.4.0/start_ovs.sh
 
 echo "#############################################################################"
 echo "Setting up Octave"
-echo "#############################################################################
+echo "#############################################################################"
 sudo add-apt-repository ppa:octave/stable
 sudo apt-get update
 sudo apt-get install octave
 
 echo "#############################################################################"
 echo "Setting up Protocol Buffers and GRPC tools"
-echo "#############################################################################
+echo "#############################################################################"
 sudo pip install protobuf==3.7.0rc2
 sudo pip install cython
 sudo python -m pip install grpcio
