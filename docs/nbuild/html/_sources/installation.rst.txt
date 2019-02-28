@@ -6,6 +6,13 @@ Minimum System Requirements
 
 Melody and Kronos have been tested on Ubuntu 16.04.5 LTS. Kronos uses a modified linux kernel v4.4.50 patch. The system should consist of an Intel i5 or later processor with atleast 4 cores and 8 GB of RAM for good performance. It is preferable to install Kronos and Melody inside a VM with Virtualized Intel-VTx and CPU performance counters. This is known to avoid display driver issues on newer laptops/machines.
 
+.. figure:: images/vmware_virtual_machine_settings_virt.png
+  :alt: VMware Virtual Machine Settings Screenshot
+  :width: 80%
+  :align: center
+  
+  Virtualization Settings required for virtual machine in VMware.
+
 Installing Kronos
 ^^^^^^^^^^^^^^^^^
 
@@ -25,24 +32,42 @@ To get started on Kronos, please perform the following setup steps:
 
 * Clone Repository into /home/${user} directory. Checkout the master branch::
 
-    git clone https:://github.com/Vignesh2208/Kronos.git
+    git clone https://github.com/Vignesh2208/Kronos.git
 
 * Compile and configure Kronos kernel patch::
  
-    cd ~/Kronos && sudo make setup_kernel
+    cd ~/Kronos 
+    sudo make setup_kernel
 
   During the setup process do not allow kexec tools to handle kernel reboots.
   Over the course of kernel setup, a menu config would appear. 
 
   The following additional config steps should also be performed inside menuconfig:
 
-  Under General setup 
+  1. Under General setup 
 		     -->  Append a local kernel version name. (e.g it could be "-ins-VT")
-  Under kernel_hacking 
+		     
+		     .. figure:: images/kernel_config_local_version.png
+  			:alt: Kernel Configuration Screenshot for Local Version
+  			:width: 80%
+  			:align: center
+  
+  #. Under kernel_hacking 
 		     --> enable Collect kernel timers statistics
-  Under Processor types and features 
+		     
+		     .. figure:: images/kernel_config_kernel_timers.png
+  			:alt: Kernel Configuration Screenshot for Kernel Timers
+  			:width: 80%
+  			:align: center
+		     
+  #. Under Processor types and features 
                      --> Transparent Huge Page support 
                                                       --> Transparent Huge Page support sysfs defaults should be set to always
+						      
+		     .. figure:: images/kernel_config_transparent_hugepage_support.png
+  			:alt: Kernel Configuration Screenshot for Transparent Huge Page Support
+  			:width: 80%
+  			:align: center	      
 
 * Reboot the machine and into the new kernel (identifiable by the appended local kernel version name in the previous step)
 
@@ -96,7 +121,8 @@ Melody depends on the following packages and tools:
 
 It may be installed before/after Kronos installation. Please follow the steps given below to download and install melody and its dependencies. It is preferable to install Melody in the /home/${user} directory::
 
-  cd ~/ && git clone https://github.com/Vignesh2208/Melody.git
+  cd ~/ 
+  git clone https://github.com/Vignesh2208/Melody.git
   cd ~/Melody
   sudo ./install_deps.sh
   sudo python setup.py install
@@ -107,8 +133,11 @@ Melody Post-Installation Steps
 * Setting up python path::
   
     # Add the following to ~/.bashrc
+    export PYTHONPATH=$PYTHONPATH:<path-to-melody>
     export PYTHONPATH=$PYTHONPATH:<path-to-melody>/src
-    export PYTHONPATH=$PYTHONPATH:<path-to-melody>/src/core
+    
+    # Update .bashrc
+    source ~/.bashrc
 
     # Do the following
     sudo visudo
@@ -119,6 +148,18 @@ Melody Post-Installation Steps
 * Install Matpower by following instructions listed `here`_.
 
 .. _here: https://github.com/MATPOWER/matpower/blob/master/README.md
+
+  Note that it is recommended to install the development version of Matpower by cloning from the github repository, and then run the install_matpower script using Octave. When prompted to select from the MATPOWER Installation Options, choose the following:
+    
+    	+------------------------------------------------------------------------+
+  	| 3. DO modify the Octave path, and SAVE the updated path                |
+	|        (so you will not have to do it again next time you run Octave)  |
+	+------------------------------------------------------------------------+
+	
+    	.. figure:: images/octave_matpower_installation.png
+  		:alt: Screenshot of Matpower Installation using Octave
+  		:width: 80%
+  		:align: center
 
 * Install protoc (optional) by following these `instructions`_. Protoc can be used for development if the defined protos are to be changed and compiled. Use version >= 3.7.
 
