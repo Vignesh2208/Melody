@@ -25,6 +25,8 @@ def main():
                                 "enable_kronos": args.enable_kronos,
                                 "rel_cpu_speed": args.rel_cpu_speed,
                             }
+
+    
     exp = parse_experiment_configuration(project_run_time_args)
     exp.initialize_project()
 

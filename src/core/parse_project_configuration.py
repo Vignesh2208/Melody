@@ -7,11 +7,10 @@ import sys
 from src.cyber_network.network_configuration import NetworkConfiguration
 from src.cyber_network.traffic_flow import EmulatedTrafficFlow, ReplayTrafficFlow
 from src.cyber_network.traffic_flow import TRAFFIC_FLOW_ONE_SHOT
-from src.core.net_power import NetPower
+from src.core.net_power import *
 from src.core.shared_buffer import *
 from src.proto import configuration_pb2
 from google.protobuf import text_format
-
 
 
 
@@ -94,23 +93,24 @@ def get_network_configuration(project_config):
             print "ERROR: Cyber Node Role Not specified for ", curr_host, " in the project configuration!"
             sys.exit(0)
 
-
+    
     network_configuration = NetworkConfiguration(
-        controller="ryu",
-        controller_ip="127.0.0.1",
-        controller_port=6633,
-        controller_api_base_url="http://localhost:8080/",
-        controller_api_user_name="admin",
-        controller_api_password="admin",
-        topo_name=cyber_emulation_spec.topology_name,
-        topo_params=topology_params,
-        conf_root="configurations/",
-        synthesis_name="SimpleMACSynthesis",
-        synthesis_params={},
-        roles=cyber_node_roles,
-        project_name=project_config.project_name,
-    )
+            controller="ryu",
+            controller_ip="127.0.0.1",
+            controller_port=6633,
+            controller_api_base_url="http://localhost:8080/",
+            controller_api_user_name="admin",
+            controller_api_password="admin",
+            topo_name=cyber_emulation_spec.topology_name,
+            topo_params=topology_params,
+            conf_root="configurations/",
+            synthesis_name="SimpleMACSynthesis",
+            synthesis_params={},
+            roles=cyber_node_roles,
+            project_name=project_config.project_name,
+        )
 
+    
     network_configuration.setup_network_graph(mininet_setup_gap=1, synthesis_setup_gap=1)
     return network_configuration, cyber_host_apps
 
@@ -186,16 +186,19 @@ def parse_experiment_configuration(project_run_time_args):
     assert "enable_kronos" in project_run_time_args, "ERROR: Kronos state is not specified !"
     assert "rel_cpu_speed" in project_run_time_args, "ERROR: Kronos specific relative cpu speed is not specified !"
 
-    configuration_file = project_run_time_args["project_directory"] + "/project_configuration.prototxt"
-    if not os.path.isfile(configuration_file):
-        print "Configuration file not found for the project !"
-        sys.exit(0)
+    print "############################  STARTING UP ##############################"
+    with stderr_redirected():
+        configuration_file = project_run_time_args["project_directory"] + "/project_configuration.prototxt"
+        if not os.path.isfile(configuration_file):
+            print "Configuration file not found for the project !"
+            sys.exit(0)
 
-    project_config = configuration_pb2.ProjectConfiguration()
-    with open(configuration_file, 'r') as f:
-        text_format.Parse(f.read(), project_config)
+        project_config = configuration_pb2.ProjectConfiguration()
+        with open(configuration_file, 'r') as f:
+            text_format.Parse(f.read(), project_config)
 
-    return get_experiment_container(project_config, project_run_time_args)
+        exp =  get_experiment_container(project_config, project_run_time_args)
+        return exp
 
 
 
