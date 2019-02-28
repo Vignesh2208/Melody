@@ -17,7 +17,8 @@ sudo pip install dpkt
 sudo pip install pcapy
 sudo pip install six==1.9.0
 sudo pip install networkx
-
+sudo pip install pandas
+sudo pip install plotly
 sudo apt-get -y install inetutils-ping
 sudo apt-get -y install openssh-server
 sudo apt-get -y install expect
