@@ -5,21 +5,21 @@ Anomaly Detection Purposes.
 ```
 Dependencies:
 
-#python-httplib2
-#python-ryu-4.0 or above
-#ryu-bin and ryu-manager
-#python 2.7
-#numpy
-#pypcapfile
-#openssh-server
-#paramiko
-#dpkt
-#expect 
-#mininet
-#openvswitch
-#protobuf version >= 3.7
-#grpc (sudo pip install grpcio && sudo pip install grpcio-tools)
-#Kronos
+python-httplib2
+python-ryu-4.0 or above
+ryu-bin and ryu-manager
+python 2.7
+numpy
+pypcapfile
+openssh-server
+paramiko
+dpkt
+expect 
+mininet
+openvswitch
+protobuf version >= 3.7
+grpc (sudo pip install grpcio && sudo pip install grpcio-tools)
+Kronos
 
 ```
 
@@ -49,8 +49,6 @@ Pre-Run Steps:
 ```
 
 ```
-TODO: the powersim case name ishardcoded for now, need to fix it
-Need to change the name of mapped_powersim_entity_id
-Change PSSService to remove MatPower dependency
-
+Find detailed documentation for the project at:
+https://melody-by-projectmoses.readthedocs.io/
 ```

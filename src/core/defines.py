@@ -83,7 +83,7 @@ def rpc_read(readlist):
         response = {int(res.id):res.value for res in readResponse.response}
         return [response[id] for id in xrange(0,counter)]
     except:
-        print "Error in creating RPC read request ..."
+        print "Error in creating RPC read request ! Check /tmp/proxy_log.txt"
         sys.stdout.flush()
         return None
 
@@ -119,7 +119,7 @@ def rpc_write(writelist):
         status = {int(res.id): res.status for res in writeStatus.status}
         return [status[id] for id in xrange(0, counter)]
     except:
-        print "Error in creating RPC write request ..."
+        print "Error in creating RPC write request !. Check /tmp/proxy_log.txt"
         sys.stdout.flush()
         return None
 
@@ -137,7 +137,7 @@ def rpc_process():
             request = pss_pb2.ProcessRequest(id=getid())
             stub.process(request)
     except:
-        print "Error creating RPC process request !"
+        print "Error creating RPC process request ! This could be due to some error in proxy. Check /tmp/proxy_log.txt"
 
 
 def inet_to_str(inet):

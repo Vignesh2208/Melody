@@ -21,6 +21,8 @@ from src.cyber_network.synthesis.flow_specification import FlowSpecification
 from src.core.kronos_helper_functions import *
 import subprocess
 
+
+
 class NetworkConfiguration(object):
 
     def __init__(self,
@@ -249,7 +251,7 @@ class NetworkConfiguration(object):
             self.ng = NetworkGraph(network_configuration=self)
             self.ng.parse_network_graph()
 
-        print "total_flow_rules:", self.ng.total_flow_rules
+        #print "total_flow_rules:", self.ng.total_flow_rules
 
         return self.ng
 
@@ -267,13 +269,13 @@ class NetworkConfiguration(object):
                                                                                 ip=self.controller_ip,
                                                                                 port=self.controller_port),
                                        switch=partial(OVSSwitch, protocols='OpenFlow13'))
-
+           
             self.mininet_obj.start()
 
     def cleanup_mininet(self):
 
         if self.mininet_obj:
-            print "Mininet cleanup..."
+            print "Melody >> Cleaning up mininet ..."
             clean_up_cmd = ["sudo", "mn", "-c"]
 
             with open("/tmp/mininet_cleanup.txt", "wb") as out, open("/tmp/mininet_cleanup.txt", "wb") as err:

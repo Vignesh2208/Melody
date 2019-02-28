@@ -40,6 +40,10 @@
 <div class="section" id="minimum-system-requirements">
 <h2>Minimum System Requirements<a class="headerlink" href="#minimum-system-requirements" title="Permalink to this headline">¶</a></h2>
 <p>Melody and Kronos have been tested on Ubuntu 16.04.5 LTS. Kronos uses a modified linux kernel v4.4.50 patch. The system should consist of an Intel i5 or later processor with atleast 4 cores and 8 GB of RAM for good performance. It is preferable to install Kronos and Melody inside a VM with Virtualized Intel-VTx and CPU performance counters. This is known to avoid display driver issues on newer laptops/machines.</p>
+<div class="figure align-center" id="id1">
+<a class="reference internal image-reference" href="_images/vmware_virtual_machine_settings_virt.png"><img alt="VMware Virtual Machine Settings Screenshot" src="_images/vmware_virtual_machine_settings_virt.png" style="width: 80%;" /></a>
+<p class="caption"><span class="caption-text">Virtualization Settings required for virtual machine in VMware.</span></p>
+</div>
 </div>
 <div class="section" id="installing-kronos">
 <h2>Installing Kronos<a class="headerlink" href="#installing-kronos" title="Permalink to this headline">¶</a></h2>
@@ -61,32 +65,51 @@
 </div>
 </li>
 <li><p class="first">Clone Repository into /home/${user} directory. Checkout the master branch:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">::</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">Vignesh2208</span><span class="o">/</span><span class="n">Kronos</span><span class="o">.</span><span class="n">git</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">Vignesh2208</span><span class="o">/</span><span class="n">Kronos</span><span class="o">.</span><span class="n">git</span>
 </pre></div>
 </div>
 </li>
 <li><p class="first">Compile and configure Kronos kernel patch:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">~/</span><span class="n">Kronos</span> <span class="o">&amp;&amp;</span> <span class="n">sudo</span> <span class="n">make</span> <span class="n">setup_kernel</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">~/</span><span class="n">Kronos</span>
+<span class="n">sudo</span> <span class="n">make</span> <span class="n">setup_kernel</span>
 </pre></div>
 </div>
 <p>During the setup process do not allow kexec tools to handle kernel reboots.
 Over the course of kernel setup, a menu config would appear.</p>
 <p>The following additional config steps should also be performed inside menuconfig:</p>
-<dl class="docutils">
+<ol class="arabic">
+<li><dl class="first docutils">
 <dt>Under General setup</dt>
-<dd><p class="first last">–&gt;  Append a local kernel version name. (e.g it could be “-ins-VT”)</p>
+<dd><p class="first">–&gt;  Append a local kernel version name. (e.g it could be “-ins-VT”)</p>
+<div class="last figure align-center">
+<a class="reference internal image-reference" href="_images/kernel_config_local_version.png"><img alt="Kernel Configuration Screenshot for Local Version" src="_images/kernel_config_local_version.png" style="width: 80%;" /></a>
+</div>
 </dd>
+</dl>
+</li>
+<li><dl class="first docutils">
 <dt>Under kernel_hacking</dt>
-<dd><p class="first last">–&gt; enable Collect kernel timers statistics</p>
+<dd><p class="first">–&gt; enable Collect kernel timers statistics</p>
+<div class="last figure align-center">
+<a class="reference internal image-reference" href="_images/kernel_config_kernel_timers.png"><img alt="Kernel Configuration Screenshot for Kernel Timers" src="_images/kernel_config_kernel_timers.png" style="width: 80%;" /></a>
+</div>
 </dd>
+</dl>
+</li>
+<li><dl class="first docutils">
 <dt>Under Processor types and features</dt>
-<dd><dl class="first last docutils">
+<dd><dl class="first docutils">
 <dt>–&gt; Transparent Huge Page support</dt>
 <dd><p class="first last">–&gt; Transparent Huge Page support sysfs defaults should be set to always</p>
 </dd>
 </dl>
+<div class="last figure align-center">
+<a class="reference internal image-reference" href="_images/kernel_config_transparent_hugepage_support.png"><img alt="Kernel Configuration Screenshot for Transparent Huge Page Support" src="_images/kernel_config_transparent_hugepage_support.png" style="width: 80%;" /></a>
+</div>
 </dd>
 </dl>
+</li>
+</ol>
 </li>
 <li><p class="first">Reboot the machine and into the new kernel (identifiable by the appended local kernel version name in the previous step)</p>
 </li>
@@ -143,7 +166,8 @@ Over the course of kernel setup, a menu config would appear.</p>
 <li>Matpower</li>
 </ul>
 <p>It may be installed before/after Kronos installation. Please follow the steps given below to download and install melody and its dependencies. It is preferable to install Melody in the /home/${user} directory:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">~/</span> <span class="o">&amp;&amp;</span> <span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">Vignesh2208</span><span class="o">/</span><span class="n">Melody</span><span class="o">.</span><span class="n">git</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">~/</span>
+<span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">Vignesh2208</span><span class="o">/</span><span class="n">Melody</span><span class="o">.</span><span class="n">git</span>
 <span class="n">cd</span> <span class="o">~/</span><span class="n">Melody</span>
 <span class="n">sudo</span> <span class="o">./</span><span class="n">install_deps</span><span class="o">.</span><span class="n">sh</span>
 <span class="n">sudo</span> <span class="n">python</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">install</span>
@@ -154,8 +178,11 @@ Over the course of kernel setup, a menu config would appear.</p>
 <ul>
 <li><p class="first">Setting up python path:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span># Add the following to ~/.bashrc
+export PYTHONPATH=$PYTHONPATH:&lt;path-to-melody&gt;
 export PYTHONPATH=$PYTHONPATH:&lt;path-to-melody&gt;/src
-export PYTHONPATH=$PYTHONPATH:&lt;path-to-melody&gt;/src/core
+
+# Update .bashrc
+source ~/.bashrc
 
 # Do the following
 sudo visudo
@@ -168,6 +195,30 @@ Defaults env_keep += &quot;PYTHONPATH&quot;
 <li><p class="first">Install Matpower by following instructions listed <a class="reference external" href="https://github.com/MATPOWER/matpower/blob/master/README.md">here</a>.</p>
 </li>
 </ul>
+<blockquote>
+<div><p>Note that it is recommended to install the development version of Matpower by cloning from the github repository, and then run the install_matpower script using Octave. When prompted to select from the MATPOWER Installation Options, choose the following:</p>
+<blockquote>
+<div><table border="1" class="docutils">
+<colgroup>
+<col width="100%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><ol class="first last arabic simple" start="3">
+<li><dl class="first docutils">
+<dt>DO modify the Octave path, and SAVE the updated path</dt>
+<dd>(so you will not have to do it again next time you run Octave)</dd>
+</dl>
+</li>
+</ol>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="figure align-center">
+<a class="reference internal image-reference" href="_images/octave_matpower_installation.png"><img alt="Screenshot of Matpower Installation using Octave" src="_images/octave_matpower_installation.png" style="width: 80%;" /></a>
+</div>
+</div></blockquote>
+</div></blockquote>
 <ul class="simple">
 <li>Install protoc (optional) by following these <a class="reference external" href="http://google.github.io/proto-lens/installing-protoc.html">instructions</a>. Protoc can be used for development if the defined protos are to be changed and compiled. Use version &gt;= 3.7.</li>
 </ul>
@@ -234,6 +285,7 @@ Please follow the instructions given below to download and use the VM:</p>
 <li class="toctree-l1"><a class="reference internal" href="project_configuration.html">Project Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quick_start.html">Quick Start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="modules.html">Python Modules Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tracked_bugs.html">Tracked Bugs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contact.html">Contact</a></li>
 </ul>
 

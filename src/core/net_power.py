@@ -23,6 +23,33 @@ from sys import stdout
 from src.proto import configuration_pb2
 from google.protobuf import text_format
 
+from contextlib import contextmanager
+import sys, os
+
+@contextmanager
+def stderr_redirected():
+    """Lifted from: https://stackoverflow.com/questions/4675728/redirect-stdout-to-a-file-in-python
+
+    This is the only way I've found to redirect stdout with curses. This way the
+    output from questionnaire can be piped to another program, without piping
+    what's written to the terminal by the prompters.
+    """
+    stderr = sys.stderr
+    to = os.devnull
+
+    to_file =  open(to, 'wb')
+    stderr_fd = stderr.fileno()
+    with os.fdopen(os.dup(stderr_fd), 'wb') as copied:
+        try:
+            os.dup2(to_file.fileno(), stderr_fd)  
+        except ValueError:  # filename
+            os.dup2(to_file.fileno(), stderr_fd) 
+        try:
+            yield stderr
+        finally:
+            os.dup2(copied.fileno(), stderr_fd) 
+            to_file.close()
+
 
 class NetPower(object):
     """Class which starts mininet, proxy, disturbance generator and manages their operation.
@@ -70,6 +97,7 @@ class NetPower(object):
         :type power_sim_spec: dict
         """
 
+        
         self.network_configuration = network_configuration
         self.switch_2_switch_latency = self.network_configuration.topo_params["switch_switch_link_latency_range"][0]
         self.host_2_switch_latency = self.network_configuration.topo_params["host_switch_link_latency_range"][0]
@@ -289,7 +317,7 @@ class NetPower(object):
 
         :return: None
         """
-        print "Melody >> Starting all hosts: "
+        print "Melody >> Starting all hosts ... "
 
         for mininet_host in self.network_configuration.mininet_obj.hosts:
             for mapped_application_id in self.host_to_application_ids[mininet_host.name]:
@@ -416,7 +444,7 @@ class NetPower(object):
             pass
 
         capture_cmd = capture_cmd + " -i " + str(host_obj.name + "-eth0")
-        capture_cmd = capture_cmd + " -w " + capture_log_file + " -U -B 20000 ip & > /dev/null"
+        capture_cmd = capture_cmd + " -w " + capture_log_file + " -U -B 20000 ip & > /dev/null 2>&1"
         self.n_actual_tcpdump_procs = self.n_actual_tcpdump_procs + 1
 
         host_obj.cmd(capture_cmd)
@@ -449,7 +477,7 @@ class NetPower(object):
                     pass
 
                 capture_cmd = capture_cmd + " -i " + str(switchIntfs.name)
-                capture_cmd = capture_cmd + " -w " + capture_log_file + " -B 40000 ip & > /dev/null"
+                capture_cmd = capture_cmd + " -w " + capture_log_file + " -B 40000 ip > /dev/null 2>&1 &"
                 self.n_actual_tcpdump_procs = self.n_actual_tcpdump_procs + 1
 
                 proc = subprocess.Popen(capture_cmd, shell=True)
@@ -499,6 +527,10 @@ class NetPower(object):
         cmd_to_run = "python " + str(proxy_script) + " --driver_name=" + self.power_sim_spec["driver_name"] + \
                      " --listen_ip=11.0.0.255" + " --case_file_path=" + self.power_sim_spec["case_file_path"]
         cmd_to_run += ' > /tmp/proxy_log.txt 2>&1 & echo $! '
+
+        if not os.path.isfile(self.power_sim_spec["case_file_path"]):
+            print "Melody >> WARNING: Please check your configuration. Case file path: %s is incorrect!"\
+                  %self.power_sim_spec["case_file_path"]
         self.proxy_pid = -1
         with tempfile.NamedTemporaryFile() as f:
             os.system(cmd_to_run + '>> ' + f.name)
@@ -514,7 +546,7 @@ class NetPower(object):
 
         :return: None
         """
-        print "Melody >> Starting Control Network"
+        print "Melody >> Starting grpc control network ..."
         for host in self.network_configuration.mininet_obj.hosts:
             host_number = host.name[1:]
             host.cmd("ip link add eth0 type veth peer name " + host.name + "base netns 1")
@@ -559,7 +591,7 @@ class NetPower(object):
 
         :return: None
         """
-        print "Melody >> Stopping Control Network"
+        print "Melody >> Stopping grpc control network ..."
         os.system("sudo kill -9 " + str(self.proxy_pid))
         os.system("sudo fuser -k 50051/tcp")
         time.sleep(5.0)
@@ -725,8 +757,8 @@ class NetPower(object):
 
         :return: None
         """
-
-        print "Melody >> In Warm up phase waiting for pcaps to be loaded by all replay drivers ... "
+        print "########################################################################"
+        print "\nMelody >> Waiting for pcaps to be loaded by all replay drivers ... "
         n_warmup_rounds = 0
         outstanding_hosts = self.nodes_involved_in_replay
         while True:
@@ -751,7 +783,7 @@ class NetPower(object):
                 time.sleep(0.1)
         if self.enable_kronos == 1 :
             print "\nMelody >> All pcaps loaded in ", float(n_warmup_rounds*self.timeslice)/float(SEC), " seconds (virtual time)"
-        print "\nMelody >> All replay drivers ready to proceed ..."
+        print "\nMelody >> All replay drivers ready to proceed ...\n"
         sys.stdout.flush()
 
     def print_topo_info(self):
@@ -786,13 +818,17 @@ class NetPower(object):
             self.stop_synchronized_experiment()
             time.sleep(5)
         else:
+            print "\nMelody >> Stopping Experiment ..."
             self.trigger_all_processes("EXIT")
             self.replay_orchestrator.send_command("EXIT")
             for pid in self.pid_list:
                 os.system("sudo kill -9 %s"%str(pid))
             time.sleep(5)
 
-        print "\n"
+        print "########################################################################\n"
+        sys.stdout.flush()
+        print "Melody >> Stopping all packet captures ..."
+        sys.stdout.flush()
         self.enable_TCP_RST()
         self.stop_control_network()
         self.network_configuration.cleanup_mininet()

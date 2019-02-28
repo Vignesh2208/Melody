@@ -4,6 +4,8 @@
 """
 import uuid
 import json
+import os
+import sys
 
 
 TRAFFIC_FLOW_ONE_SHOT = 'OneShot'
@@ -89,7 +91,11 @@ class ReplayFlowsContainer(object):
         self.replay_flows = []
 
     def add_replay_flow(self, replay_flow_obj):
-        self.replay_flows.append(replay_flow_obj)
+        if not os.path.isfile(replay_flow_obj.pcap_file_path):
+            sys.stdout.write("Melody >> WARNING: Ignoring replay pcap: %s because pcap file path is incorrect!\n"%replay_flow_obj.pcap_file_path)
+            sys.stdout.flush()
+        else:
+            self.replay_flows.append(replay_flow_obj)
 
     def get_all_involved_nodes(self):
         involved_nodes = []
@@ -102,7 +108,12 @@ class ReplayFlowsContainer(object):
     def create_replay_plan(self):
         replay_plan = []
         for replay_flow_obj in self.replay_flows:
-            replay_plan.append(replay_flow_obj.get_attributes())
+            attributes = replay_flow_obj.get_attributes()
+            if os.path.isfile(attributes["pcap_file_path"]):
+                replay_plan.append(replay_flow_obj.get_attributes())
+            else:
+                sys.stdout.write("Ignoring replay pcap: %s because pcap file path is incorrect !\n"%attributes["pcap_file_path"])
+                sys.stdout.flush()
         with open("/tmp/replay_plan.json", "w") as outfile:
             json.dump(replay_plan, outfile)
 
