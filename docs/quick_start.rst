@@ -86,7 +86,7 @@ Generated Log files
 -------------------
 Log files and pcaps which are generated are stored inside::
 
-  ~/Melogy/logs/secondary_voltage_control
+  ~/Melody/logs/secondary_voltage_control
 
 One log file is generated for each application id.
 
