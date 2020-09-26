@@ -6,25 +6,26 @@
 
 import datetime
 import json
-from datetime import datetime
-from shared_buffer import *
-from src.cyber_network.traffic_flow import ReplayFlowsContainer
-from src.core.replay_orchestrator import ReplayOrchestrator
-from src.utils.util_functions import *
-from defines import *
 import kronos_functions
-from kronos_helper_functions import *
 import subprocess
 import sys
 import os
 import tempfile
 import threading
-from sys import stdout
-from src.proto import configuration_pb2
-from google.protobuf import text_format
+import logging
 
+import src.core.defines as defines
+
+from src.cyber_network.traffic_flow import ReplayFlowsContainer
+from src.core.replay_orchestrator import ReplayOrchestrator
+from src.utils.util_functions import *
+from src.proto import configuration_pb2
+from sys import stdout
+from google.protobuf import text_format
 from contextlib import contextmanager
-import sys, os
+from datetime import datetime
+from src.core.shared_buffer import *
+
 
 @contextmanager
 def stderr_redirected():
@@ -99,8 +100,10 @@ class NetPower(object):
 
         
         self.network_configuration = network_configuration
-        self.switch_2_switch_latency = self.network_configuration.topo_params["switch_switch_link_latency_range"][0]
-        self.host_2_switch_latency = self.network_configuration.topo_params["host_switch_link_latency_range"][0]
+        self.switch_2_switch_latency = self.network_configuration.topo_params[
+            "switch_switch_link_latency_range"][0]
+        self.host_2_switch_latency = self.network_configuration.topo_params[
+            "host_switch_link_latency_range"][0]
 
         # Dictionary containing mappings, keyed by the id of the mininet host
         # Value is a tuple -- (IP Address, Role)
@@ -133,7 +136,7 @@ class NetPower(object):
         self.node_mappings_file_path = "/tmp/node_mappings.json"
         self.log_dir = log_dir
         self.flag_debug = True  # flag for debug printing
-        self.nxt_tracer_id = 0
+        self.nxt_tracer_id = 1
 
         # Clean up logs from previous run(s)
         os.system("rm -rf " + self.log_dir + "/*")
@@ -149,36 +152,60 @@ class NetPower(object):
 
         if not os.path.exists(self.log_dir):
             os.makedirs(self.log_dir)
-        for i in xrange(0, len(self.network_configuration.roles)):
+        for i in range(0, len(self.network_configuration.roles)):
                 mininet_host_name = self.network_configuration.roles[i][0]
 
                 self.host_to_application_ids[mininet_host_name] = []
                 port_mapping = self.network_configuration.roles[i][1]
                 for mapping in port_mapping:
                     entity_id = mapping[0]
-                    self.host_to_application_ids[mininet_host_name].append(entity_id)
+                    self.host_to_application_ids[mininet_host_name].append(
+                        entity_id)
 
                 if len(self.host_to_application_ids[mininet_host_name]) == 0 :
-                    self.host_to_application_ids[mininet_host_name].append("DUMMY_" + str(mininet_host_name))
+                    self.host_to_application_ids[mininet_host_name].append(
+                        f"DUMMY_{mininet_host_name}")
         self.attributes_dict = {}
         self.open_main_cmd_channel_buffers()
         
-        self.check_kronos_loaded()
+        
         self.replay_flows_container = ReplayFlowsContainer()
         for flow in self.replay_traffic_flows:
             self.replay_flows_container.add_replay_flow(flow)
-        self.nodes_involved_in_replay = self.replay_flows_container.get_all_involved_nodes()
+        self.nodes_involved_in_replay = \
+            self.replay_flows_container.get_all_involved_nodes()
         self.replay_orchestrator = None
         self.prev_queued_disturbance_threads = []
         self.nxt_queued_disturbance_threads = []
         self.total_elapsed_virtual_time = 0.0
 
-        set_cpu_affinity(int(os.getpid()))
 
-    def get_application_id_attributes(self, application_id, project_config_file):
+    def get_number_of_tracers(self):
+        num_tracers = 0
+
+        # All host processes
+        for mininet_host in self.network_configuration.mininet_obj.hosts:
+            num_tracers += len(self.host_to_application_ids[mininet_host.name])
+
+        # All switch processes
+        num_tracers += len(self.network_configuration.mininet_obj.switches)
+
+        # All emulation drivers
+        num_tracers += len(self.emulation_driver_params)
+
+        # All replay drivers
+        num_tracers += len(self.nodes_involved_in_replay)
+
+        # Disturbance generator
+        num_tracers += 1
+        return num_tracers
+        
+
+    def get_application_id_attributes(self, application_id,
+        project_config_file):
 
         if not os.path.isfile(project_config_file):
-            print "Project config file is incorrect !"
+            logging.info("Project config file is incorrect !")
             return {}
         project_config = configuration_pb2.ProjectConfiguration()
         with open(project_config_file, 'r') as f:
@@ -200,7 +227,8 @@ class NetPower(object):
         :return: None
         """
         for bg_flow in self.emulated_background_traffic_flows:
-            self.emulation_driver_params.append(bg_flow.get_emulated_driver_attributes(for_client=True))
+            self.emulation_driver_params.append(
+                bg_flow.get_emulated_driver_attributes(for_client=True))
             attr = bg_flow.get_emulated_driver_attributes(for_client=False)
             if attr is not None:
                 self.emulation_driver_params.append(attr)
@@ -210,21 +238,23 @@ class NetPower(object):
 
         :return: Fails if Kronos is enabled but not loaded
         """
-        if self.enable_kronos == 1 and is_module_loaded() == 0:
-            print "ERROR: Kronos is not loaded. Please load and try again!"
-            sys.exit(0)
-        elif self.enable_kronos == 1:
-            self.initialize_kronos_exp()
+        if self.enable_kronos == 1 and not os.path.isfile('/proc/kronos'):
+            logging.error(
+                "Kronos is not loaded. Please load it and try again!")
+            sys.exit(defines.EXIT_FAILURE)
 
     def initialize_kronos_exp(self):
         """Initialize Kronos exp
 
         :return: None
         """
-        ret = kronos_functions.initializeExp(1)
+        self.check_kronos_loaded()
+        num_tracers = self.get_number_of_tracers()
+        logging.info(f"Initializing Kronos experiment with {num_tracers} nodes")
+        ret = kronos_functions.initializeExp(num_tracers)
         if ret < 0:
-            print "ERROR:  Kronos initialization failed. Exiting ..."
-            sys.exit(0)
+            logging.error("Kronos initialization failed. Exiting ...")
+            sys.exit(defines.EXIT_FAILURE)
 
     def start_synchronized_experiment(self):
         """Start a synchronized kronos experiment if kronos is enabled
@@ -233,17 +263,21 @@ class NetPower(object):
         """
 
         if self.enable_kronos == 1:
-            print "Kronos >> Synchronizing and freezing all processes ..."
-            n_tracers = self.nxt_tracer_id
-            while kronos_functions.synchronizeAndFreeze(n_tracers) <= 0:
-                print "Kronos >> Synchronize and Freeze failed. Retrying in 1 sec"
+            logging.info(
+                "Kronos >> Synchronizing and freezing all processes ...")
+            while kronos_functions.synchronizeAndFreeze() <= 0:
+                logging.info(
+                    "Kronos >> Synchronize and Freeze failed. Retrying in 1 sec")
                 time.sleep(1)
-            print "Kronos >> Synchronize and Freeze succeeded !"
-            print "Kronos >> Experiment started with Rel_cpu_speed: ", self.rel_cpu_speed, " at Local Time: " + str(
-                datetime.now())
+            logging.info(
+                "Kronos >> Synchronize and Freeze succeeded !")
+            logging.info(
+                "Kronos >> Experiment started with REL_CPU_SPEED: %s",
+                self.rel_cpu_speed)
         else:
             self.start_time = time.time()
-            print "Melody >> Experiment started with Kronos disabled ... "
+            logging.info(
+                "Melody >> Experiment started with Kronos disabled ... ")
 
     def stop_synchronized_experiment(self):
         """Stop a synchronized kronos experiment if kronos is disabled
@@ -251,16 +285,19 @@ class NetPower(object):
         :return: None
         """
 
-        print "########################################################################"
+        logging.info(
+            "########################################################################")
         if self.enable_kronos == 1:
             kronos_functions.stopExp()
-            print "Kronos >> Stopping synchronized experiment at Local Time: ", str(datetime.now())
-            self.trigger_all_processes("EXIT")
-            self.replay_orchestrator.send_command("EXIT")
-            print "Kronos >> Stopped synchronized experiment"
+            logging.info("Kronos >> Stopping synchronized experiment ...")
+            self.trigger_all_processes(defines.EXIT_CMD)
+            self.replay_orchestrator.send_command(defines.EXIT_CMD)
+            logging.info("Kronos >> Stopped synchronized experiment")
         else:
-            print "Melody >> Stopping emulation at Local Time: ", str(datetime.now())
-        print "########################################################################"
+            logging.info(
+                "Melody >> Stopping emulation ... ")
+        logging.info(
+            "########################################################################")
 
     def generate_node_mappings(self, roles):
         """Generate a dictionary which maps application_id to a hostname, ip and port. Stores this in /tmp
@@ -269,7 +306,7 @@ class NetPower(object):
         :return: None
         """
         with open(self.node_mappings_file_path, "w") as outfile:
-            for i in xrange(0, len(roles)):
+            for i in range(0, len(roles)):
                 mininet_host_name = roles[i][0]
                 port_mapping = roles[i][1]
                 for mapping in port_mapping:
@@ -277,15 +314,19 @@ class NetPower(object):
                     entity_port = mapping[1]
                     self.powersim_id_to_host[entity_id] = {}
                     self.powersim_id_to_host[entity_id]["port"] = entity_port
-                    self.powersim_id_to_host[entity_id]["mapped_host"] = mininet_host_name
-                    self.powersim_id_to_host[entity_id]["mapped_host_ip"] = "10.0.0." + str(mininet_host_name[1:])
+                    self.powersim_id_to_host[entity_id][
+                        "mapped_host"] = mininet_host_name
+                    self.powersim_id_to_host[entity_id][
+                        "mapped_host_ip"] = f"10.0.0.{mininet_host_name[1:]}"
                 if len(port_mapping) == 0:
                     entity_id = "DUMMY_" + str(mininet_host_name)
                     entity_port = 5100
                     self.powersim_id_to_host[entity_id] = {}
                     self.powersim_id_to_host[entity_id]["port"] = entity_port
-                    self.powersim_id_to_host[entity_id]["mapped_host"] = mininet_host_name
-                    self.powersim_id_to_host[entity_id]["mapped_host_ip"] = "10.0.0." + str(mininet_host_name[1:])
+                    self.powersim_id_to_host[entity_id][
+                        "mapped_host"] = mininet_host_name
+                    self.powersim_id_to_host[entity_id][
+                        "mapped_host_ip"] = f"10.0.0.{mininet_host_name[1:]}"
 
             json.dump(self.powersim_id_to_host, outfile)
         with open("/tmp/application_params.json", "w") as outfile:
@@ -303,7 +344,6 @@ class NetPower(object):
         tracer_args = [tracer_path]
         tracer_args.extend(["-i", str(self.nxt_tracer_id)])
         tracer_args.extend(["-r", str(self.rel_cpu_speed)])
-        tracer_args.extend(["-n", str(self.timeslice)])
         tracer_args.extend(["-c", "\"" + cmd_to_run + "\""])
         tracer_args.append("-s")
 
@@ -317,54 +357,50 @@ class NetPower(object):
 
         :return: None
         """
-        print "Melody >> Starting all hosts ... "
+        logging.info("Melody >> Starting all hosts ... ")
 
         for mininet_host in self.network_configuration.mininet_obj.hosts:
             for mapped_application_id in self.host_to_application_ids[mininet_host.name]:
                 host_id = int(mininet_host.name[1:])
-                host_log_file = self.log_dir + "/" + mapped_application_id  + "_log.txt"
-                host_py_script = self.base_dir + "/src/core/host.py"
-                cmd_to_run = "python " + str(
-                    host_py_script) + " -l " + host_log_file + " -c " + self.node_mappings_file_path + " -r " + str(
-                    self.run_time) + " -n " + str(self.project_name) + " -d " + str(host_id) + " -m "  + str(mapped_application_id)
+                host_log_file = f"{self.log_dir}/{mapped_application_id}_log.txt"
+                host_py_script = f"{self.base_dir}/src/core/host.py"
+                cmd_to_run = f"python {host_py_script} -l {host_log_file} " \
+                             f"-c {self.node_mappings_file_path} " \
+                             f"-r {self.run_time} -n {self.project_name} " \
+                             f"-d {host_id} -m {mapped_application_id}" 
 
                 if mapped_application_id in self.cyber_host_apps:
-                    cmd_to_run += " -a " + str(self.cyber_host_apps[mapped_application_id])
+                    cmd_to_run = f"{cmd_to_run} -a {self.cyber_host_apps[mapped_application_id]}"
                 else:
-                    cmd_to_run += " -a NONE"
+                    cmd_to_run = f"{cmd_to_run} -a NONE"
 
                 if self.enable_kronos == 1:
                     cmd_to_run = self.cmd_to_start_process_under_tracer(cmd_to_run)
-                cmd_to_run += ' > ' + host_log_file + ' 2>&1 & echo $! '
+                cmd_to_run = f"{cmd_to_run} >  {host_log_file} 2>&1 & echo $! "
 
                 with tempfile.NamedTemporaryFile() as f:
-                    mininet_host.cmd(cmd_to_run + '>> ' + f.name)
+                    mininet_host.cmd(f"{cmd_to_run} >> {f.name}")
                     pid = int(f.read())
                     self.host_pids[mininet_host.name] = pid
                     self.pid_list.append(pid)
-
-                set_cpu_affinity(mininet_host.pid)
 
     def start_switch_processes(self):
         """Starts all mininet switch processes
 
         :return: None
         """
-        print "Melody >> Starting all switches ..."
+        logging.info("Melody >> Starting all switches ...")
         for mininet_switch in self.network_configuration.mininet_obj.switches:
             sw_id = int(mininet_switch.name[1:])
-            cmd_to_run = "python " + self.base_dir + "/src/utils/dummy_nop_process.py"
-            sw_log_file = "/tmp/sw_" + str(sw_id) + "_log.txt"
+            cmd_to_run = f"python {self.base_dir}/src/utils/dummy_nop_process.py"
+            sw_log_file = f"/tmp/sw_{sw_id}_log.txt"
             if self.enable_kronos == 1:
                 cmd_to_run = self.cmd_to_start_process_under_tracer(cmd_to_run)
-            cmd_to_run += ' > ' + sw_log_file + ' 2>&1 & echo $! '
+            cmd_to_run = f"{cmd_to_run} > {sw_log_file} 2>&1 & echo $! "
             with tempfile.NamedTemporaryFile() as f:
-                mininet_switch.cmd(cmd_to_run + '>> ' + f.name)
+                mininet_switch.cmd(f"{cmd_to_run} >> {f.name}")
                 pid = int(f.read())
                 self.switch_pids[mininet_switch.name] = pid
-                self.pid_list.append(pid)
-
-            set_cpu_affinity(mininet_switch.pid)
 
     def start_emulation_drivers(self):
         """Starts all emulation drivers
@@ -374,26 +410,27 @@ class NetPower(object):
         :return: None
         """
 
-        driver_py_script = self.base_dir + "/src/core/emulation_driver.py"
+        driver_py_script = f"{self.base_dir}/src/core/emulation_driver.py"
         for edp in self.emulation_driver_params:
 
-            mininet_host = self.network_configuration.mininet_obj.get(edp["node_id"])
-            driver_log_file = "/tmp/" + str(edp["driver_id"]) + "_log.txt"
-            input_params_file_path = "/tmp/" + edp["driver_id"] + ".json"
+            mininet_host = self.network_configuration.mininet_obj.get(
+                edp["node_id"])
+            driver_log_file = "/tmp/%s_log.txt" %(str(edp["driver_id"]))
+            input_params_file_path = "/tmp/%s.json" %(edp["driver_id"])
             with open(input_params_file_path, "w") as f:
                 json.dump(edp, f)
 
-            cmd_to_run = "python " + str(driver_py_script) + " --input_params_file_path=" + input_params_file_path
+            cmd_to_run = f"python {driver_py_script} --input_params_file_path={input_params_file_path}"
             if self.enable_kronos == 1:
                 cmd_to_run = self.cmd_to_start_process_under_tracer(cmd_to_run)
-            cmd_to_run += ' > ' + driver_log_file + ' 2>&1 & echo $! '
+            cmd_to_run = f"{cmd_to_run} > {driver_log_file} 2>&1 & echo $! "
 
             with tempfile.NamedTemporaryFile() as f:
-                mininet_host.cmd(cmd_to_run + '>> ' + f.name)
+                mininet_host.cmd(f"{cmd_to_run} >> {f.name}")
                 pid = int(f.read())
                 self.emulation_driver_pids.append(pid)
                 self.pid_list.append(pid)
-        print "Melody >> All background flow drivers started ..."
+        logging.info("Melody >> All background flow drivers started ...")
 
     def start_replay_drivers(self):
         """Starts all replay drivers
@@ -403,33 +440,34 @@ class NetPower(object):
         :return: None
         """
 
-        driver_py_script = self.base_dir + "/src/core/replay_driver.py"
+        driver_py_script = f"{self.base_dir}/src/core/replay_driver.py"
         for node in self.nodes_involved_in_replay:
             mininet_host = self.network_configuration.mininet_obj.get(node)
-            rdp = {"driver_id": mininet_host.name + "-replay",
-                   "run_time": self.run_time,
-                   "node_id": mininet_host.name,
-                   "node_ip": mininet_host.IP(),
-                   "replay_plan_file_path": "/tmp/replay_plan.json"
-                   }
+            rdp = {
+                "driver_id": f"{mininet_host.name}-replay",
+                "run_time": self.run_time,
+                "node_id": mininet_host.name,
+                "node_ip": mininet_host.IP(),
+                "replay_plan_file_path": "/tmp/replay_plan.json"
+                }
 
-            driver_log_file = "/tmp/" + str(rdp["driver_id"]) + "_log.txt"
-            input_params_file_path = "/tmp/" + str(rdp["driver_id"]) + ".json"
+            driver_log_file = "/tmp/%s_log.txt" % (str(rdp["driver_id"]))
+            input_params_file_path = "/tmp/%s.json" % (str(rdp["driver_id"]))
             with open(input_params_file_path, "w") as f:
                 json.dump(rdp, f)
 
-            cmd_to_run = "python " + str(driver_py_script) + " --input_params_file_path=" + input_params_file_path
+            cmd_to_run = f"python {driver_py_script} --input_params_file_path={input_params_file_path}"
             if self.enable_kronos == 1:
                 cmd_to_run = self.cmd_to_start_process_under_tracer(cmd_to_run)
-            cmd_to_run += ' > ' + driver_log_file + ' 2>&1 & echo $! '
+            cmd_to_run = f"{cmd_to_run} > {driver_log_file} 2>&1 & echo $! "
 
             with tempfile.NamedTemporaryFile() as f:
-                mininet_host.cmd(cmd_to_run + '>> ' + f.name)
+                mininet_host.cmd(f"{cmd_to_run} >> {f.name}")
                 pid = int(f.read())
                 self.replay_driver_pids.append(pid)
                 self.pid_list.append(pid)
 
-        print "Melody >> All replay flow drivers started ... "
+        logging.info("Melody >> All replay flow drivers started ... ")
 
     def start_host_capture(self, host_obj):
         """Start packet capture in each host
@@ -438,15 +476,14 @@ class NetPower(object):
         :return: None
         """
         core_cmd = "tcpdump"
-        capture_cmd = "sudo " + core_cmd
-        capture_log_file = self.log_dir + "/" + host_obj.name + ".pcap"
+        capture_cmd = f"sudo {core_cmd}"
+        capture_log_file = f"{self.log_dir}/{host_obj.name}.pcap"
         with open(capture_log_file, "w") as f:
             pass
 
-        capture_cmd = capture_cmd + " -i " + str(host_obj.name + "-eth0")
-        capture_cmd = capture_cmd + " -w " + capture_log_file + " -U -B 20000 ip & > /dev/null 2>&1"
+        capture_cmd = f"{capture_cmd} -i {host_obj.name}-eth0"
+        capture_cmd = f"{capture_cmd} -w {capture_log_file} -U -B 20000 ip & > /dev/null 2>&1"
         self.n_actual_tcpdump_procs = self.n_actual_tcpdump_procs + 1
-
         host_obj.cmd(capture_cmd)
 
     def start_all_host_captures(self):
@@ -454,7 +491,7 @@ class NetPower(object):
 
         :return: None
         """
-        print "Melody >> Starting tcpdump capture on hosts ..."
+        logging.info("Melody >> Starting tcpdump capture on hosts ...")
         for host in self.network_configuration.mininet_obj.hosts:
             self.start_host_capture(host)
 
@@ -464,34 +501,30 @@ class NetPower(object):
         :return: None
         """
         self.start_all_host_captures()
-        print "Melody >> Starting tcpdump capture on switches ..."
+        logging.info("Melody >> Starting tcpdump capture on switches ...")
         for mininet_link in self.network_configuration.mininet_obj.links:
             switchIntfs = mininet_link.intf1
             core_cmd = "tcpdump"
-            capture_cmd = "sudo " + core_cmd
+            capture_cmd = f"sudo {core_cmd}"
 
             # 1. to capture all pcaps:
             if mininet_link.intf1.name.startswith("s") and mininet_link.intf2.name.startswith("s"):
-                capture_log_file = self.log_dir + "/" + mininet_link.intf1.name + "-" + mininet_link.intf2.name + ".pcap"
+                capture_log_file = \
+                    f"{self.log_dir}/{mininet_link.intf1.name}-{mininet_link.intf2.name}.pcap"
                 with open(capture_log_file, "w") as f:
                     pass
 
-                capture_cmd = capture_cmd + " -i " + str(switchIntfs.name)
-                capture_cmd = capture_cmd + " -w " + capture_log_file + " -B 40000 ip > /dev/null 2>&1 &"
+                capture_cmd = f"{capture_cmd} -i {switchIntfs.name}"
+                capture_cmd = f"{capture_cmd} -w {capture_log_file} -B 40000 ip > /dev/null 2>&1 &"
                 self.n_actual_tcpdump_procs = self.n_actual_tcpdump_procs + 1
 
                 proc = subprocess.Popen(capture_cmd, shell=True)
                 self.tcpdump_procs.append(proc)
-                set_cpu_affinity(int(proc.pid))  # *NEW* ??? not dependent on timekeeper running?
-
-        # Get all the pids of actual tcpdump processes
-        actual_tcpdump_pids = get_pids_with_cmd(cmd=core_cmd, expected_no_of_pids=self.n_actual_tcpdump_procs)
-        set_cpu_affinity_pid_list(actual_tcpdump_pids)
-
+                
         # Get all the pids of sudo tcpdump parents
-        sudo_tcpdump_parent_pids = get_pids_with_cmd(cmd="sudo " + core_cmd,
-                                                     expected_no_of_pids=self.n_actual_tcpdump_procs)
-        set_cpu_affinity_pid_list(sudo_tcpdump_parent_pids)
+        sudo_tcpdump_parent_pids = get_pids_with_cmd(
+            cmd=f"sudo {core_cmd}",
+            expected_no_of_pids=self.n_actual_tcpdump_procs)
 
         self.tcpdump_pids = sudo_tcpdump_parent_pids
 
@@ -500,43 +533,46 @@ class NetPower(object):
 
         :return: None
         """
-        print "Kronos >> Assuming control over mininet network interfaces ..."
+        logging.info(
+            "Kronos >> Assuming control over mininet network interfaces ...")
         for mininet_switch in self.network_configuration.mininet_obj.switches:
             assert mininet_switch.name in self.switch_pids
-            tracer_pid = self.switch_pids[mininet_switch.name]
-
             for name in mininet_switch.intfNames():
                 if name != "lo":
-                    kronos_functions.set_netdevice_owner(tracer_pid, name)
+                    kronos_functions.setNetDeviceOwner(0, name)
 
         for host_name in self.host_pids:
             mininet_host = self.network_configuration.mininet_obj.get(host_name)
             assert mininet_host.name in self.host_pids
-            tracer_pid = self.host_pids[mininet_host.name]
             for name in mininet_host.intfNames():
                 if name != "lo" and name != "eth0" :
-                    kronos_functions.set_netdevice_owner(tracer_pid, name)
+                    kronos_functions.setNetDeviceOwner(0, name)
 
     def start_proxy_process(self):
         """Starts the proxy process
 
         :return: None
         """
-        print "Melody >> Starting proxy ... "
-        proxy_script = self.base_dir + "/src/core/pss_server.py"
-        cmd_to_run = "python " + str(proxy_script) + " --driver_name=" + self.power_sim_spec["driver_name"] + \
-                     " --listen_ip=11.0.0.255" + " --case_file_path=" + self.power_sim_spec["case_file_path"]
-        cmd_to_run += ' > /tmp/proxy_log.txt 2>&1 & echo $! '
+        logging.info("Melody >> Starting proxy ... ")
+        proxy_script = f"{self.base_dir}/src/core/pss_server.py"
+        driver_name = self.power_sim_spec["driver_name"]
+        powersim_case_file_path = self.power_sim_spec["case_file_path"]
+        cmd_to_run = f"python {proxy_script} --driver_name={driver_name} " \
+                     f"--listen_ip=11.0.0.255 --case_file_path={powersim_case_file_path} "
+        cmd_to_run = f"{cmd_to_run} > /tmp/proxy_log.txt 2>&1 & echo $! "
 
-        if not os.path.isfile(self.power_sim_spec["case_file_path"]):
-            print "Melody >> WARNING: Please check your configuration. Case file path: %s is incorrect!"\
-                  %self.power_sim_spec["case_file_path"]
+        if not os.path.isfile(powersim_case_file_path):
+            logging.info(
+                "Melody >> WARNING: Please check your configuration. "
+                "Case file path: %s is incorrect!" %powersim_case_file_path)
         self.proxy_pid = -1
         with tempfile.NamedTemporaryFile() as f:
             os.system(cmd_to_run + '>> ' + f.name)
             pid = int(f.read())
             self.proxy_pid = pid
-            print "Melody >> Proxy PID: ", self.proxy_pid, " Waiting 5 sec for GRPC server to get setup ..."
+            logging.info(
+                f"Melody >> Proxy PID: {self.proxy_pid} "
+                f"Waiting 5 sec for GRPC server to get setup ...")
             time.sleep(5.0)
 
     def start_control_network(self):
@@ -546,19 +582,19 @@ class NetPower(object):
 
         :return: None
         """
-        print "Melody >> Starting grpc control network ..."
+        logging.info("Melody >> Starting grpc control network ...")
         for host in self.network_configuration.mininet_obj.hosts:
             host_number = host.name[1:]
-            host.cmd("ip link add eth0 type veth peer name " + host.name + "base netns 1")
+            host.cmd(f"ip link add eth0 type veth peer name {host.name}base netns 1")
             host.cmd("ifconfig eth0 up")
-            host.cmd("ifconfig eth0 11.0.0." + str(host_number))
+            host.cmd(f"ifconfig eth0 11.0.0.{host_number}")
         os.system("sudo ip link add base type veth peer name hostbase netns 1")
         os.system("sudo ifconfig base 11.0.0.255 up")
         os.system("sudo ifconfig hostbase up")
         os.system("sudo brctl addbr connect")
         for host in self.network_configuration.mininet_obj.hosts:
-            os.system("sudo ifconfig " + str(host.name) + "base up")
-            os.system("sudo brctl addif connect " + str(host.name) + "base")
+            os.system(f"sudo ifconfig {host.name}base up")
+            os.system(f"sudo brctl addif connect {host.name}base")
         os.system("sudo brctl addif connect hostbase")
         os.system("sudo ifconfig connect up")
 
@@ -569,21 +605,21 @@ class NetPower(object):
 
         :return: None
         """
-        if os.path.isfile(self.project_dir + "/disturbances.prototxt"):
-            disturbance_gen_script = self.base_dir + "/src/core/disturbance_gen.py"
-            disturbance_file = self.project_dir + "/disturbances.prototxt"
+        if os.path.isfile(f"{self.project_dir}/disturbances.prototxt"):
+            disturbance_gen_script = f"{self.base_dir}/src/core/disturbance_gen.py"
+            disturbance_file = f"{self.project_dir}/disturbances.prototxt"
             disturbance_gen_log_file = "/tmp/disturbance_gen_log.txt"
 
-            cmd_to_run = "python " + str(disturbance_gen_script) +\
-                         " --path_to_disturbance_file=" + disturbance_file
+            cmd_to_run = f"python {disturbance_gen_script} " \
+                         f"--path_to_disturbance_file={disturbance_file}"
             if self.enable_kronos == 1:
                 cmd_to_run = self.cmd_to_start_process_under_tracer(cmd_to_run)
-            cmd_to_run += ' > ' + disturbance_gen_log_file + ' 2>&1 & echo $! '
+            cmd_to_run = f"{cmd_to_run} > {disturbance_gen_log_file} 2>&1 & echo $! "
 
             with tempfile.NamedTemporaryFile() as f:
-                os.system(cmd_to_run + '>> ' + f.name)
+                os.system(f"{cmd_to_run} >> {f.name}")
                 pid = int(f.read())
-                print "Melody >> Disturbance Generator PID: ", pid
+                logging.info(f"Melody >> Disturbance Generator PID: {pid}")
                 self.pid_list.append(pid)
 
     def stop_control_network(self):
@@ -591,8 +627,8 @@ class NetPower(object):
 
         :return: None
         """
-        print "Melody >> Stopping grpc control network ..."
-        os.system("sudo kill -9 " + str(self.proxy_pid))
+        logging.info("Melody >> Stopping grpc control network ...")
+        os.system(f"sudo kill -9 {self.proxy_pid}")
         os.system("sudo fuser -k 50051/tcp")
         time.sleep(5.0)
         os.system("sudo ifconfig connect down")
@@ -612,7 +648,7 @@ class NetPower(object):
         :return: None
         """
 
-        t = threading.Thread(target=rpc_process)
+        t = threading.Thread(target=defines.rpc_process)
         t.start()
         t.join()
 
@@ -623,7 +659,7 @@ class NetPower(object):
 
         :return: None
         """
-        print "Melody >> Starting replay orchestrator ... "
+        logging.info("Melody >> Starting replay orchestrator ... ")
         self.replay_flows_container.create_replay_plan()
         replay_plan_file = "/tmp/replay_plan.json"
         self.replay_orchestrator = ReplayOrchestrator(self, replay_plan_file)
@@ -648,7 +684,8 @@ class NetPower(object):
         :return: None
         """
         for host in self.network_configuration.mininet_obj.hosts:
-            self.send_cmd_to_node(host.name, "sudo iptables -I OUTPUT -p icmp -j ACCEPT &")
+            self.send_cmd_to_node(host.name,
+                "sudo iptables -I OUTPUT -p icmp -j ACCEPT &")
 
     def allow_icmp_responses(self):
         """Allows ICMP responses on all hosts
@@ -656,7 +693,8 @@ class NetPower(object):
         :return: None
         """
         for host in self.network_configuration.mininet_obj.hosts:
-            self.send_cmd_to_node(host.name, "sudo iptables -I INPUT -p icmp -j ACCEPT &")
+            self.send_cmd_to_node(host.name,
+                "sudo iptables -I INPUT -p icmp -j ACCEPT &")
 
     def disable_TCP_RST(self):
         """Disables TCP_RST on all hosts
@@ -664,7 +702,8 @@ class NetPower(object):
         :return: None
         """
         for host in self.network_configuration.mininet_obj.hosts:
-            self.send_cmd_to_node(host.name, "sudo iptables -I OUTPUT -p tcp --tcp-flags RST RST -j DROP &")
+            self.send_cmd_to_node(host.name,
+                "sudo iptables -I OUTPUT -p tcp --tcp-flags RST RST -j DROP &")
 
     def enable_TCP_RST(self):
         """Enables TCP_RST on all hosts
@@ -672,7 +711,8 @@ class NetPower(object):
         :return: None
         """
         for host in self.network_configuration.mininet_obj.hosts:
-            self.send_cmd_to_node(host.name, "sudo iptables -I OUTPUT -p tcp --tcp-flags RST RST -j ACCEPT &")
+            self.send_cmd_to_node(host.name,
+                "sudo iptables -I OUTPUT -p tcp --tcp-flags RST RST -j ACCEPT &")
 
     def open_main_cmd_channel_buffers(self):
         """Open shared buffer channels to all hosts
@@ -681,38 +721,57 @@ class NetPower(object):
 
         :return: None or exits on Failure to open shared buffer channels
         """
-        print "Melody >> Opening main inter-process communication channels ..."
+        logging.info(
+            "Melody >> Opening main inter-process communication channels ...")
 
         for mininet_host in self.network_configuration.mininet_obj.hosts:
             if mininet_host.name in self.host_to_application_ids:
-                for mapped_application_id in self.host_to_application_ids[mininet_host.name]:
-                    result = self.shared_buf_array.open(mapped_application_id + "-main-cmd-channel-buffer", isProxy=True)
-                    if result == BUF_NOT_INITIALIZED or result == FAILURE:
-                        print "Shared Buffer open failed! Buffer not initialized for host: " + str(mininet_host.name)
-                        sys.exit(0)
+                for mapped_application_id in self.host_to_application_ids[
+                    mininet_host.name]:
+                    result = self.shared_buf_array.open(
+                        f"{mapped_application_id}-main-cmd-channel-buffer",
+                        isProxy=True)
+                    if (result == defines.BUF_NOT_INITIALIZED or
+                        result == defines.FAILURE):
+                        logging.error(
+                            f"Shared Buffer open failed! "
+                            f"Buffer not initialized for host: {mininet_host.name}")
+                        sys.exit(defines.EXIT_FAILURE)
 
-                    self.attributes_dict[mapped_application_id] = self.get_application_id_attributes(
-                        mapped_application_id, self.project_dir + "/project_configuration.prototxt")
+                    self.attributes_dict[mapped_application_id] = \
+                        self.get_application_id_attributes(
+                            mapped_application_id,
+                            f"{self.project_dir}/project_configuration.prototxt")
 
-            result = self.shared_buf_array.open(bufName=str(mininet_host.name) + "-replay-main-cmd-channel-buffer",
-                                                isProxy=True)
-            if result == BUF_NOT_INITIALIZED or result == FAILURE:
-                print "Shared Buffer open open failed! Buffer not initialized for replay driver: " \
-                      + str(mininet_host.name)
-                sys.exit(0)
+            result = self.shared_buf_array.open(
+                bufName=f"{mininet_host.name}-replay-main-cmd-channel-buffer",
+                isProxy=True)
+            if result == defines.BUF_NOT_INITIALIZED or result == defines.FAILURE:
+                logging.error(
+                    "Shared Buffer open open failed! "
+                    f"Buffer not initialized for replay driver: {mininet_host.name}")
+                sys.exit(defines.EXIT_FAILURE)
 
         for edp in self.emulation_driver_params:
-            result = self.shared_buf_array.open(bufName=edp["driver_id"] + "-main-cmd-channel-buffer", isProxy=True)
-            if result == BUF_NOT_INITIALIZED or result == FAILURE:
-                print "Shared Buffer open failed! Buffer not initialized for driver: " + edp["driver_id"]
-                sys.exit(0)
+            curr_edp_driver_id = edp["driver_id"]
+            result = self.shared_buf_array.open(
+                bufName=f"{curr_edp_driver_id}-main-cmd-channel-buffer", isProxy=True)
+            if result == defines.BUF_NOT_INITIALIZED or result == defines.FAILURE:
+                logging.error(
+                    "Shared Buffer open failed! Buffer not initialized "
+                    f"for driver: {curr_edp_driver_id}")
+                sys.exit(defines.EXIT_FAILURE)
 
-        result = self.shared_buf_array.open(bufName="disturbance-gen-cmd-channel-buffer", isProxy=True)
-        if result == BUF_NOT_INITIALIZED or result == FAILURE:
-            print "Shared Buffer open open failed! Buffer not initialized for disturbance generator "
-            sys.exit(0)
+        result = self.shared_buf_array.open(
+            bufName="disturbance-gen-cmd-channel-buffer", isProxy=True)
+        if result == defines.BUF_NOT_INITIALIZED or result == defines.FAILURE:
+            logging.error(
+                "Shared Buffer open open failed! Buffer not initialized for "
+                "disturbance generator ")
+            sys.exit(defines.EXIT_FAILURE)
 
-        print "Melody >> Opened main inter-process communication channels ... "
+        logging.info(
+            "Melody >> Opened main inter-process communication channels ... ")
 
     def trigger_all_processes(self, trigger_cmd):
         """Sends a message over shared buffer channels to all co-simulated hosts, replay and emulation drivers
@@ -724,18 +783,20 @@ class NetPower(object):
         for mininet_host in self.network_configuration.mininet_obj.hosts:
             if mininet_host.name in self.host_to_application_ids:
                 for mapped_application_id in self.host_to_application_ids[mininet_host.name]:
-                    ret = 0
-                    while ret <= 0:
-                        ret = self.shared_buf_array.write(mapped_application_id + "-main-cmd-channel-buffer", trigger_cmd, 0)
+                    self.shared_buf_array.write(
+                        f"{mapped_application_id}-main-cmd-channel-buffer",
+                        trigger_cmd, 0)
 
         for edp in self.emulation_driver_params:
-            ret = 0
-            while ret <= 0:
-                ret = self.shared_buf_array.write(edp["driver_id"] + "-main-cmd-channel-buffer", trigger_cmd, 0)
+            curr_edp_driver_id = edp["driver_id"]
+            self.shared_buf_array.write(
+                f"{curr_edp_driver_id}-main-cmd-channel-buffer",
+                trigger_cmd, 0)
 
         self.shared_buf_array.write("disturbance-gen-cmd-channel-buffer", trigger_cmd, 0)
 
-        print "Melody >> Triggered hosts and drivers with command: ", trigger_cmd
+        logging.info(
+            f"Melody >> Triggered hosts and drivers with command: {trigger_cmd}")
 
     def trigger_nxt_replay(self):
         """Sends a command to replay orchestrater
@@ -745,20 +806,21 @@ class NetPower(object):
 
         :return: None
         """
-        print "Melody >> Triggering next replay ..."
-        self.replay_orchestrator.send_command("TRIGGER")
+        logging.info("Melody >> Triggering next replay ...")
+        self.replay_orchestrator.send_command(defines.TRIGGER_CMD)
 
     def trigger_nxt_k_replays(self, k):
-        for i in xrange(0, k):
-            self.replay_orchestrator.send_command("TRIGGER")
+        for _ in range(0, k):
+            self.replay_orchestrator.send_command(defines.TRIGGER_CMD)
 
     def wait_for_loaded_pcap_msg(self):
         """Waits for required pcaps to be loaded by all replay-drivers
 
         :return: None
         """
-        print "########################################################################"
-        print "\nMelody >> Waiting for pcaps to be loaded by all replay drivers ... "
+        logging.info("########################################################################")
+        logging.info(
+            "\nMelody >> Waiting for pcaps to be loaded by all replay drivers ... ")
         n_warmup_rounds = 0
         outstanding_hosts = self.nodes_involved_in_replay
         while True:
@@ -766,73 +828,85 @@ class NetPower(object):
                 break
 
             for host in outstanding_hosts:
-                dummy_id, msg = self.shared_buf_array.read(str(host) \
-                                                            + "-replay-main-cmd-channel-buffer")
-                if msg == "LOADED":
-                    print "\nMelody >> Got a PCAP-Loaded message from replay driver for node: ", host
+                dummy_id, msg = self.shared_buf_array.read(
+                    f"{str(host)}-replay-main-cmd-channel-buffer")
+                if msg == defines.LOADED_CMD:
+                    logging.info(
+                        "\nMelody >> Got a PCAP-Loaded message from "
+                        f"replay driver for node: {host}")
                     outstanding_hosts.remove(host)
-                    sys.stdout.flush()
+                    
             if self.enable_kronos == 1:
-                kronos_functions.progress_n_rounds(1)
+                kronos_functions.progressBy(self.timeslice, 1)
                 n_warmup_rounds += 1
 
                 if n_warmup_rounds % 100 == 0:
-                    stdout.write("\rNumber of rounds ran until all replay pcaps were loaded: %d" % n_warmup_rounds)
+                    stdout.write(
+                        "\rNumber of rounds ran until all replay pcaps were loaded: %d"
+                        % n_warmup_rounds)
                     stdout.flush()
             else:
                 time.sleep(0.1)
         if self.enable_kronos == 1 :
-            print "\nMelody >> All pcaps loaded in ", float(n_warmup_rounds*self.timeslice)/float(SEC), " seconds (virtual time)"
-        print "\nMelody >> All replay drivers ready to proceed ...\n"
-        sys.stdout.flush()
+            logging.info(
+                f"\nMelody >> All pcaps loaded in "
+                f"{float(n_warmup_rounds*self.timeslice)/float(defines.SEC)} "
+                "seconds (virtual time)")
+        logging.info("\nMelody >> All replay drivers ready to proceed ...\n")
+        
 
     def print_topo_info(self):
         """Prints topology information
 
         """
 
-        print "########################################################################"
-        print ""
-        print "                        Topology Information"
-        print ""
-        print "########################################################################"
-        print ""
-        print "Links in the network topology:"
+        logging.info("########################################################################")
+        logging.info("")
+        logging.info("                        Topology Information")
+        logging.info("")
+        logging.info("########################################################################")
+        logging.info("")
+        logging.info("Links in the network topology:")
         for link in self.network_configuration.ng.get_switch_link_data():
-            print link
+            logging.info(link)
 
-        print "All the hosts in the topology:"
+        logging.info("All the hosts in the topology:")
         for sw in self.network_configuration.ng.get_switches():
-            print "Hosts at switch:", sw.node_id
+            logging.info(f"Hosts at switch: {sw.node_id}")
             for h in sw.attached_hosts:
-                print "Name:", h.node_id, "IP:", h.ip_addr, "Port:", h.switch_port
-        print ""
-        print "########################################################################"
+                logging.info(
+                    f"Name: {h.node_id} IP: {h.ip_addr} Port: {h.switch_port}")
+        logging.info("")
+        logging.info("########################################################################")
 
     def cleanup(self):
         """Cleanup the emulation
 
         :return: None
         """
+        print("Stopping project ...")
         if self.enable_kronos == 1:
             self.stop_synchronized_experiment()
             time.sleep(5)
         else:
-            print "\nMelody >> Stopping Experiment ..."
-            self.trigger_all_processes("EXIT")
-            self.replay_orchestrator.send_command("EXIT")
+            print("\nMelody >> Stopping Experiment ...")
+            self.trigger_all_processes(defines.EXIT_CMD)
+            print("\nMelody >> Sent EXIT command to all drivers ...")
+            self.replay_orchestrator.send_command(defines.EXIT_CMD)
+            print("\nMelody >> Sent EXIT command to replay orchestrator ...")
             for pid in self.pid_list:
                 os.system("sudo kill -9 %s"%str(pid))
+            for pid in self.tcpdump_pids:
+                os.system("sudo kill -9 %s"%(str(pid)))
             time.sleep(5)
 
-        print "########################################################################\n"
-        sys.stdout.flush()
-        print "Melody >> Stopping all packet captures ..."
-        sys.stdout.flush()
+        logging.info("########################################################################\n")
+        
+        logging.info("Melody >> Stopping all packet captures ...")
+        
         self.enable_TCP_RST()
         self.stop_control_network()
-        self.network_configuration.cleanup_mininet()
-        print "########################################################################"
+        logging.info("########################################################################")
 
     def initialize_project(self):
         """Initialize the project
@@ -842,8 +916,11 @@ class NetPower(object):
 
         :return: None
         """
-        print "Melody >> Initializing project ..."
+        logging.info("Melody >> Initializing project ...")
         self.generate_node_mappings(self.network_configuration.roles)
+
+        if self.enable_kronos:
+            self.initialize_kronos_exp()
         #self.print_topo_info()
         self.start_host_processes()
         self.start_switch_processes()
@@ -860,7 +937,7 @@ class NetPower(object):
         if self.enable_kronos:
             self.set_netdevice_owners()
             self.start_synchronized_experiment()
-            self.start_time = get_current_virtual_time()
+            self.start_time = kronos_functions.getCurrentVirtualTime()
         else:
             self.start_time = time.time()
             for pid in self.emulation_driver_pids:  # *NEW*
@@ -886,50 +963,53 @@ class NetPower(object):
         :return: None
         """
         if not self.started:
-            print "########################################################################"
-            print ""
-            print "          Starting Experiment. Total Run time (secs) = ", self.run_time
-            print ""
-            print "########################################################################"
-            self.trigger_all_processes("START")
+            logging.info("########################################################################")
+            logging.info("")
+            logging.info("          Starting Experiment. Total Run time (secs) = %d" %self.run_time)
+            logging.info("")
+            logging.info("########################################################################")
+            self.trigger_all_processes(defines.START_CMD)
             self.started = True
 
         if run_time_ns > 0:
             if run_time_ns < self.timeslice:
                 run_time_ns = self.timeslice
             # progress for 20ms
-            if self.timeslice > 20 * NS_PER_MS:
+            if self.timeslice > 20 * defines.NS_PER_MS:
                 n_rounds = 1
             else:
-                n_rounds = int(10 * NS_PER_MS / self.timeslice)
+                n_rounds = int(10 * defines.NS_PER_MS / self.timeslice)
             n_total_rounds = int(run_time_ns / self.timeslice)
             n_rounds_progressed = 0
             while True:
 
                 if self.enable_kronos == 1:
-                    sys.stdout.flush()
-                    kronos_functions.progress_n_rounds(n_rounds)
+                    kronos_functions.progressBy(self.timeslice, n_rounds)
                     n_rounds_progressed += n_rounds
-                    stdout.write("\rRunning for %f ms. Number of Rounds Progressed:  %d/%d" % (
-                        float(run_time_ns)/float(MS), n_rounds_progressed, n_total_rounds))
+                    stdout.write(
+                        "\rRunning for %f ms. Number of Rounds Progressed:  %d/%d" % (
+                        float(run_time_ns)/float(defines.MS),
+                        n_rounds_progressed, n_total_rounds))
                     stdout.flush()
 
                     if n_rounds_progressed >= n_total_rounds:
-                        sys.stdout.flush()
                         break
                 else:
-                    time.sleep(float(run_time_ns)/float(NS_PER_SEC))
+                    time.sleep(float(run_time_ns)/float(defines.NS_PER_SEC))
                     break
 
             if self.enable_kronos == 1:
                 if sync:
-                    stdout.write("\r................... Syncing with power simulator ...................")
+                    stdout.write(
+                        "\r................... Syncing with power simulator ...................")
                     stdout.flush()
                     self.sync_with_power_simulator()
                 stdout.write("\n")
-                self.total_elapsed_virtual_time += float(run_time_ns)/float(SEC)
+                self.total_elapsed_virtual_time += \
+                    float(run_time_ns)/float(defines.SEC)
             elif sync:
-                stdout.write("\r................... Syncing with power simulator ...................\n")
+                stdout.write(
+                    "\r................... Syncing with power simulator ...................\n")
                 stdout.flush()
                 self.sync_with_power_simulator()
 
@@ -938,4 +1018,5 @@ class NetPower(object):
 
         :return: None
         """
+
         self.cleanup()

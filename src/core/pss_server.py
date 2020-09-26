@@ -3,26 +3,32 @@
 .. moduleauthor:: Hoang Hai Nguyen <nhh311@gmail.com>
 """
 
-from concurrent import futures
+
 import time
 import logging
 import grpc
-from threading import Event, Lock
 import sys
-from src.proto import pss_pb2
-from src.proto import pss_pb2_grpc
 import argparse
 import signal
 import os
 
+from threading import Event, Lock
 from src.power_sim.drivers import MatPowerDriver
+from concurrent import futures
+from src.proto import pss_pb2
+from src.proto import pss_pb2_grpc
 
+root = logging.getLogger()
+root.setLevel(logging.DEBUG)
 
+handler = logging.StreamHandler(sys.stdout)
+handler.setLevel(logging.DEBUG)
 
 kill_now = False
+
 def exit_gracefully(signum, frame):
     global kill_now
-    print "Proxy Exiting Gracefully !"
+    logging.info("Proxy Exiting Gracefully !")
     kill_now = True
 
 
@@ -33,9 +39,10 @@ PROCESS_LOG = "PLOG"
 class Job():
     '''A data structure to store the GRPC read/write request, the reply, and an Event() object to signal when the reply is ready to be returned to the requester.
     ''' 
-    def __init__(self, request, reply):
+    def __init__(self, request, request_type, reply):
         self.request = request
         self.reply = reply
+        self.request_type = request_type
         self.event = Event()
 
     
@@ -66,7 +73,7 @@ class PSSServicer(pss_pb2_grpc.pssServicer): # a.k.a. the Proxy
         self.jobLock.acquire()
         for req in readRequest.request:
             self.rlog.info("%s,READ,%s,%s,%s,%s" % (readRequest.timestamp, req.id, req.objtype, req.objid, req.fieldtype))
-        job = Job(readRequest, None)
+        job = Job(readRequest, "READ", None)
         self.jobs.append(job)
         self.jobLock.release()
         job.event.wait()
@@ -88,7 +95,7 @@ class PSSServicer(pss_pb2_grpc.pssServicer): # a.k.a. the Proxy
         for req in writeRequest.request:
             self.rlog.info("%s,WRITE,%s,%s,%s,%s,%s" % (
             writeRequest.timestamp, req.id, req.objtype, req.objid, req.fieldtype, req.value))
-        job = Job(writeRequest, None)
+        job = Job(writeRequest, "WRITE", None)
         self.jobs.append(job)
         self.jobLock.release()
         job.event.wait()
@@ -107,6 +114,7 @@ class PSSServicer(pss_pb2_grpc.pssServicer): # a.k.a. the Proxy
         '''
         if len(self.jobs) == 0:
             return pss_pb2.Status(id=request.id, status=pss_pb2.SUCCEEDED)
+            
 
         else:
             self.jobLock.acquire()
@@ -120,7 +128,7 @@ class PSSServicer(pss_pb2_grpc.pssServicer): # a.k.a. the Proxy
                 job = self.jobs.pop(idx)
                 request = job.request
 
-                if type(request) == pss_pb2.ReadRequest:
+                if job.request_type == "READ":
                     readResponse = pss_pb2.ReadResponse()
 
                     for req in request.request:
@@ -133,7 +141,7 @@ class PSSServicer(pss_pb2_grpc.pssServicer): # a.k.a. the Proxy
                     job.reply = readResponse
                     job.event.set()
 
-                elif type(request) == pss_pb2.WriteRequest:
+                elif job.request_type == "WRITE":
                     writelist = [(req.objtype, req.objid, req.fieldtype, req.value) for req in request.request]
                     self.driver.write_multiple(writelist)
                     self.driver.run_pf()
@@ -162,30 +170,31 @@ if __name__ == '__main__':
     parser.add_argument("--listen_ip", dest="listen_ip")
     parser.add_argument("--case_file_path", dest="case_file_path")
 
-    global kill_now
     kill_now = False
 
     signal.signal(signal.SIGTERM, exit_gracefully)
     signal.signal(signal.SIGINT, exit_gracefully)
     args = parser.parse_args()
 
-    print "Driver Name: ", args.driver_name
-    print "Case File: ", args.case_file_path
-    print "Listening ON: ", args.listen_ip, " Port: 50051"
-    sys.stdout.flush()
-    logging.basicConfig(level=logging.DEBUG)
+    logging.info(f"Driver Name: {args.driver_name}")
+    logging.info(f"Case File: {args.case_file_path}")
+    logging.info(f"Listening ON: {args.listen_ip} Port: 50051")
+    
 
     if not os.path.isfile(args.case_file_path):
-        print "Specified case file not found !"
-        sys.stdout.flush()
+        logging.info("Specified case file not found !")
+        
         raise NotImplementedError
 
     if args.driver_name == "MatPowerDriver":
         pss_driver = MatPowerDriver.MatPowerDriver()
 
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=1000), maximum_concurrent_rpcs = 1000)
-    pss_pb2_grpc.add_pssServicer_to_server(PSSServicer(pss_driver, args.case_file_path), server)
-    server.add_insecure_port(args.listen_ip + ':50051')
+    server = grpc.server(
+        futures.ThreadPoolExecutor(max_workers=1000),
+        maximum_concurrent_rpcs = 1000)
+    pss_pb2_grpc.add_pssServicer_to_server(
+        PSSServicer(pss_driver, args.case_file_path), server)
+    server.add_insecure_port(f"{args.listen_ip}:50051")
     server.start()
 
 
@@ -194,12 +203,12 @@ if __name__ == '__main__':
         while True:
             time.sleep(1.0)
             if kill_now:
-                print "Exiting gracefully !"
-                sys.stdout.flush()
+                logging.info("Exiting gracefully !")
+                
                 server.stop(0)
                 break
     except KeyboardInterrupt:
-        print "Exiting gracefully !"
-        sys.stdout.flush()
+        logging.info("Exiting gracefully !")
+        
         server.stop(0)
 

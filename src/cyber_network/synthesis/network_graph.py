@@ -6,11 +6,11 @@ import networkx as nx
 from collections import defaultdict
 from itertools import permutations
 
-from switch import Switch
-from host import Host
-from flow_table import FlowTable
-from group_table import GroupTable
-from port import Port
+from src.cyber_network.synthesis.switch import Switch
+from src.cyber_network.synthesis.host import Host
+from src.cyber_network.synthesis.flow_table import FlowTable
+from src.cyber_network.synthesis.group_table import GroupTable
+from src.cyber_network.synthesis.port import Port
 
 
 class NetworkGraphLinkData(object):
@@ -120,23 +120,6 @@ class NetworkGraph(object):
                              host_switch_obj,
                              sw_obj.ports[mininet_port_links[mininet_host_dict["host_name"]]['0'][1]])
 
-                #except KeyError:
-                    #import pdb; pdb.set_trace()
-                #    h_obj = Host(mininet_host_dict["host_name"],
-                #             self,
-                #             mininet_host_dict["host_IP"],
-                #             mininet_host_dict["host_MAC"],
-                #             host_switch_obj,
-                #             None)
-
-                #print "sw_obj.ports:"
-                #print sw_obj.ports
-                #print "port index:"
-                #print mininet_port_links[mininet_host_dict["host_name"]]['0'][1]
-                #print "attached host:"
-                #print sw_obj.ports[mininet_port_links[mininet_host_dict["host_name"]]['0'][1]].attached_host
-                #print "attached host to append on switch side:"
-                #print h_obj
 
                 # Make the connections both on switch and host side
                 sw_obj.host_ports.append(mininet_port_links[mininet_host_dict["host_name"]]['0'][1])
@@ -452,9 +435,9 @@ class NetworkGraph(object):
         elif self.network_configuration.controller == "onos":
             self.parse_onos_switches()
         elif self.network_configuration.controller == "sel":
-            raise NotImplemented
+            raise NotImplementedError
         else:
-            raise NotImplemented
+            raise NotImplementedError
 
     def parse_network_graph(self):
 

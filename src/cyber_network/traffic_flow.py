@@ -7,8 +7,8 @@ import json
 import os
 import sys
 
+import src.core.defines as defines
 
-TRAFFIC_FLOW_ONE_SHOT = 'OneShot'
 
 
 class EmulatedTrafficFlow(object):
@@ -33,7 +33,7 @@ class EmulatedTrafficFlow(object):
         :type dst_mn_node: mininet host obj
         """
 
-        self.type = TRAFFIC_FLOW_ONE_SHOT
+        self.type = defines.TRAFFIC_FLOW_ONE_SHOT
         self.offset = offset
         self.run_time = run_time
 
@@ -93,7 +93,7 @@ class ReplayFlowsContainer(object):
     def add_replay_flow(self, replay_flow_obj):
         if not os.path.isfile(replay_flow_obj.pcap_file_path):
             sys.stdout.write("Melody >> WARNING: Ignoring replay pcap: %s because pcap file path is incorrect!\n"%replay_flow_obj.pcap_file_path)
-            sys.stdout.flush()
+            
         else:
             self.replay_flows.append(replay_flow_obj)
 
@@ -113,7 +113,7 @@ class ReplayFlowsContainer(object):
                 replay_plan.append(replay_flow_obj.get_attributes())
             else:
                 sys.stdout.write("Ignoring replay pcap: %s because pcap file path is incorrect !\n"%attributes["pcap_file_path"])
-                sys.stdout.flush()
+                
         with open("/tmp/replay_plan.json", "w") as outfile:
             json.dump(replay_plan, outfile)
 

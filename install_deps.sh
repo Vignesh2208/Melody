@@ -4,21 +4,22 @@ echo "##########################################################################
 echo "Installing python packages"
 echo "#############################################################################"
 
-sudo apt-get -y install python-pip
-sudo apt-get -y install python-dev
+sudo apt-get -y install python3-pip
+sudo apt-get -y install python3-dev
 sudo apt-get -y install libyaml-dev
 sudo apt-get -y install libpcap-dev
-sudo apt-get -y install python-httplib2
-sudo apt-get -y install python-paramiko
-sudo pip install ryu==4.0
-sudo pip install numpy
-sudo pip install pypcapfile
-sudo pip install dpkt
-sudo pip install pcapy
-sudo pip install six==1.9.0
-sudo pip install networkx
-sudo pip install pandas
-sudo pip install plotly
+sudo apt-get -y install python3-httplib2
+sudo apt-get -y install python3-paramiko
+sudo python -m pip install ryu
+sudo python -m pip install numpy
+sudo python -m pip install pypcapfile
+sudo python -m pip install dpkt
+sudo python -m pip install pcapy
+sudo python -m pip install six==1.9.0
+sudo python -m pip install networkx==2.3.0
+sudo python -m pip install pandas
+sudo python -m pip install plotly
+sudo python -m pip install -U pexpect
 sudo apt-get -y install inetutils-ping
 sudo apt-get -y install openssh-server
 sudo apt-get -y install expect
@@ -31,8 +32,8 @@ echo "##########################################################################
 pushd ~/Downloads
 git clone https://www.github.com/mininet/mininet.git
 pushd mininet
-git checkout 2.2.1
-./util/install.sh -fnv
+git checkout 2.3.0d6
+sudo ./util/install.sh -fnv
 popd
 popd
 
@@ -56,18 +57,18 @@ sudo /sbin/modprobe openvswitch
 popd
 popd
 
+#sudo apt-get -y install openvswitch-switch
+
 echo "#############################################################################"
 echo "Setting up openvswitch"
 echo "#############################################################################"
 
-sudo cp -v start-ovs.sh ~/Downloads/openvswitch-2.4.0/
-#sudo chmod +x ~/Downloads/openvswitch-2.4.0/start-ovs.sh
 sudo sed "s/@HOME@/${HOME//\//\\/}/g" start_ovs.sh.template > start_ovs.sh
 sudo cp -v start_ovs.sh /etc/init.d/
 sudo rm start_ovs.sh
 sudo chmod +x /etc/init.d/start_ovs.sh
 sudo update-rc.d start_ovs.sh defaults
-sudo sh ~/Downloads/openvswitch-2.4.0/start_ovs.sh
+sudo /etc/init.d/start_ovs.sh
 
 echo "#############################################################################"
 echo "Setting up Octave"
@@ -79,7 +80,7 @@ sudo apt-get install octave
 echo "#############################################################################"
 echo "Setting up Protocol Buffers and GRPC tools"
 echo "#############################################################################"
-sudo pip install protobuf==3.7.0rc2
-sudo pip install cython
+sudo python -m pip install protobuf==3.7.0rc2
+sudo python -m pip install cython
 sudo python -m pip install grpcio
 sudo python -m pip install grpcio-tools

@@ -28,12 +28,13 @@ def get_pids_with_cmd(cmd, expected_no_of_pids=1) :
         time.sleep(0.5)
         pid_list = []
         try:
-	        ps_output = subprocess.check_output("ps -e -o command:200,pid | grep '^" + cmd + "'", shell=True)
+	        ps_output = subprocess.check_output(
+                "ps -e -o command:200,pid | grep '^" + cmd + "'", shell=True)
         except subprocess.CalledProcessError:
 	        ps_output = ""
 
         if len(ps_output) > 0 :
-            for p in ps_output.split('\n'):
+            for p in ps_output.decode("ascii").split('\n'):
                 p_tokens = p.split()
                 if not p_tokens:
 	                continue
@@ -55,21 +56,19 @@ def representsInt(s) :
 def get_thread_ids(pid):
     cmd = "ps -e -T | grep " + str(pid)
     output = subprocess.check_output(cmd, shell=True)
-    output = output.split("\n")
+    output = output.decode("ascii").split("\n")
     threads = []
     for line in output:
         line = line.split(" ")
         if len(line) > 0:
             i = 0
-            for i in xrange(0,len(line)) :
+            for i in range(0,len(line)) :
                 if len(line[i]) > 0 and representsInt(line[i]) and int(line[i]) == pid:
-                    for j in xrange(i+1,len(line)) :
+                    for j in range(i+1,len(line)) :
                         if len(line[j]) > 0 :
                             if representsInt(line[j]) and int(line[j]) != pid :
                                 threads.append(int(line[j]))
                             break
                     break
     return threads
-
-#print get_thread_ids(29307)
 

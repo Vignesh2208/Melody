@@ -1,6 +1,7 @@
 
 import threading
-from src.core.defines import *
+import time
+import src.core.defines as defines
 from src.core.basicHostIPCLayer import basicHostIPCLayer
 from src.proto import css_pb2
 
@@ -45,7 +46,8 @@ class PLC(threading.Thread):
             pkt_parsed = css_pb2.CyberMessage()
             pkt_parsed.ParseFromString(data)
 
-            self.host_control_layer.log.info("Rx New packet for PLC: \n" + str(pkt_parsed))
+            self.host_control_layer.log.info(
+                f"Received new control message from SCADA controller: {str(pkt_parsed)}")
             voltage_setpoint = None
             for data_content in pkt_parsed.content:
                 if data_content.key == "VOLTAGE_SETPOINT":
@@ -53,9 +55,11 @@ class PLC(threading.Thread):
             assert(voltage_setpoint is not None)
 
             # Sends a write request to the proxy based on the received command from SCADA controller
-            self.host_control_layer.log.info("Sending RPC Write Request ...")
-            rpc_write([(obj_type_to_write, obj_id_to_write, field_type_to_write, voltage_setpoint)])
-            self.host_control_layer.log.info("----------------------------------------")
+            self.host_control_layer.log.info(
+                "Sending RPC Write Request ...")
+            defines.rpc_write([(obj_type_to_write, obj_id_to_write, field_type_to_write, voltage_setpoint)])
+            self.host_control_layer.log.info(
+                "----------------------------------------")
 
             request_no += 1
 
@@ -83,10 +87,10 @@ class hostApplicationLayer(basicHostIPCLayer):
         """
             Called after initialization of application layer. Here we start the PLC thread.
         """
-
+        
+        self.log.info(f"Started PLC: {self.managed_application_id}")
         self.PLC.start()
-        self.log.info("Started PLC: " + self.managed_application_id + " on " + str(self.host_id))
-
+        
 
     def on_shutdown(self):
         """
@@ -94,4 +98,4 @@ class hostApplicationLayer(basicHostIPCLayer):
         """
         self.PLC.stop = True
         self.PLC.join()
-        self.log.info("Stopping PLC: "  + self.managed_application_id + " on " + str(self.host_id))
+        self.log.info(f"Stopping PLC: {self.managed_application_id}")

@@ -5,8 +5,10 @@
 
 
 import threading
-import logger
-from defines import *
+import socket
+import src.core.logger as logger
+import src.core.defines as defines
+
 from src.proto import css_pb2
 
 class basicHostIPCLayer(threading.Thread):
@@ -16,7 +18,8 @@ class basicHostIPCLayer(threading.Thread):
     Co-simulation processes may interact with the power simulator through by making GRPC
     calls to the proxy.
     """
-    def __init__(self, host_id, log_file, application_ids_mapping, managed_application_id, params):
+    def __init__(self, host_id, log_file, application_ids_mapping,
+                 managed_application_id, params):
         """Initialization
 
         :param host_id: The mininet host name in which this thread is spawned
@@ -40,7 +43,7 @@ class basicHostIPCLayer(threading.Thread):
         self.host_ip = self.application_ids_mapping[self.managed_application_id]["mapped_host_ip"]
         self.listen_port = self.application_ids_mapping[self.managed_application_id]["port"]
 
-        self.log = logger.Logger(log_file, "Host " + str(host_id) + " IPC Thread")
+        self.log = logger.Logger(log_file, f"Host {str(host_id)} IPC Thread")
         self.raw_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.params = params
 
@@ -62,7 +65,7 @@ class basicHostIPCLayer(threading.Thread):
         :return: None
         .. note:: Do not override
         """
-        self.thread_cmd_queue.append(CMD_QUIT)
+        self.thread_cmd_queue.append(defines.CMD_QUIT)
 
     def tx_pkt_to_powersim_entity(self, pkt):
         """Transmit a co-simulation packet over the mininet cyber network
@@ -74,8 +77,10 @@ class basicHostIPCLayer(threading.Thread):
         """
         pkt_parsed = css_pb2.CyberMessage()
         pkt_parsed.ParseFromString(pkt)
-        cyber_entity_ip = self.application_ids_mapping[pkt_parsed.dst_application_id]["mapped_host_ip"]
-        cyber_entity_port = self.application_ids_mapping[pkt_parsed.dst_application_id]["port"]
+        cyber_entity_ip = self.application_ids_mapping[
+            pkt_parsed.dst_application_id]["mapped_host_ip"]
+        cyber_entity_port = self.application_ids_mapping[
+            pkt_parsed.dst_application_id]["port"]
         self.raw_sock.sendto(pkt, (cyber_entity_ip, cyber_entity_port))
 
     def run(self):
@@ -88,10 +93,11 @@ class basicHostIPCLayer(threading.Thread):
         .. note:: Do not override
         """
         self.log.info("Started underlying IPC layer ... ")
-        self.log.info("Started listening on IP: " + self.host_ip + " PORT: " + str(self.listen_port))
-        sys.stdout.flush()
+        self.log.info(f"Started listening on IP: {self.host_ip} "
+                      f"PORT: {str(self.listen_port)}")
+        
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP
-        sock.settimeout(SOCKET_TIMEOUT)
+        sock.settimeout(defines.SOCKET_TIMEOUT)
         sock.bind((self.host_ip, self.listen_port))
 
 
@@ -99,18 +105,18 @@ class basicHostIPCLayer(threading.Thread):
         while True:
 
             curr_cmd = self.get_curr_cmd()
-            if curr_cmd is not None and curr_cmd == CMD_QUIT:
+            if curr_cmd is not None and curr_cmd == defines.CMD_QUIT:
                 self.on_shutdown()
                 self.log.info("Stopping ... ")
-                sys.stdout.flush()
+                
                 break
 
             try:
-                data, addr = sock.recvfrom(MAXPKTSIZE)
+                data, addr = sock.recvfrom(defines.MAXPKTSIZE)
             except socket.timeout:
                 data = None
             if data is not None:
-                self.on_rx_pkt_from_network(str(data))
+                self.on_rx_pkt_from_network(data)
 
     def on_rx_pkt_from_network(self, pkt):
         """This function gets called on reception of message from network.

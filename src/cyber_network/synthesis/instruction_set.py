@@ -1,7 +1,7 @@
 __author__ = 'Rakesh Kumar'
 
-from action_set import ActionSet
-from action_set import Action
+from src.cyber_network.synthesis.action_set import ActionSet
+from src.cyber_network.synthesis.action_set import Action
 
 
 class Instruction:

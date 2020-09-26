@@ -1,8 +1,19 @@
 import argparse
-from src.core.parse_project_configuration import *
-from src.core.net_power import *
+import src.core.defines as defines
 import signal
 import sys
+import logging
+
+from src.core.parse_project_configuration import *
+from src.core.net_power import *
+
+root = logging.getLogger()
+root.setLevel(logging.DEBUG)
+
+handler = logging.StreamHandler(sys.stdout)
+handler.setLevel(logging.DEBUG)
+
+
 
 Interrupted = False
 def signal_handler(sig, frame):
@@ -44,23 +55,25 @@ def main():
     total_time_ran = 0
 
     #MS, SEC are defined in src/core/defines.py
-    timestep_size = 10*MS
+    timestep_size = 10*defines.MS
 
     
     # Main Loop of Co-Simulation
     while Interrupted == False:
 
-        if total_time_ran == 1*SEC:
-            print "Triggering nxt replay pcap ..."
+        if total_time_ran == 1*defines.SEC:
+            logging.info("Triggering nxt replay pcap ...")
             exp.trigger_nxt_replay()
 
         exp.run_for(timestep_size)
         total_time_ran += timestep_size
         if args.enable_kronos == 1:
-            print "Virtual Time Elapsed (Secs): ", float(total_time_ran)/float(SEC)
+            logging.info(
+                f"Virtual Time Elapsed (Secs): {float(total_time_ran)/float(defines.SEC)}")
         else:
-            print "Time Elapsed (Secs): ", float(total_time_ran)/float(SEC)
-        if total_time_ran >= args.run_time*SEC or Interrupted == True:
+            logging.info(
+                f"Time Elapsed (Secs): {float(total_time_ran)/float(defines.SEC)}")
+        if total_time_ran >= args.run_time*defines.SEC or Interrupted == True:
             break
 
     exp.close_project()

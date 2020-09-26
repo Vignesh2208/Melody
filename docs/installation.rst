@@ -13,6 +13,8 @@ Melody and Kronos have been tested on Ubuntu 16.04.5 LTS. Kronos uses a modified
   
   Virtualization Settings required for virtual machine in VMware.
 
+Installtion assumes default python on the system is version 3.6 or higher.
+
 Installing Kronos
 ^^^^^^^^^^^^^^^^^
 
@@ -30,7 +32,7 @@ To get started on Kronos, please perform the following setup steps:
 
     sudo chmod +x /etc/rc.local
 
-* Clone Repository into /home/${user} directory. Checkout the master branch::
+* Clone Repository into /home/${user} directory. Checkout the master branch (v1.2)::
 
     git clone https://github.com/Vignesh2208/Kronos.git
 
@@ -107,7 +109,7 @@ Installing Melody
 Melody depends on the following packages and tools:
 
 * python-httplib2
-* python-ryu-4.0
+* python-ryu
 * numpy
 * pypcapfile
 * openssh-server
@@ -133,8 +135,10 @@ Melody Post-Installation Steps
 * Setting up python path::
   
     # Add the following to ~/.bashrc
-    export PYTHONPATH=$PYTHONPATH:<path-to-melody>
-    export PYTHONPATH=$PYTHONPATH:<path-to-melody>/src
+    export PYTHONPATH="${PYTHONPATH}:<path-to-melody>"
+    export PYTHONPATH="${PYTHONPATH}:<path-to-melody>/src"
+    export PYTHONPATH="${PYTHONPATH}:/home/kronos/Melody/src/proto"
+
     
     # Update .bashrc
     source ~/.bashrc
@@ -171,7 +175,7 @@ Melody Post-Installation Steps
 Ready To Use Melody VM
 ^^^^^^^^^^^^^^^^^^^^^^
 
-A precompiled ready to use VM can also be downloaded if you wish to get started quickly. The username of the VM is "**moses**" and password is "**project_melody**".
+A precompiled ready to use VM can also be downloaded if you wish to get started quickly. The username of the VM is "**kronos**" and password is "**kronos**".
 Please follow the instructions given below to download and use the VM:
 
 * Downloading the VM::
@@ -180,8 +184,8 @@ Please follow the instructions given below to download and use the VM:
 
 * Logging into the VM::
 
-    Upon grub start up, load the default highlighted kernel version (which is linux-4.4.5-ins-VT)
-    Username: moses, Password: project_melody
+    Upon start up:
+    Username: kronos, Password: kronos
 
-*  Melody/Kronos is installed inside the VM in /home/moses directory along with all the required dependencies
+*  Melody/Kronos is installed inside the VM in /home/kronos directory along with all the required dependencies
   

@@ -1,8 +1,11 @@
 __author__ = 'Rakesh Kumar'
 
 import sys
+import logging
+import codecs
+from collections import MutableMapping as DictMixin
 from netaddr import IPNetwork
-from UserDict import DictMixin
+#from UserDict import DictMixin
 
 field_names = ["in_port",
                "ethernet_type",
@@ -142,6 +145,13 @@ class Match(DictMixin):
 
     def __delitem__(self, key):
         del self.match_field_values[key]
+
+    def __len__(self):
+        return len(self.match_field_values)
+
+    def __iter__(self):
+        for i in self.match_field_values:
+            yield i
 
     def keys(self):
         return self.match_field_values.keys()
@@ -380,8 +390,7 @@ class Match(DictMixin):
                     mac_hex_str = hex(self[field_name])[2:]
                     if len(mac_hex_str) == 11:
                         mac_hex_str = "0" + mac_hex_str
-                    mac_hex_str = unicode(':'.join(s.encode('hex') for s in mac_hex_str.decode('hex')))
-
+                    mac_hex_str = str(':'.join(str(codecs.encode(s.encode('utf-8'), 'hex_codec'), 'utf-8') for s in bytes.fromhex(mac_hex_str).decode('utf-8')))
                     match_json.append(get_onos_match_field_dict(field_name, mac_hex_str))
 
                 elif field_name == "ethernet_type":
@@ -397,7 +406,7 @@ class Match(DictMixin):
         if "in_port" in self and self["in_port"] != sys.maxsize:
             # TODO(abhilash) check what does SEL want in case of port_in;
             # it errors out if you let the port number (self["port_in"]) pass
-            # through as value. IPv4 keeps it quiet, but I am not sure if it
+            # through as value. IPv4 keeps it quiet, but I am not subytesre if it
             # wants that.
             match.__setattr__("in_port", str(self["in_port"]))
 
@@ -409,15 +418,15 @@ class Match(DictMixin):
         if "ethernet_source" in self and self["ethernet_source"] != sys.maxsize:
             mac_int = self["ethernet_source"]
             mac_hex_str = hex(mac_int)[2:]
-            mac_hex_str = unicode(':'.join(s.encode('hex') for s in mac_hex_str.decode('hex')))
-
+            mac_hex_str = str(':'.join(str(codecs.encode(s.encode('utf-8'), 'hex_codec'), 'utf-8') for s in bytes.fromhex(mac_hex_str).decode('utf-8')))
+                    
             match.__setattr__("eth_src", mac_hex_str)
 
         if "ethernet_destination" in self and self["ethernet_destination"] != sys.maxsize:
             mac_int = self["ethernet_destination"]
             mac_hex_str = format(mac_int, "012x")
-            mac_hex_str = unicode(':'.join(s.encode('hex') for s in mac_hex_str.decode('hex')))
-
+            mac_hex_str = str(':'.join(str(codecs.encode(s.encode('utf-8'), 'hex_codec'), 'utf-8') for s in bytes.fromhex(mac_hex_str).decode('utf-8')))
+                    
             match.__setattr__("eth_dst", mac_hex_str)
 
         if "src_ip_addr" in self and self["src_ip_addr"] != sys.maxsize:
@@ -460,9 +469,7 @@ class Match(DictMixin):
 
                 if field_name == "ethernet_source" or field_name == "ethernet_destination":
 
-                    # print "self[field_name]:", self[field_name]
                     mac_hex_str = hex(self[field_name])[2:]
-                    # print "mac_hex_str:", mac_hex_str
                     if len(mac_hex_str) == 11:
                         mac_hex_str = "0" + mac_hex_str
 
@@ -471,13 +478,7 @@ class Match(DictMixin):
                     elif len(mac_hex_str) == 2:
                         mac_hex_str = "0000000000" + mac_hex_str
 
-                    #
-                    # print self[field_name]
-                    # print "mac_hex_str:", type(mac_hex_str), mac_hex_str
-                    #
-                    # raw_input("stop")
-
-                    mac_hex_str = unicode(':'.join(s.encode('hex') for s in mac_hex_str.decode('hex')))
+                    mac_hex_str = str(':'.join(str(codecs.encode(s.encode('utf-8'), 'hex_codec'), 'utf-8') for s in bytes.fromhex(mac_hex_str).decode('utf-8')))
                     match_json[ryu_field_names_mapping_reverse[field_name]] = mac_hex_str
 
                 else:

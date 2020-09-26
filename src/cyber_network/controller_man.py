@@ -5,6 +5,7 @@
 
 import subprocess
 import os
+import time
 
 
 class ControllerMan(object):
@@ -20,17 +21,23 @@ class ControllerMan(object):
     def get_next_ryu(self):
 
         os.system("sudo killall ryu-manager")
-
-        ryu_cmd = ["ryu-manager", "--observe-links", "ryu.app.ofctl_rest", "ryu.app.rest_topology"]
+        os.system("sudo fuser -k 8080/tcp")
+        os.system("sudo fuser -k 8081/tcp")
+        os.system("sudo fuser -k 6633/tcp")
+        ryu_cmd = ["ryu-manager", "--observe-links",
+                   "ryu.app.ofctl_rest", "ryu.app.rest_topology"]
 
         with open("/tmp/ryu_stdout.txt", "wb") as out, open("/tmp/ryu_stderr.txt", "wb") as err:
             self.ryu_proc = subprocess.Popen(ryu_cmd, stderr=err, stdout=out)
+        print ("Starting ryu-manager ...")
+        print ("Waiting 5 secs ...")
+        time.sleep(5.0)
 
         return 6633
 
     def start_controller(self):
         if self.controller == "odl":
-            raise NotImplemented
+            raise NotImplementedError
         elif self.controller == "sel":
             pass
         elif self.controller == "ryu":
@@ -44,6 +51,6 @@ class ControllerMan(object):
         elif self.controller == "sel":
             pass
         else:
-            raise NotImplemented
+            raise NotImplementedError
 
 

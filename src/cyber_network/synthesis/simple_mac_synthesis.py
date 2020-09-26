@@ -1,10 +1,12 @@
 __author__ = 'Rakesh Kumar'
 
+import networkx as nx
+import sys
+
 from collections import defaultdict
 from copy import deepcopy
-import networkx as nx
 from src.cyber_network.synthesis.intent import Intent
-import sys
+
 
 
 class SimpleMACSynthesis:
@@ -91,7 +93,7 @@ class SimpleMACSynthesis:
         else:
             progress = (int(processed_flows)*100)/int(total_flows)
         sys.stdout.write("\n\rSynthesizing rules in switches for all-to-all connectivity: %d%% completed"%progress)
-        sys.stdout.flush()
+        
         for fs in flow_specs:
 
 
@@ -105,6 +107,6 @@ class SimpleMACSynthesis:
             processed_flows += 1
             progress = (int(processed_flows)*100) / int(total_flows)
             sys.stdout.write("\rSynthesizing rules in switches for all-to-all connectivity: %d%% completed" % progress)
-            sys.stdout.flush()
+            
         sys.stdout.write("\n")
 

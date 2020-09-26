@@ -17,7 +17,7 @@ cyber_emulation_spec {
 
 power_simulation_spec {
     power_sim_driver_name: "MatPowerDriver"
-    case_file_path: "/home/moses/Melody/src/power_sim/cases/case39.m"
+    case_file_path: "/home/kronos/Melody/src/power_sim/cases/case39.m"
 }
 
 cyber_physical_map {
@@ -446,7 +446,7 @@ bg_flow {
 replay_flow {
     involved_cyber_entity: "h1"
     involved_cyber_entity: "h3"
-    pcap_file_path: "/home/moses/Melody/src/projects/secondary_voltage_control/replay_pcaps/pmu_fuzzing_h1_h3.pcap"
+    pcap_file_path: "/home/kronos/Melody/src/projects/secondary_voltage_control/replay_pcaps/pmu_fuzzing_h1_h3.pcap"
     description: "Replaying a PMU fuzzing attack gathered from a real network over the path between h1-h3"
 }
 

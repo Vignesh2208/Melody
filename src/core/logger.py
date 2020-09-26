@@ -6,6 +6,7 @@
 import sys
 import os
 import datetime
+import logging
 
 
 class Logger(object):
@@ -43,11 +44,13 @@ class Logger(object):
         :return: None
         """
         if self.printable:
-            print str(datetime.datetime.now()) + ": " + str(tag) + " >> " + str(loglevel) + " >> " + str(msg) + "\n"
+            print (
+                f"{str(datetime.datetime.now())} : {str(tag)} >> "
+                f"{str(loglevel)} >>  {str(msg)} \n")
         else:
             with open(self.log_file, "a") as f:
-                f.write(str(datetime.datetime.now()) + ": " + str(tag) + " >> " + str(loglevel)
-                        + " >> " + str(msg) + "\n")
+                f.write(f"{str(datetime.datetime.now())} : {str(tag)} >> "
+                        f"{str(loglevel)} >>  {str(msg)} \n")
 
     def info(self, msg):
         """Logs a INFO message

@@ -6,9 +6,19 @@
 
 import json
 import threading
-import logger
-import Queue
-from defines import *
+import logging
+import queue
+import time
+import sys
+
+import src.core.logger as logger
+import src.core.defines as defines
+
+root = logging.getLogger()
+root.setLevel(logging.DEBUG)
+
+handler = logging.StreamHandler(sys.stdout)
+handler.setLevel(logging.DEBUG)
 
 
 class ReplayOrchestrator(threading.Thread):
@@ -25,10 +35,11 @@ class ReplayOrchestrator(threading.Thread):
         """
         threading.Thread.__init__(self)
 
-        self.thread_cmd_queue = Queue.Queue()
+        self.thread_cmd_queue = queue.Queue()
         self.replay_plan_file = replay_plan_file
         self.shared_bufs = {}
-        self.log = logger.Logger("/tmp/replay_orchestrator_log.txt", "Replay Orchestrator")
+        self.log = logger.Logger(
+            "/tmp/replay_orchestrator_log.txt", "Replay Orchestrator")
         self.replay_plan = None
         self.start_time = None
         self.net_power_obj = net_power_obj
@@ -48,15 +59,15 @@ class ReplayOrchestrator(threading.Thread):
         """
         ret = 0
         while ret <= 0:
-            ret = self.net_power_obj.shared_buf_array.write(str(node_id)\
-                                                            + "-replay-main-cmd-channel-buffer", pcap_file_path, 0)
-        self.log.info("Signalled start of replay phase to node:" + str(node_id))
+            ret = self.net_power_obj.shared_buf_array.write(
+                f"{node_id}-replay-main-cmd-channel-buffer", pcap_file_path, 0)
+        self.log.info(f"Signalled start of replay phase to node: {node_id}")
 
     def send_command(self, cmd):
         self.thread_cmd_queue.put(cmd)
 
     def cancel_thread(self):
-        self.thread_cmd_queue.put("EXIT")
+        self.thread_cmd_queue.put(defines.EXIT_CMD)
 
     def are_two_pcap_stages_conflicting(self, stage_1_nodes, stage_2_nodes):
         """Checks if two sets have nodes have any intersections
@@ -109,13 +120,14 @@ class ReplayOrchestrator(threading.Thread):
         while True:
             try:
                 cmd = self.thread_cmd_queue.get(block=False)
-            except Queue.Empty:
+            except queue.Empty:
                 cmd = None
-            if cmd == "EXIT":
+            if cmd == defines.EXIT_CMD:
                 self.net_power_obj.enable_TCP_RST()
-                self.log.info("Emulation ended. Stopping replay orchestrator ...")
-                sys.exit(0)
-            elif cmd == "TRIGGER":
+                self.log.info(
+                    "Emulation ended. Stopping replay orchestrator ...")
+                sys.exit(defines.EXIT_SUCCESS)
+            elif cmd == defines.TRIGGER_CMD:
                 if nxt_replay_pcap_no >= len(self.replay_plan):
                     self.log.info("All pcaps replayed!. Ignoring TRIGGER ...")
                     time.sleep(1.0)
@@ -129,28 +141,36 @@ class ReplayOrchestrator(threading.Thread):
                 if not self.are_two_pcap_stages_conflicting(
                             cumulative_involved_replay_hosts, self.replay_plan[nxt_replay_pcap_no]["involved_nodes"])\
                         and n_pending_requests == 0:
-                    self.log.info("Signalled Start of Next Replay Pcap: " +\
-                                  self.replay_plan[nxt_replay_pcap_no]["pcap_file_path"])
+                    self.log.info(
+                        "Signalled Start of Next Replay Pcap: " + \
+                        self.replay_plan[nxt_replay_pcap_no]["pcap_file_path"])
                     self.net_power_obj.disable_TCP_RST()
-                    self.trigger_replay(self.replay_plan[nxt_replay_pcap_no]["involved_nodes"],
-                                        self.replay_plan[nxt_replay_pcap_no]["pcap_file_path"])
-                    for node_id in self.replay_plan[nxt_replay_pcap_no]["involved_nodes"]:
+                    self.trigger_replay(
+                        self.replay_plan[nxt_replay_pcap_no]["involved_nodes"],
+                        self.replay_plan[nxt_replay_pcap_no]["pcap_file_path"])
+                    for node_id in self.replay_plan[nxt_replay_pcap_no][
+                        "involved_nodes"]:
                         cumulative_involved_replay_hosts.append(node_id)
                     nxt_replay_pcap_no += 1
                 else:
                     n_pending_requests += 1
-            if len(cumulative_involved_replay_hosts) == 0 and n_pending_requests > 0:
-                self.log.info("End of Last Replay batch. Begin processing next batch of pending requests ...")
+            if (len(cumulative_involved_replay_hosts) == 0 and
+                n_pending_requests > 0):
+                self.log.info("End of Last Replay batch. Begin processing next "
+                    "batch of pending requests ...")
                 while n_pending_requests > 0:
                     if not self.are_two_pcap_stages_conflicting(
-                            cumulative_involved_replay_hosts, self.replay_plan[nxt_replay_pcap_no]["involved_nodes"]):
-                        for node_id in self.replay_plan[nxt_replay_pcap_no]["involved_nodes"]:
+                            cumulative_involved_replay_hosts,
+                            self.replay_plan[nxt_replay_pcap_no]["involved_nodes"]):
+                        for node_id in self.replay_plan[nxt_replay_pcap_no][
+                            "involved_nodes"]:
                             cumulative_involved_replay_hosts.append(node_id)
                         self.log.info(
-                            "Signalled Start of Next Replay Pcap: " + self.replay_plan[nxt_replay_pcap_no][
-                                "pcap_file_path"])
-                        self.trigger_replay(self.replay_plan[nxt_replay_pcap_no]["involved_nodes"],
-                                            self.replay_plan[nxt_replay_pcap_no]["pcap_file_path"])
+                            "Signalled Start of Next Replay Pcap: " + \
+                            self.replay_plan[nxt_replay_pcap_no]["pcap_file_path"])
+                        self.trigger_replay(
+                            self.replay_plan[nxt_replay_pcap_no]["involved_nodes"],
+                            self.replay_plan[nxt_replay_pcap_no]["pcap_file_path"])
                         nxt_replay_pcap_no += 1
                         n_pending_requests -= 1
                     else:
@@ -158,9 +178,10 @@ class ReplayOrchestrator(threading.Thread):
 
             i = 0
             while i < len(cumulative_involved_replay_hosts):
-                dummy_id, replay_status = self.net_power_obj.shared_buf_array.read(
-                    cumulative_involved_replay_hosts[i] + "-replay-main-cmd-channel-buffer")
-                if replay_status == "DONE":
+                dummy_id, replay_status = \
+                    self.net_power_obj.shared_buf_array.read(
+                        f"{cumulative_involved_replay_hosts[i]}-replay-main-cmd-channel-buffer")
+                if replay_status == defines.SIGNAL_FINISH_CMD:
                     cumulative_involved_replay_hosts.pop(i)
                 else:
                     i += 1

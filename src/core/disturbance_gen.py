@@ -4,11 +4,18 @@
 """
 
 import argparse
+import logging
+import sys
+import datetime
+import time
+import os
+import src.core.shared_buffer
+
+import src.core.defines as defines
+
 from src.proto import configuration_pb2
 from google.protobuf import text_format
-import datetime
-import shared_buffer
-from shared_buffer import *
+from src.core.shared_buffer import *
 
 
 
@@ -19,12 +26,13 @@ def init_shared_buffers(shared_buf_array):
     :return: None
     """
 
-    result = shared_buf_array.open(bufName="disturbance-gen-cmd-channel-buffer", isProxy=False)
-    if result == BUF_NOT_INITIALIZED or result == FAILURE:
-        print "Failed to open communication channel ! Not starting any threads !"
-        sys.exit(0)
-    print "Buffer opened: disturbance-gen-cmd-channel-buffer"
-    sys.stdout.flush()
+    result = shared_buf_array.open(
+        bufName="disturbance-gen-cmd-channel-buffer", isProxy=False)
+    if result == defines.BUF_NOT_INITIALIZED or result == defines.FAILURE:
+        logging.error("Failed to open communication channel ! Not starting any threads !")
+        sys.exit(defines.FAILURE)
+    logging.info("Buffer opened: disturbance-gen-cmd-channel-buffer")
+    
 
 def main(path_to_disturbance_file):
     """Starts the disturbance generator and sends disturbances to the power simulation at specified relative timestamps
@@ -41,8 +49,9 @@ def main(path_to_disturbance_file):
     init_shared_buffers(shared_buf_array)
 
     recv_msg = ''
-    while "START" not in recv_msg:
-        dummy_id, recv_msg = shared_buf_array.read_until("disturbance-gen-cmd-channel-buffer", cool_off_time=0.1)
+    while defines.START_CMD not in recv_msg:
+        dummy_id, recv_msg = shared_buf_array.read_until(
+            "disturbance-gen-cmd-channel-buffer", cool_off_time=0.1)
 
     start_time = time.time()
     assert os.path.isfile(path_to_disturbance_file) is True
@@ -55,30 +64,32 @@ def main(path_to_disturbance_file):
         if time_elapsed < float(disturbance.timestamp):
             time.sleep(float(disturbance.timestamp) - time_elapsed)
 
-        print "-----------------------------------------------------------------------------"
-        print "Sending Following Disturbances at : ", str(datetime.datetime.now()), "  >> "
-        sys.stdout.flush()
+        logging.info("-----------------------------------------------------------------------------")
+        logging.info("Sending Disturbances ...")
 
         write_list = []
         for request in disturbance.request:
-            print "Disturbance Description: OBJ_TYPE: %s, OBJ_ID: %s, " \
-              "FIELD_TYPE: %s, DISTURBANCE_VALUE: %s" % (request.objtype, request.objid,
-                                                         request.fieldtype, request.value)
-            write_list.append((request.objtype, request.objid, request.fieldtype, request.value))
-        rpc_write(write_list)
+            logging.info("Disturbance Description: OBJ_TYPE: %s, OBJ_ID: %s, "
+                         "FIELD_TYPE: %s, DISTURBANCE_VALUE: %s" % (
+                             request.objtype, request.objid,
+                             request.fieldtype, request.value))
+            write_list.append(
+                (request.objtype, request.objid, request.fieldtype, request.value))
+        defines.rpc_write(write_list)
 
-    print "-----------------------------------------------------------------------------"
-    print "Finished Sending all disturbances !"
-    sys.stdout.flush()
+    logging.info("-----------------------------------------------------------------------------")
+    logging.info("Finished Sending all disturbances !")
 
     recv_msg = ''
-    while "EXIT" not in recv_msg:
-        dummy_id, recv_msg = shared_buf_array.read_until("disturbance-gen-cmd-channel-buffer", cool_off_time=0.1)
+    while defines.EXIT_CMD not in recv_msg:
+        dummy_id, recv_msg = shared_buf_array.read_until(
+            "disturbance-gen-cmd-channel-buffer", cool_off_time=0.1)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--path_to_disturbance_file', dest="path_to_disturbance_file", type=str,
+    parser.add_argument('--path_to_disturbance_file',
+                        dest="path_to_disturbance_file", type=str,
                         help="Path to disturbance file", required=True)
 
     args = parser.parse_args()

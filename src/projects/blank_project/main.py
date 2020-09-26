@@ -1,4 +1,6 @@
 import argparse
+import logging
+import src.core.defines as defines
 from src.core.parse_project_configuration import *
 from src.core.net_power import *
 
@@ -31,7 +33,7 @@ def main():
     total_time_ran = 0
 
     #MS, SEC are defined in src/core/defines.py
-    timestep_size = 500*MS
+    timestep_size = 500*defines.MS
 
     
     # Main Loop of Co-Simulation
@@ -39,8 +41,9 @@ def main():
         exp.run_for(timestep_size)
         total_time_ran += timestep_size
 
-        print "Time Elapsed (Secs): ", float(total_time_ran)/float(SEC)
-        if total_time_ran >= args.run_time*SEC:
+        logging.info(
+            f"Time Elapsed (Secs): {float(total_time_ran)/float(defines.SEC)}")
+        if total_time_ran >= args.run_time*defines.SEC:
             break
 
     exp.close_project()

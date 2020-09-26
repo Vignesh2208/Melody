@@ -5,22 +5,33 @@
 
 import json
 import httplib2
+import subprocess
+import logging
+import os
+import sys
+import time
+
 from itertools import permutations
 from collections import defaultdict
 from functools import partial
 from mininet.net import Mininet
 from mininet.node import RemoteController
 from mininet.node import OVSSwitch
+from mininet.node import OVSKernelSwitch
 from mininet.link import TCLink
-from controller_man import ControllerMan
+
+import mininet.cli
+from src.cyber_network.controller_man import ControllerMan
 from src.cyber_network.synthesis.network_graph import NetworkGraph
 from src.cyber_network.synthesis.match import Match
 from src.cyber_network.synthesis.simple_mac_synthesis import SimpleMACSynthesis
 from src.cyber_network.synthesis.synthesis_lib import SynthesisLib
 from src.cyber_network.synthesis.flow_specification import FlowSpecification
-from src.core.kronos_helper_functions import *
-import subprocess
 
+
+CLI = None
+
+#setLogLevel('debug')
 
 
 class NetworkConfiguration(object):
@@ -92,7 +103,7 @@ class NetworkConfiguration(object):
             raise NotImplementedError("Topology: %s" % self.topo_name)
 
         topo_cls = __import__("src.cyber_network.topologies.%s" %self.topo_name, globals(), locals(),
-                              ['CyberTopology'], -1)
+                              ['CyberTopology'], 0)
         self.topo = topo_cls.CyberTopology(self.topo_params)
 
     def init_synthesis(self):
@@ -130,7 +141,6 @@ class NetworkConfiguration(object):
         # Get all the ryu_switches from the inventory API
         remaining_url = 'stats/switches'
         resp, content = self.h.request(self.controller_api_base_url + remaining_url, "GET")
-
         ryu_switch_numbers = json.loads(content)
 
         for dpid in ryu_switch_numbers:
@@ -148,7 +158,7 @@ class NetworkConfiguration(object):
                     switch_flow_tables[flow_rule["table_id"]].append(flow_rule)
                 this_ryu_switch["flow_tables"] = switch_flow_tables
             else:
-                print "Error pulling switch flows from RYU."
+                logging.error("Error pulling switch flows from RYU.")
 
             # Get the ports
             remaining_url = 'stats/portdesc' + "/" + str(dpid)
@@ -158,7 +168,7 @@ class NetworkConfiguration(object):
                 switch_ports = json.loads(content)
                 this_ryu_switch["ports"] = switch_ports[str(dpid)]
             else:
-                print "Error pulling switch ports from RYU."
+                logging.error("Error pulling switch ports from RYU.")
 
             # Get the groups
             remaining_url = 'stats/groupdesc' + "/" + str(dpid)
@@ -168,7 +178,7 @@ class NetworkConfiguration(object):
                 switch_groups = json.loads(content)
                 this_ryu_switch["groups"] = switch_groups[str(dpid)]
             else:
-                print "Error pulling switch ports from RYU."
+                logging.error("Error pulling switch ports from RYU.")
 
             ryu_switches[dpid] = this_ryu_switch
 
@@ -245,13 +255,9 @@ class NetworkConfiguration(object):
                 # Refresh just the switches in the network graph, post synthesis
                 self.get_switches()
                 self.ng.parse_network_graph()
-
-
         else:
             self.ng = NetworkGraph(network_configuration=self)
             self.ng.parse_network_graph()
-
-        #print "total_flow_rules:", self.ng.total_flow_rules
 
         return self.ng
 
@@ -265,22 +271,18 @@ class NetworkConfiguration(object):
                                        autoStaticArp=True,
                                        autoSetMacs=True,
                                        link=TCLink,
-                                       controller=lambda name: RemoteController(name,
-                                                                                ip=self.controller_ip,
-                                                                                port=self.controller_port),
-                                       switch=partial(OVSSwitch, protocols='OpenFlow13'))
-           
+                                       controller=RemoteController("ryu", ip=self.controller_ip, port=self.controller_port),
+                                       switch=partial(OVSSwitch, protocols="OpenFlow14"))
             self.mininet_obj.start()
+           
 
     def cleanup_mininet(self):
 
         if self.mininet_obj:
-            print "Melody >> Cleaning up mininet ..."
+            logging.info("Melody >> Cleaning up mininet ...")
             clean_up_cmd = ["sudo", "mn", "-c"]
-
-            with open("/tmp/mininet_cleanup.txt", "wb") as out, open("/tmp/mininet_cleanup.txt", "wb") as err:
-                p = subprocess.Popen(clean_up_cmd, stderr=err, stdout=out)
-                p.wait()
+            p = subprocess.Popen(clean_up_cmd)
+            p.wait()
 
     def get_all_switch_hosts(self, switch_id):
 

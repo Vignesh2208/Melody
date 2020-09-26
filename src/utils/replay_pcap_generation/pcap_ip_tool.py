@@ -8,7 +8,7 @@ from dpkt.ethernet import Ethernet
 from dpkt.sll import SLL
 
 
-def inet_to_str(inet):
+def defines.inet_to_str(inet):
     """Convert inet object to a string
         Args:
             inet (inet struct): inet network address
@@ -22,7 +22,7 @@ def inet_to_str(inet):
         return socket.inet_ntop(socket.AF_INET6, inet)
 
 
-def str_to_inet(str):
+def defines.str_to_inet(str):
     """Convert string object to an inet
         Args:
             str: Printable/readable IP address
@@ -42,7 +42,7 @@ def get_src_dst_ip_str(ip):
     :return: A tuple with source and destination IP strings
     """
 
-    return inet_to_str(ip.src), inet_to_str(ip.dst)
+    return defines.inet_to_str(ip.src), defines.inet_to_str(ip.dst)
 
 
 class PCAPIPTool(object):
@@ -80,13 +80,13 @@ class PCAPIPTool(object):
             modified_ip = l2.data
 
             src_ip_str, dst_ip_str = get_src_dst_ip_str(l2.data)
-            print 'IP: %s -> %s ' % (src_ip_str, dst_ip_str)
+            print ("IP: %s -> %s ' % (src_ip_str, dst_ip_str))
 
             if src_ip_str in ip_mappings:
-                modified_ip.src = str_to_inet(ip_mappings[src_ip_str])
+                modified_ip.src = defines.str_to_inet(ip_mappings[src_ip_str])
 
             if dst_ip_str in ip_mappings:
-                modified_ip.dst = str_to_inet(ip_mappings[dst_ip_str])
+                modified_ip.dst = defines.str_to_inet(ip_mappings[dst_ip_str])
 
             modified_ip.len = len(modified_ip)
             modified_ip.sum = 0x0000

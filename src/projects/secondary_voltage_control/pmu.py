@@ -1,8 +1,9 @@
 import threading
+import src.core.defines as defines
+
 from src.core.basicHostIPCLayer import basicHostIPCLayer
 from src.core.defines import *
 from src.proto import css_pb2
-
 
 
 
@@ -29,8 +30,6 @@ class PMU(threading.Thread):
 
     def run(self):
 
-        print "params = ", self.params
-
         obj_type_to_read = self.params["objtype"]
         field_type_to_read = self.params["fieldtype"]
         obj_id_to_read = self.params["objid"]
@@ -44,8 +43,9 @@ class PMU(threading.Thread):
             pkt.msg_type = "PERIODIC_UPDATE"
 
             #Sends an RPC read request to get pilot bus reading.
-            pilot_busses_to_read = [(obj_type_to_read, obj_id_to_read, field_type_to_read)]
-            ret = rpc_read(pilot_busses_to_read)
+            pilot_busses_to_read = [
+                (obj_type_to_read, obj_id_to_read, field_type_to_read)]
+            ret = defines.rpc_read(pilot_busses_to_read)
             assert(ret is not None)
 
             assert (len(ret) == 1)
@@ -68,8 +68,9 @@ class PMU(threading.Thread):
             data.value = obj_id_to_read
 
             #Sends pilot bus reading to SCADA controller.
-            self.host_control_layer.log.info("Sending Reading: \n" + str(pkt))
-            self.host_control_layer.tx_pkt_to_powersim_entity(pkt.SerializeToString())
+            self.host_control_layer.log.info(f"Sending reading: {pkt}")
+            self.host_control_layer.tx_pkt_to_powersim_entity(
+                pkt.SerializeToString())
             time.sleep(polling_time)
             request_no += 1
 
@@ -78,8 +79,10 @@ class PMU(threading.Thread):
 
 class hostApplicationLayer(basicHostIPCLayer):
 
-    def __init__(self, host_id, log_file, application_ids_mapping, managed_application_id, params):
-        basicHostIPCLayer.__init__(self, host_id, log_file, application_ids_mapping, managed_application_id, params)
+    def __init__(self, host_id, log_file,
+        application_ids_mapping, managed_application_id, params):
+        basicHostIPCLayer.__init__(self, host_id, log_file,
+            application_ids_mapping, managed_application_id, params)
         self.PMU = PMU(self, managed_application_id, params)
 
 
@@ -94,8 +97,8 @@ class hostApplicationLayer(basicHostIPCLayer):
         pkt_parsed = css_pb2.CyberMessage()
         pkt_parsed.ParseFromString(pkt)
 
-        self.log.info("Rx New packet from: " + str(pkt_parsed.src_application_id))
-        self.log.info("\n" + str(pkt_parsed))
+        self.log.info(f"Rx new packet from: {pkt_parsed.src_application_id}")
+        self.log.info(f"\n{pkt_parsed}")
 
 
     def on_start_up(self):
@@ -103,7 +106,8 @@ class hostApplicationLayer(basicHostIPCLayer):
             Called after initialization of application layer. Here we start the PMU thread.
         """
 
-        self.log.info("Started PMU:  " + self.managed_application_id + " on " + str(self.host_id))
+        self.log.info(
+            f"Started PMU: {self.managed_application_id}")
         self.PMU.start()
 
 
@@ -113,4 +117,4 @@ class hostApplicationLayer(basicHostIPCLayer):
         """
         self.PMU.stop = True
         self.PMU.join()
-        self.log.info("Stopped PMU: " + self.managed_application_id + " on " + str(self.host_id))
+        self.log.info(f"Stopped PMU: {self.managed_application_id}")

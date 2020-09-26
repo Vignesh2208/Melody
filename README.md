@@ -49,6 +49,5 @@ Pre-Run Steps:
 ```
 
 ```
-Find detailed documentation for the project at:
-https://melody-by-projectmoses.readthedocs.io/
+Full documentation can be found [here]https://melody-by-projectmoses.readthedocs.io/
 ```

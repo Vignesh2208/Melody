@@ -1,16 +1,19 @@
-from src.core.basicHostIPCLayer import basicHostIPCLayer
-from src.core.defines import *
-from src.proto import css_pb2
+
 import threading
 import time
 import numpy as np
-import svc_config as cfg
-import cPickle as pickle
+
+import _pickle as pickle
+import src.core.defines as defines
+import src.projects.secondary_voltage_control.svc_config as cfg
+
+from src.core.basicHostIPCLayer import basicHostIPCLayer
+from src.proto import css_pb2
 
 def loadObjectBinary(filename):
     with open(filename, "rb") as input:
-        obj = pickle.load(input)
-    print "# " + filename + " loaded"
+        obj = pickle.load(input, encoding='latin1')
+    print(f"# {filename} loaded")
     return obj
 
 class SCADA(threading.Thread):
@@ -18,12 +21,12 @@ class SCADA(threading.Thread):
     """
     def __init__(self, host_control_layer, scada_controller_name, params):
         """
-
         :param host_control_layer: hostApplicationLayer object
         :param scada_controller_name: application_id
         :type scada_controller_name: str
         :param params: is a dictionary containing parameters of key,value strings
         """
+
         threading.Thread.__init__(self)
         self.host_control_layer = host_control_layer
         self.stop = False
@@ -44,7 +47,7 @@ class SCADA(threading.Thread):
 
         while not self.stop:
             _vp = np.array([self.host_control_layer.vp[bus] for bus in cfg.PILOT_BUS])
-            u = np.dot(Cpi, alpha * (_vp - _vp_nom)).A1  # 1-d base array
+            u = np.ravel(np.dot(Cpi, alpha * (_vp - _vp_nom)))  # 1-d base array
             _vg = np.array(_vg + u)
 
             for i in range(cfg.GEN_NO):
@@ -60,15 +63,18 @@ class SCADA(threading.Thread):
                 data.key = "TIMESTAMP"
                 data.value = str(time.time())
 
-                self.host_control_layer.log.info("Tx New Control Pkt: " + str(pkt_new))
-                self.host_control_layer.tx_pkt_to_powersim_entity(pkt_new.SerializeToString())
+                self.host_control_layer.log.info(
+                    f"Sending new control msg to PLC: {str(pkt_new)}")
+                self.host_control_layer.tx_pkt_to_powersim_entity(
+                    pkt_new.SerializeToString())
 
             time.sleep(controller_timestep)
 
 
 class hostApplicationLayer(basicHostIPCLayer):
 
-    def __init__(self, host_id, log_file, application_ids_mapping, managed_application_id, params):
+    def __init__(self, host_id, log_file, application_ids_mapping,
+                 managed_application_id, params):
         basicHostIPCLayer.__init__(self, host_id, log_file, application_ids_mapping, managed_application_id, params)
         self.SCADA = SCADA(self, managed_application_id, params)
         self.vp = {bus:cfg.BUS_VM[bus] for bus in cfg.PILOT_BUS}
@@ -94,7 +100,7 @@ class hostApplicationLayer(basicHostIPCLayer):
         assert(recv_obj_id in self.vp)
 
         self.vp[recv_obj_id] = recv_obj_value
-        self.log.info("Rx pkt from: %d = %s"%(recv_obj_id,str(pkt_parsed)))
+        self.log.info(f"Rx reading from PMU: {recv_obj_id} = {str(pkt_parsed)}")
 
     def on_start_up(self):
         """

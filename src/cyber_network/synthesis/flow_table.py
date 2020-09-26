@@ -1,7 +1,7 @@
 __author__ = 'Rakesh Kumar'
 
-from match import Match
-from instruction_set import InstructionSet
+from src.cyber_network.synthesis.match import Match
+from src.cyber_network.synthesis.instruction_set import InstructionSet
 
 
 class Flow:

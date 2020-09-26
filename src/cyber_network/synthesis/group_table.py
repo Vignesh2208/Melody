@@ -1,6 +1,6 @@
 __author__ = 'Rakesh Kumar'
 
-from action_set import Action, ActionSet
+from src.cyber_network.synthesis.action_set import Action, ActionSet
 
 
 class Bucket:

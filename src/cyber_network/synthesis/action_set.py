@@ -1,7 +1,7 @@
 __author__ = 'Rakesh Kumar'
 
 
-from match import ryu_field_names_mapping
+from src.cyber_network.synthesis.match import ryu_field_names_mapping
 from collections import defaultdict
 
 
@@ -111,7 +111,7 @@ class Action:
                 self.field_modified_to = self.action_json["value"]
                 self.field_modified_to = int(self.field_modified_to)
             else:
-                raise NotImplemented
+                raise NotImplementedError
 
         if self.action_json["type"] == "GROUP":
             self.action_type = "group"

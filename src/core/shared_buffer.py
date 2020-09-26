@@ -8,9 +8,9 @@ import ctypes
 import sys
 import os
 import time
-import shared_buf as sb
-from defines import *
 
+import src.core.defines as defines
+import shared_buf as sb
 
 class shared_buffer(object):
     """Uses the shared_buffer library defined in src/core/libs
@@ -47,14 +47,15 @@ class shared_buffer(object):
         #time.sleep(0.001)
         return ret
 
-    def write(self, msg, dstID=PROXY_NODE_ID):
+    def write(self, msg, dstID=defines.PROXY_NODE_ID):
         """Write message to the shared buffer
 
         :param msg: message to write
         :type msg: str
         :param dstID: Not used
         """
-        return self.shared_buf.write(self.sharedBufName, str(msg), len(str(msg)), self.isProxy, dstID)
+        return self.shared_buf.write(self.sharedBufName, str(msg),
+            len(str(msg)), self.isProxy, dstID)
 
 
 class shared_buffer_array(object):
@@ -119,7 +120,7 @@ class shared_buffer_array(object):
                 return id, msg
             time.sleep(cool_off_time)
 
-    def write(self, bufName, msg, dstID=PROXY_NODE_ID):
+    def write(self, bufName, msg, dstID=defines.PROXY_NODE_ID):
         """Write a message to the buffer.
 
         :param bufName: buffer name to write
@@ -133,4 +134,5 @@ class shared_buffer_array(object):
         assert (idx >= 0 and idx < len(self.sharedBufNames))
         isProxy = self.sharedBufs[idx][1]
 
-        return self.shared_buf.write(bufName, str(msg), len(str(msg)), isProxy, dstID)
+        return self.shared_buf.write(
+            bufName, str(msg), len(str(msg)), isProxy, dstID)

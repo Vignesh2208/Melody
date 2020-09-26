@@ -3,9 +3,10 @@
 .. moduleauthor:: Rakesh Kumar (gopchandani@gmail.com)
 """
 
-from mininet.topo import Topo
 import random
+import logging
 
+from mininet.topo import Topo
 
 class CyberTopology(Topo):
 
@@ -19,10 +20,9 @@ class CyberTopology(Topo):
         :type params: dict
         """
         self.params = params
-        Topo.__init__(self)
 
         if params["num_switches"] < 1 :
-            print "Need to have at least 2 switches for a linear topology."
+            logging.info("Need to have at least 2 switches for a linear topology.")
             raise Exception
 
         self.num_switches = params["num_switches"]
@@ -45,13 +45,17 @@ class CyberTopology(Topo):
         self.switch_names = []
         self.host_names = []
         self.host_cntr = 1
+        Topo.__init__(self)
+
+    def build(self, *args, **params):
+        print ("Building Linear Topology ...")
 
         last_switch = None
-        for i in xrange(self.num_switches):
+        for i in range(self.num_switches):
             curr_switch = self.addSwitch("s" + str(i + 1), protocols="OpenFlow14")
             self.switch_names.append(curr_switch)
 
-            for j in xrange(self.num_hosts_per_switch) :
+            for j in range(self.num_hosts_per_switch) :
                 curr_host = self.addHost("h" + str(self.host_cntr))
                 self.host_names.append(curr_host)
                 self.host_cntr += 1

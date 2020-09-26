@@ -9,6 +9,7 @@ import sys
 import time
 import random
 import socket
+import logging
 
 from dpkt.loopback import Loopback
 from dpkt.ethernet import Ethernet
@@ -21,9 +22,9 @@ from src.proto import pss_pb2_grpc
 # Error Defines
 SUCCESS = 1
 FAILURE = 0
-IS_SHARED = 1
+EXIT_FAILURE = -1
+EXIT_SUCCESS = 0
 BUF_NOT_INITIALIZED = -1
-TEMP_ERROR = -2
 
 # Other Defines
 PROXY_NODE_ID = 0
@@ -42,6 +43,14 @@ NS_PER_SEC = 1000000000
 GRPC_SERVER_LOCATION = "11.0.0.255:50051"
 
 TRAFFIC_FLOW_ONE_SHOT = 'OneShot'
+
+# Defines strings
+EXIT_CMD = "EXIT"
+START_CMD = "START"
+NONE = "NONE"
+LOADED_CMD = "LOADED"
+SIGNAL_FINISH_CMD = "DONE"
+TRIGGER_CMD = "TRIGGER"
 
 
 def getid():
@@ -81,10 +90,9 @@ def rpc_read(readlist):
 
         readResponse = stub.read(readRequest)
         response = {int(res.id):res.value for res in readResponse.response}
-        return [response[id] for id in xrange(0,counter)]
+        return [response[id] for id in range(0,counter)]
     except:
-        print "Error in creating RPC read request ! Check /tmp/proxy_log.txt"
-        sys.stdout.flush()
+        logging.info("Error in creating RPC read request ! Check /tmp/proxy_log.txt")
         return None
 
 
@@ -117,10 +125,11 @@ def rpc_write(writelist):
 
         writeStatus = stub.write(writeRequest)
         status = {int(res.id): res.status for res in writeStatus.status}
-        return [status[id] for id in xrange(0, counter)]
+        return [status[id] for id in range(0, counter)]
     except:
-        print "Error in creating RPC write request !. Check /tmp/proxy_log.txt"
-        sys.stdout.flush()
+        logging.info("Error in creating RPC write request !. "
+                     "Check /tmp/proxy_log.txt")
+        
         return None
 
 
@@ -137,7 +146,8 @@ def rpc_process():
             request = pss_pb2.ProcessRequest(id=getid())
             stub.process(request)
     except:
-        print "Error creating RPC process request ! This could be due to some error in proxy. Check /tmp/proxy_log.txt"
+        logging.info("Error creating RPC process request ! "
+                     "This could be due to some error in proxy. Check /tmp/proxy_log.txt")
 
 
 def inet_to_str(inet):

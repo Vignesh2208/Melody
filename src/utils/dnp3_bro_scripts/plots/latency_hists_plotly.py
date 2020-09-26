@@ -17,9 +17,8 @@ def get_bro_x(filepath):
             bro_dict = json.loads(l)
             x.append(bro_dict['latency']*1000)
 
-    print filepath + " Mean Latency:", np.mean(x)
-    print filepath + " Stdev Latency:", np.std(x)
-
+    print (f"{filepath} Mean Latency: {np.mean(x)}")
+    print (f"{filepath} Stdev Latency: {np.std(x)}")
     return x
 
 x_production = get_bro_x(sys.argv[1])

@@ -14,8 +14,8 @@ with open(sys.argv[1], "r") as infile:
 n, bins, patches = plt.hist(x, 50, facecolor='green', alpha=0.75)
 
 
-print "Mean Latency:", np.mean(x)
-print "Stdev Latency:", np.std(x)
+print("Mean Latency:", np.mean(x)) 
+print("Stdev Latency:", np.std(x)) 
 
 plt.xlabel('Latency')
 plt.ylabel('Frequency')

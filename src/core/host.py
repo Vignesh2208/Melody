@@ -3,13 +3,18 @@
 .. moduleauthor:: Vignesh Babu <vig2208@gmail.com>
 """
 
-import shared_buffer
-from shared_buffer import *
-import logger
-from logger import *
+
 import getopt
 import time
 import json
+import sys
+import os
+import src.core.shared_buffer
+
+import src.core.defines as defines
+import src.core.logger as logger
+
+from src.core.shared_buffer import *
 
 
 def extract_mappings(net_cfg_file):
@@ -20,16 +25,16 @@ def extract_mappings(net_cfg_file):
 
 
 def usage():
-    print "python host.py <options>"
-    print "Options:"
-    print "-h or --help"
-    print "-c or --netcfg-file=  Absolute path to network Cfg File <required>"
-    print "-l or --log-file=     Absolute path to log File <optional>"
-    print "-r or --run-time=    Run time of host in seconds before it is shut-down <optional - default forever>"
-    print "-n or --project-name= Name of project folder <optional - default is test project>"
-    print "-d or --id= Id of the node. Required and must be > 0"
-    print "-a or --app= <Name-of-src-file containing application layer>"
-    sys.exit(0)
+    print("python host.py <options>")
+    print("Options:")
+    print("-h or --help")
+    print("-c or --netcfg-file=  Absolute path to network Cfg File <required>")
+    print("-l or --log-file=     Absolute path to log File <optional>")
+    print("-r or --run-time=    Run time of host in seconds before it is shut-down <optional - default forever>")
+    print("-n or --project-name= Name of project folder <optional - default is test project>")
+    print("-d or --id= Id of the node. Required and must be > 0")
+    print("-a or --app= <Name-of-src-file containing application layer>")
+    sys.exit(defines.EXIT_SUCCESS)
 
 
 def parseOpts():
@@ -39,12 +44,12 @@ def parseOpts():
     log_file = "stdout"
     run_time = 0
     project_name = "test"
-    app_layer_file = "NONE"
+    app_layer_file = defines.NONE
 
     try:
-        (opts, args) = getopt.getopt(sys.argv[1:], "hc:l:r:n:a:m:id:",
-                                     ["help", "netcfg-file=", "log-file=", "run-time=", "project-name=",
-                                      "app=", "managed_application_id=", "id="])
+        opts, _ = getopt.getopt(sys.argv[1:], "hc:l:r:n:a:m:id:",
+                                ["help", "netcfg-file=", "log-file=", "run-time=", "project-name=",
+                                "app=", "managed_application_id=", "id="])
     except getopt.GetoptError as e:
         print (str(e))
         usage()
@@ -70,11 +75,15 @@ def parseOpts():
         if o in ("-a", "--app="):
             app_layer_file = str(v)
 
-    assert net_cfg_file_path is not None and host_id is not None and managed_application_id is not None
-    return net_cfg_file_path, log_file, run_time, project_name, host_id, app_layer_file, managed_application_id
+    assert (net_cfg_file_path is not None and
+            host_id is not None and
+            managed_application_id is not None)
+
+    return (net_cfg_file_path, log_file, run_time, project_name,
+            host_id, app_layer_file, managed_application_id)
 
 
-def init_shared_buffers(run_time, shared_buf_array, log, managed_application_id):
+def init_shared_buffers(run_time, shared_buf_array, managed_application_id):
     """Initialize shared buffers used for communication with the main Melody process
 
     If the shared buffers cannot be opened successfully, the co-simulation host just sleeps for the specified amount of
@@ -83,25 +92,27 @@ def init_shared_buffers(run_time, shared_buf_array, log, managed_application_id)
     :param run_time: Running time of co-simulation host in seconds
     :type run_time: int
     :param shared_buf_array: A shared buffer array object (defined in src/core/shared_buffer.py)
-    :param log: A logger object (defined in src/core/logger.py)
     :param managed_application_id: The application_id assigned to this co-simulation host
     :type managed_application_id: str
     :return: None
     """
-    log.info("Buffer opened: " + managed_application_id + "-main-cmd-channel-buffer")
-    result = shared_buf_array.open(bufName=managed_application_id + "-main-cmd-channel-buffer", isProxy=False)
-    if result == BUF_NOT_INITIALIZED or result == FAILURE:
-        log.error("Failed to open communication channel ! Not starting any threads !")
-        sys.stdout.flush()
+    print(f"Buffer opened: {managed_application_id}-main-cmd-channel-buffer")
+    result = shared_buf_array.open(
+        bufName=f"{managed_application_id}-main-cmd-channel-buffer",
+        isProxy=False)
+    if result == defines.BUF_NOT_INITIALIZED or result == defines.FAILURE:
+        print("Failed to open communication channel ! "
+                      "Not starting any threads !")
         if run_time == 0:
             while True:
                 time.sleep(1)
 
         time.sleep(run_time)
-        sys.exit(0)
+        sys.exit(defines.EXIT_FAILURE)
 
 
-def main(host_id, net_cfg_file, log_file, run_time, project_name, app_layer_file, managed_application_id):
+def main(host_id, net_cfg_file, log_file, run_time, project_name, 
+         app_layer_file, managed_application_id):
     """Main entry point of the co-simulation host
 
     Starts the co-simulation host and its application layer thread.
@@ -128,58 +139,60 @@ def main(host_id, net_cfg_file, log_file, run_time, project_name, app_layer_file
     with open("/tmp/application_params.json") as f:
         app_attributes = json.load(f)
 
-    
-    log = logger.Logger(log_file, "Host" + str(host_id) + ": ")
 
-    log.info("Powersim IDS Mapping: " + str(powersim_ids_mapping))
-    log.info("Managed PowerSim ID: " + str(managed_application_id))
+    print(f"Powersim IDS Mapping: {str(powersim_ids_mapping)}")
+    print(f"Managed PowerSim ID: {str(managed_application_id)}")
     script_location = os.path.dirname(os.path.realpath(__file__))
-    project_location = script_location + "/../projects/" + project_name + "/"
+    project_location = f"{script_location}/../projects/{project_name}/"
 
     attributes = app_attributes[managed_application_id]
     shared_buf_array = shared_buffer_array()
 
-    if app_layer_file != "NONE":
+    if app_layer_file != defines.NONE:
         split_ls = app_layer_file.split('.')
         host_control_layer_override_file = split_ls[0]
-        log.info("Override file name: " + host_control_layer_override_file)
-        host_ipc_layer = __import__("src.projects." + str(project_name) + "." + host_control_layer_override_file,
-                                  globals(), locals(), ['hostApplicationLayer'], -1)
+        print(f"Override file name: {host_control_layer_override_file}")
+        host_ipc_layer = __import__(
+            f"src.projects.{str(project_name)}.{host_control_layer_override_file}",
+            globals(), locals(), ['hostApplicationLayer'], 0)
         host_ipc_layer = host_ipc_layer.hostApplicationLayer
     else:
-        host_ipc_layer = __import__("basicHostIPCLayer", globals(), locals(), ['basicHostIPCLayer'], -1)
+        host_ipc_layer = __import__(
+            "basicHostIPCLayer", globals(), locals(),
+            ['basicHostIPCLayer'], 0)
         host_ipc_layer = host_ipc_layer.basicHostIPCLayer
 
-    log.info("Initializing inter process communication channels ...")
-    sys.stdout.flush()
-    init_shared_buffers(run_time, shared_buf_array, log, managed_application_id)
+    print("Initializing inter process communication channels ...")
+    init_shared_buffers(run_time, shared_buf_array, managed_application_id)
 
-    log.info("Successfully opened an inter process communication channel !")
-    sys.stdout.flush()
-
-    ipc_layer = host_ipc_layer(host_id, log_file, powersim_ids_mapping, managed_application_id, attributes)
-    log.info("Waiting for start command ... ")
-    sys.stdout.flush()
+    print("Successfully opened an inter process communication channel !")
+    ipc_layer = host_ipc_layer(host_id, log_file, powersim_ids_mapping,
+                               managed_application_id, attributes)
+    print("Waiting for start command ... ")
+    
     recv_msg = ''
-    while "START" not in recv_msg:
-        dummy_id, recv_msg = shared_buf_array.read_until(managed_application_id + "-main-cmd-channel-buffer",
-                                                         cool_off_time=0.1)
+    while defines.START_CMD not in recv_msg:
+        dummy_id, recv_msg = shared_buf_array.read_until(
+            f"{managed_application_id}-main-cmd-channel-buffer",
+            cool_off_time=0.1)
     ipc_layer.start()
-    log.info("Signalled all threads to start ...")
-    sys.stdout.flush()
+    print("Signalled all threads to start ...")
+    
     recv_msg = ''
 
-    log.info("Waiting for stop command ...")
-    sys.stdout.flush()
-    while "EXIT" not in recv_msg:
-        dummy_id, recv_msg = shared_buf_array.read_until(managed_application_id + "-main-cmd-channel-buffer",
-                                                         cool_off_time=0.1)
+    print("Waiting for stop command ...")   
+    while defines.EXIT_CMD not in recv_msg:
+        dummy_id, recv_msg = shared_buf_array.read_until(
+            f"{managed_application_id}-main-cmd-channel-buffer",
+            cool_off_time=0.1)
 
     ipc_layer.cancel_thread()
-    log.info("Shutting Down ... ")
-    sys.stdout.flush()
+    print("Shutting Down ... ")
+    
 
 
 if __name__ == "__main__":
-    net_cfg_file_path, log_file, run_time, project_name, host_id, app_layer_file, managed_application_id = parseOpts()
-    sys.exit(main(host_id, net_cfg_file_path, log_file, run_time, project_name, app_layer_file, managed_application_id))
+    (net_cfg_file_path, log_file, run_time, project_name,
+    host_id, app_layer_file, managed_application_id) = parseOpts()
+    sys.exit(main(host_id, net_cfg_file_path, log_file, run_time,
+                  project_name, app_layer_file, managed_application_id))

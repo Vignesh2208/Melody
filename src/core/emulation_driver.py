@@ -6,11 +6,17 @@
 import argparse
 import json
 import datetime
-from datetime import datetime
-import shared_buffer
-from shared_buffer import *
+import logging
 import time
 import subprocess
+import sys
+import src.core.shared_buffer
+
+import src.core.defines as defines
+
+from src.core.shared_buffer import *
+from datetime import datetime
+
 
 
 class EmulationDriver(object):
@@ -49,18 +55,18 @@ class EmulationDriver(object):
         :return: None
         """
 
-        result = self.shared_buf_array.open(bufName=str(driver_id) + "-main-cmd-channel-buffer", isProxy=False)
-        if result == BUF_NOT_INITIALIZED or result == FAILURE:
-            print "Cmd channel buffer open failed!. Not starting any processes !"
+        result = self.shared_buf_array.open(
+            bufName=f"{str(driver_id)}-main-cmd-channel-buffer", isProxy=False)
+        if result == defines.BUF_NOT_INITIALIZED or result == defines.FAILURE:
+            logging.error("Cmd channel buffer open failed!. Not starting any processes !")
             if run_time == 0:
                 while True:
                     time.sleep(1)
 
             time.sleep(run_time)
-            sys.exit(0)
+            sys.exit(defines.EXIT_FAILURE)
 
-        print "Cmd channel buffer open succeeded !"
-        sys.stdout.flush()
+        logging.info("Cmd channel buffer open succeeded !")
 
     def trigger(self):
         """Start executing the assigned command.
@@ -70,22 +76,19 @@ class EmulationDriver(object):
         :return: None
         """
         if self.cmd == "":
-            print "Nothing to execute ..."
+            logging.info("Nothing to execute ...")
             return
 
         time.sleep(int(self.offset))
-        print "Started executing command at ", str(datetime.now())
-        sys.stdout.flush()
+        logging.info("Started executing command ")
         try:
             cmd_list = self.cmd.split(' ')
             for arg in cmd_list:
                 if arg == '':
                     cmd_list.remove(arg)
-            print cmd_list
-            sys.stdout.flush()
             subprocess.Popen(cmd_list, shell=False)
         except RuntimeError:
-            print "Error running command: ", sys.exec_info()[0]
+            logging.error("Error running command: %s", sys.exc_info()[0])
 
 
 
@@ -98,10 +101,11 @@ def main():
     :return: None
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument("--input_params_file_path", dest="input_params_file_path")
+    parser.add_argument("--input_params_file_path",
+                        dest="input_params_file_path")
 
-    print "Started background flow emulation driver ..."
-    sys.stdout.flush()
+    logging.info("Started background flow emulation driver ...")
+    
     args = parser.parse_args()
 
     with open(args.input_params_file_path) as f:
@@ -109,24 +113,23 @@ def main():
 
     d = EmulationDriver(input_params)
 
-    print "Waiting for START command ... "
-    sys.stdout.flush()
+    logging.info("Waiting for START command ... ")
     recv_msg = ''
-    while "START" not in recv_msg:
-        dummy_id, recv_msg = d.shared_buf_array.read_until(str(d.driver_id) + "-main-cmd-channel-buffer")
+    while defines.START_CMD not in recv_msg:
+        dummy_id, recv_msg = d.shared_buf_array.read_until(
+            f"{str(d.driver_id)}-main-cmd-channel-buffer")
 
-    print "Triggered emulation driver at ", str(datetime.now())
-    sys.stdout.flush()
+    logging.info("Triggered emulation driver ")
     d.trigger()
 
-    print "Waiting for STOP command ... "
-    sys.stdout.flush()
+    logging.info("Waiting for STOP command ... ")
     recv_msg = ''
-    while "EXIT" not in recv_msg:
-        dummy_id, recv_msg = d.shared_buf_array.read_until(str(d.driver_id) + "-main-cmd-channel-buffer")
+    while defines.EXIT_CMD not in recv_msg:
+        dummy_id, recv_msg = d.shared_buf_array.read_until(
+            f"{str(d.driver_id)}-main-cmd-channel-buffer")
 
-    print "Shutting down background flow emulation driver ..."
-    sys.stdout.flush()
+    logging.info("Shutting down background flow emulation driver ...")
+    
 
 
 if __name__ == "__main__":

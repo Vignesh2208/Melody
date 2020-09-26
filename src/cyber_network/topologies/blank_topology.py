@@ -18,5 +18,10 @@ class CyberTopology(Topo):
         :type params: dict
         """
 
-        Topo.__init__(self)
+        
         self.params = params
+        Topo.__init__(self)
+
+    def build(self, *args, **params):
+        """Build the topology here."""
+        pass
