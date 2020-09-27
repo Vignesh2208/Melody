@@ -1,0 +1,101 @@
+// Protocol buffer for specifying project configuration.
+
+syntax = "proto2";
+import "pss.proto";
+package melody_configuration;
+
+
+
+// These additional parameters are passed to the topology class as a dictionary during initialization
+message TopologyParameter {
+	required string parameter_name = 1; // name of the parameter
+
+	// value of the parameter (only one of the following 4 may be specified) depending on the type of the value
+
+	optional string parameter_value_string = 2;
+	optional int32 parameter_value_int = 3;
+	optional double parameter_value_double = 4;
+	optional bool parameter_value_bool = 5;
+}
+
+// Specifying the cyber emulation parameters
+message CyberEmulationSpecification {
+
+	required string topology_name = 1; // name of the cyber topology. must be one of the topologies
+	                                   // defined in srcs/cyber_network/topologies
+	required int32 num_hosts = 2;       // number of hosts in the topology
+	required int32 num_switches = 3;    // number of switches in the topology
+	required int32 inter_switch_link_latency_ms = 4;    // host-host link latency in ms
+	required int32 host_switch_link_latency_ms = 5;     // host-switch link latency in ms
+	repeated TopologyParameter additional_topology_param = 6;   // additional topology specific parameters
+}
+
+message PowerSimulationSpecification {
+	required string power_sim_driver_name = 1;
+	required string case_file_path = 2;
+}
+
+message ApplicationAttributes {
+	required string name = 1;
+	required string value = 2;
+}
+
+// Specifying attributes of an application which runs on a mininet host
+message MappedApplication {
+    required string application_id = 1;     // ID assigned to the application
+    required string application_src = 2;    // src python file which implements the application layer
+                                            // Note that this is relative to the project directory. So absolute
+                                            // path may not be specified.
+    required int32 listen_port = 3;         // port on which the application should listen
+
+	repeated ApplicationAttributes attribute = 4; // application specific params
+}
+
+// Specifying the set of applications which can run on a mininet host
+message CyberPhysicalMap {
+	required string cyber_host_name = 1;    // mininet host name
+	repeated MappedApplication mapped_application = 2;  // specification for each application which can run on it
+	optional string description = 3;       // optional description string
+}
+
+// Format of a background flow specification.
+message BackGroundFlow {
+	required string src_cyber_entity = 1;   // Mininet host name on which the client command is started
+	required string dst_cyber_entity = 2;   // Mininet host name on which the server client command is started
+	required string cmd_to_run_at_src = 3;  // Command to start on the client
+	required string cmd_to_run_at_dst = 4;  // Command to start on the server
+	required int32 	flow_start_time = 5;    // The client command is delayed by this offset.
+	                                        // If flow_start_time == 1, then it is delayed by 1 sec.
+	optional string description = 6;    // Optional description string
+}
+
+
+// Format of a replay pcap specification
+message PcapReplayFlow {
+
+	repeated string involved_cyber_entity = 1;  // List of mininet host names which are a part of the pcap to be replayed
+	required string pcap_file_path = 2; // Path to the pcap which needs to be replayed
+	optional string description = 3;    // Optional description string
+}
+
+
+// Format of the entire project configuration
+message ProjectConfiguration {
+
+	required string project_name = 1;       //Name of the project
+	required CyberEmulationSpecification cyber_emulation_spec = 2;      // Specification of the cyber emulation
+	required PowerSimulationSpecification power_simulation_spec = 3;    // Specification of the power simulation
+	repeated CyberPhysicalMap cyber_physical_map = 4;   // Specifying the mapping between applications which would
+	                                                    // interact with the power simulator and mininet hosts on
+	                                                    // which they should run
+	repeated BackGroundFlow bg_flow = 5;    // Specifying background network flows which are initiated over
+	                                        // the cyber network
+	repeated PcapReplayFlow replay_flow = 6;    // Specifying pcap replays which are initiated over the cyber network
+
+}
+
+
+// Each disturbance is a WriteRequest
+message Disturbances {
+    repeated melody_powersim_proto.WriteRequest disturbance = 1;
+}

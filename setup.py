@@ -5,6 +5,6 @@ setup(name='shared_buf', version='1.2',  \
             Extension('shared_buf',
                   libraries=['rt','pthread'], 
                   library_dirs = ['/usr/local/lib','/usr/lib/i386-linux-gnu'],
-                  sources = ['src/core/libs/shared_buf.c',
-                             'src/core/libs/utils/linkedlist.c',
-                             'src/core/libs/utils/hashmap.c'])])
+                  sources = ['srcs/lib/libs/shared_buf.c',
+                             'srcs/lib/libs/utils/linkedlist.c',
+                             'srcs/lib/libs/utils/hashmap.c'])])

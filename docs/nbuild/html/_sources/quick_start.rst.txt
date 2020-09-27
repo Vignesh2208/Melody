@@ -5,12 +5,12 @@ In this section we will help you install Melody and run you through a simple tut
 Example: Secondary Voltage Control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-`This example <https://github.com/Vignesh2208/Melody/tree/master/src/projects/secondary_voltage_control/>`_ uses Melody to implement Secondary Voltage Control (SVC) for the `IEEE 39-bus New England <https://icseg.iti.illinois.edu/ieee-39-bus-system/>`_ power system model. The goal of SVC is to maintain voltages at specifically chosen load buses called pilot buses at their nominal values, subjected to random demand fluctuations throughout the day. That can be achieved by adjusting voltage setpoints at the generator buses. In this example, we implement SVC as a standard textbook p-controller that works on the first-order approximation of the power system. Being part of a close-loop control system, SVC is sensitive to the timing of (i) the input signals, which are voltages at pilot buses reported to the SCADA controller by the emulated PMUs, and (ii) the output signals, which are voltage setpoints at generator buses that are sent from the same SCADA controller to the emulated PLCs. It is therefore crucially important that Melody is capable of precisely controlling the advance of virtual simulation time using Kronos.
+`This example <https://github.com/Vignesh2208/Melody/tree/master/srcs/projects/secondary_voltage_control/>`_ uses Melody to implement Secondary Voltage Control (SVC) for the `IEEE 39-bus New England <https://icseg.iti.illinois.edu/ieee-39-bus-system/>`_ power system model. The goal of SVC is to maintain voltages at specifically chosen load buses called pilot buses at their nominal values, subjected to random demand fluctuations throughout the day. That can be achieved by adjusting voltage setpoints at the generator buses. In this example, we implement SVC as a standard textbook p-controller that works on the first-order approximation of the power system. Being part of a close-loop control system, SVC is sensitive to the timing of (i) the input signals, which are voltages at pilot buses reported to the SCADA controller by the emulated PMUs, and (ii) the output signals, which are voltage setpoints at generator buses that are sent from the same SCADA controller to the emulated PLCs. It is therefore crucially important that Melody is capable of precisely controlling the advance of virtual simulation time using Kronos.
 
 
 Setup
 -----
-The simulation setup is specified in the `project configuration file <https://github.com/Vignesh2208/Melody/blob/master/src/projects/secondary_voltage_control/project_configuration.prototxt>`_. Below we provide a high level summary:
+The simulation setup is specified in the `project configuration file <https://github.com/Vignesh2208/Melody/blob/master/srcs/projects/secondary_voltage_control/project_configuration.prototxt>`_. Below we provide a high level summary:
 
 * System model: IEEE 39-bus New England case
 * Power sytem simulation tool: `MATPOWER <http://www.pserc.cornell.edu/matpower/>`_
@@ -22,7 +22,7 @@ The simulation setup is specified in the `project configuration file <https://gi
 
 PMUs
 ----
-The PMU application is implemented in `this <https://github.com/Vignesh2208/Melody/blob/master/src/projects/secondary_voltage_control/pmu.py>`_ Python script. Each PMU is assigned to one pilot bus and is run as a process inside a mininet host. The PMU configuration can be found in the projection configuration file, which is explained `here <https://melody-by-projectmoses.readthedocs.io/en/latest/project_configuration.html>`_. During runtime, each PMU periodically sends GRPC read requests to the proxy to get the voltage measurement at its pilot bus::
+The PMU application is implemented in `this <https://github.com/Vignesh2208/Melody/blob/master/srcs/projects/secondary_voltage_control/pmu.py>`_ Python script. Each PMU is assigned to one pilot bus and is run as a process inside a mininet host. The PMU configuration can be found in the projection configuration file, which is explained `here <https://melody-by-projectmoses.readthedocs.io/en/latest/project_configuration.html>`_. During runtime, each PMU periodically sends GRPC read requests to the proxy to get the voltage measurement at its pilot bus::
   
   # Creating a list of read requests
   # obj_type_to_read = "bus"
@@ -43,7 +43,7 @@ Once receiving the voltage reading, the PMU forwards it to the SCADA controller 
 
 SCADA controller
 ----------------
-The SCADA controller is implemented in `this <https://github.com/Vignesh2208/Melody/blob/master/src/projects/secondary_voltage_control/scada.py>`_ Python script. The SCADA process contains two main threads:
+The SCADA controller is implemented in `this <https://github.com/Vignesh2208/Melody/blob/master/srcs/projects/secondary_voltage_control/scada.py>`_ Python script. The SCADA process contains two main threads:
 
 * One that keeps listening to UDP packets sent by PMUs that contain voltage measurements.
   
@@ -52,7 +52,7 @@ The SCADA controller is implemented in `this <https://github.com/Vignesh2208/Mel
 
 PLCs
 ----
-The PLC application is implemented in `this <https://github.com/Vignesh2208/Melody/blob/master/src/projects/secondary_voltage_control/plc.py>`_ Python script. Each PLC is assigned to one generator bus that it directly controls. Each PLC runs as a process inside a mininet host. However, unlike PMUs and the SCADA server, PLCs do not run periodically. Instead, each PLC application waits for UDP packets sent by the SCADA controller, parses the packets to extract the voltage setpoints, then updates them to the power system simulation by issueing a GRPC write request to the proxy::
+The PLC application is implemented in `this <https://github.com/Vignesh2208/Melody/blob/master/srcs/projects/secondary_voltage_control/plc.py>`_ Python script. Each PLC is assigned to one generator bus that it directly controls. Each PLC runs as a process inside a mininet host. However, unlike PMUs and the SCADA server, PLCs do not run periodically. Instead, each PLC application waits for UDP packets sent by the SCADA controller, parses the packets to extract the voltage setpoints, then updates them to the power system simulation by issueing a GRPC write request to the proxy::
 
   # Making a GRPC call to change the generator voltage setpoint
   # The call blocks until proxy returns the write status
@@ -74,7 +74,7 @@ Load Kronos once upon restart::
 
 Switch to the project directory::
 
-  cd ~/Melody/src/projects/secondary_voltage_control
+  cd ~/Melody/srcs/projects/secondary_voltage_control
   # set enable_kronos=0 if you wish to run without kronos support
   # if enable_kronos is set to 1, ensure that kronos module is pre-loaded
   sudo python main.py --enable_kronos=1 --run_time=10

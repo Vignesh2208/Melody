@@ -1,0 +1,2 @@
+# You may add any disturbances you wish to send to the power simulation here
+# They obey the "Disturbances" message format specified in ~/Melody/srcs/proto/configuration.proto

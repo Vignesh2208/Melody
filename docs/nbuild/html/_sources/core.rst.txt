@@ -4,114 +4,114 @@ core package
 Submodules
 ----------
 
-core.basicHostIPCLayer module
+lib.basicHostIPCLayer module
 -----------------------------
 
-.. automodule:: core.basicHostIPCLayer
+.. automodule:: lib.basicHostIPCLayer
     :members:
     :undoc-members:
     :show-inheritance:
 
-core.defines module
+lib.defines module
 -------------------
 
-.. automodule:: core.defines
+.. automodule:: lib.defines
     :members:
     :undoc-members:
     :show-inheritance:
 
-core.disturbance\_gen module
+lib.disturbance\_gen module
 ----------------------------
 
-.. automodule:: core.disturbance_gen
+.. automodule:: lib.disturbance_gen
     :members:
     :undoc-members:
     :show-inheritance:
 
-core.emulation\_driver module
+lib.emulation\_driver module
 -----------------------------
 
-.. automodule:: core.emulation_driver
+.. automodule:: lib.emulation_driver
     :members:
     :undoc-members:
     :show-inheritance:
 
-core.host module
+lib.host module
 ----------------
 
-.. automodule:: core.host
+.. automodule:: lib.host
     :members:
     :undoc-members:
     :show-inheritance:
 
-core.kronos\_helper\_functions module
+lib.kronos\_helper\_functions module
 -------------------------------------
 
-.. automodule:: core.kronos_helper_functions
+.. automodule:: lib.kronos_helper_functions
     :members:
     :undoc-members:
     :show-inheritance:
 
-core.logger module
+lib.logger module
 ------------------
 
-.. automodule:: core.logger
+.. automodule:: lib.logger
     :members:
     :undoc-members:
     :show-inheritance:
 
-core.net\_power module
+lib.net\_power module
 ----------------------
 
-.. automodule:: core.net_power
+.. automodule:: lib.net_power
     :members:
     :undoc-members:
     :show-inheritance:
 
-core.parse\_project\_configuration module
+lib.parse\_project\_configuration module
 -----------------------------------------
 
-.. automodule:: core.parse_project_configuration
+.. automodule:: lib.parse_project_configuration
     :members:
     :undoc-members:
     :show-inheritance:
 
-core.pss\_driver module
+lib.pss\_driver module
 -----------------------
 
-.. automodule:: core.pss_driver
+.. automodule:: lib.pss_driver
     :members:
     :undoc-members:
     :show-inheritance:
 
-core.pss\_server module
+lib.pss\_server module
 -----------------------
 
-.. automodule:: core.pss_server
+.. automodule:: lib.pss_server
     :members:
     :undoc-members:
     :show-inheritance:
 
-core.replay\_driver module
+lib.replay\_driver module
 --------------------------
 
-.. automodule:: core.replay_driver
+.. automodule:: lib.replay_driver
     :members:
     :undoc-members:
     :show-inheritance:
 
-core.replay\_orchestrator module
+lib.replay\_orchestrator module
 --------------------------------
 
-.. automodule:: core.replay_orchestrator
+.. automodule:: lib.replay_orchestrator
     :members:
     :undoc-members:
     :show-inheritance:
 
-core.shared\_buffer module
+lib.shared\_buffer module
 --------------------------
 
-.. automodule:: core.shared_buffer
+.. automodule:: lib.shared_buffer
     :members:
     :undoc-members:
     :show-inheritance:

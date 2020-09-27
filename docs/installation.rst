@@ -137,7 +137,7 @@ Melody Post-Installation Steps
     # Add the following to ~/.bashrc
     export PYTHONPATH="${PYTHONPATH}:<path-to-melody>"
     export PYTHONPATH="${PYTHONPATH}:<path-to-melody>/src"
-    export PYTHONPATH="${PYTHONPATH}:/home/kronos/Melody/src/proto"
+    export PYTHONPATH="${PYTHONPATH}:/home/kronos/Melody/srcs/proto"
 
     
     # Update .bashrc

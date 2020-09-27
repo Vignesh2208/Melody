@@ -401,7 +401,7 @@ Refer src/proto/pss.proto</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>shared_buf_array</strong> – A shared buffer array object (defined in src/core/shared_buffer.py)</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>shared_buf_array</strong> – A shared buffer array object (defined in src/lib/shared_buffer.py)</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
 </tr>
@@ -516,8 +516,8 @@ run time.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>run_time</strong> (<em>int</em>) – Running time of co-simulation host in seconds</li>
-<li><strong>shared_buf_array</strong> – A shared buffer array object (defined in src/core/shared_buffer.py)</li>
-<li><strong>log</strong> – A logger object (defined in src/core/logger.py)</li>
+<li><strong>shared_buf_array</strong> – A shared buffer array object (defined in src/lib/shared_buffer.py)</li>
+<li><strong>log</strong> – A logger object (defined in src/lib/logger.py)</li>
 <li><strong>managed_application_id</strong> (<em>str</em>) – The application_id assigned to this co-simulation host</li>
 </ul>
 </td>
@@ -1269,7 +1269,7 @@ what’s written to the terminal by the prompters.</p>
 <dt id="core.parse_project_configuration.Experiment">
 <em class="property">class </em><code class="descclassname">core.parse_project_configuration.</code><code class="descname">Experiment</code><span class="sig-paren">(</span><em>run_time</em>, <em>network_configuration</em>, <em>project_dir</em>, <em>base_dir</em>, <em>log_dir</em>, <em>emulated_background_traffic_flows</em>, <em>replay_traffic_flows</em>, <em>cyber_host_apps</em>, <em>enable_kronos</em>, <em>relative_cpu_speed</em>, <em>power_sim_spec</em><span class="sig-paren">)</span><a class="headerlink" href="#core.parse_project_configuration.Experiment" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">src.core.net_power.NetPower</span></code></p>
-<p>Experiment object inherits from src.core.NetPower</p>
+<p>Experiment object inherits from srcs.core.NetPower</p>
 <p>It provides API to control/start/stop the experiment.</p>
 </dd></dl>
 
@@ -1701,7 +1701,7 @@ the specified amount and exit gracefully.</td>
 <dt id="core.shared_buffer.shared_buffer">
 <em class="property">class </em><code class="descclassname">core.shared_buffer.</code><code class="descname">shared_buffer</code><span class="sig-paren">(</span><em>bufName</em>, <em>isProxy</em><span class="sig-paren">)</span><a class="headerlink" href="#core.shared_buffer.shared_buffer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Uses the shared_buffer library defined in src/core/libs</p>
+<p>Uses the shared_buffer library defined in src/lib/libs</p>
 <dl class="method">
 <dt id="core.shared_buffer.shared_buffer.close">
 <code class="descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#core.shared_buffer.shared_buffer.close" title="Permalink to this definition">¶</a></dt>

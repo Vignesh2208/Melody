@@ -1,0 +1,454 @@
+project_name: "secondary_voltage_control"
+cyber_emulation_spec {
+    topology_name: "clique_topo"
+    num_hosts: 5
+    num_switches: 5
+    inter_switch_link_latency_ms: 1
+    host_switch_link_latency_ms: 1
+    additional_topology_param {
+        parameter_name: "per_switch_links"
+        parameter_value_int: 2
+    }
+    additional_topology_param {
+        parameter_name: "num_hosts_per_switch"
+        parameter_value_int: 1
+    }
+}
+
+power_simulation_spec {
+    power_sim_driver_name: "MatPowerDriver"
+    case_file_path: "/home/kronos/Melody/srcs/power_sim/cases/case39.m"
+}
+
+cyber_physical_map {
+    cyber_host_name	:	"h1"
+    description		:	"Workstation"
+}
+
+cyber_physical_map {
+    cyber_host_name	:	"h2"
+    description		:	"HMI"
+}
+
+cyber_physical_map {
+    cyber_host_name	:	"h3"
+    mapped_application {
+        application_id	:	"PMU_Pilot_Bus_2"
+        application_src : "pmu.py"
+        listen_port : 5100
+        attribute {
+            name: "objtype"
+            value: "bus"
+        }
+        attribute {
+            name: "fieldtype"
+            value: "Vm"
+        }
+        attribute {
+            name: "objid"
+            value: "2"
+        }
+        attribute {
+            name: "polling_time_secs"
+            value: "1"
+        }
+    }
+    mapped_application {
+        application_id   :   "PMU_Pilot_Bus_6"
+        application_src : "pmu.py"
+        listen_port : 5101
+        attribute {
+            name: "objtype"
+            value: "bus"
+        }
+        attribute {
+            name: "fieldtype"
+            value: "Vm"
+        }
+        attribute {
+            name: "objid"
+            value: "6"
+        }
+        attribute {
+            name: "polling_time_secs"
+            value: "1"
+        }
+    }
+    mapped_application {
+        application_id   :   "PMU_Pilot_Bus_9"
+        application_src : "pmu.py"
+        listen_port : 5102
+        attribute {
+            name: "objtype"
+            value: "bus"
+        }
+        attribute {
+            name: "fieldtype"
+            value: "Vm"
+        }
+        attribute {
+            name: "objid"
+            value: "9"
+        }
+        attribute {
+            name: "polling_time_secs"
+            value: "1"
+        }
+    }
+    mapped_application {
+        application_id   :   "PMU_Pilot_Bus_10"
+        application_src : "pmu.py"
+        listen_port : 5103
+        attribute {
+            name: "objtype"
+            value: "bus"
+        }
+        attribute {
+            name: "fieldtype"
+            value: "Vm"
+        }
+        attribute {
+            name: "objid"
+            value: "10"
+        }
+        attribute {
+            name: "polling_time_secs"
+            value: "1"
+        }
+    }
+    mapped_application {
+        application_id   :   "PMU_Pilot_Bus_19"
+        application_src : "pmu.py"
+        listen_port : 5104
+        attribute {
+            name: "objtype"
+            value: "bus"
+        }
+        attribute {
+            name: "fieldtype"
+            value: "Vm"
+        }
+        attribute {
+            name: "objid"
+            value: "19"
+        }
+        attribute {
+            name: "polling_time_secs"
+            value: "1"
+        }
+    }
+    mapped_application {
+        application_id   :   "PMU_Pilot_Bus_20"
+        application_src : "pmu.py"
+        listen_port : 5105
+        attribute {
+            name: "objtype"
+            value: "bus"
+        }
+        attribute {
+            name: "fieldtype"
+            value: "Vm"
+        }
+        attribute {
+            name: "objid"
+            value: "20"
+        }
+        attribute {
+            name: "polling_time_secs"
+            value: "1"
+        }
+    }
+    mapped_application {
+        application_id   :   "PMU_Pilot_Bus_22"
+        application_src : "pmu.py"
+        listen_port : 5106
+        attribute {
+            name: "objtype"
+            value: "bus"
+        }
+        attribute {
+            name: "fieldtype"
+            value: "Vm"
+        }
+        attribute {
+            name: "objid"
+            value: "22"
+        }
+        attribute {
+            name: "polling_time_secs"
+            value: "1"
+        }
+    }
+    mapped_application {
+        application_id   :   "PMU_Pilot_Bus_23"
+        application_src : "pmu.py"
+        listen_port : 5107
+        attribute {
+            name: "objtype"
+            value: "bus"
+        }
+        attribute {
+            name: "fieldtype"
+            value: "Vm"
+        }
+        attribute {
+            name: "objid"
+            value: "23"
+        }
+        attribute {
+            name: "polling_time_secs"
+            value: "1"
+        }
+    }
+    mapped_application {
+        application_id   :   "PMU_Pilot_Bus_25"
+        application_src : "pmu.py"
+        listen_port : 5108
+        attribute {
+            name: "objtype"
+            value: "bus"
+        }
+        attribute {
+            name: "fieldtype"
+            value: "Vm"
+        }
+        attribute {
+            name: "objid"
+            value: "25"
+        }
+        attribute {
+            name: "polling_time_secs"
+            value: "1"
+        }
+    }
+    mapped_application {
+        application_id   :   "PMU_Pilot_Bus_29"
+        application_src : "pmu.py"
+        listen_port : 5109
+        attribute {
+            name: "objtype"
+            value: "bus"
+        }
+        attribute {
+            name: "fieldtype"
+            value: "Vm"
+        }
+        attribute {
+            name: "objid"
+            value: "29"
+        }
+        attribute {
+            name: "polling_time_secs"
+            value: "1"
+        }
+    }
+    description		            :	"PMUs for reading pilot buses"
+}
+
+cyber_physical_map {
+    cyber_host_name				:	"h4"
+    mapped_application {
+        application_id	:	"PLC_Gen_Bus_30"
+        application_src: "plc.py"
+        listen_port : 5100
+        attribute {
+            name: "objtype"
+            value: "gen"
+        }
+        attribute {
+            name: "fieldtype"
+            value: "Vg"
+        }
+        attribute {
+            name: "objid"
+            value: "30"
+        }
+    }
+    mapped_application {
+        application_id   :   "PLC_Gen_Bus_31"
+        application_src: "plc.py"
+        listen_port : 5101
+        attribute {
+            name: "objtype"
+            value: "gen"
+        }
+        attribute {
+            name: "fieldtype"
+            value: "Vg"
+        }
+        attribute {
+            name: "objid"
+            value: "31"
+        }
+    }
+    mapped_application {
+        application_id   :   "PLC_Gen_Bus_32"
+        application_src: "plc.py"
+        listen_port : 5102
+        attribute {
+            name: "objtype"
+            value: "gen"
+        }
+        attribute {
+            name: "fieldtype"
+            value: "Vg"
+        }
+        attribute {
+            name: "objid"
+            value: "32"
+        }
+    }
+    mapped_application {
+        application_id   :   "PLC_Gen_Bus_33"
+        application_src: "plc.py"
+        listen_port : 5103
+        attribute {
+            name: "objtype"
+            value: "gen"
+        }
+        attribute {
+            name: "fieldtype"
+            value: "Vg"
+        }
+        attribute {
+            name: "objid"
+            value: "33"
+        }
+    }
+    mapped_application {
+        application_id   :   "PLC_Gen_Bus_34"
+        application_src: "plc.py"
+        listen_port : 5104
+        attribute {
+            name: "objtype"
+            value: "gen"
+        }
+        attribute {
+            name: "fieldtype"
+            value: "Vg"
+        }
+        attribute {
+            name: "objid"
+            value: "34"
+        }
+    }
+    mapped_application {
+        application_id   :   "PLC_Gen_Bus_35"
+        application_src: "plc.py"
+        listen_port : 5105
+        attribute {
+            name: "objtype"
+            value: "gen"
+        }
+        attribute {
+            name: "fieldtype"
+            value: "Vg"
+        }
+        attribute {
+            name: "objid"
+            value: "35"
+        }
+    }
+    mapped_application {
+        application_id   :   "PLC_Gen_Bus_36"
+        application_src: "plc.py"
+        listen_port : 5106
+        attribute {
+            name: "objtype"
+            value: "gen"
+        }
+        attribute {
+            name: "fieldtype"
+            value: "Vg"
+        }
+        attribute {
+            name: "objid"
+            value: "36"
+        }
+    }
+    mapped_application {
+        application_id   :   "PLC_Gen_Bus_37"
+        application_src: "plc.py"
+        listen_port : 5107
+        attribute {
+            name: "objtype"
+            value: "gen"
+        }
+        attribute {
+            name: "fieldtype"
+            value: "Vg"
+        }
+        attribute {
+            name: "objid"
+            value: "37"
+        }
+    }
+    mapped_application {
+        application_id   :   "PLC_Gen_Bus_38"
+        application_src: "plc.py"
+        listen_port : 5108
+        attribute {
+            name: "objtype"
+            value: "gen"
+        }
+        attribute {
+            name: "fieldtype"
+            value: "Vg"
+        }
+        attribute {
+            name: "objid"
+            value: "38"
+        }
+    }
+    mapped_application {
+        application_id   :   "PLC_Gen_Bus_39"
+        application_src: "plc.py"
+        listen_port : 5109
+        attribute {
+            name: "objtype"
+            value: "gen"
+        }
+        attribute {
+            name: "fieldtype"
+            value: "Vg"
+        }
+        attribute {
+            name: "objid"
+            value: "39"
+        }
+    }
+    description		            :	"PLCs for controlling generator bus voltages"
+}
+
+cyber_physical_map {
+    cyber_host_name				:	"h5"
+    mapped_application {
+        application_id   :   "SCADA_CONTROLLER"
+        application_src: "scada.py"
+        listen_port : 5100
+        attribute {
+            name: "controller_timestep_secs"
+            value: "1"
+        }
+    }
+    description		            :	"Receives PMU data and sends commands to PLCs"
+}
+
+bg_flow {
+    src_cyber_entity	:	"h2"
+    dst_cyber_entity	:	"h3"
+    cmd_to_run_at_src	:	"ping -i 0.2 h3"
+    cmd_to_run_at_dst	:	""
+    flow_start_time		:	1
+    description		    :	"Ping flow between h2 to h3 starting at time 1.0 seconds"
+}
+
+replay_flow {
+    involved_cyber_entity: "h1"
+    involved_cyber_entity: "h3"
+    pcap_file_path: "/home/kronos/Melody/srcs/projects/secondary_voltage_control/replay_pcaps/pmu_fuzzing_h1_h3.pcap"
+    description: "Replaying a PMU fuzzing attack gathered from a real network over the path between h1-h3"
+}
+
+
+

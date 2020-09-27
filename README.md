@@ -38,7 +38,7 @@ Pre-Run Steps:
 - Setting up the python path
     - Add the following to ~/.bashrc
       export PYTHONPATH=$PYTHONPATH:<path-to-melody>/src
-      export PYTHONPATH=$PYTHONPATH:<path-to-melody>/src/core
+      export PYTHONPATH=$PYTHONPATH:<path-to-melody>/srcs/core
 
     - Do the following
       sudo visudo

@@ -8,12 +8,12 @@ Creating a New Project
 
 * To create a new project with a <project_name>, please do the following::
 
-    cp -R ~/Melody/src/projects/blank_project ~/Melody/src/projects/<project_name>
+    cp -R ~/Melody/srcs/projects/blank_project ~/Melody/srcs/projects/<project_name>
 
 Specifying a Project Configuration
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The project configuration can be specified by editing the project_configuration.prototxt file located inside the project directory. The project configuration must be specified according to the `configuration.proto <https://github.com/Vignesh2208/Melody/tree/master/src/proto/configuration.proto/>`_ format. We briefly describe the format below with an example. For the complete configuration, see `this <https://github.com/Vignesh2208/Melody/tree/master/src/projects/secondary_voltage_control/project_configuration.prototxt/>`_. 
+The project configuration can be specified by editing the project_configuration.prototxt file located inside the project directory. The project configuration must be specified according to the `configuration.proto <https://github.com/Vignesh2208/Melody/tree/master/srcs/proto/configuration.proto/>`_ format. We briefly describe the format below with an example. For the complete configuration, see `this <https://github.com/Vignesh2208/Melody/tree/master/srcs/projects/secondary_voltage_control/project_configuration.prototxt/>`_. 
 
 * project_name: must match the name of the project directory::
   
@@ -39,7 +39,7 @@ The project configuration can be specified by editing the project_configuration.
 
   In this example, we specify to use the clique_topo. The name "clique_topo" is automatically resolved to a "clique_topo.py" file located inside::
 
-    ~/Melody/src/cyber_network/topologies
+    ~/Melody/srcs/cyber_network/topologies
 
   directory. The rest of the topology attributes are converted into a "**params**" dictionary and passed as a run time argument to the clique_topo object. In this example the generated "**params**" dictionary will be equal to::
 
@@ -58,10 +58,10 @@ The project configuration can be specified by editing the project_configuration.
 
     power_simulation_spec {
       power_sim_driver_name: "MatPowerDriver"
-      case_file_path: "/home/moses/Melody/src/power_sim/cases/case39.m"
+      case_file_path: "/home/moses/Melody/srcs/power_sim/cases/case39.m"
     }
 
-  In this example, we use the MatPowerDriver. The specified driver name is automatically resolved to a "MatPowerDriver" class located in src/power_sim/drivers/MatPowerDriver.py. The case_file_path is passed as an argument to the "**open**" function implemented by the driver.
+  In this example, we use the MatPowerDriver. The specified driver name is automatically resolved to a "MatPowerDriver" class located in srcs/power_sim/drivers/MatPowerDriver.py. The case_file_path is passed as an argument to the "**open**" function implemented by the driver.
 
 * cyber_physical_map: describes which applications are running on a specific mininet host::
 
@@ -122,7 +122,7 @@ The project configuration can be specified by editing the project_configuration.
 
   In this example, on mininet host "h3", 10 applications are configured to run. Each mapped application has a unique id and a port on which it is listening for packets. All applications in this case share the same source file which is automatically resolved to the file::
 
-    ~/Melody/src/projects/secondary_voltage_control/pmu.py. 
+    ~/Melody/srcs/projects/secondary_voltage_control/pmu.py. 
 
   All 10 applications are started as separate processes which execute the same source file but they are passed their respective application_id and the application_ids of all other applications running in the network as arguments. The source file may perform different operations based on the passed/assigned application_id.
 
@@ -144,7 +144,7 @@ The project configuration can be specified by editing the project_configuration.
     replay_flow {
       involved_cyber_entity: "h1"
       involved_cyber_entity: "h3"
-      pcap_file_path: "/home/moses/Melody/src/projects/secondary_voltage_control/replay_pcaps/pmu_fuzzing_h1_h3.pcap"
+      pcap_file_path: "/home/moses/Melody/srcs/projects/secondary_voltage_control/replay_pcaps/pmu_fuzzing_h1_h3.pcap"
       description: "Replaying a PMU fuzzing attack gathered from a real network over the path between h1-h3"
     }
 
@@ -153,7 +153,7 @@ The project configuration can be specified by editing the project_configuration.
 Specifying/Sending Disturbances to the Power Simulation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-A power system may be affected by outside sources of interference such as load changes. Melody allows specifying these disturbances in a file inside the project directory. The disturbances are specified in a "**disturbances.prototxt**" file according to the "**Disturbances**" message defined in src/proto/configuration.proto. In the working example we send five `disturbances <https://github.com/Vignesh2208/Melody/tree/master/src/projects/secondary_voltage_control/disturbances.prototxt>`_ at 2, 2.5, 3, 3.5 and 4 seconds after the start of the emulation.
+A power system may be affected by outside sources of interference such as load changes. Melody allows specifying these disturbances in a file inside the project directory. The disturbances are specified in a "**disturbances.prototxt**" file according to the "**Disturbances**" message defined in srcs/proto/configuration.proto. In the working example we send five `disturbances <https://github.com/Vignesh2208/Melody/tree/master/srcs/projects/secondary_voltage_control/disturbances.prototxt>`_ at 2, 2.5, 3, 3.5 and 4 seconds after the start of the emulation.
 
 
 Creating custom cyber topologies
@@ -161,7 +161,7 @@ Creating custom cyber topologies
 
 To create a new cyber topology, follow the steps given below::
 
-  cp ~/Melody/src/cyber_network/topologies/blank_topology.py ~/Melody/src/cyber_network/topologies/<cyber_topology_name>.py
+  cp ~/Melody/srcs/cyber_network/topologies/blank_topology.py ~/Melody/srcs/cyber_network/topologies/<cyber_topology_name>.py
 
 You may now edit the file and use the mininet API to implement a custom topology. It will then be accessible from the project configuration by simply specifying the same <cyber_topology_name> in the configuration.
 
@@ -172,21 +172,21 @@ Creating custom host applications
 
 To create a new application inside a <project_name>, follow the steps given below::
 
-  cp ~/Melody/src/projects/<project_name>/blank_application.py ~/Melody/src/projects/<project_name>/<application_name>.py
+  cp ~/Melody/srcs/projects/<project_name>/blank_application.py ~/Melody/srcs/projects/<project_name>/<application_name>.py
 
-You may now edit the file and override specific functions of the `basicHostIPCLayer <https://github.com/Vignesh2208/Melody/tree/master/src/core/basicHostIPCLayer.py>`_  class. Please refer the module documentation for more details. This file <application_name>.py may now be specified as an "application_src" attribute in the project configuration.
+You may now edit the file and override specific functions of the `basicHostIPCLayer <https://github.com/Vignesh2208/Melody/tree/master/srcs/lib/basicHostIPCLayer.py>`_  class. Please refer the module documentation for more details. This file <application_name>.py may now be specified as an "application_src" attribute in the project configuration.
 
 .. note:: Do not modify the class name inside the new file. It must remain as hostApplicationLayer.
 
 Changing the Power Simulation Tool
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Melody supports flexible interchange of the power simulation tool used. By default it ships with support for MatPower. If the power simulator is to be changed, a new driver has to be implemented for the specific power simulator in question. The driver must implement the abstract class defined in ~/Melody/src/core/pss_driver.py and it must be placed in ~/Melody/src/power_sim/drivers.
+Melody supports flexible interchange of the power simulation tool used. By default it ships with support for MatPower. If the power simulator is to be changed, a new driver has to be implemented for the specific power simulator in question. The driver must implement the abstract class defined in ~/Melody/srcs/lib/pss_driver.py and it must be placed in ~/Melody/srcs/power_sim/drivers.
 
-The following additional edits must also be made to src/core/pss_server.py::
+The following additional edits must also be made to srcs/lib/pss_server.py::
 
   # import the new driver <driver-name>
-  from src.power_sim.drivers import <driver-name>
+  from srcs.power_sim.drivers import <driver-name>
 
   # instantiate a driver object in __main__
   if args.driver_name == <driver-name> :

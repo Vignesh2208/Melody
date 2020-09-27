@@ -212,7 +212,7 @@
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cp</span> <span class="o">~/</span><span class="n">Melody</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">projects</span><span class="o">/&lt;</span><span class="n">project_name</span><span class="o">&gt;/</span><span class="n">blank_application</span><span class="o">.</span><span class="n">py</span> <span class="o">~/</span><span class="n">Melody</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">projects</span><span class="o">/&lt;</span><span class="n">project_name</span><span class="o">&gt;/&lt;</span><span class="n">application_name</span><span class="o">&gt;.</span><span class="n">py</span>
 </pre></div>
 </div>
-<p>You may now edit the file and override specific functions of the <a class="reference external" href="https://github.com/Vignesh2208/Melody/tree/master/src/core/basicHostIPCLayer.py">basicHostIPCLayer</a>  class. Please refer the module documentation for more details. This file &lt;application_name&gt;.py may now be specified as an “application_src” attribute in the project configuration.</p>
+<p>You may now edit the file and override specific functions of the <a class="reference external" href="https://github.com/Vignesh2208/Melody/tree/master/src/lib/basicHostIPCLayer.py">basicHostIPCLayer</a>  class. Please refer the module documentation for more details. This file &lt;application_name&gt;.py may now be specified as an “application_src” attribute in the project configuration.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">Do not modify the class name inside the new file. It must remain as hostApplicationLayer.</p>
@@ -220,8 +220,8 @@
 </div>
 <div class="section" id="changing-the-power-simulation-tool">
 <h2>Changing the Power Simulation Tool<a class="headerlink" href="#changing-the-power-simulation-tool" title="Permalink to this headline">¶</a></h2>
-<p>Melody supports flexible interchange of the power simulation tool used. By default it ships with support for MatPower. If the power simulator is to be changed, a new driver has to be implemented for the specific power simulator in question. The driver must implement the abstract class defined in ~/Melody/src/core/pss_driver.py and it must be placed in ~/Melody/src/power_sim/drivers.</p>
-<p>The following additional edits must also be made to src/core/pss_server.py:</p>
+<p>Melody supports flexible interchange of the power simulation tool used. By default it ships with support for MatPower. If the power simulator is to be changed, a new driver has to be implemented for the specific power simulator in question. The driver must implement the abstract class defined in ~/Melody/src/lib/pss_driver.py and it must be placed in ~/Melody/src/power_sim/drivers.</p>
+<p>The following additional edits must also be made to src/lib/pss_server.py:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># import the new driver &lt;driver-name&gt;</span>
 <span class="kn">from</span> <span class="nn">src.power_sim.drivers</span> <span class="k">import</span> <span class="o">&lt;</span><span class="n">driver</span><span class="o">-</span><span class="n">name</span><span class="o">&gt;</span>
 
