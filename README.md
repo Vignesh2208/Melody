@@ -6,9 +6,9 @@ Anomaly Detection Purposes.
 Dependencies:
 
 python-httplib2
-python-ryu-4.0 or above
+python-ryu
 ryu-bin and ryu-manager
-python 2.7
+python 3.7
 numpy
 pypcapfile
 openssh-server
@@ -37,8 +37,8 @@ Pre-Run Steps:
 
 - Setting up the python path
     - Add the following to ~/.bashrc
-      export PYTHONPATH=$PYTHONPATH:<path-to-melody>/src
-      export PYTHONPATH=$PYTHONPATH:<path-to-melody>/srcs/core
+      export PYTHONPATH=$PYTHONPATH:<path-to-melody>/srcs
+      export PYTHONPATH=$PYTHONPATH:<path-to-melody>/srcs/proto
 
     - Do the following
       sudo visudo
@@ -49,5 +49,5 @@ Pre-Run Steps:
 ```
 
 ```
-Full documentation can be found [here]https://melody-by-projectmoses.readthedocs.io/
+Full documentation can be found [here](https://melody-by-projectmoses.readthedocs.io/)
 ```
