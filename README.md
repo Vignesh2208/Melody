@@ -2,7 +2,7 @@ A TestBed which integrates Power System Simulation with Mininet to simulate a
 Micro Grid control Architecture. This TestBed will be used for 
 Anomaly Detection Purposes.
 
-Full documentation can be found [here](https://melody-by-projectmoses.readthedocs.io/)
+Full documentation can be found [here](https://melody-by-projectmoses.readthedocs.io/).
 
 ```
 Dependencies:
