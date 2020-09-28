@@ -62,7 +62,7 @@ downloads/
 __pycache__/
 eggs/
 .eggs/
-lib/
+
 lib64/
 parts/
 sdist/
@@ -116,6 +116,6 @@ logs/microgrid_with_background_traffic/
 logs/
 
 #configuration
-src/projects/secondary_voltage_control/configurations
-src/projects/configurations
-src/configurations/
+srcs/projects/secondary_voltage_control/configurations
+srcs/projects/configurations
+srcs/configurations/
