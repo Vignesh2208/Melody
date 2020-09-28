@@ -172,20 +172,18 @@ Melody Post-Installation Steps
 * After installation of Melody, please reboot the VM/machine
 
 
-Ready To Use Melody VM
-^^^^^^^^^^^^^^^^^^^^^^
+Ready to use VM
+^^^^^^^^^^^^^^^
 
-A precompiled ready to use VM can also be downloaded if you wish to get started quickly. The username of the VM is "**kronos**" and password is "**kronos**".
-Please follow the instructions given below to download and use the VM:
+Link to a ready to use Kronos VM (version 1.3) can be downloaded from `here <https://drive.google.com/drive/folders/1wwJ6tO7XaGj3C_8ZophNsmbc2vO-oxH4?usp=sharing>`_.
+The VM also contains installations of companion projects `OpenSCADA <http://github.com/Vignesh2208/OpenSCADA>`_ and `Melody <http://github.com/Vignesh2208/Melody>`_.
+which use Kronos for cyber-physical system modelling.
 
-* Downloading the VM::
+Username: kronos
+Password: kronos
 
-    Instructions to follow ...
+Make sure Kronos is loaded after each reboot before running experiments which use it::
 
-* Logging into the VM::
-
-    Upon start up:
-    Username: kronos, Password: kronos
-
-*  Melody/Kronos is installed inside the VM in /home/kronos directory along with all the required dependencies
+  cd ~/Kronos
+  sudo make load
   
