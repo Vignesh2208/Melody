@@ -1,19 +1,18 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Quick Start &#8212; Melody 1.0 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="_static/language_data.js"></script>
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
     <link rel="author" title="About these documents" href="about.html" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -40,23 +39,23 @@
 <p>In this section we will help you install Melody and run you through a simple tutorial that helps you generate your first dataset.</p>
 <div class="section" id="example-secondary-voltage-control">
 <h2>Example: Secondary Voltage Control<a class="headerlink" href="#example-secondary-voltage-control" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="https://github.com/Vignesh2208/Melody/tree/master/src/projects/secondary_voltage_control/">This example</a> uses Melody to implement Secondary Voltage Control (SVC) for the <a class="reference external" href="https://icseg.iti.illinois.edu/ieee-39-bus-system/">IEEE 39-bus New England</a> power system model. The goal of SVC is to maintain voltages at specifically chosen load buses called pilot buses at their nominal values, subjected to random demand fluctuations throughout the day. That can be achieved by adjusting voltage setpoints at the generator buses. In this example, we implement SVC as a standard textbook p-controller that works on the first-order approximation of the power system. Being part of a close-loop control system, SVC is sensitive to the timing of (i) the input signals, which are voltages at pilot buses reported to the SCADA controller by the emulated PMUs, and (ii) the output signals, which are voltage setpoints at generator buses that are sent from the same SCADA controller to the emulated PLCs. It is therefore crucially important that Melody is capable of precisely controlling the advance of virtual simulation time using Kronos.</p>
+<p><a class="reference external" href="https://github.com/Vignesh2208/Melody/tree/master/srcs/projects/secondary_voltage_control/">This example</a> uses Melody to implement Secondary Voltage Control (SVC) for the <a class="reference external" href="https://icseg.iti.illinois.edu/ieee-39-bus-system/">IEEE 39-bus New England</a> power system model. The goal of SVC is to maintain voltages at specifically chosen load buses called pilot buses at their nominal values, subjected to random demand fluctuations throughout the day. That can be achieved by adjusting voltage setpoints at the generator buses. In this example, we implement SVC as a standard textbook p-controller that works on the first-order approximation of the power system. Being part of a close-loop control system, SVC is sensitive to the timing of (i) the input signals, which are voltages at pilot buses reported to the SCADA controller by the emulated PMUs, and (ii) the output signals, which are voltage setpoints at generator buses that are sent from the same SCADA controller to the emulated PLCs. It is therefore crucially important that Melody is capable of precisely controlling the advance of virtual simulation time using Kronos.</p>
 <div class="section" id="setup">
 <h3>Setup<a class="headerlink" href="#setup" title="Permalink to this headline">¶</a></h3>
-<p>The simulation setup is specified in the <a class="reference external" href="https://github.com/Vignesh2208/Melody/blob/master/src/projects/secondary_voltage_control/project_configuration.prototxt">project configuration file</a>. Below we provide a high level summary:</p>
+<p>The simulation setup is specified in the <a class="reference external" href="https://github.com/Vignesh2208/Melody/blob/master/srcs/projects/secondary_voltage_control/project_configuration.prototxt">project configuration file</a>. Below we provide a high level summary:</p>
 <ul class="simple">
-<li>System model: IEEE 39-bus New England case</li>
-<li>Power sytem simulation tool: <a class="reference external" href="http://www.pserc.cornell.edu/matpower/">MATPOWER</a></li>
-<li>Network simulation tool: Mininet</li>
-<li>Application: Secondary Voltage Control</li>
-<li>Generator buses (controlled by SVC): 30, 31, 32, 33, 34, 35, 36, 37, 38, 39</li>
-<li>Pilot buses: 2, 6, 9, 10, 19, 20, 22, 23, 25, 29</li>
-<li>Cyber network: 5-switch clique/ring topology</li>
+<li><p>System model: IEEE 39-bus New England case</p></li>
+<li><p>Power sytem simulation tool: <a class="reference external" href="http://www.pserc.cornell.edu/matpower/">MATPOWER</a></p></li>
+<li><p>Network simulation tool: Mininet</p></li>
+<li><p>Application: Secondary Voltage Control</p></li>
+<li><p>Generator buses (controlled by SVC): 30, 31, 32, 33, 34, 35, 36, 37, 38, 39</p></li>
+<li><p>Pilot buses: 2, 6, 9, 10, 19, 20, 22, 23, 25, 29</p></li>
+<li><p>Cyber network: 5-switch clique/ring topology</p></li>
 </ul>
 </div>
 <div class="section" id="pmus">
 <h3>PMUs<a class="headerlink" href="#pmus" title="Permalink to this headline">¶</a></h3>
-<p>The PMU application is implemented in <a class="reference external" href="https://github.com/Vignesh2208/Melody/blob/master/src/projects/secondary_voltage_control/pmu.py">this</a> Python script. Each PMU is assigned to one pilot bus and is run as a process inside a mininet host. The PMU configuration can be found in the projection configuration file, which is explained <a class="reference external" href="https://melody-by-projectmoses.readthedocs.io/en/latest/project_configuration.html">here</a>. During runtime, each PMU periodically sends GRPC read requests to the proxy to get the voltage measurement at its pilot bus:</p>
+<p>The PMU application is implemented in <a class="reference external" href="https://github.com/Vignesh2208/Melody/blob/master/srcs/projects/secondary_voltage_control/pmu.py">this</a> Python script. Each PMU is assigned to one pilot bus and is run as a process inside a mininet host. The PMU configuration can be found in the projection configuration file, which is explained <a class="reference external" href="https://melody-by-projectmoses.readthedocs.io/en/latest/project_configuration.html">here</a>. During runtime, each PMU periodically sends GRPC read requests to the proxy to get the voltage measurement at its pilot bus:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Creating a list of read requests</span>
 <span class="c1"># obj_type_to_read = &quot;bus&quot;</span>
 <span class="c1"># obj_id_to_read = 2 (for pilot bus #2)</span>
@@ -77,15 +76,15 @@
 </div>
 <div class="section" id="scada-controller">
 <h3>SCADA controller<a class="headerlink" href="#scada-controller" title="Permalink to this headline">¶</a></h3>
-<p>The SCADA controller is implemented in <a class="reference external" href="https://github.com/Vignesh2208/Melody/blob/master/src/projects/secondary_voltage_control/scada.py">this</a> Python script. The SCADA process contains two main threads:</p>
+<p>The SCADA controller is implemented in <a class="reference external" href="https://github.com/Vignesh2208/Melody/blob/master/srcs/projects/secondary_voltage_control/scada.py">this</a> Python script. The SCADA process contains two main threads:</p>
 <ul class="simple">
-<li>One that keeps listening to UDP packets sent by PMUs that contain voltage measurements.</li>
-<li>The other that periodically (i) runs the SVC algorithm using the most up-to-date voltage measurements, computes voltage setpoints at the generator buses, and (iii) sends them to the PLCs.</li>
+<li><p>One that keeps listening to UDP packets sent by PMUs that contain voltage measurements.</p></li>
+<li><p>The other that periodically (i) runs the SVC algorithm using the most up-to-date voltage measurements, computes voltage setpoints at the generator buses, and (iii) sends them to the PLCs.</p></li>
 </ul>
 </div>
 <div class="section" id="plcs">
 <h3>PLCs<a class="headerlink" href="#plcs" title="Permalink to this headline">¶</a></h3>
-<p>The PLC application is implemented in <a class="reference external" href="https://github.com/Vignesh2208/Melody/blob/master/src/projects/secondary_voltage_control/plc.py">this</a> Python script. Each PLC is assigned to one generator bus that it directly controls. Each PLC runs as a process inside a mininet host. However, unlike PMUs and the SCADA server, PLCs do not run periodically. Instead, each PLC application waits for UDP packets sent by the SCADA controller, parses the packets to extract the voltage setpoints, then updates them to the power system simulation by issueing a GRPC write request to the proxy:</p>
+<p>The PLC application is implemented in <a class="reference external" href="https://github.com/Vignesh2208/Melody/blob/master/srcs/projects/secondary_voltage_control/plc.py">this</a> Python script. Each PLC is assigned to one generator bus that it directly controls. Each PLC runs as a process inside a mininet host. However, unlike PMUs and the SCADA server, PLCs do not run periodically. Instead, each PLC application waits for UDP packets sent by the SCADA controller, parses the packets to extract the voltage setpoints, then updates them to the power system simulation by issueing a GRPC write request to the proxy:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Making a GRPC call to change the generator voltage setpoint</span>
 <span class="c1"># The call blocks until proxy returns the write status</span>
 <span class="n">rpc_write</span><span class="p">([(</span><span class="n">obj_type_to_write</span><span class="p">,</span> <span class="n">obj_id_to_write</span><span class="p">,</span> <span class="n">field_type_to_write</span><span class="p">,</span> <span class="n">voltage_setpoint</span><span class="p">)])</span>
@@ -104,7 +103,7 @@
 </pre></div>
 </div>
 <p>Switch to the project directory:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">~/</span><span class="n">Melody</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">projects</span><span class="o">/</span><span class="n">secondary_voltage_control</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">~/</span><span class="n">Melody</span><span class="o">/</span><span class="n">srcs</span><span class="o">/</span><span class="n">projects</span><span class="o">/</span><span class="n">secondary_voltage_control</span>
 <span class="c1"># set enable_kronos=0 if you wish to run without kronos support</span>
 <span class="c1"># if enable_kronos is set to 1, ensure that kronos module is pre-loaded</span>
 <span class="n">sudo</span> <span class="n">python</span> <span class="n">main</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">enable_kronos</span><span class="o">=</span><span class="mi">1</span> <span class="o">--</span><span class="n">run_time</span><span class="o">=</span><span class="mi">10</span>
@@ -115,7 +114,7 @@
 <div class="section" id="generated-log-files">
 <h3>Generated Log files<a class="headerlink" href="#generated-log-files" title="Permalink to this headline">¶</a></h3>
 <p>Log files and pcaps which are generated are stored inside:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">~/</span><span class="n">Melogy</span><span class="o">/</span><span class="n">logs</span><span class="o">/</span><span class="n">secondary_voltage_control</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">~/</span><span class="n">Melody</span><span class="o">/</span><span class="n">logs</span><span class="o">/</span><span class="n">secondary_voltage_control</span>
 </pre></div>
 </div>
 <p>One log file is generated for each application id.</p>
@@ -124,24 +123,24 @@
 <h3>Results<a class="headerlink" href="#results" title="Permalink to this headline">¶</a></h3>
 <p>We setup three following experiments:</p>
 <ul class="simple">
-<li>Without Kronos</li>
-<li>With Kronos, minimal network link delay (1ms)</li>
-<li>With Kronos, large network link delay (500ms)</li>
+<li><p>Without Kronos</p></li>
+<li><p>With Kronos, minimal network link delay (1ms)</p></li>
+<li><p>With Kronos, large network link delay (500ms)</p></li>
 </ul>
 <p>For each experiment, we measure SVC’s step response when there is a step change in reactive power consumption at load bus #4 from 184 to 230 MVAR (25% increment). The data are collected for 25 seconds of virtual time. Using our lab’s setup, it takes about 10 to 15 minutes to complete each experiment.</p>
 <div class="figure align-center" id="id3">
 <a class="reference internal image-reference" href="_images/without_kronos.png"><img alt="Without Kronos" src="_images/without_kronos.png" style="width: 100%;" /></a>
-<p class="caption"><span class="caption-text">Without Kronos</span></p>
+<p class="caption"><span class="caption-text">Without Kronos</span><a class="headerlink" href="#id3" title="Permalink to this image">¶</a></p>
 </div>
 <p>As can be seen from the graph, without Kronos, the timings of the measurements are totally messed up. Since SVC is time sensitive, that leads to unstable behaviors towards the end of the simulation.</p>
 <div class="figure align-center" id="id4">
 <a class="reference internal image-reference" href="_images/with_kronos.png"><img alt="With Kronos and 1ms network link delay" src="_images/with_kronos.png" style="width: 100%;" /></a>
-<p class="caption"><span class="caption-text">With Kronos and 1ms network link delay</span></p>
+<p class="caption"><span class="caption-text">With Kronos and 1ms network link delay</span><a class="headerlink" href="#id4" title="Permalink to this image">¶</a></p>
 </div>
 <p>With Kronos, we can see that SVC makes the right adjustments to bring the voltages at pilot buses back to their nominal values, indicated by all relative changes of pilot bus voltages being at 1.0. The voltage setpoints at generator buses slightly overshoot but eventually stabilize within 15 seconds following the onset of the disturbance.</p>
 <div class="figure align-center" id="id5">
 <a class="reference internal image-reference" href="_images/with_kronos_and_delay_500.png"><img alt="With Kronos and 500ms network link delay" src="_images/with_kronos_and_delay_500.png" style="width: 100%;" /></a>
-<p class="caption"><span class="caption-text">With Kronos and 500ms network link delay</span></p>
+<p class="caption"><span class="caption-text">With Kronos and 500ms network link delay</span><a class="headerlink" href="#id5" title="Permalink to this image">¶</a></p>
 </div>
 <p>By introducing a delay of 500ms to every network link, it takes on average 2 seconds for each PMU originated packet to reach the SCADA controller (i.e. 4 hops) and another 1.5 seconds for a SCADA controller packet to arrive at the PLCs (3 hops). The net result is a delay of at least 3.5 seconds between the onset of the disturbance and the first time SCADA controller’s response reaches the power system. Such a delay results in the observed oscillation, which can bring the system to instability. This experiment showcases the potential of Melody as a co-simulation tool, i.e. changes in the cyber network setting has the potential of affecting the future states of a cyber-physical system.</p>
 </div>
@@ -198,17 +197,15 @@
 </ul>
 </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
 
 
 
@@ -225,7 +222,7 @@
       &copy;2019, Project Moses.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.4</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.2.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

@@ -1,19 +1,18 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>About &#8212; Melody 1.0 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="_static/language_data.js"></script>
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
     <link rel="author" title="About these documents" href="#" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -48,16 +47,16 @@
 <p>Smart grid communication networks typically use a two-layered architecture containing a corporate network and a fieldbus/control network. The corporate network handles IT management, operator control, and the storage and analysis of process control data. The control network consists of a topology of controllers and field devices interconnected through multiple switches.</p>
 <div class="figure align-center" id="id1">
 <a class="reference internal image-reference" href="_images/case_study_cyber_topology.png"><img alt="Smart Grid Communication Network Diagram" src="_images/case_study_cyber_topology.png" style="width: 80%;" /></a>
-<p class="caption"><span class="caption-text">A hypothetical smart grid control network topology in Mininet.</span></p>
+<p class="caption"><span class="caption-text">A hypothetical smart grid control network topology in Mininet.</span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
 </div>
 <p>Melody uses Mininet to emulate the communication network and either <a class="reference external" href="http://www.pserc.cornell.edu/matpower/">MATPOWER</a> or <a class="reference external" href="https://www.powerworld.com/">PowerWorld Simulator</a> to simulate the physical behaviors of the power grid. A proxy process, which is implemented as a <a class="reference external" href="https://grpc.io/">GRPC</a> server, provides an interface between the power system simulator and the network emulator. Control commands originate from an emulated control node (e.g. a SCADA master) and are routed through the emulated network to the destination host (e.g an RTU controlling a circuit breaker). These commands are later transferred from this destination host to the power simulator via the proxy. The power simulator updates the system states (e.g. voltage magnitude and angle measurements), which are later picked up by sensor nodes (e.g. PMUs) and re-routed back to the control node.</p>
 <div class="figure align-center" id="id2">
 <a class="reference internal image-reference" href="_images/cyber_phys_components.png"><img alt="Cyber-Physical Component Diagram" src="_images/cyber_phys_components.png" style="width: 80%;" /></a>
-<p class="caption"><span class="caption-text">Integration of cyber and physical components using a proxy process.</span></p>
+<p class="caption"><span class="caption-text">Integration of cyber and physical components using a proxy process.</span><a class="headerlink" href="#id2" title="Permalink to this image">¶</a></p>
 </div>
 <div class="figure align-center" id="id3">
 <a class="reference internal image-reference" href="_images/melody_architecture.png"><img alt="Melody Architecture Diagram" src="_images/melody_architecture.png" style="width: 80%;" /></a>
-<p class="caption"><span class="caption-text">Melody Architecture Diagram.</span></p>
+<p class="caption"><span class="caption-text">Melody Architecture Diagram.</span><a class="headerlink" href="#id3" title="Permalink to this image">¶</a></p>
 </div>
 <div class="section" id="virtual-time-integration">
 <h3>Virtual Time Integration<a class="headerlink" href="#virtual-time-integration" title="Permalink to this headline">¶</a></h3>
@@ -67,15 +66,13 @@
 <h3>Traffic Generation<a class="headerlink" href="#traffic-generation" title="Permalink to this headline">¶</a></h3>
 <p>Each emulated host may run three types of driver processes:</p>
 <ul>
-<li><p class="first">Emulation Driver: produces traffic by spawning processes that interact with each other</p>
-</li>
-<li><p class="first">Replay Driver: initiates traffic replay actions at designated times</p>
-</li>
-<li><p class="first">Powersim Driver: conveys power simulation state data across the cyber network to and from the proxy process; spawns the following two threads</p>
+<li><p>Emulation Driver: produces traffic by spawning processes that interact with each other</p></li>
+<li><p>Replay Driver: initiates traffic replay actions at designated times</p></li>
+<li><p>Powersim Driver: conveys power simulation state data across the cyber network to and from the proxy process; spawns the following two threads</p>
 <blockquote>
 <div><ul class="simple">
-<li>application layer thread: emulates smart grid applications (IPC layer)</li>
-<li>network layer thread: handles packet transmission and reception</li>
+<li><p>application layer thread: emulates smart grid applications (IPC layer)</p></li>
+<li><p>network layer thread: handles packet transmission and reception</p></li>
 </ul>
 </div></blockquote>
 </li>
@@ -130,17 +127,15 @@
 </ul>
 </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
 
 
 
@@ -157,7 +152,7 @@
       &copy;2019, Project Moses.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.4</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.2.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

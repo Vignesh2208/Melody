@@ -1,6 +1,6 @@
 home_dir=$(HOME)
 melody_dir=${home_dir}/Melody
-core_dir=${melody_dir}/srcs/core
+core_dir=${melody_dir}/srcs/lib
 utils_dir=${melody_dir}/srcs/utils
 
 clean:

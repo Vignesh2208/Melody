@@ -58,7 +58,7 @@ The project configuration can be specified by editing the project_configuration.
 
     power_simulation_spec {
       power_sim_driver_name: "MatPowerDriver"
-      case_file_path: "/home/moses/Melody/srcs/power_sim/cases/case39.m"
+      case_file_path: "/home/kronos/Melody/srcs/power_sim/cases/case39.m"
     }
 
   In this example, we use the MatPowerDriver. The specified driver name is automatically resolved to a "MatPowerDriver" class located in srcs/power_sim/drivers/MatPowerDriver.py. The case_file_path is passed as an argument to the "**open**" function implemented by the driver.
